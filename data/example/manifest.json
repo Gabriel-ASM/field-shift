@@ -1,0 +1,10 @@
+{
+  "profile": "example",
+  "version": "1",
+  "natureza": "sintetica",
+  "datasets": {
+    "states.json": {"origem": "Field Shift", "responsavel": "Agronomia", "frequencia": "por versão"},
+    "transitions.json": {"origem": "Field Shift", "responsavel": "Modelagem", "frequencia": "por versão"},
+    "environment.json": {"origem": "Field Shift", "responsavel": "Clima", "frequencia": "quinzenal"}
+  }
+}

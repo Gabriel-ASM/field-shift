@@ -1,0 +1,8 @@
+[
+  {"state": "soja_baixa", "action": "manter", "environment": "seco", "counts": {"soja_baixa": 8, "soja_media": 2}},
+  {"state": "soja_baixa", "action": "manter", "environment": "umido", "counts": {"soja_baixa": 3, "soja_media": 7}},
+  {"state": "soja_baixa", "action": "irrigar", "environment": "seco", "counts": {"soja_baixa": 3, "soja_media": 7}},
+  {"state": "soja_baixa", "action": "irrigar", "environment": "umido", "counts": {"soja_baixa": 1, "soja_media": 9}},
+  {"state": "soja_media", "action": "manter", "environment": "seco", "counts": {"soja_baixa": 6, "soja_media": 4}},
+  {"state": "soja_media", "action": "manter", "environment": "umido", "counts": {"soja_baixa": 2, "soja_media": 8}}
+]

@@ -4,7 +4,11 @@ Proposta de apoio à decisão para comparar rotações de culturas usando observ
 
 O projeto responde ao desafio [Field Shift: Adapting Farms with NASA Data](https://www.spaceappschallenge.org/2026/challenges/field-shift-adapting-farms-with-nasa-data/) do NASA Space Apps Challenge 2026.
 
-> **Status:** documentação da proposta. O modelo ainda não foi implementado nem calibrado.
+> **Status:** núcleo Markov e Monte Carlo disponível com dados sintéticos. A calibração e a integração das fontes nacionais estão pendentes.
+
+## Rodar o exemplo
+
+Na raiz do repositório, execute `python -m field_shift` com Python 3.10 ou posterior. O exemplo compara duas políticas em 500 trajetórias de cinco anos e imprime as probabilidades dos estados finais. A configuração do motor usa 10 mil trajetórias por padrão. Consulte o [formato dos dados](data/README.md) para conectar um perfil próprio.
 
 ## Ideia em uma figura
 
@@ -31,6 +35,6 @@ O estado Markov descreve o talhão. O Monte Carlo cria futuros plausíveis de cl
 
 ## Escopo proposto
 
-Começar com uma área de estudo, poucas culturas candidatas e três classes por variável. Comparar uma rotação de referência com alternativas adaptativas. O horizonte de cinco anos é uma hipótese de planejamento herdada do material inicial; deve ser ajustado às culturas e ao calendário local.
+O MVP cobre todo o Brasil e simula cinco anos de manejo por talhão. O produtor pode selecionar qualquer município brasileiro. As opções de manejo dependem do calendário, do solo e dos dados disponíveis para a região. O catálogo prevê soja, milho, cana-de-açúcar, café e dez culturas candidatas para rotação, consórcio ou cobertura.
 
-O resultado deve mostrar, por estratégia, produtividade ou margem estimada, condição de água e solo, e a faixa de incerteza. Preços e custos só entram quando houver dados locais confiáveis. A ferramenta apoia a comparação; não substitui recomendação agronômica.
+O produtor ajusta os dados iniciais e compara retorno, risco, água e solo. Preços e custos fazem parte da simulação. O motor usa perfis regionais de dados, regras e parâmetros para permitir expansão a outros mercados.

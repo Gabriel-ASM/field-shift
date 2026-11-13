@@ -1,0 +1,4 @@
+[
+  {"id": "soja_baixa", "crop": "soja", "phase": "exemplo", "water": "baixa", "soil": "adequado"},
+  {"id": "soja_media", "crop": "soja", "phase": "exemplo", "water": "media", "soil": "adequado"}
+]

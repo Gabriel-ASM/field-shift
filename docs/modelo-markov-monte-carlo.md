@@ -2,7 +2,7 @@
 
 ## Unidade do modelo
 
-A unidade é o talhão ou uma área de manejo homogênea. O horizonte inicial é de cinco anos, sujeito a revisão. Um passo Markov representa uma janela de decisão agrícola — por exemplo, semeadura, colheita ou reforma. O clima é simulado dentro do ciclo e resumido por fase da cultura.
+A unidade é o talhão ou uma área de manejo homogênea. Em cinco anos, o motor atualiza o estado em 120 passos quinzenais, com balanço hídrico diário. A política escolhe ações nas janelas elegíveis, como semeadura, colheita ou reforma.
 
 ## Estado, ação e ambiente
 
@@ -23,9 +23,9 @@ As classes são uma simplificação para o MVP. Os limites de água devem ser de
 
 O clima altera a água no perfil por um balanço simples:
 
-\[
+$$
 SW_{t+1} = \min(AWC,\ \max(0,\ SW_t + P_t + I_t - ETc_t - R_t - D_t))
-\]
+$$
 
 Aqui, SW é a água armazenada na zona de raízes, AWC sua capacidade disponível, P chuva, I irrigação, ETc consumo da cultura, R escoamento e D drenagem. O resultado é convertido em classe baixa, média ou alta. A condição do solo também pode mudar com nutrientes removidos, fertilização e resíduos.
 
@@ -33,17 +33,17 @@ Aqui, SW é a água armazenada na zona de raízes, AWC sua capacidade disponíve
 
 Para cada estado atual, ação, cenário ambiental e área, estima-se:
 
-\[
+$$
 P(S_{t+1}=j \mid S_t=i,\ a_t,\ E_t,\ local)
-\]
+$$
 
 E_t resume as condições do ciclo, como chuva e estresse térmico. A probabilidade representa a chance de o talhão chegar a cada estado seguinte — por exemplo, manter água baixa ou recuperar para água média após uma cultura de cobertura e uma estação chuvosa favorável.
 
 Quando houver histórico, uma estimativa inicial é a frequência observada:
 
-\[
+$$
 \hat P_{ij} = \frac{N(i,a,E,j)}{\sum_j N(i,a,E,j)}
-\]
+$$
 
 Probabilidades precisam somar 1 em cada linha. Com poucos dados, usar suavização ou uma distribuição a priori explícita; marcar os valores como provisórios e atualizá-los com dados observados e referências agronômicas. Não apresentar probabilidades inventadas como evidência.
 
@@ -64,7 +64,8 @@ Cada trajetória Monte Carlo representa um futuro plausível. Ela combina:
 
 1. **Clima:** reamostrar períodos históricos por estação ou fase da cultura, preservando a sequência entre dias chuvosos e secos e a relação entre variáveis. Cenários de aquecimento ou seca podem ser aplicados como deslocamentos explícitos.
 2. **Parâmetros de transição:** sortear probabilidades coerentes com os dados. Com contagens por transição, uma distribuição Dirichlet permite representar a incerteza mantendo cada linha somada a 1.
-3. **Resposta agronômica:** incluir variação de produtividade e resposta do solo após calibrar funções com observações ou literatura regional.
+3. **Resposta agronômica:** incluir variação de produtividade e resposta do solo após calibrar funções com observações ou literatura regional. Modelar somente a incerteza residual da água após aplicar o balanço hídrico.
+4. **Mercado:** usar a curva de futuros por safra como preço base, com extensão do último vencimento líquido. Atualizar os choques de preço e custo mensalmente e descontar os fluxos nominais com os juros longos definidos no [plano do MVP](plano-mvp.md#5-economia-e-comparação).
 
 Para cada trajetória, o modelo aplica a ação, calcula a resposta da cultura e do solo sob o clima sorteado, consulta a transição condicionada e sorteia o estado seguinte. Repete até o fim do horizonte. As mesmas trajetórias climáticas devem ser usadas ao comparar estratégias, reduzindo ruído na comparação.
 
