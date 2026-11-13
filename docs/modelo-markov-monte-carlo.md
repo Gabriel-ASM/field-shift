@@ -21,6 +21,14 @@ As classes são uma simplificação para o MVP. Os limites de água devem ser de
 
 **Ambiente** é externo ao estado: chuva, temperatura, radiação e evapotranspiração. Umidade relativa e vento podem entrar quando forem necessários para estimar evapotranspiração. Os valores formam uma trajetória sazonal, não sorteios independentes por variável.
 
+O clima altera a água no perfil por um balanço simples:
+
+\[
+SW_{t+1} = \min(AWC,\ \max(0,\ SW_t + P_t + I_t - ETc_t - R_t - D_t))
+\]
+
+Aqui, SW é a água armazenada na zona de raízes, AWC sua capacidade disponível, P chuva, I irrigação, ETc consumo da cultura, R escoamento e D drenagem. O resultado é convertido em classe baixa, média ou alta. A condição do solo também pode mudar com nutrientes removidos, fertilização e resíduos.
+
 ## Probabilidade de transição
 
 Para cada estado atual, ação, cenário ambiental e área, estima-se:
