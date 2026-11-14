@@ -1,0 +1,18 @@
+{
+    "state": "maize_grain:skip_stages",
+    "day": 0,
+    "soil": {
+        "pH": 5.4,
+        "organic_carbon": 21.0,
+        "available_water_capacity": 108.3,
+        "available_water_fraction": 0.5
+    },
+    "climate": {
+        "lat": -20.56,
+        "long": -47.38,
+        "month": "october",
+        "season": "spring",
+        "weather": {"pluviosity": 6.7, "temperature": 22.9, "relative_humidity": 81.5, "et0": 4.1}
+    },
+    "financial": {"cash": 0, "cost": 0, "revenue": 0, "yield": 0, "price": 0}
+}

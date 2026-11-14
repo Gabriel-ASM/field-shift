@@ -1,0 +1,16 @@
+{
+    "description": "Franca-SP, dominant PAM crop per year, 1988-2025 (38 years, 37 adjacent pairs). Probabilities are raw count ratios, without the v1 Dirichlet prior (alpha 0.5). Source: data/profiles/franca-sp/crop-transition-markov.json.",
+    "initial_state": "maize_grain:skip_stages",
+    "states": [
+        {"id": "maize_grain:skip_stages", "crop": "maize_grain", "stage": "skip_stages", "duration_days": 365},
+        {"id": "sugarcane:skip_stages", "crop": "sugarcane", "stage": "skip_stages", "duration_days": 365},
+        {"id": "coffee:skip_stages", "crop": "coffee", "stage": "skip_stages", "duration_days": 365}
+    ],
+    "transitions": [
+        {"from": "maize_grain:skip_stages", "to": "maize_grain:skip_stages", "action": null, "probability": 0.9444, "count": 17, "outgoing_count": 18, "support": "observed", "provenance": "PAM municipal, year pairs 1988-1989 ... 2004-2005"},
+        {"from": "maize_grain:skip_stages", "to": "sugarcane:skip_stages", "action": null, "probability": 0.0556, "count": 1, "outgoing_count": 18, "support": "observed", "provenance": "PAM municipal, year pair 2005-2006"},
+        {"from": "sugarcane:skip_stages", "to": "sugarcane:skip_stages", "action": null, "probability": 0.8333, "count": 5, "outgoing_count": 6, "support": "observed", "provenance": "PAM municipal, year pairs 2006-2007 ... 2010-2011"},
+        {"from": "sugarcane:skip_stages", "to": "coffee:skip_stages", "action": null, "probability": 0.1667, "count": 1, "outgoing_count": 6, "support": "observed", "provenance": "PAM municipal, year pair 2011-2012"},
+        {"from": "coffee:skip_stages", "to": "coffee:skip_stages", "action": null, "probability": 1, "count": 13, "outgoing_count": 13, "support": "observed", "provenance": "PAM municipal, year pairs 2012-2013 ... 2024-2025; perennial, persistent within horizon"}
+    ]
+}

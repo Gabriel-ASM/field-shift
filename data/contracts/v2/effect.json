@@ -1,60 +1,107 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "https://fieldshift.local/contracts/v2/effect.json",
-    "title": "Efeito sobre o estado da simulação",
-    "$comment": "Um efeito NÃO é um estado: é uma mudança aplicada a UMA variável do estado. Solo, clima e finanças usam o mesmo formato; só muda o 'target'. Quem aplica é o Monte Carlo, com a seed da trajetória.",
-
+    "title": "Effect on the simulation state",
+    "$comment": "An effect is NOT a state: it is a change applied to ONE variable of the state. Soil, climate and finances share this format; only 'target' changes. Monte Carlo applies effects, using the trajectory seed.",
     "type": "object",
-    "required": ["target", "operation", "value", "support"],
+    "required": [
+        "target",
+        "operation",
+        "value",
+        "support"
+    ],
     "properties": {
         "target": {
             "type": "string",
-            "description": "JSON Pointer para a variável alterada, relativo ao nó da cadeia (markov.json#/definitions/node).",
-            "examples": ["/soil/N2", "/soil/pH", "/climate/solar_incidence", "/financial/cash"]
+            "description": "JSON Pointer to the changed variable, relative to the chain node (markov.json#/definitions/node).",
+            "examples": [
+                "/soil/N2",
+                "/soil/pH",
+                "/climate/solar_incidence",
+                "/financial/cost"
+            ]
         },
         "operation": {
-            "enum": ["add", "multiply", "set", "rate"],
-            "description": "add: soma 'value' uma vez. multiply: multiplica por 'value'. set: sobrescreve. rate: 'value' por dia, multiplicado pelos dias de permanência no estágio/ação."
+            "enum": [
+                "add",
+                "multiply",
+                "set",
+                "rate"
+            ],
+            "description": "add: adds 'value' once. multiply: multiplies by 'value'. set: overwrites. rate: 'value' per day, multiplied by the days spent in the state/action."
         },
-        "value": {"$ref": "#/definitions/quantity"},
+        "value": {
+            "$ref": "#/definitions/quantity"
+        },
         "unit": {
             "type": "string",
-            "description": "Unidade de 'value'. Para add/set é a unidade do target; para rate é unidade do target por dia; para multiply é adimensional."
+            "description": "Unit of 'value'. For add/set it is the target unit; for rate it is target unit per day; multiply is dimensionless."
+        },
+        "at": {
+            "enum": [
+                "entry",
+                "exit"
+            ],
+            "default": "entry",
+            "description": "When a one-off effect (add/multiply/set) fires inside a state: on entry (e.g. sowing cost) or on exit (e.g. harvest revenue). Ignored for operation=rate, which accumulates over the whole stay, and for effects on transitions, which fire when the edge is crossed."
         },
         "when": {
             "type": "array",
-            "items": {"$ref": "#/definitions/condition"},
-            "description": "Condições sobre o estado (todas precisam valer). Vazio/ausente = sempre aplica."
+            "items": {
+                "$ref": "#/definitions/condition"
+            },
+            "description": "Conditions on the node (all must hold). Empty/absent = always applies."
         },
         "bounds": {
             "type": "object",
             "properties": {
-                "min": {"type": "number"},
-                "max": {"type": "number"}
+                "min": {
+                    "type": "number"
+                },
+                "max": {
+                    "type": "number"
+                }
             },
-            "description": "Limites aplicados ao target depois do efeito (ex.: N2 >= 0, 3 <= pH <= 9)."
+            "additionalProperties": false,
+            "description": "Clamp applied to the target after the effect (e.g. N2 >= 0, 3 <= pH <= 9)."
         },
         "support": {
-            "enum": ["observed", "derived", "pooled", "prior"],
-            "description": "Mesma escala de suporte da v1: um prior não vira observação."
+            "$ref": "#/definitions/support"
         },
-        "provenance": {"type": "string", "description": "Fonte, regra de derivação ou referência do prior."}
+        "provenance": {
+            "type": "string",
+            "description": "Where the number comes from, specific enough to check it: a file and field, a dataset and query, a paper or a rule. Example: 'PAM municipal, year pair 2005-2006'."
+        }
     },
     "additionalProperties": false,
-
     "definitions": {
         "quantity": {
-            "description": "Número fixo ou distribuição. Se for distribuição, o Monte Carlo sorteia um valor por trajetória a partir da seed.",
+            "description": "Fixed number or distribution. A distribution is sampled once per trajectory by Monte Carlo from its seed.",
             "oneOf": [
-                {"type": "number"},
+                {
+                    "type": "number"
+                },
                 {
                     "type": "object",
-                    "required": ["distribution", "params"],
+                    "required": [
+                        "distribution",
+                        "params"
+                    ],
                     "properties": {
-                        "distribution": {"enum": ["normal", "lognormal", "uniform", "triangular", "beta"]},
+                        "distribution": {
+                            "enum": [
+                                "normal",
+                                "lognormal",
+                                "uniform",
+                                "triangular",
+                                "beta"
+                            ]
+                        },
                         "params": {
                             "type": "object",
-                            "additionalProperties": {"type": "number"},
+                            "additionalProperties": {
+                                "type": "number"
+                            },
                             "description": "normal/lognormal: mean, sd | uniform: min, max | triangular: min, mode, max | beta: alpha, beta"
                         }
                     },
@@ -64,13 +111,39 @@
         },
         "condition": {
             "type": "object",
-            "required": ["path", "op", "value"],
+            "required": [
+                "path",
+                "op",
+                "value"
+            ],
             "properties": {
-                "path": {"type": "string", "description": "JSON Pointer no nó, como em 'target'."},
-                "op": {"enum": ["<", "<=", "==", "!=", ">=", ">", "in"]},
+                "path": {
+                    "type": "string",
+                    "description": "JSON Pointer into the node, like 'target'."
+                },
+                "op": {
+                    "enum": [
+                        "<",
+                        "<=",
+                        "==",
+                        "!=",
+                        ">=",
+                        ">",
+                        "in"
+                    ]
+                },
                 "value": {}
             },
             "additionalProperties": false
+        },
+        "support": {
+            "enum": [
+                "observed",
+                "derived",
+                "pooled",
+                "prior"
+            ],
+            "description": "How much evidence stands behind a number. observed: counted or measured in our data for this place (e.g. PAM year pairs for Franca-SP). derived: computed by a stated rule from observed data or physics (e.g. phenological order, pedotransfer AWC). pooled: borrowed from similar places or crops because this row has too few observations. prior: an assumption or literature range used until data exists. Never upgrade a value's support without new evidence."
         }
     }
 }

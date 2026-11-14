@@ -1,72 +1,201 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "https://fieldshift.local/contracts/v2/markov.json",
-    "title": "Schema do Grafo da Cadeia de Markov",
-    "$comment": "Separação: a cadeia anda por estados DISCRETOS (cultura x estágio); as variáveis CONTÍNUAS (solo, clima, finanças) ficam no nó e só mudam por efeitos. O que a cadeia altera = o que aparece como target de algum efeito.",
-
+    "title": "Markov chain graph",
+    "$comment": "The chain walks over DISCRETE states (crop x stage). CONTINUOUS variables (soil, climate, finances) live in the node and change only through effects: what the chain can alter is whatever appears as an effect target. The chain has no seed: Monte Carlo owns the seed (monte_carlo.json) and draws every transition and effect value with it.",
     "type": "object",
-    "required": ["states", "transitions", "initial_state"],
+    "required": [
+        "initial_state",
+        "states",
+        "transitions"
+    ],
     "properties": {
-        "seed": {"type": "integer", "description": "Should be given by monte carlo, and should not be edited on the markov chain"},
-        "initial_state": {"type": "string", "description": "id de um item de 'states'"},
-        "states": {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/state"}},
-        "transitions": {"type": "array", "items": {"$ref": "#/definitions/transition"}}
+        "description": {
+            "type": "string"
+        },
+        "initial_state": {
+            "type": "string",
+            "description": "id of an item in 'states'"
+        },
+        "states": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+                "$ref": "#/definitions/state"
+            }
+        },
+        "transitions": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/transition"
+            }
+        }
     },
-
+    "additionalProperties": false,
     "definitions": {
         "node": {
-            "description": "Valores atuais de uma trajetória. É sobre isto que os 'target' dos efeitos apontam.",
+            "description": "The state of one Monte Carlo trajectory at a point in time: what the field looks like now. Behaviour: (1) Monte Carlo creates one node per trajectory from a profile (soil, climate at day 0, finances at 0). (2) Entering a state applies its 'entry' effects. (3) While in the state, 'rate' effects accumulate over duration_days and Monte Carlo refreshes climate each period. (4) Leaving applies 'exit' effects. (5) Outgoing edges are filtered by 'when' against the node, one is drawn, its effects apply, and the loop repeats until the horizon. Why it exists: crops, actions and climate must affect each other (soybean adds N used by maize, liming unlocks soybean, drought cuts yield). They can only do that through one shared place. A field belongs here only if some effect writes it or some condition reads it.",
             "type": "object",
-            "required": ["state", "soil"],
+            "required": [
+                "state",
+                "soil"
+            ],
             "properties": {
-                "state":     {"type": "string", "description": "id do estado discreto atual"},
-                "day":       {"type": "integer", "minimum": 0, "description": "Dias desde o início da trajetória"},
-                "soil":      {"$ref": "soil.json"},
-                "climate":   {"$ref": "climate.json"},
+                "state": {
+                    "type": "string",
+                    "description": "id of the current discrete state"
+                },
+                "day": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Days since the trajectory started"
+                },
+                "soil": {
+                    "$ref": "soil.json"
+                },
+                "climate": {
+                    "$ref": "climate.json"
+                },
                 "financial": {
                     "type": "object",
                     "properties": {
-                        "cash":    {"type": "number", "unit": "BRL/ha"},
-                        "cost":    {"type": "number", "unit": "BRL/ha", "description": "Custo acumulado"},
-                        "revenue": {"type": "number", "unit": "BRL/ha", "description": "Receita acumulada"}
-                    }
+                        "cash": {
+                            "type": "number",
+                            "unit": "BRL/ha"
+                        },
+                        "cost": {
+                            "type": "number",
+                            "unit": "BRL/ha",
+                            "description": "Accumulated cost"
+                        },
+                        "revenue": {
+                            "type": "number",
+                            "unit": "BRL/ha",
+                            "description": "Accumulated revenue"
+                        },
+                        "yield": {
+                            "type": "number",
+                            "unit": "kg/ha",
+                            "minimum": 0,
+                            "description": "Expected yield of the current crop. Starts from PAM yield; effects such as water stress or pests multiply it. Revenue at exit = yield x price."
+                        },
+                        "price": {
+                            "type": "number",
+                            "unit": "BRL/kg",
+                            "minimum": 0,
+                            "description": "Sale price for the current crop. Source: PAM real price (IPCA-adjusted); Yahoo futures as reference."
+                        }
+                    },
+                    "additionalProperties": false
                 }
-            }
-        },
-
-        "state": {
-            "description": "Estado discreto: uma cultura em um estágio. A duração e os efeitos vêm do crop.json; aqui só se sobrescreve quando necessário.",
-            "type": "object",
-            "required": ["id", "crop", "stage"],
-            "properties": {
-                "id":    {"type": "string", "examples": ["soja:flowering", "pousio:skip_stages"]},
-                "crop":  {"type": "string", "description": "crop.json#/properties/name"},
-                "stage": {"$ref": "crop.json#/definitions/stage_name"},
-                "duration_days": {"$ref": "effect.json#/definitions/quantity", "description": "Sobrescreve a duração do estágio do crop.json"},
-                "effects": {
-                    "type": "array",
-                    "items": {"$ref": "effect.json"},
-                    "description": "Efeitos extras durante a permanência (somados aos do estágio do crop.json)"
-                },
-                "allowed_actions": {"type": "array", "items": {"type": "string"}, "description": "ids de action.json"}
             },
             "additionalProperties": false
         },
-
-        "transition": {
-            "description": "Aresta do grafo. As probabilidades que saem de um estado (com o mesmo 'action') somam 1 depois de aplicar 'when'; o consumidor renormaliza.",
+        "state": {
+            "description": "Discrete state: one crop in one stage. With stage 'skip_stages' the state is the sum of all stages: only entry and exit (see effect 'at'), duration = full cycle, no intermediate granularity.",
             "type": "object",
-            "required": ["from", "to", "probability", "support"],
+            "required": [
+                "id",
+                "crop",
+                "stage"
+            ],
             "properties": {
-                "from":   {"type": "string"},
-                "to":     {"type": "string"},
-                "action": {"type": ["string", "null"], "description": "id da ação que habilita esta aresta; null = transição natural"},
-                "probability": {"type": "number", "minimum": 0, "maximum": 1},
-                "count":  {"type": "integer", "minimum": 0, "description": "Contagem que originou a probabilidade, quando houver"},
-                "when":   {"type": "array", "items": {"$ref": "effect.json#/definitions/condition"}, "description": "Aresta só existe se o nó satisfizer as condições (ex.: pH < 5 bloqueia o plantio)"},
-                "effects": {"type": "array", "items": {"$ref": "effect.json"}, "description": "Aplicados uma vez, ao cruzar a aresta (ex.: receita da colheita)"},
-                "support": {"enum": ["observed", "derived", "pooled", "prior"]},
-                "provenance": {"type": "string"}
+                "id": {
+                    "type": "string",
+                    "description": "Convention: '<crop>:<stage>'. Generated from the crop list of a profile (v1 crop-transition-markov.json states) x the stages with data; today every crop has only skip_stages.",
+                    "examples": [
+                        "soybean:skip_stages",
+                        "coffee:skip_stages"
+                    ]
+                },
+                "crop": {
+                    "type": "string",
+                    "description": "Crop id, same ids as v1 (soybean, maize_grain, sugarcane, coffee, brachiaria, ...)"
+                },
+                "stage": {
+                    "$ref": "crop.json#/definitions/stage_name"
+                },
+                "duration_days": {
+                    "$ref": "effect.json#/definitions/quantity",
+                    "description": "Time spent in this state. Effects with operation=rate are multiplied by it."
+                },
+                "effects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "effect.json"
+                    },
+                    "description": "Applied while the trajectory stays in this state"
+                },
+                "allowed_actions": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "ids from action.json"
+                }
+            },
+            "additionalProperties": false
+        },
+        "transition": {
+            "description": "Graph edge. Probabilities leaving one state (for the same 'action') must sum to 1 after filtering by 'when'; consumers renormalize.",
+            "type": "object",
+            "required": [
+                "from",
+                "to",
+                "probability",
+                "support"
+            ],
+            "properties": {
+                "from": {
+                    "type": "string"
+                },
+                "to": {
+                    "type": "string"
+                },
+                "action": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "description": "id of the action that enables this edge; null = natural transition"
+                },
+                "probability": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Markov chain parameter: chance of taking this edge once the trajectory leaves 'from'. Estimated from data (e.g. PAM counts / outgoing_count) or set as a prior. Monte Carlo does not set it: it only draws with its seed which edge each trajectory takes."
+                },
+                "count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Observed count behind the probability, when there is one"
+                },
+                "outgoing_count": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "description": "Total observed transitions leaving 'from'"
+                },
+                "when": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "effect.json#/definitions/condition"
+                    },
+                    "description": "Edge exists only if the node meets every condition (e.g. pH < 5.5 blocks planting)"
+                },
+                "effects": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "effect.json"
+                    },
+                    "description": "Applied once, when the edge is crossed (e.g. harvest revenue)"
+                },
+                "support": {
+                    "$ref": "effect.json#/definitions/support"
+                },
+                "provenance": {
+                    "type": "string",
+                    "description": "Where the probability comes from, specific enough to check it (dataset, year pairs, rule or prior reference)."
+                }
             },
             "additionalProperties": false
         }

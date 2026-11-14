@@ -1,18 +1,87 @@
 {
-    "$schema":"http://json-schema.org/draft-07/schema#",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://fieldshift.local/contracts/v2/climate.json",
+    "title": "Climate",
+    "$comment": "Values for one simulation period at the profile location. Monte Carlo fills them per trajectory from the historical NASA POWER series (and later from extreme-event draws).",
+    "type": "object",
     "properties": {
-        "lat":  {"type":"number", "unit":"m"},
-        "long": {"type":"number", "unit":"m"},
-        "alt":  {"type":"number", "unit":"m", "description": "Altitude at the level of the farm"},
-        "month": {"enum": ["january", "february", "march", "april", ""]},
-        "season": {"enum": []},
-
-        "solar_incidence":{"type":"number","unit":"W/m^2", "description": "Solar incidence at the field level, it might be altered by a greenhouse"},
-        
-        "weather":{
-            "pluviosity":        {"type":"number", "unit":"mm/m^2"},
-            "temperature":       {"type":"number", "unit":"ºC"},
-            "relative_humidity": {"type":"number", "unit":"%", "comment":"It might need to be calculated from temperature"}
+        "lat": {
+            "type": "number",
+            "unit": "deg",
+            "minimum": -90,
+            "maximum": 90
+        },
+        "long": {
+            "type": "number",
+            "unit": "deg",
+            "minimum": -180,
+            "maximum": 180
+        },
+        "alt": {
+            "type": "number",
+            "unit": "m",
+            "description": "Altitude at the level of the farm. Source pending: task CL1 in docs/tasks/data-usage.md (assigned to huatso)."
+        },
+        "month": {
+            "enum": [
+                "january",
+                "february",
+                "march",
+                "april",
+                "may",
+                "june",
+                "july",
+                "august",
+                "september",
+                "october",
+                "november",
+                "december"
+            ]
+        },
+        "season": {
+            "enum": [
+                "summer",
+                "autumn",
+                "winter",
+                "spring"
+            ],
+            "description": "Southern-hemisphere season for Brazilian profiles"
+        },
+        "solar_incidence": {
+            "type": "number",
+            "unit": "W/m^2",
+            "minimum": 0,
+            "description": "Solar incidence at the field level, it might be altered by a greenhouse"
+        },
+        "weather": {
+            "type": "object",
+            "properties": {
+                "pluviosity": {
+                    "type": "number",
+                    "unit": "mm",
+                    "minimum": 0,
+                    "description": "Precipitation over the period (1 mm = 1 L/m^2)"
+                },
+                "temperature": {
+                    "type": "number",
+                    "unit": "ºC"
+                },
+                "relative_humidity": {
+                    "type": "number",
+                    "unit": "%",
+                    "minimum": 0,
+                    "maximum": 100,
+                    "$comment": "Pre-process step: derive the actual vapor pressure from temperature and pressure (task CL2 in docs/tasks/data-usage.md). NASA POWER RH2M is the direct source."
+                },
+                "et0": {
+                    "type": "number",
+                    "unit": "mm/day",
+                    "minimum": 0,
+                    "description": "Reference evapotranspiration. Computed in data/pipeline from NASA POWER (Penman-Monteith FAO-56; Hargreaves-Samani when solar radiation is missing). Drives the water balance with the crop Kc."
+                }
+            },
+            "additionalProperties": false
         }
-    }
+    },
+    "additionalProperties": false
 }

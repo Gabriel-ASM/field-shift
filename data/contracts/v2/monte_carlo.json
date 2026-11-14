@@ -2,8 +2,8 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "monte_carlo",
     "properties": {
-        "seed":     {"type":"object"},
-        "climate":  {"type":"object"},
+        "seed":     {"type":"integer"},
+        "climate":  {"$ref": "climate.json"},
         "weather":  {"type":"object"},
         "markov":   {"type":"object"}
     }

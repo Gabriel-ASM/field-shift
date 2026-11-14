@@ -2,20 +2,41 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "https://fieldshift.local/contracts/v2/crop.json",
     "type": "object",
-    "required": ["name", "stage"],
+    "required": [
+        "name",
+        "stage"
+    ],
     "properties": {
-        "name": {"type": "string"},
-        "description": {"type": "string"},
-
+        "name": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string"
+        },
         "stage": {
             "type": "object",
-            "$comment": "Use skip_stages só se não houver informação por estágio; nesse caso ele é o único estágio da cultura.",
-            "propertyNames": {"$ref": "#/definitions/stage_name"},
-            "additionalProperties": {"$ref": "#/definitions/stage_props"},
+            "$comment": "Use skip_stages only when there is no per-stage information; it is then the crop's only stage.",
+            "propertyNames": {
+                "$ref": "#/definitions/stage_name"
+            },
+            "additionalProperties": {
+                "$ref": "#/definitions/stage_props"
+            },
             "minProperties": 1
+        },
+        "kc_annual_effective": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Crop coefficient averaged over the whole cycle (used with skip_stages). ETc = Kc x ET0. Source: FAO-56 tables, data/reference/crop-water-parameters.json."
+        },
+        "planting_windows": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/planting_window"
+            },
+            "description": "When the crop may be sown at each profile. A Markov edge into this crop waits (fallow) until the next allowed window. Source: MAPA ZARC, data/profiles/*/zarc-planting-windows.json."
         }
     },
-
     "definitions": {
         "stage_name": {
             "enum": [
@@ -29,20 +50,78 @@
                 "ripening",
                 "harvesting",
                 "post_harvesting"
-            ]
+            ],
+            "description": "skip_stages aggregates the whole cycle with no intermediate granularity: one duration (sum of all stages), effects only at entry and exit, and rate effects integrated over the full cycle. When per-stage data exists, the stages must add up to the skip_stages equivalent."
         },
         "stage_props": {
             "type": "object",
-            "required": ["duration_days"],
+            "required": [
+                "duration_days"
+            ],
             "properties": {
                 "duration_days": {
                     "$ref": "effect.json#/definitions/quantity",
-                    "description": "Permanência no estágio. Efeitos com operation=rate são multiplicados por este valor."
+                    "description": "Time spent in the stage. Effects with operation=rate are multiplied by it."
                 },
                 "effects": {
                     "type": "array",
-                    "items": {"$ref": "effect.json"},
-                    "description": "Efeitos da cultura neste estágio. Solo (/soil/...), microclima (/climate/...) e finanças (/financial/...) vão juntos aqui; o target diz o que é afetado."
+                    "items": {
+                        "$ref": "effect.json"
+                    },
+                    "description": "Crop effects in this stage. Soil (/soil/...), microclimate (/climate/...) and finances (/financial/...) all go here; the target says what is affected."
+                },
+                "kc": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Crop coefficient for this stage (FAO-56 Kc ini / mid / end). Only with per-stage data."
+                }
+            },
+            "additionalProperties": false
+        },
+        "planting_window": {
+            "type": "object",
+            "required": [
+                "location_id",
+                "decendio_start",
+                "decendio_end",
+                "max_risk_pct",
+                "source"
+            ],
+            "properties": {
+                "location_id": {
+                    "type": "string",
+                    "description": "Profile id, e.g. franca-sp"
+                },
+                "decendio_start": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 36,
+                    "description": "First 10-day period of the year (1 = Jan 1-10)"
+                },
+                "decendio_end": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 36,
+                    "description": "Last 10-day period; may be smaller than start when the window crosses the new year"
+                },
+                "max_risk_pct": {
+                    "enum": [
+                        20,
+                        30,
+                        40
+                    ],
+                    "description": "ZARC climate-risk level of the window"
+                },
+                "soil_group": {
+                    "type": "string",
+                    "description": "ZARC soil group (water retention class)"
+                },
+                "cultivar_group": {
+                    "type": "string",
+                    "description": "ZARC cultivar cycle group"
+                },
+                "source": {
+                    "type": "string"
                 }
             },
             "additionalProperties": false

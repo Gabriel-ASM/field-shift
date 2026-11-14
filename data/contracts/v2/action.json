@@ -1,18 +1,18 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "https://fieldshift.local/contracts/v2/action.json",
-    "title": "Ação de manejo",
-    "$comment": "Ex.: calagem, adubação nitrogenada, irrigação, estufa. O custo é um efeito em /financial/cash, não um campo separado.",
+    "title": "Management action",
+    "$comment": "E.g. liming, nitrogen fertilization, irrigation, greenhouse. Cost is an effect on /financial/cost, not a separate field.",
     "type": "object",
     "required": ["id", "duration", "effects"],
     "properties": {
         "id": {"type": "string"},
         "label": {"type": "string"},
-        "duration": {"type": "integer", "minimum": 0, "description": "Duração da ação em dias"},
+        "duration": {"type": "integer", "minimum": 0, "description": "Duration of the action in days"},
         "allowed_stages": {
             "type": "array",
             "items": {"$ref": "crop.json#/definitions/stage_name"},
-            "description": "Estágios em que a ação pode ser aplicada. Ausente = qualquer estágio."
+            "description": "Stages where the action can be applied. Absent = any stage."
         },
         "effects": {"type": "array", "items": {"$ref": "effect.json"}}
     },
