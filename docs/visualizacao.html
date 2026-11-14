@@ -553,7 +553,8 @@ function soilDelta(cropId,rng){
   return Number(range[0])+rng()*(Number(range[1])-Number(range[0]));
 }
 function sampleTrajectory(startCrop,rng,environmentYears){
-  const posteriorRows={},path=[{year:0,crop:startCrop,water:"water_medium",soc:active.soil.organic_carbon_top_0_30_g_kg}],crop=startCrop,water="water_medium",soc=active.soil.organic_carbon_top_0_30_g_kg;
+  const posteriorRows={},path=[{year:0,crop:startCrop,water:"water_medium",soc:active.soil.organic_carbon_top_0_30_g_kg}];
+  let crop=startCrop,water="water_medium",soc=active.soil.organic_carbon_top_0_30_g_kg;
   for(let year=1;year<=horizon;year++){
     const selected=environmentYears[Math.floor(rng()*environmentYears.length)];
     for(const climate of selected[1])water=advanceWaterForCrop(water,climate,crop,rng);
