@@ -5,10 +5,14 @@
     "horizon_months": 60,
     "days_per_year": 365,
     "environment_periods_per_year": 24,
-    "markov_transition_clock": "A matriz PAM anual é usada como prior regional, não como calendário de talhão. Para culturas anuais, a decisão Markov ocorre na próxima oportunidade municipal de plantio após a colheita; destinos com janela ZARC municipal standalone nos 365 dias seguintes são elegíveis. Depois do sorteio, o talhão permanece em pousio até a próxima janela própria da cultura escolhida. O calendário 2026/2027 é repetido nos cinco anos como hipótese.",
+    "markov_transition_clock": "A matriz PAM anual é usada como prior regional, não como calendário de talhão. Para culturas anuais, a decisão Markov ocorre na próxima oportunidade municipal de plantio após a colheita; destinos com janela MAPA municipal standalone nos 365 dias seguintes são elegíveis. Para coberturas de rotação explicitamente listadas, qualquer decêndio só é elegível quando o município não tem linha MAPA standalone; uma linha oficial, inclusive sem decêndios de risco 20/30/40, prevalece. Depois do sorteio, o talhão permanece em pousio até a próxima janela aplicável da cultura escolhida. O calendário 2026/2027 e a tábua perene vigente são repetidos nos cinco anos como hipótese.",
     "planting_calendar": {
-      "source": "MAPA SISZARC — publicação municipal da safra 2026/2027, carregada do perfil selecionado",
-      "risk_levels_included_percent": [20, 30, 40],
+      "source": "MAPA SISZARC — tábua municipal anual 2026/2027 e recurso vigente perene/olerícola/sem safra, carregados do perfil selecionado",
+      "risk_levels_included_percent": [
+        20,
+        30,
+        40
+      ],
       "calendar_anchor": "2026-01-01",
       "annual_repetition": true,
       "strata_rule": "União das janelas publicadas em todos os grupos de cultivar e classes ZARC do município; não substitui selecionar o estrato correto para o talhão.",
@@ -19,20 +23,157 @@
     "new_crop_rule": "Uma cultura destino começa recém-implantada. Os custos de formação são pagos durante o atraso; não há receita antes de atingir a maturação indicada."
   },
   "crops": {
-    "soybean": {"cycle_days": 115, "maturation_days": 115, "class": "annual", "support": "published_reference", "basis": "Ciclo médio representativo entre 100, 115 e 130 dias usados nas fases de soja do ZARC/Embrapa; não identifica cultivar nem janela local."},
-    "maize_grain": {"cycle_days": 125, "maturation_days": 125, "class": "annual", "support": "published_reference_global", "basis": "Ciclo de 125 dias de milho em região tropical úmida na FAO-56; não distingue cultivar, verão e segunda safra brasileiras."},
-    "sorghum_grain": {"cycle_days": 130, "maturation_days": 130, "class": "annual", "support": "published_reference_internal_discrepancy", "basis": "FAO-56 reporta 130 dias, mas soma de fases é 125; conserva o total publicado e mantém a inconsistência visível. Proxy de sorgo também é usado em custos de milheto."},
-    "millet": {"cycle_days": 75, "maturation_days": 75, "class": "cover_or_annual", "support": "literature_range_midpoint", "basis": "Ponto médio aproximado do intervalo Embrapa de 60–90 dias até florescimento para milheto de cobertura."},
-    "dry_bean": {"cycle_days": 110, "maturation_days": 110, "class": "annual", "support": "published_reference_global", "basis": "Ciclo de 110 dias de feijão-seco continental na FAO-56; varia por cultivar e região."},
-    "peanut": {"cycle_days": 130, "maturation_days": 130, "class": "annual", "support": "published_reference_global", "basis": "Ciclo de 130 dias de amendoim na FAO-56; referência climática externa, não calendário local brasileiro."},
-    "oat": {"cycle_days": 100, "maturation_days": 100, "class": "cover_or_annual", "support": "literature_range", "basis": "Intervalo de ciclo de aveias de cobertura da referência Embrapa; aveia-preta não é equivalente à aveia em grão usada no preço PAM."},
-    "wheat": {"cycle_days": 150, "maturation_days": 150, "class": "annual", "support": "published_reference_global", "basis": "Referência de ciclo de cereais de 150 dias FAO-56; não representa cultivar ou janela ZARC local."},
-    "sugarcane": {"cycle_days": 365, "maturation_days": 540, "class": "perennial_or_semiperennial", "support": "published_reference_plus_hypothesis", "basis": "Embrapa descreve maturação da cana-planta em 16–18 meses; modelo usa 18 meses (540 dias). Canavial estabelecido recebe cortes anuais simplificados; idade e número de cortes são desconhecidos."},
-    "coffee": {"cycle_days": 365, "maturation_days": 1095, "class": "perennial", "support": "literature_range_midpoint", "basis": "Cafezal existente é produtivo no tempo zero; Embrapa informa retorno financeiro a partir do 3º/4º ano. Modelo usa 36 meses até receita comercial significativa e colheitas anuais simplificadas."},
-    "forage_radish": {"cycle_days": 75, "maturation_days": 75, "class": "cover", "support": "literature_range_midpoint", "basis": "Ponto médio aproximado do intervalo Embrapa de 60–90 dias até florescimento."},
-    "brachiaria": {"cycle_days": 120, "maturation_days": 120, "class": "cover", "support": "management_interval_hypothesis", "basis": "Intervalo operacional de manejo/revisão da cobertura; braquiária pode permanecer por mais tempo e não tem ciclo de colheita anual comparável."},
-    "crotalaria": {"cycle_days": 105, "maturation_days": 105, "class": "cover", "support": "literature_range_midpoint", "basis": "Ponto médio aproximado do intervalo Embrapa de 90–120 dias para Crotalaria juncea de cobertura."},
-    "mucuna": {"cycle_days": 120, "maturation_days": 120, "class": "cover", "support": "species_unspecified_hypothesis", "basis": "Hipótese de 4 meses; a duração muda materialmente entre mucuna-anã e mucuna-preta, não identificadas no catálogo PAM."}
+    "soybean": {
+      "cycle_days": 115,
+      "maturation_days": 115,
+      "class": "annual",
+      "support": "published_reference",
+      "basis": "Ciclo médio representativo entre 100, 115 e 130 dias usados nas fases de soja do ZARC/Embrapa; não identifica cultivar nem janela local."
+    },
+    "maize_grain": {
+      "cycle_days": 125,
+      "maturation_days": 125,
+      "class": "annual",
+      "support": "published_reference_global",
+      "basis": "Ciclo de 125 dias de milho em região tropical úmida na FAO-56; não distingue cultivar, verão e segunda safra brasileiras."
+    },
+    "sorghum_grain": {
+      "cycle_days": 130,
+      "maturation_days": 130,
+      "class": "annual",
+      "support": "published_reference_internal_discrepancy",
+      "basis": "FAO-56 reporta 130 dias, mas soma de fases é 125; conserva o total publicado e mantém a inconsistência visível. Proxy de sorgo também é usado em custos de milheto."
+    },
+    "millet": {
+      "cycle_days": 75,
+      "maturation_days": 75,
+      "class": "cover_or_annual",
+      "support": "literature_range_midpoint",
+      "basis": "Ponto médio aproximado do intervalo Embrapa de 60–90 dias até florescimento para milheto de cobertura."
+    },
+    "dry_bean": {
+      "cycle_days": 110,
+      "maturation_days": 110,
+      "class": "annual",
+      "support": "published_reference_global",
+      "basis": "Ciclo de 110 dias de feijão-seco continental na FAO-56; varia por cultivar e região."
+    },
+    "peanut": {
+      "cycle_days": 130,
+      "maturation_days": 130,
+      "class": "annual",
+      "support": "published_reference_global",
+      "basis": "Ciclo de 130 dias de amendoim na FAO-56; referência climática externa, não calendário local brasileiro."
+    },
+    "oat": {
+      "cycle_days": 100,
+      "maturation_days": 100,
+      "class": "cover_or_annual",
+      "support": "literature_range",
+      "basis": "Intervalo de ciclo de aveias de cobertura da referência Embrapa; aveia-preta não é equivalente à aveia em grão usada no preço PAM."
+    },
+    "wheat": {
+      "cycle_days": 150,
+      "maturation_days": 150,
+      "class": "annual",
+      "support": "published_reference_global",
+      "basis": "Referência de ciclo de cereais de 150 dias FAO-56; não representa cultivar ou janela ZARC local."
+    },
+    "sugarcane": {
+      "cycle_days": 365,
+      "maturation_days": 540,
+      "class": "perennial_or_semiperennial",
+      "support": "published_reference_plus_hypothesis",
+      "basis": "Embrapa descreve maturação da cana-planta em 16–18 meses; modelo usa 18 meses (540 dias). Canavial estabelecido recebe cortes anuais simplificados; idade e número de cortes são desconhecidos."
+    },
+    "coffee": {
+      "cycle_days": 365,
+      "maturation_days": 1095,
+      "class": "perennial",
+      "support": "literature_range_midpoint",
+      "basis": "Cafezal existente é produtivo no tempo zero; Embrapa informa retorno financeiro a partir do 3º/4º ano. Modelo usa 36 meses até receita comercial significativa e colheitas anuais simplificadas."
+    },
+    "forage_radish": {
+      "cycle_days": 75,
+      "maturation_days": 75,
+      "class": "cover",
+      "support": "literature_range_midpoint",
+      "basis": "Ponto médio aproximado do intervalo Embrapa de 60–90 dias até florescimento."
+    },
+    "brachiaria": {
+      "cycle_days": 120,
+      "maturation_days": 120,
+      "class": "cover",
+      "support": "management_interval_hypothesis",
+      "basis": "Intervalo operacional de manejo/revisão da cobertura; braquiária pode permanecer por mais tempo e não tem ciclo de colheita anual comparável."
+    },
+    "crotalaria": {
+      "cycle_days": 105,
+      "maturation_days": 105,
+      "class": "cover",
+      "support": "literature_range_midpoint",
+      "basis": "Ponto médio aproximado do intervalo Embrapa de 90–120 dias para Crotalaria juncea de cobertura."
+    },
+    "mucuna": {
+      "cycle_days": 120,
+      "maturation_days": 120,
+      "class": "cover",
+      "support": "species_unspecified_hypothesis",
+      "basis": "Hipótese de 4 meses; a duração muda materialmente entre mucuna-anã e mucuna-preta, não identificadas no catálogo PAM."
+    }
+  },
+  "rotation_calendar_fallback": {
+    "status": "explicit_uncalibrated_user_directed_assumption",
+    "crop_ids": [
+      "forage_radish",
+      "brachiaria",
+      "oat",
+      "crotalaria",
+      "mucuna"
+    ],
+    "all_year_decendios": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36
+    ],
+    "apply_only_when": "The municipality has no standalone, non-consortium MAPA row for the crop state in the packaged annual or perennial/no-season tables.",
+    "official_data_precedence": "Any official standalone row takes precedence. If MAPA rows exist but publish no 20/30/40 risk decendio, the crop stays blocked; the fallback does not override an explicit official calendar.",
+    "rationale": "Keep rotation-only cover and green-manure states available as exploratory alternatives when no local standalone ZARC row is published, rather than silently removing them from the Markov destination set.",
+    "limitation": "All 36 decendios are a user-directed model assumption, not an observed planting calendar or agronomic recommendation. Temperature, photoperiod, cultivar, establishment moisture and local management are not validated by this fallback.",
+    "coverage_note": "Aveia é incluída como cobertura apenas em Ariquemes, onde não há linha oficial mapeada; Embrapa descreve adaptabilidade da aveia ao clima tropical, mas não publica aqui um calendário local. Em Franca e Varginha, o calendário MAPA genérico Aveia é usado como proxy explícito para aveia-preta."
   },
   "new_perennial_formation": {
     "coffee_annual_formation_cost_fraction": 0.55,
@@ -42,7 +183,10 @@
   },
   "repeated_crop_effect": {
     "status": "uncalibrated_editable_hypothesis",
-    "applies_to_classes": ["annual", "cover_or_annual"],
+    "applies_to_classes": [
+      "annual",
+      "cover_or_annual"
+    ],
     "yield_penalty_per_consecutive_replant_fraction": 0.08,
     "maximum_yield_penalty_fraction": 0.4,
     "formula": "Multiplicador da receita bruta = max(1 − limite, 1 − penalidade_por_replantio × (número_de_ciclos_consecutivos − 1)); custo por ciclo não muda.",
@@ -63,7 +207,13 @@
   },
   "associated_cover_chain": {
     "applies_to_primary_crop": "coffee",
-    "states": ["millet", "brachiaria", "forage_radish", "crotalaria", "mucuna"],
+    "states": [
+      "millet",
+      "brachiaria",
+      "forage_radish",
+      "crotalaria",
+      "mucuna"
+    ],
     "default_initial_cover": "millet",
     "observed_transition_counts": 0,
     "prior_alpha_per_destination": 1.0,
@@ -79,21 +229,68 @@
     ]
   },
   "sources": [
-    {"publisher": "Embrapa", "title": "ZARC da soja — ciclos e fases", "url": "https://www.embrapa.br/documents/1355202/83794724/4.%2BJRenato%2B-%2BZARC%2BSoja%2B06%2BADs%2B_%2B2023%2B_%2BSeminario%2BZARC.pdf/3bed6875-beb3-fbb6-fe37-c7f033a45629", "use": "Ciclos de soja de 100, 115 e 130 dias; modelo usa 115 dias como referência média."},
-    {"publisher": "Embrapa", "title": "Plantio da cana-de-açúcar", "url": "https://www.embrapa.br/web/agencia-de-informacao-tecnologica/cultivos/cana-de-acucar/producao/manejo/plantio", "use": "Maturação da cana-planta em 16–18 meses; modelo usa 18 meses."},
-    {"publisher": "Embrapa", "title": "Planejamento do plantio do café", "url": "https://www.atermaisdigital.cnptia.embrapa.br/web/cafe/planejamento-do-plantio", "use": "Cafezal perene e retorno financeiro a partir do 3º/4º ano; modelo usa 36 meses até receita comercial significativa."},
-    {"publisher": "Embrapa", "title": "Culturas de cobertura — ciclo até florescimento", "url": "https://ainfo.cnptia.embrapa.br/digital/bitstream/item/201211/1/CT-168-22-08-2019-1.pdf", "use": "Referências de ciclo para milheto, nabo forrageiro e crotalária; não são previsão local."},
-    {"publisher": "Guth, Lorenzoni e Mello", "title": "Efeitos das rotações agrícolas no rendimento da soja em sistema plantio direto", "url": "https://www.infoteca.cnptia.embrapa.br/bitstream/doc/459626/1/ResumosdoIICongressoBrasileirodeSojaeMercosoja2002.pdf", "use": "Ensaio de duas safras em Ijuí-RS: soja em soja-soja-milho rendeu 11% mais e em soja-milho-soja 24% mais que a monocultura; suporte regional e duração limitados."},
-    {"publisher": "Seifert, Roberts e Lobell", "title": "Continuous Corn and Soybean Yield Penalties across Hundreds of Thousands of Fields", "url": "https://doi.org/10.2134/agronj2016.03.0134", "use": "Registros de campo dos EUA: penalidade média de 4,3% em milho contínuo e 10,3% em soja; milho estabiliza após três anos e soja cresce até cinco anos. Referência externa, não transferência direta aos perfis brasileiros."},
-    {"publisher": "Garbelini et al.", "title": "Diversified crop rotations increase the yield and economic efficiency of grain production systems", "url": "https://doi.org/10.1016/j.eja.2022.126528", "use": "Ensaio de longa duração em Campo Mourão-PR (avaliação 2009–2017): rotações diversificadas elevam soja e milho primeira safra em vários contrastes, enquanto resposta do milho segunda safra varia por ano."},
-    {"publisher": "FAO", "title": "Irrigation and Drainage Paper 56, Tables 11–12", "url": "https://www.fao.org/4/x0490e/x0490e0b.htm", "use": "Curvas Kc/duração usadas como referência hídrica no projeto; duração global não é calendário varietal brasileiro."}
+    {
+      "publisher": "Embrapa",
+      "title": "ZARC da soja — ciclos e fases",
+      "url": "https://www.embrapa.br/documents/1355202/83794724/4.%2BJRenato%2B-%2BZARC%2BSoja%2B06%2BADs%2B_%2B2023%2B_%2BSeminario%2BZARC.pdf/3bed6875-beb3-fbb6-fe37-c7f033a45629",
+      "use": "Ciclos de soja de 100, 115 e 130 dias; modelo usa 115 dias como referência média."
+    },
+    {
+      "publisher": "Embrapa",
+      "title": "Plantio da cana-de-açúcar",
+      "url": "https://www.embrapa.br/web/agencia-de-informacao-tecnologica/cultivos/cana-de-acucar/producao/manejo/plantio",
+      "use": "Maturação da cana-planta em 16–18 meses; modelo usa 18 meses."
+    },
+    {
+      "publisher": "Embrapa",
+      "title": "Planejamento do plantio do café",
+      "url": "https://www.atermaisdigital.cnptia.embrapa.br/web/cafe/planejamento-do-plantio",
+      "use": "Cafezal perene e retorno financeiro a partir do 3º/4º ano; modelo usa 36 meses até receita comercial significativa."
+    },
+    {
+      "publisher": "Embrapa",
+      "title": "Culturas de cobertura — ciclo até florescimento",
+      "url": "https://ainfo.cnptia.embrapa.br/digital/bitstream/item/201211/1/CT-168-22-08-2019-1.pdf",
+      "use": "Referências de ciclo para milheto, nabo forrageiro e crotalária; não são previsão local."
+    },
+    {
+      "publisher": "Guth, Lorenzoni e Mello",
+      "title": "Efeitos das rotações agrícolas no rendimento da soja em sistema plantio direto",
+      "url": "https://www.infoteca.cnptia.embrapa.br/bitstream/doc/459626/1/ResumosdoIICongressoBrasileirodeSojaeMercosoja2002.pdf",
+      "use": "Ensaio de duas safras em Ijuí-RS: soja em soja-soja-milho rendeu 11% mais e em soja-milho-soja 24% mais que a monocultura; suporte regional e duração limitados."
+    },
+    {
+      "publisher": "Seifert, Roberts e Lobell",
+      "title": "Continuous Corn and Soybean Yield Penalties across Hundreds of Thousands of Fields",
+      "url": "https://doi.org/10.2134/agronj2016.03.0134",
+      "use": "Registros de campo dos EUA: penalidade média de 4,3% em milho contínuo e 10,3% em soja; milho estabiliza após três anos e soja cresce até cinco anos. Referência externa, não transferência direta aos perfis brasileiros."
+    },
+    {
+      "publisher": "Garbelini et al.",
+      "title": "Diversified crop rotations increase the yield and economic efficiency of grain production systems",
+      "url": "https://doi.org/10.1016/j.eja.2022.126528",
+      "use": "Ensaio de longa duração em Campo Mourão-PR (avaliação 2009–2017): rotações diversificadas elevam soja e milho primeira safra em vários contrastes, enquanto resposta do milho segunda safra varia por ano."
+    },
+    {
+      "publisher": "Embrapa",
+      "title": "Aveia para forragem e cobertura de solo no Estado de São Paulo",
+      "url": "https://www.infoteca.cnptia.embrapa.br/bitstream/doc/45837/1/Pagesfromdigitalizar0001b.pdf",
+      "use": "A aveia tem ampla adaptabilidade e pode ser cultivada em regiões tropicais; dá suporte apenas à plausibilidade regional do estado Aveia-preta em Ariquemes. Não estabelece calendário local nem valida o fallback de qualquer decêndio, que permanece hipótese do modelo."
+    },
+    {
+      "publisher": "FAO",
+      "title": "Irrigation and Drainage Paper 56, Tables 11–12",
+      "url": "https://www.fao.org/4/x0490e/x0490e0b.htm",
+      "use": "Curvas Kc/duração usadas como referência hídrica no projeto; duração global não é calendário varietal brasileiro."
+    }
   ],
   "limitations": [
-    "Ciclos são hipóteses editáveis por cultura; as decisões anuais respeitam a união municipal das janelas ZARC 2026/2027 de risco 20/30/40, repetida em cada ano. A página não seleciona cultivar nem classe oficial de solo, portanto a elegibilidade é exploratória, não recomendação para um talhão.",
+    "Ciclos são hipóteses editáveis por cultura; as decisões respeitam a união municipal das janelas MAPA standalone de risco 20/30/40, repetida por ano. Coberturas de rotação na lista de fallback podem usar qualquer decêndio somente sem linha oficial no perfil. A página não seleciona cultivar nem classe oficial de solo, portanto a elegibilidade é exploratória, não recomendação para um talhão.",
     "A penalidade de rendimento por replantio consecutivo é uma hipótese de sensibilidade explicitamente editável, não um efeito causal quantificado. Deve ser recalibrada com séries de campo ou substituída por resposta local validada.",
     "A cadeia PAM mede dominância anual municipal, não rotação sequencial do mesmo talhão. Usá-la no fim de cada ciclo não equivale a estimar uma probabilidade observada intra-anual.",
     "A produtividade da primeira colheita após maturação usa a mediana PAM de culturas adultas; não há uma curva local de produtividade por idade, então a primeira safra perene pode estar superestimada.",
     "O custo CONAB disponível não separa consistentemente implantação, formação, trato anual e colheita; os custos de formação perene usam frações explícitas de proxy.",
-    "Coberturas intercalares do café formam uma subcadeia independente com prior uniforme e zero contagens observadas; isso mantém o café como cultura principal e não inventa frequência empírica."
+    "Coberturas intercalares do café formam uma subcadeia independente com prior uniforme e zero contagens observadas; isso mantém o café como cultura principal e não inventa frequência empírica.",
+    "A hipótese de qualquer decêndio para coberturas é usada somente sem linha oficial standalone; continua sendo disponibilidade exploratória, não calendário agronômico observado nem recomendação, e não valida a adequação de cada época."
   ]
 }

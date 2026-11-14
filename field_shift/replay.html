@@ -71,6 +71,8 @@
   .year-chip { flex:0 0 86px; display:grid; gap:3px; min-height:60px; padding:7px; border:1px solid var(--line); border-radius:8px; background:#fff; color:#26382b; text-align:left; }
   .year-chip strong { font-size:.74rem; }
   .year-chip span { display:-webkit-box; overflow:hidden; -webkit-box-orient:vertical; -webkit-line-clamp:2; color:var(--muted); font-size:.62rem; line-height:1.25; }
+  #crop-timeline .year-chip { flex-basis:170px; min-height:82px; }
+  #crop-timeline .year-chip span { -webkit-line-clamp:5; }
   .simulation-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
   .simulation-card { padding:14px; border:1px solid var(--line); border-radius:10px; background:#fff; }
   .simulation-card h3 { margin-bottom:7px; font-size:.92rem; }
@@ -145,7 +147,7 @@
   <header>
     <p class="eyebrow">Field Shift · uma cultura por vez</p>
     <h1>O Monte Carlo muda o ambiente. O ambiente muda a próxima cultura.</h1>
-    <p class="intro">Escolha uma região e a cultura principal inicial (soja, milho, cana ou café). O Monte Carlo avança pelos ciclos e pelas janelas municipais de plantio ZARC; água e carbono atualizam as probabilidades Markov. Repetições consecutivas de anuais reduzem o rendimento por uma hipótese editável. No café, a cobertura de entrelinha é uma cadeia associada e não substitui o cafezal.</p>
+    <p class="intro">Escolha uma região e a cultura principal inicial (soja, milho, cana ou café). O Monte Carlo avança pelos ciclos e calendários municipais MAPA; só coberturas sem linha oficial podem usar a hipótese de qualquer decêndio. Água e carbono atualizam as probabilidades Markov. Repetições consecutivas de anuais reduzem o rendimento por uma hipótese editável. No café, a cobertura de entrelinha é uma cadeia associada e não substitui o cafezal.</p>
   </header>
 
   <div class="selection">
@@ -182,7 +184,7 @@
     <p id="crop-data-note" class="data-note"></p>
     <div id="crop-lifecycle-note" class="perennial-note"></div>
     <h3 class="graph-heading">Grafo da cadeia completa</h3>
-    <p class="small-muted">Cada nó é uma cultura principal individual. O seletor indica quando a decisão Markov acontece; a matriz considera destinos que tenham uma janela ZARC municipal nos 365 dias seguintes. No Monte Carlo, a decisão ocorre na próxima oportunidade municipal após a colheita e o plantio escolhido espera sua própria janela. O calendário 2026/2027 é repetido nos cinco anos. Café e cana preservam sua identidade perene; o café também tem uma cadeia separada de coberturas de entrelinha.</p>
+    <p class="small-muted">Cada nó é uma cultura principal individual. O seletor indica quando a decisão Markov acontece; a matriz considera destinos com janela MAPA municipal nos 365 dias seguintes ou cobertura de rotação sem linha oficial, marcada como hipótese. No Monte Carlo, a decisão ocorre na próxima oportunidade municipal após a colheita e o plantio espera o calendário aplicável. As tábuas anuais 2026/2027 e perenes vigentes são repetidas nos cinco anos. Café e cana preservam sua identidade perene; o café também tem uma cadeia separada de coberturas de entrelinha.</p>
     <div class="graph-controls">
       <label for="graph-year-select">Recorte das transições Monte Carlo
         <select id="graph-year-select"></select>
@@ -208,10 +210,10 @@
         <ol id="graph-edge-list" class="graph-edge-list"></ol>
       </aside>
     </div>
-    <div class="graph-legend"><span>Seta mais larga = maior P Markov.</span><span>Brilho do nó = maior ocupação do estado.</span><span>“Ciclo completo” agrega todas as transições nos 60 meses.</span><span>Contagem PAM k/n não é sequência do mesmo talhão.</span></div>
+    <div class="graph-legend"><span>Seta mais larga = maior P Markov.</span><span>Brilho do nó = maior ocupação do estado.</span><span>“Ciclo completo” agrega todas as transições nos 60 meses.</span><span>PAM top-5 é área municipal ponderada; não é transição de talhão.</span></div>
     <div class="matrix-caption">
       <span>Origem nas linhas · próxima cultura nas colunas · cada estado contém uma cultura.</span>
-      <span>Célula: probabilidade ajustada pelo ambiente · transições PAM observadas k/n.</span>
+      <span>Célula: probabilidade ajustada pelo ambiente · massa esperada PAM top-5 e diagnóstico rank 1.</span>
     </div>
     <div class="matrix-wrap"><table id="crop-matrix" class="matrix" aria-label="Matriz completa de transição entre culturas individuais"></table></div>
     <p id="crop-matrix-note" class="small-muted"></p>
@@ -221,15 +223,15 @@
       <div id="cover-chain-graph" class="yearline" aria-label="Estados e transições da cadeia de cobertura do café"></div>
       <p id="cover-chain-note" class="small-muted"></p>
     </div>
-    <p class="small-muted">Sequência anual observada: cultura de maior área colhida entre os produtos deste catálogo na PAM municipal; produtos fora do catálogo não entram nessa comparação. Não é a rotação do mesmo talhão.</p>
-    <div id="crop-timeline" class="yearline" aria-label="Uma cultura de maior área do catálogo por ano no município"></div>
+    <p class="small-muted">Distribuição anual do top 5 PAM entre as culturas mapeadas, com pesos proporcionais à área colhida dentro do top 5. O rank 1 é mostrado primeiro, mas a PAM municipal não revela qual cultura sucedeu a outra no mesmo talhão.</p>
+    <div id="crop-timeline" class="yearline" aria-label="Cinco culturas de maior área e participação anual no município"></div>
   </section>
 
   <section aria-labelledby="monte-carlo-title">
     <div class="section-head">
       <div>
         <h2 id="monte-carlo-title">Monte Carlo · ambiente e rotação</h2>
-        <p>A execução começa automaticamente ao abrir a página. 100.000 trajetórias · horizonte de 60 meses · culturas anuais só replantam em janela ZARC elegível; água é atualizada a cada quinzena.</p>
+        <p>A execução começa automaticamente ao abrir a página. 100.000 trajetórias · horizonte de 60 meses · culturas anuais seguem janela MAPA ou hipótese explícita de cobertura sem dado; água é atualizada a cada quinzena.</p>
       </div>
       <div class="controls">
         <label for="simulation-seed">Semente
@@ -330,9 +332,10 @@
   <details>
     <summary>Fontes, equações e limites</summary>
     <p id="crop-source-detail"></p>
-    <p>A matriz usa os anos adjacentes da PAM em que muda a cultura de maior área entre as categorias do catálogo naquele município-ano. Produtos fora do catálogo, como arroz, não competem por essa posição. A PAM não identifica talhão ou ordem da rotação; portanto, k/n é um proxy regional, não uma frequência observada de rotação parcelar.</p>
-    <p>Para permitir destinos sem contagem histórica, a cadeia sorteia uma posterior Dirichlet com α=0,5 por destino e condiciona a linha às culturas que tenham uma janela municipal ZARC standalone nos 365 dias seguintes: <strong>P₀ = (k + α) / (n elegível + m elegível × α)</strong>. Destinos sem janela nesse horizonte ficam bloqueados. Essa massa é uma hipótese explicitada, não dado observado; as contagens PAM continuam sendo município-ano, não talhão.</p>
-    <p>Depois de cada colheita de cultura anual, o Monte Carlo espera a próxima oportunidade municipal de plantio para tomar a decisão Markov; o destino sorteado só é semeado na sua própria janela ZARC. O intervalo é pousio (Kc de referência e delta de carbono zero). As janelas municipais 2026/2027 agregam grupos de cultivar/classes de solo e se repetem nos cinco anos; linhas de consórcio foram removidas da cadeia principal para manter uma cultura por talhão. A cadeia PAM ainda é um prior regional, não histórico de rotação da gleba. A cadeia de cobertura do café tem zero contagens observadas e usa uma prior uniforme separada.</p>
+    <p>Fonte oficial dos calendários: <a href="https://dados.agricultura.gov.br/dataset/tabua-de-risco-zoneamento-agricola-de-risco-climatico" target="_blank" rel="noreferrer">MAPA · Tábua de Risco ZARC</a>. Feijão junta variantes publicadas e linhas de grupo/solo para o estado Markov; a janela exibida é uma união municipal, não valida um talhão ou cultivar específico.</p>
+    <p>Em cada ano, selecionamos as cinco culturas mapeadas com maior área colhida e dividimos cada área pela soma do top 5. Para cada par consecutivo de anos, a massa da transição i → j é a participação de i no ano t multiplicada pela participação de j no ano t+1; as massas são somadas ao longo da série. É uma distribuição conjunta de máxima entropia sob independência das marginais municipais, não uma rotação observada. Produtos fora do catálogo, como arroz, não competem no top 5. Os pares em que o rank 1 muda continuam registrados como diagnóstico separado, sem serem adicionados outra vez à evidência.</p>
+    <p>A matriz usa essa massa fracionária com uma posterior Dirichlet e condiciona a linha às culturas que tenham janela MAPA standalone nos 365 dias seguintes ou sejam cobertura de rotação sem linha oficial e com fallback configurado: <strong>P₀ = (massa top-5 + α) / (suporte top-5 elegível + m elegível × α)</strong>, com α=0,5 por destino. Para coberturas de rotação sem linha standalone no perfil, usa uma hipótese explícita de disponibilidade nos 36 decêndios; o grafo marca essas arestas como hipótese, não como ZARC. Uma linha oficial existente sempre prevalece, inclusive quando não publica risco 20/30/40; a hipótese não apaga uma restrição oficial. Destinos sem calendário aplicável continuam bloqueados. Com suporte zero e 14 destinos elegíveis, a prior começa em 7,1%; conforme o suporte observado aumenta, a parcela cai. Portanto 6–7% é possível em linhas pouco apoiadas, mas não é piso nem frequência observada.</p>
+    <p>Depois de cada colheita anual, o Monte Carlo espera a próxima oportunidade de decisão Markov; o destino sorteado é semeado na sua janela MAPA ou, nas exceções de cobertura sem dado, em qualquer decêndio pela hipótese descrita. O intervalo é pousio (Kc de referência e delta de carbono zero). As tabelas anuais 2026/2027 e perenes/sem safra agregam grupos/códigos de solo e se repetem nos cinco anos; linhas de consórcio foram removidas para manter uma cultura principal por talhão. A cadeia PAM é um prior regional, não histórico da gleba. A cadeia de cobertura do café tem zero contagens observadas e usa uma prior uniforme separada.</p>
     <p>Depois da amostragem de cada bloco de clima, a probabilidade de destino é reponderada por água e carbono do solo: peso = P₀ × exp(βágua × alinhamento hídrico × (Kc anual efetivo − Kc médio)) × exp(βsolo × déficit de carbono × (ΔCOS hipotético / escala)). As probabilidades são normalizadas na linha. Kc vem do catálogo FAO‑56 já usado no projeto; a resposta de COS e os coeficientes beta estão em <code>data/reference/soil-crop-response-hypotheses.json</code>.</p>
     <p>NASA POWER fornece chuva por quinzena; água atualiza a cada período de clima. O Kc de cultura ajusta a fração representativa da CAD por (Kc−1)×ETo média quinzenal/CAD e a classe é recalculada nos cortes declarados. Sob café, a cobertura modifica Kc e carbono por uma fração de ocupação editável; essa mistura não foi medida localmente. SoilGrids fornece o carbono inicial; as faixas de variação de carbono são hipóteses não calibradas.</p>
     <p id="cycle-assumptions-detail"></p>
@@ -375,7 +378,7 @@ const economicData=JSON.parse(document.getElementById("economic-data").textConte
 const waterLabels={water_low:"Baixa",water_medium:"Média",water_high:"Alta"};
 const rainLabels={dry:"seca",normal:"normal",wet:"úmida"};
 const trajectories=100000,horizon=5,horizonMonths=Number(cropCycles.time_basis.horizon_months),horizonDays=horizonMonths*Number(cropCycles.time_basis.days_per_year)/12,climatePeriodDays=Number(cropCycles.time_basis.days_per_year)/Number(cropCycles.time_basis.environment_periods_per_year),rankingPageSize=25;
-let active=null,latestRun=null,selectedGraphCropId=null,cachedCropTransitionProfile=null,cachedCropTransitions=null,cachedZarcProfile=null,cachedZarcWindows=null,cachedZarcDecendios=null,simulationRunId=0,rotationRankingPage=0;
+let active=null,latestRun=null,selectedGraphCropId=null,cachedCropTransitionProfile=null,cachedCropTransitions=null,cachedCalendarProfile=null,cachedCropPlantingWindows=null,cachedPlantingDecendios=null,cachedCropCalendarBasis=null,simulationRunId=0,rotationRankingPage=0;
 const graphIntervalCache=new Map();
 
 function byId(id){return document.getElementById(id);}
@@ -399,33 +402,44 @@ function cropLifecycleRule(sourceId){return active.crop_markov.lifecycle_rules?.
 function cropAllowedDestinations(sourceId){const rule=cropLifecycleRule(sourceId);return rule?.mode==="persistent_within_horizon"?new Set(rule.allowed_destinations):new Set(cropStates().map(state=>state.id));}
 function decendioForDay(day){let remaining=((Math.floor(day)%365)+365)%365;const monthDays=[31,28,31,30,31,30,31,31,30,31,30,31];for(let month=0;month<monthDays.length;month++){if(remaining<monthDays[month])return month*3+Math.floor(remaining/10)+1;remaining-=monthDays[month];}return 36;}
 function decendioStartDay(decendio){const index=clamp(Number(decendio)-1,0,35),month=Math.floor(index/3),part=index%3,monthDays=[31,28,31,30,31,30,31,31,30,31,30,31];return monthDays.slice(0,month).reduce((sum,value)=>sum+value,0)+part*10;}
+function compactDecendioRanges(values){const sorted=[...new Set(values.map(Number).filter(value=>value>=1&&value<=36))].sort((a,b)=>a-b),ranges=[];for(const value of sorted){const last=ranges.at(-1);if(last&&value===last[1]+1)last[1]=value;else ranges.push([value,value]);}return ranges.map(([start,end])=>String(start).padStart(2,"0")+(start===end?"":"–"+String(end).padStart(2,"0"))).join(", ");}
+function beanCalendarAuditNote(){const rows=(active?.zarc_planting_windows?.rows||[]).filter(row=>row.crop_parameter_id==="dry_bean"&&!/consorciad|consórcio|mistura/i.test(String(row.crop||""))),labels=[...new Set(rows.map(row=>String(row.crop||"")))],decendios=new Set();for(const row of rows)for(const risk of cropCycles.time_basis.planting_calendar.risk_levels_included_percent)for(const value of row.planting_decendios_by_risk_percent?.[String(risk)]||[])decendios.add(Number(value));const pamYears=(active?.crop_markov?.annual_sequence||[]).filter(year=>(year.top5_crops||[]).some(crop=>crop.state_id==="dry_bean")).length,totalYears=Number(active?.crop_markov?.annual_observation_count||0);return rows.length?" Feijão (estado Markov agregado): "+rows.length+" linhas MAPA standalone ("+labels.join(", ")+"); união municipal de risco 20/30/40: decêndios "+compactDecendioRanges([...decendios])+". Na PAM, esteve no top 5 de área em "+pamYears+"/"+totalYears+" anos. O calendário não distingue esses tipos/grupos no nó.":" Sem linha MAPA standalone de feijão neste perfil.";}
 function decendioName(decendio){const index=clamp(Number(decendio)-1,0,35),month=Math.floor(index/3),part=index%3,months=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"],monthEnds=[31,28,31,30,31,30,31,31,30,31,30,31],starts=[1,11,21][part],ends=part===2?monthEnds[month]:starts+9;return "decêndio "+String(index+1).padStart(2,"0")+" · "+String(starts).padStart(2,"0")+"–"+String(ends).padStart(2,"0")+"/"+months[month];}
-function zarcWindowsByCrop(){
-  if(cachedZarcProfile===active&&cachedZarcWindows)return cachedZarcWindows;
-  const windows={},rows=active?.zarc_planting_windows?.rows||[];
+function plantingWindowsByCrop(){
+  if(cachedCalendarProfile===active&&cachedCropPlantingWindows)return cachedCropPlantingWindows;
+  const windows={},officialCropIds=new Set(),basis={},rows=active?.zarc_planting_windows?.rows||[];
   for(const row of rows){
     const label=String(row.crop||"");if(/consorciad|consórcio|mistura/i.test(label))continue;
     const rawId=row.crop_parameter_id;if(!rawId)continue;
     const cropId=rawId==="coffee_bare"?"coffee":rawId;if(!cropStateMap()[cropId])continue;
+    officialCropIds.add(cropId);
     for(const risk of cropCycles.time_basis.planting_calendar.risk_levels_included_percent){
       for(const decendio of row.planting_decendios_by_risk_percent?.[String(risk)]||[]){if(!windows[cropId])windows[cropId]=new Set();windows[cropId].add(Number(decendio));}
     }
   }
-  cachedZarcProfile=active;cachedZarcWindows=windows;cachedZarcDecendios=null;return windows;
+  const fallback=cropCycles.rotation_calendar_fallback||{},fallbackIds=new Set(fallback.crop_ids||[]),fallbackDecendios=fallback.all_year_decendios||[];
+  for(const crop of cropStates()){
+    if(officialCropIds.has(crop.id)){basis[crop.id]="official_zarc";continue;}
+    if(fallbackIds.has(crop.id)){windows[crop.id]=new Set(fallbackDecendios);basis[crop.id]="all_season_rotation_fallback";continue;}
+    basis[crop.id]="no_calendar_data";
+  }
+  cachedCalendarProfile=active;cachedCropPlantingWindows=windows;cachedPlantingDecendios=null;cachedCropCalendarBasis=basis;return windows;
 }
-function zarcWindowsByDecendio(){
-  if(cachedZarcProfile===active&&cachedZarcDecendios)return cachedZarcDecendios;
+function cropCalendarBasis(cropId){plantingWindowsByCrop();return cachedCropCalendarBasis?.[cropId]||"no_calendar_data";}
+function cropCalendarBasisLabel(cropId){const basis=cropCalendarBasis(cropId);return basis==="official_zarc"?"MAPA ZARC oficial":basis==="all_season_rotation_fallback"?"hipótese de rotação: qualquer decêndio, sem linha ZARC":"sem calendário MAPA/fallback";}
+function plantingWindowsByDecendio(){
+  if(cachedCalendarProfile===active&&cachedPlantingDecendios)return cachedPlantingDecendios;
   const grouped=Array.from({length:37},()=>new Set());
-  for(const [cropId,decendios] of Object.entries(zarcWindowsByCrop()))for(const decendio of decendios)grouped[decendio].add(cropId);
-  cachedZarcProfile=active;cachedZarcDecendios=grouped;return grouped;
+  for(const [cropId,decendios] of Object.entries(plantingWindowsByCrop()))for(const decendio of decendios)grouped[decendio].add(cropId);
+  cachedCalendarProfile=active;cachedPlantingDecendios=grouped;return grouped;
 }
 function eligibleCropDestinations(sourceId,day){
   const lifecycle=cropLifecycleRule(sourceId),allowed=cropAllowedDestinations(sourceId);
   if(lifecycle?.mode==="persistent_within_horizon")return allowed;
-  return new Set(cropStates().filter(state=>allowed.has(state.id)&&nextZarcPlantingForCrop(state.id,day)).map(state=>state.id));
+  return new Set(cropStates().filter(state=>allowed.has(state.id)&&nextCropPlantingWindow(state.id,day)).map(state=>state.id));
 }
-function nextZarcPlantingForCrop(cropId,afterDay){
-  const first=Math.max(0,Math.ceil(afterDay)),daysPerYear=Number(cropCycles.time_basis.days_per_year),limit=first+daysPerYear,decendios=zarcWindowsByCrop()[cropId];if(!decendios?.size)return null;let best=null;
+function nextCropPlantingWindow(cropId,afterDay){
+  const first=Math.max(0,Math.ceil(afterDay)),daysPerYear=Number(cropCycles.time_basis.days_per_year),limit=first+daysPerYear,decendios=plantingWindowsByCrop()[cropId];if(!decendios?.size)return null;let best=null;
   const firstYear=Math.floor(first/daysPerYear);
   for(let year=firstYear;year<=firstYear+1;year++)for(let decendio=1;decendio<=36;decendio++){
     if(!decendios.has(decendio))continue;
@@ -435,7 +449,7 @@ function nextZarcPlantingForCrop(cropId,afterDay){
   return best;
 }
 function nextPlantingOpportunity(sourceId,afterDay){
-  const first=Math.max(0,Math.ceil(afterDay)),daysPerYear=Number(cropCycles.time_basis.days_per_year),limit=first+daysPerYear,allowed=cropAllowedDestinations(sourceId),grouped=zarcWindowsByDecendio();let best=null;
+  const first=Math.max(0,Math.ceil(afterDay)),daysPerYear=Number(cropCycles.time_basis.days_per_year),limit=first+daysPerYear,allowed=cropAllowedDestinations(sourceId),grouped=plantingWindowsByDecendio();let best=null;
   const firstYear=Math.floor(first/daysPerYear);
   for(let year=firstYear;year<=firstYear+1;year++)for(let decendio=1;decendio<=36;decendio++){
     const destinations=new Set([...grouped[decendio]].filter(cropId=>allowed.has(cropId)));if(!destinations.size)continue;
@@ -445,9 +459,11 @@ function nextPlantingOpportunity(sourceId,afterDay){
   return best;
 }
 function selectedGraphPlantingDay(){return decendioStartDay(Number(byId("matrix-planting-decendio")?.value||1))+4;}
-function outgoingCount(stateId){return active.crop_markov.transitions.filter(row=>row.from_state===stateId).reduce((sum,row)=>sum+row.count,0);}
+function outgoingCount(stateId){return active.crop_markov.transitions.filter(row=>row.from_state===stateId).reduce((maximum,row)=>Math.max(maximum,Number(row.area_weighted_outgoing_count??row.outgoing_count??0)),0);}
 function cropTransitionMap(){if(cachedCropTransitionProfile!==active){cachedCropTransitions=new Map(active.crop_markov.transitions.map(row=>[row.from_state+"|"+row.to_state,row]));cachedCropTransitionProfile=active;}return cachedCropTransitions;}
-function observedCount(from,to){const edge=cropTransitionMap().get(from+"|"+to);return edge?edge.count:0;}
+function observedCount(from,to){const edge=cropTransitionMap().get(from+"|"+to);return edge?Number(edge.area_weighted_count??edge.count??0):0;}
+function dominantObservedCount(from,to){const edge=cropTransitionMap().get(from+"|"+to);return edge?Number(edge.count||0):0;}
+function dominantOutgoingCount(stateId){return active.crop_markov.transitions.filter(row=>row.from_state===stateId).reduce((maximum,row)=>Math.max(maximum,Number(row.outgoing_count||0)),0);}
 function alpha(){return Number(active.crop_markov.alpha_per_destination)||0.5;}
 function eligibleObservedCount(sourceId,allowed){return[...allowed].reduce((sum,destinationId)=>sum+observedCount(sourceId,destinationId),0);}
 function cropBaseProbability(sourceId,destinationId,allowed){if(!allowed.has(destinationId))return 0;const count=eligibleObservedCount(sourceId,allowed);return(observedCount(sourceId,destinationId)+alpha())/(count+allowed.size*alpha()||1);}
@@ -456,8 +472,9 @@ function renderCropTimeline(){
   const root=byId("crop-timeline");root.replaceChildren();
   for(const year of active.crop_markov.annual_sequence){
     const chip=el("div",undefined,"year-chip");
-    chip.append(el("strong",String(year.year)),el("span",cropLabel(year.state_id)));
-    chip.title="Área colhida PAM da cultura com maior área entre os produtos do catálogo: "+fmt(year.harvested_area_ha,0)+" ha";
+    const topFive=year.top5_crops||[{state_id:year.state_id,crop_name:year.crop_name,harvested_area_ha:year.harvested_area_ha,area_share_within_top5:1}],summary=topFive.map(item=>cropLabel(item.state_id)+" "+pct(Number(item.area_share_within_top5||0))).join(" · ");
+    chip.append(el("strong",String(year.year)),el("span",summary));
+    chip.title="Top 5 PAM entre os produtos mapeados; pesos pela participação na área top 5. "+topFive.map(item=>item.rank+"º "+cropLabel(item.state_id)+": "+fmt(item.harvested_area_ha,0)+" ha ("+pct(item.area_share_within_top5)+")").join(" · ");
     root.append(chip);
   }
 }
@@ -527,7 +544,7 @@ function renderCropGraph(waterId,soc,nodeCountsByYear={},edgeCountsByYear={},com
   const transitions=[];
   for(const source of states){
     const allowed=eligibleCropDestinations(source.id,plantingDay),probabilities=cropProbabilities(source.id,waterId,soc,null,allowed),sourceTotal=outgoingCount(source.id),eligibleTotal=eligibleObservedCount(source.id,allowed),lifecycle=cropLifecycleRule(source.id);
-    for(const destination of states){const factors=cropEnvironmentalFactors(destination,waterId,soc),posterior=source.id===selectedGraphCropId?probabilitySummaries[destination.id]:null;transitions.push({source,destination,probability:Number(posterior?.mean??probabilities[destination.id]??0),interval:posterior,observed:observedCount(source.id,destination.id),sourceTotal,eligibleTotal,eligibleCount:allowed.size,baseProbability:cropBaseProbability(source.id,destination.id,allowed),waterFactor:factors.waterFactor,soilFactor:factors.soilFactor,lifecycleOverride:!allowed.has(destination.id),lifecycle});}
+    for(const destination of states){const factors=cropEnvironmentalFactors(destination,waterId,soc),posterior=source.id===selectedGraphCropId?probabilitySummaries[destination.id]:null;transitions.push({source,destination,probability:Number(posterior?.mean??probabilities[destination.id]??0),interval:posterior,observed:observedCount(source.id,destination.id),dominantObserved:dominantObservedCount(source.id,destination.id),sourceTotal,eligibleTotal,dominantSourceTotal:dominantOutgoingCount(source.id),eligibleCount:allowed.size,baseProbability:cropBaseProbability(source.id,destination.id,allowed),waterFactor:factors.waterFactor,soilFactor:factors.soilFactor,calendarBasis:cropCalendarBasis(destination.id),lifecycleOverride:!allowed.has(destination.id),lifecycle});}
   }
   for(const edge of transitions){
     const start=positions.get(edge.source.id),end=positions.get(edge.destination.id),isOutgoing=edge.source.id===selectedGraphCropId,dx=end.x-start.x,dy=end.y-start.y,length=Math.max(1,Math.hypot(dx,dy));
@@ -542,8 +559,8 @@ function renderCropGraph(waterId,soc,nodeCountsByYear={},edgeCountsByYear={},com
       const t=.79,u=1-t;labelX=u*u*sx+2*u*t*cx+t*t*ex;labelY=u*u*sy+2*u*t*cy+t*t*ey-4;
     }
     const path=svgNode("path",{d,class:"graph-edge"+(isOutgoing?" is-outgoing":"")+(edge.lifecycleOverride?" lifecycle-blocked":""),"stroke-width":isOutgoing?1.2+8*Math.sqrt(edge.probability):.7+2*Math.sqrt(edge.probability),"marker-end":"url(#crop-arrow)"});
-    const sourceCount=Number(nodeCounts[edge.source.id]||0),edgeCount=Number(edgeCounts[edge.source.id+"|"+edge.destination.id]||0),outgoingEvents=Object.entries(edgeCounts).filter(([key])=>key.startsWith(edge.source.id+"|")).reduce((sum,[,value])=>sum+Number(value),0),edgeFrequency=outgoingEvents?edgeCount/outgoingEvents:0;
-    const interval=edge.interval||{lower:edge.probability,upper:edge.probability},title=svgNode("title");title.textContent=edge.source.name+" → "+edge.destination.name+": P média contextual "+fmt(100*edge.probability,2)+"%; intervalo Dirichlet 90% "+fmt(100*interval.lower,2)+"–"+fmt(100*interval.upper,2)+"%; P₀ condicional às "+edge.eligibleCount+" culturas plantáveis=(k+α)/(n_elegível+α×m)="+fmt(100*edge.baseProbability,2)+"%, k/n PAM "+edge.observed+"/"+edge.sourceTotal+", n elegível="+edge.eligibleTotal+", α="+fmt(alpha(),1)+", fatores água/solo "+fmt(edge.waterFactor,3)+"/"+fmt(edge.soilFactor,3)+(edge.lifecycleOverride?"; bloqueada: sem janela ZARC standalone nos próximos 365 dias ou regra perene":"")+"; Monte Carlo no "+graphScope+": "+edgeCount+" decisões/transições ("+fmt(100*edgeFrequency,1)+"% das saídas deste nó).";path.append(title);countEdges.append(path);
+    const edgeCount=Number(edgeCounts[edge.source.id+"|"+edge.destination.id]||0),outgoingEvents=Object.entries(edgeCounts).filter(([key])=>key.startsWith(edge.source.id+"|")).reduce((sum,[,value])=>sum+Number(value),0),edgeFrequency=outgoingEvents?edgeCount/outgoingEvents:0;
+    const interval=edge.interval||{lower:edge.probability,upper:edge.probability},calendarNote=edge.calendarBasis==="official_zarc"?"; calendário: janela oficial MAPA (grupos/códigos agregados)":edge.calendarBasis==="all_season_rotation_fallback"?"; calendário: hipótese de cobertura de rotação, qualquer decêndio, sem linha ZARC":"; calendário: sem dado ZARC ou hipótese de rotação",blockedNote=edge.lifecycleOverride?"; bloqueada por regra perene ou falta de janela elegível no próximo ano":"",title=svgNode("title");title.textContent=edge.source.name+" → "+edge.destination.name+": P média contextual "+fmt(100*edge.probability,2)+"%; intervalo Dirichlet 90% "+fmt(100*interval.lower,2)+"–"+fmt(100*interval.upper,2)+"%; P₀ top-5=(massa ponderada + α)/(suporte ponderado + α×destinos)="+fmt(100*edge.baseProbability,2)+"%; massa top-5 "+fmt(edge.observed,3)+"/"+fmt(edge.sourceTotal,3)+" unidades esperadas, suporte elegível="+fmt(edge.eligibleTotal,3)+"; rank 1 observado "+edge.dominantObserved+"/"+edge.dominantSourceTotal+" pares, α="+fmt(alpha(),1)+" por destino; fatores água/solo "+fmt(edge.waterFactor,3)+"/"+fmt(edge.soilFactor,3)+calendarNote+blockedNote+"; Monte Carlo no "+graphScope+": "+edgeCount+" decisões/transições ("+fmt(100*edgeFrequency,1)+"% das saídas deste nó).";path.append(title);countEdges.append(path);
     if(isOutgoing){const label=svgNode("text",{x:labelX,y:labelY,class:"graph-edge-label"});label.textContent=fmt(100*edge.probability,2)+"%";countLabels.append(label);}
   }
   for(const state of states){
@@ -558,10 +575,10 @@ function renderCropGraph(waterId,soc,nodeCountsByYear={},edgeCountsByYear={},com
   const outgoing=transitions.filter(edge=>edge.source.id===selectedGraphCropId).sort((a,b)=>b.probability-a.probability),totalAtNode=Number(nodeCounts[selectedGraphCropId]||0),sideTitle=byId("graph-selected-title"),sideContext=byId("graph-selected-context"),sideList=byId("graph-edge-list");
   sideTitle.textContent="Saídas de "+(selected?.name||"—");
   const lifecycle=cropLifecycleRule(selectedGraphCropId),mcState=(completedTrajectories?"amostra parcial "+completedTrajectories.toLocaleString("pt-BR")+"/"+trajectories.toLocaleString("pt-BR"):"simulação ainda não iniciada"),occupied=Object.values(nodeCounts).reduce((sum,value)=>sum+Number(value||0),0),fallowPositions=Math.max(0,nodeDenominator-occupied);
-  sideContext.textContent=graphScope+": "+mcState+" · "+pct(nodeDenominator?totalAtNode/nodeDenominator:0)+" das posições observadas ocupam este nó (n="+totalAtNode.toLocaleString("pt-BR")+" de "+nodeDenominator.toLocaleString("pt-BR")+" posições). Pousio no fechamento: "+fallowPositions.toLocaleString("pt-BR")+" posições ("+pct(nodeDenominator?fallowPositions/nodeDenominator:0)+"). P nas setas usa decisão no "+decendioName(plantingDecendio)+"; destinos devem ter janela ZARC nos 365 dias seguintes. Água "+waterLabels[waterId].toLowerCase()+" e carbono "+fmt(soc,1)+" g/kg ajustam os pesos; o intervalo de 90% sorteia linhas Dirichlet entre destinos permitidos. A cultura escolhida pode esperar uma janela ZARC posterior para ser semeada."+(lifecycle?" Regra de ciclo: "+lifecycle.rationale:"");
+  sideContext.textContent=graphScope+": "+mcState+" · "+pct(nodeDenominator?totalAtNode/nodeDenominator:0)+" das posições observadas ocupam este nó (n="+totalAtNode.toLocaleString("pt-BR")+" de "+nodeDenominator.toLocaleString("pt-BR")+" posições). Pousio no fechamento: "+fallowPositions.toLocaleString("pt-BR")+" posições ("+pct(nodeDenominator?fallowPositions/nodeDenominator:0)+"). As transições PAM usam o produto das participações top-5 entre anos consecutivos, com independência assumida entre áreas municipais; não são trocas observadas no mesmo talhão. A probabilidade ajusta essa massa com prior Dirichlet, ambiente e calendário MAPA ou hipótese explícita de cobertura no "+decendioName(plantingDecendio)+". Água "+waterLabels[waterId].toLowerCase()+" e carbono "+fmt(soc,1)+" g/kg ajustam os pesos; intervalo de 90% sorteia linhas Dirichlet. A cultura escolhida pode esperar a próxima janela aplicável para ser semeada."+(lifecycle?" Regra de ciclo: "+lifecycle.rationale:"");
   sideList.replaceChildren();
-  for(const edge of outgoing){const edgeCount=Number(edgeCounts[edge.source.id+"|"+edge.destination.id]||0),outgoingEvents=Object.entries(edgeCounts).filter(([key])=>key.startsWith(edge.source.id+"|")).reduce((sum,[,value])=>sum+Number(value),0),mcShare=outgoingEvents?edgeCount/outgoingEvents:0,interval=edge.interval||{lower:edge.probability,upper:edge.probability},li=document.createElement("li"),strong=el("strong","→ "+edge.destination.name+" · P média "+fmt(100*edge.probability,2)+"%"),ruleNote=edge.lifecycleOverride?" · indisponível nesta janela ZARC":"",small=el("small","Dirichlet 90%: "+fmt(100*interval.lower,2)+"–"+fmt(100*interval.upper,2)+"% · P₀ condicional "+fmt(100*edge.baseProbability,2)+"% (α="+fmt(alpha(),1)+") · fatores água/solo "+fmt(edge.waterFactor,3)+"/"+fmt(edge.soilFactor,3)+" · PAM k/n "+edge.observed+"/"+edge.sourceTotal+"; n elegível="+edge.eligibleTotal+ruleNote+" · MC no "+graphScope+": "+edgeCount+"/"+outgoingEvents+" saídas ("+pct(mcShare)+")");li.append(strong,document.createElement("br"),small);sideList.append(li);}
-  byId("graph-environment").textContent="Ambiente da decisão: "+decendioName(plantingDecendio)+" · destinos ZARC possíveis nos próximos 365 dias · água "+waterLabels[waterId].toLowerCase()+" · carbono "+fmt(soc,1)+" g/kg · origem selecionada: "+(selected?.name||"—");
+  for(const edge of outgoing){const edgeCount=Number(edgeCounts[edge.source.id+"|"+edge.destination.id]||0),outgoingEvents=Object.entries(edgeCounts).filter(([key])=>key.startsWith(edge.source.id+"|")).reduce((sum,[,value])=>sum+Number(value),0),mcShare=outgoingEvents?edgeCount/outgoingEvents:0,interval=edge.interval||{lower:edge.probability,upper:edge.probability},li=document.createElement("li"),strong=el("strong","→ "+edge.destination.name+" · P média "+fmt(100*edge.probability,2)+"%"),ruleNote=edge.lifecycleOverride?" · bloqueada por janela/regra perene":"",small=el("small","Calendário: "+cropCalendarBasisLabel(edge.destination.id)+" · Dirichlet 90%: "+fmt(100*interval.lower,2)+"–"+fmt(100*interval.upper,2)+"% · P₀ top-5 "+fmt(100*edge.baseProbability,2)+"% (α="+fmt(alpha(),1)+") · massa top-5 "+fmt(edge.observed,3)+"/"+fmt(edge.sourceTotal,3)+" eq. · rank 1 PAM "+edge.dominantObserved+"/"+edge.dominantSourceTotal+" · água/solo "+fmt(edge.waterFactor,3)+"/"+fmt(edge.soilFactor,3)+ruleNote+" · MC no "+graphScope+": "+edgeCount+"/"+outgoingEvents+" saídas ("+pct(mcShare)+")");li.append(strong,document.createElement("br"),small);sideList.append(li);}
+  byId("graph-environment").textContent="Ambiente da decisão: "+decendioName(plantingDecendio)+" · destinos com janela MAPA ou hipótese aplicável nos próximos 365 dias · água "+waterLabels[waterId].toLowerCase()+" · carbono "+fmt(soc,1)+" g/kg · origem selecionada: "+(selected?.name||"—");
 }
 
 function renderCropMatrix(){
@@ -575,20 +592,20 @@ function renderCropMatrix(){
   for(const source of states){
     const row=document.createElement("tr"),rowHead=el("th",undefined);rowHead.scope="row";
     const allowed=eligibleCropDestinations(source.id,plantingDay),n=eligibleObservedCount(source.id,allowed),stateNode=el("div",source.name,"matrix-state");
-    stateNode.append(el("small","PAM dominante · n elegível="+n+" · destinos plantáveis="+allowed.size+(source.initial_selectable?" · início permitido":"")));
+    stateNode.append(el("small","Top-5 PAM · suporte elegível="+fmt(n,2)+" eq. · rank 1 n="+dominantOutgoingCount(source.id)+(source.initial_selectable?" · início permitido":"")));
     rowHead.append(stateNode);row.append(rowHead);
     const probabilities=cropProbabilities(source.id,waterId,soc,null,allowed);
     for(const dest of states){
-      const td=document.createElement("td"),count=observedCount(source.id,dest.id),probability=probabilities[dest.id];
+      const td=document.createElement("td"),count=observedCount(source.id,dest.id),dominantCount=dominantObservedCount(source.id,dest.id),probability=probabilities[dest.id];
       const cell=el("div",undefined,"cell-content"+((n<5)?" matrix-low-support":""));
-      cell.append(el("strong",pct(probability)),el("span",count+"/"+n+" obs."));
-      cell.title=allowed.has(dest.id)?"P ajustada por água/solo e condicionada à decisão no "+decendioName(plantingDecendio)+"; destino tem janela ZARC standalone nos 365 dias seguintes. k/n PAM observado "+count+"/"+n+" entre destinos elegíveis. Prior Dirichlet: "+alpha()+" por destino elegível.":"Destino bloqueado: sem janela ZARC standalone nos 365 dias depois da decisão em "+decendioName(plantingDecendio)+" ou bloqueado pela regra perene.";
+      cell.append(el("strong",pct(probability)),el("span",fmt(count,2)+"/"+fmt(n,2)+" massa"),el("span","rank 1: "+dominantCount));
+      cell.title=allowed.has(dest.id)?"P ajustada por água/solo e condicionada à decisão no "+decendioName(plantingDecendio)+"; calendário: "+cropCalendarBasisLabel(dest.id)+". Massa de transição top-5 ponderada: "+fmt(count,4)+"/"+fmt(n,4)+" unidades esperadas sob independência de marginais municipais; pares rank 1 observados: "+dominantCount+". Prior Dirichlet: "+alpha()+" por destino elegível.":"Destino bloqueado no contexto: calendário "+cropCalendarBasisLabel(dest.id)+" ou regra perene; a aresta não é sorteada.";
       td.append(cell);row.append(td);
     }
     tbody.append(row);
   }
   table.append(tbody);
-  byId("crop-matrix-note").textContent="Matriz completa: "+states.length+" estados de cultura. Contexto exibido: decisão no "+decendioName(plantingDecendio)+" · água "+waterLabels[waterId].toLowerCase()+" · carbono "+fmt(soc,1)+" g/kg. Probabilidades são condicionais às culturas com janela ZARC municipal standalone nos 365 dias seguintes; o plantio escolhido aguarda sua próxima janela. Células âmbar têm pouco suporte PAM; destinos sem janela aparecem em 0% e continuam identificáveis no grafo.";
+  byId("crop-matrix-note").textContent="Matriz completa: "+states.length+" estados de cultura. A evidência é a massa fracionária de transições construída com as participações de área PAM do top 5 em anos consecutivos, sob independência assumida; o número rank 1 fica separado como diagnóstico. Contexto: decisão no "+decendioName(plantingDecendio)+" · água "+waterLabels[waterId].toLowerCase()+" · carbono "+fmt(soc,1)+" g/kg. As probabilidades são condicionais a uma janela MAPA ou à hipótese explicitamente marcada de calendário para cobertura sem dado. Células âmbar têm suporte efetivo baixo; destinos sem calendário aplicável aparecem em 0%.";
   renderCropGraph(waterId,soc,latestRun?.nodeCountsByYear||{},latestRun?.edgeCountsByYear||{},latestRun?.completed||0);
   renderCoverChain(latestRun?.coverNodeCountsByYear||{},latestRun?.coverEdgeCountsByYear||{},latestRun?.completed||0);
 }
@@ -729,11 +746,11 @@ function sampleTrajectory(startCrop,rng,environmentYears){
       if(!allowed.size){pendingPlanting=nextPlantingOpportunity(lastMainCrop,decisionDay+1);}
       else{
         if(!posteriorRows[lastMainCrop])posteriorRows[lastMainCrop]=sampleCropRow(lastMainCrop,rng);
-        const probabilities=cropProbabilities(lastMainCrop,water,soc,posteriorRows[lastMainCrop],allowed),next=drawProbability(probabilities,rng),transitionProbability=probabilities[next],previous=lastMainCrop,sowOpportunity=nextZarcPlantingForCrop(next,decisionDay);
+        const probabilities=cropProbabilities(lastMainCrop,water,soc,posteriorRows[lastMainCrop],allowed),next=drawProbability(probabilities,rng),transitionProbability=probabilities[next],previous=lastMainCrop,sowOpportunity=nextCropPlantingWindow(next,decisionDay);
         if(!sowOpportunity){pendingPlanting=nextPlantingOpportunity(lastMainCrop,decisionDay+1);}
         else{
           const newStreak=next===previous?consecutivePlantings+1:1;
-          path.push({day:decisionDay,year:Math.min(horizon,Math.ceil(decisionDay/daysPerYear)),crop:next,fromCrop:previous,water,soc,transitionProbability,eventKind:"main_transition",plantingDecendio:sowOpportunity.decendio,scheduledPlantingDay:sowOpportunity.day,decisionDecendio,plantingRule:"ZARC 2026/2027; risco 20/30/40; união municipal de estratos",consecutivePlantings:newStreak,repeatYieldMultiplier:repeatedCropYieldMultiplier(next,newStreak),climateYear:historyBlocks[yearIndex][0]});
+          path.push({day:decisionDay,year:Math.min(horizon,Math.ceil(decisionDay/daysPerYear)),crop:next,fromCrop:previous,water,soc,transitionProbability,eventKind:"main_transition",plantingDecendio:sowOpportunity.decendio,scheduledPlantingDay:sowOpportunity.day,decisionDecendio,plantingRule:cropCalendarBasisLabel(next),consecutivePlantings:newStreak,repeatYieldMultiplier:repeatedCropYieldMultiplier(next,newStreak),climateYear:historyBlocks[yearIndex][0]});
           lastMainCrop=next;pendingPlanting=null;
           if(sowOpportunity.day>decisionDay)path.push({day:decisionDay,year:Math.min(horizon,Math.ceil(decisionDay/daysPerYear)),crop:"fallow",fromCrop:previous,toCrop:next,water,soc,eventKind:"fallow_until_planting",nextPlantingDay:sowOpportunity.day,nextPlantingDecendio:sowOpportunity.decendio,climateYear:historyBlocks[yearIndex][0]});
           pendingPlanting={cropId:next,fromCrop:previous,day:sowOpportunity.day,decendio:sowOpportunity.decendio,consecutivePlantings:newStreak,repeatYieldMultiplier:repeatedCropYieldMultiplier(next,newStreak)};
@@ -832,17 +849,17 @@ function trajectoryTimeline(path,inputs){
     }else if(step.eventKind==="main_transition"){
       const transition=step.transitionReason?cropLabel(step.crop)+" permanece (perene)":step.fromCrop===step.crop?"Markov mantém "+cropLabel(step.crop):"Markov seleciona "+cropLabel(step.fromCrop)+" → "+cropLabel(step.crop),parts=[transition,"P Markov "+pct(step.transitionProbability)];
       if(step.decisionDecendio)parts.push("decisão na "+decendioName(step.decisionDecendio));
-      if(step.scheduledPlantingDay!==undefined)parts.push("plantio previsto: mês "+fmt(step.scheduledPlantingDay/30.4375,1)+" · "+decendioName(step.plantingDecendio));
+      if(step.scheduledPlantingDay!==undefined)parts.push("plantio previsto: mês "+fmt(step.scheduledPlantingDay/30.4375,1)+" · "+decendioName(step.plantingDecendio));if(step.plantingRule)parts.push("calendário: "+step.plantingRule);
       if(!step.transitionReason){const multiplier=Number(step.repeatYieldMultiplier??1);parts.push("ciclo consecutivo "+Number(step.consecutivePlantings||1)+(multiplier<1?" · rendimento ×"+fmt(multiplier,2):""));}
       parts.push("água "+water.toLowerCase(),"solo "+soil);
       description="Mês "+month+" — "+parts.join(" · ");
     }else if(step.eventKind==="planting"){
-      description="Mês "+month+" — plantio de "+cropLabel(step.crop)+" na "+decendioName(step.plantingDecendio)+" · cultura principal única · ciclo consecutivo "+Number(step.consecutivePlantings||1)+" · água "+water.toLowerCase()+", solo "+soil+".";
+      description="Mês "+month+" — plantio de "+cropLabel(step.crop)+" na "+decendioName(step.plantingDecendio)+" · calendário: "+cropCalendarBasisLabel(step.crop)+" · cultura principal única · ciclo consecutivo "+Number(step.consecutivePlantings||1)+" · água "+water.toLowerCase()+", solo "+soil+".";
     }else if(step.eventKind==="fallow_start"){
-      const wait=step.nextDecisionDay===null?"sem janela ZARC standalone disponível nos dados municipais":decendioName(step.nextDecisionDecendio)+" · espera estimada "+fmt(step.nextDecisionDay-step.day,0)+" dias";
+      const wait=step.nextDecisionDay===null?"sem janela MAPA standalone nem fallback de rotação aplicável":decendioName(step.nextDecisionDecendio)+" · espera estimada "+fmt(step.nextDecisionDay-step.day,0)+" dias";
       description="Mês "+month+" — pousio após colheita de "+cropLabel(step.fromCrop)+" até a próxima oportunidade de decisão Markov ("+wait+"); água "+water.toLowerCase()+", solo "+soil+".";
     }else if(step.eventKind==="fallow_until_planting"){
-      description="Mês "+month+" — pousio aguardando janela ZARC para "+cropLabel(step.toCrop)+"; plantio previsto no mês "+fmt(step.nextPlantingDay/30.4375,1)+" · "+decendioName(step.nextPlantingDecendio)+" · espera "+fmt(step.nextPlantingDay-step.day,0)+" dias.";
+      description="Mês "+month+" — pousio aguardando calendário aplicável para "+cropLabel(step.toCrop)+"; plantio previsto no mês "+fmt(step.nextPlantingDay/30.4375,1)+" · "+decendioName(step.nextPlantingDecendio)+" · espera "+fmt(step.nextPlantingDay-step.day,0)+" dias.";
     }else if(step.eventKind==="formation_cost"){
       description="Mês "+month+" — formação de "+cropLabel(step.flowCrop)+": "+brl(economicCashflow(step,inputs))+"/ha por "+fmt(Number(step.cycleDays||0),0)+" dias; sem receita antes da maturação. Água "+water.toLowerCase()+", solo "+soil+".";
     }else if(step.eventKind==="cover_transition"){
@@ -867,8 +884,10 @@ function trajectoryDetails(path,inputs,representativeVpl=null,open=true,lazy=fal
 function renderCycleAssumptions(){
   const calendar=cropCycles.time_basis.planting_calendar,effect=cropCycles.repeated_crop_effect;
   const soybean=effect.crop_specific?.soybean||effect,maize=effect.crop_specific?.maize_grain||effect;
-  byId("cycle-assumptions-detail").textContent="Calendário do modelo (60 meses; 365 dias/ano): cultura inicial estabelecida, sem atraso de implantação; novas culturas aguardam maturação. Ciclos/maturação por cultura: "+Object.entries(cropCycles.crops).map(([id,item])=>cropLabel(id)+" "+item.cycle_days+"/"+item.maturation_days+" dias ["+item.support+": "+item.basis+"]").join(" · ")+". As durações operacionais são arredondadas para cima até o próximo passo quinzenal ambiental. Janelas de plantio: MAPA SISZARC "+(active.zarc_planting_windows?.source?.current_season||"safra disponível")+", calendário municipal repetido nos cinco anos; aceita risco "+calendar.risk_levels_included_percent.join("/")+"%, união de grupos de cultivar e classes ZARC porque o app não seleciona esses estratos. Rótulos de consórcio são excluídos da cadeia de cultura principal. Após colheita anual, a decisão Markov ocorre na próxima oportunidade municipal; destinos com janela standalone nos 365 dias seguintes são elegíveis e o plantio aguarda a própria janela ZARC; durante a espera há pousio. Sem janela standalone no perfil, o destino não é elegível. A cultura inicial é considerada estabelecida e pode produzir uma primeira colheita mesmo sem janela de plantio disponível. Café e cana preservam sua identidade perene. Embrapa situa o retorno financeiro do café no 3º/4º ano; o modelo usa 36 meses até receita comercial significativa. Na troca para uma perene, o custo anual proxy começa no plantio e se repete por ano de formação; o período final é proporcional à maturação restante. Penalidade por replantio: soja "+fmt(100*Number(soybean.yield_penalty_per_consecutive_replant_fraction),0)+" pp por repetição, teto "+fmt(100*Number(soybean.maximum_yield_penalty_fraction),0)+"%; milho "+fmt(100*Number(maize.yield_penalty_per_consecutive_replant_fraction),1)+" pp, teto "+fmt(100*Number(maize.maximum_yield_penalty_fraction),1)+"%. Outras anuais/coberturas usam a hipótese genérica "+fmt(100*Number(effect.yield_penalty_per_consecutive_replant_fraction),0)+" pp, teto "+fmt(100*Number(effect.maximum_yield_penalty_fraction),0)+"%. Todas são hipóteses de sensibilidade; o custo não muda.";
+  byId("cycle-assumptions-detail").textContent="Calendário do modelo (60 meses; 365 dias/ano): cultura inicial estabelecida, sem atraso de implantação; novas culturas aguardam maturação. Ciclos/maturação por cultura: "+Object.entries(cropCycles.crops).map(([id,item])=>cropLabel(id)+" "+item.cycle_days+"/"+item.maturation_days+" dias ["+item.support+": "+item.basis+"]").join(" · ")+". As durações operacionais são arredondadas para cima até o próximo passo quinzenal ambiental. Janelas de plantio: MAPA SISZARC "+(active.zarc_planting_windows?.source?.current_season||"safra disponível")+", calendário municipal repetido nos cinco anos; aceita risco "+calendar.risk_levels_included_percent.join("/")+"%, união de grupos de cultivar e classes ZARC porque o app não seleciona esses estratos. Rótulos de consórcio são excluídos da cadeia de cultura principal. Após colheita anual, a decisão Markov ocorre na próxima oportunidade municipal; destinos com janela standalone nos 365 dias seguintes são elegíveis e o plantio aguarda o calendário MAPA ou hipótese de cobertura aplicável; durante a espera há pousio. Sem calendário MAPA standalone, o destino só fica elegível quando pertence à lista de coberturas com fallback e não existe linha oficial para ele; uma linha oficial sem risco não é substituída. A cultura inicial é considerada estabelecida e pode produzir uma primeira colheita mesmo sem janela de plantio disponível. Café e cana preservam sua identidade perene. Embrapa situa o retorno financeiro do café no 3º/4º ano; o modelo usa 36 meses até receita comercial significativa. Na troca para uma perene, o custo anual proxy começa no plantio e se repete por ano de formação; o período final é proporcional à maturação restante. Penalidade por replantio: soja "+fmt(100*Number(soybean.yield_penalty_per_consecutive_replant_fraction),0)+" pp por repetição, teto "+fmt(100*Number(soybean.maximum_yield_penalty_fraction),0)+"%; milho "+fmt(100*Number(maize.yield_penalty_per_consecutive_replant_fraction),1)+" pp, teto "+fmt(100*Number(maize.maximum_yield_penalty_fraction),1)+"%. Outras anuais/coberturas usam a hipótese genérica "+fmt(100*Number(effect.yield_penalty_per_consecutive_replant_fraction),0)+" pp, teto "+fmt(100*Number(effect.maximum_yield_penalty_fraction),0)+"%. Todas são hipóteses de sensibilidade; o custo não muda.";
   byId("repeat-effect-status").textContent="Soja: "+fmt(100*Number(soybean.yield_penalty_per_consecutive_replant_fraction),0)+" pp por replantio, teto "+fmt(100*Number(soybean.maximum_yield_penalty_fraction),0)+"%. Milho: "+fmt(100*Number(maize.yield_penalty_per_consecutive_replant_fraction),1)+" pp, teto "+fmt(100*Number(maize.maximum_yield_penalty_fraction),1)+"%. Baseado em estudos de outras regiões e em ensaios brasileiros limitados; não calibrado para estes municípios. Afeta o rendimento bruto e o VPL, não custos nem probabilidades Markov. O modelo não simula pragas/doenças nem pressão entre culturas da mesma família.";
+  const fallback=cropCycles.rotation_calendar_fallback||{},fallbackNames=(fallback.crop_ids||[]).map(cropLabel).join(", ");
+  byId("cycle-assumptions-detail").textContent+=" Fallback de calendário: "+fallbackNames+" podem usar qualquer um dos 36 decêndios somente quando o perfil não tem linha MAPA standalone. É uma hipótese de disponibilidade para coberturas de rotação, não recomendação agronômica; uma janela oficial sempre prevalece e uma linha oficial sem decêndio de risco não recebe fallback.";
 }
 function renderEconomicInputs(){
   const table=byId("economic-input-table"),head=document.createElement("thead"),header=document.createElement("tr"),body=document.createElement("tbody");
@@ -952,9 +971,9 @@ function renderEconomicOptimization(start,rotationSamples){
   const states=cropStates(),inputs=active.economics.crop_inputs||{},selected=states.filter(crop=>Boolean(inputs[crop.id]?.include_in_vpl??inputs[crop.id]?.eligible_for_economic_comparison)),rReal=Number(economicData.discount_rate.real_annual_rate_approx);
   const yieldHypothesis=soilHypotheses.economic_yield_response,waterText=["water_low","water_medium","water_high"].map(id=>fmt(yieldHypothesis.water_multiplier_by_class[id],2)).join("/");
   const soilText=["low","medium","high"].map(id=>fmt(yieldHypothesis.soil_carbon_multiplier_by_class[id],2)).join("/");
-  byId("economic-method").textContent="Cada colheita gera fluxo na data do evento: rendimento × preço real projetado × resposta ambiental × fator de repetição consecutiva − custo. O VPL desconta cada fluxo pela data ("+pct(rReal)+" real ao ano), em R$ de "+economicData.reference_currency_month.slice(0,4)+"/"+economicData.reference_currency_month.slice(4)+". Cultura inicial começa estabelecida; uma cultura nova só gera receita após maturação e janela ZARC. Água multiplica rendimento por "+waterText+" e carbono por "+soilText+". O fator de repetição é hipótese editável; preço-base é mediana PAM real de 2017–2025 e Yahoo fica como referência separada. O ranking único mistura CVaR5 (resiliência) e P95 (retorno alto); frequência é suporte Monte Carlo, não multiplicador do VPL.";
+  byId("economic-method").textContent="Cada colheita gera fluxo na data do evento: rendimento × preço real projetado × resposta ambiental × fator de repetição consecutiva − custo. O VPL desconta cada fluxo pela data ("+pct(rReal)+" real ao ano), em R$ de "+economicData.reference_currency_month.slice(0,4)+"/"+economicData.reference_currency_month.slice(4)+". Cultura inicial começa estabelecida; uma cultura nova só gera receita após maturação e calendário aplicável. Água multiplica rendimento por "+waterText+" e carbono por "+soilText+". O fator de repetição é hipótese editável; preço-base é mediana PAM real de 2017–2025 e Yahoo fica como referência separada. O ranking único mistura CVaR5 (resiliência) e P95 (retorno alto); frequência é suporte Monte Carlo, não multiplicador do VPL.";
   const excluded=states.filter(crop=>!selected.includes(crop)).map(crop=>crop.name);
-  byId("economic-coverage-note").textContent="O grafo mantém os "+states.length+" estados. "+selected.length+" culturas estão marcadas para comparação econômica; outras ficam fora do VPL até preencher/ativar premissas, e só são destinos Markov se houver janela ZARC standalone no perfil. Coberturas sem colheita comercial começam com receita zero e custo proxy editável."+(excluded.length?" Fora do ranking: "+excluded.join(", ")+".":"");
+  byId("economic-coverage-note").textContent="O grafo mantém os "+states.length+" estados. "+selected.length+" culturas estão marcadas para comparação econômica; outras ficam fora do VPL até preencher/ativar premissas, e só são destinos Markov se houver janela MAPA standalone ou hipótese explicitamente marcada para cobertura sem dado. Coberturas sem colheita comercial começam com receita zero e custo proxy editável."+(excluded.length?" Fora do ranking: "+excluded.join(", ")+".":"");
   renderEconomicInputs();
   const routeResults=[];
   for(const [key,sample] of rotationSamples.entries()){
@@ -1036,7 +1055,7 @@ async function renderSimulation(seed){
   const sortedCrops=[...cropStates()].sort((a,b)=>(cropCounts[b.id]||0)-(cropCounts[a.id]||0));
   for(const crop of sortedCrops)appendSimRow(cropRoot,crop.name,cropCounts[crop.id]||0,trajectories);
   if(cropCounts.fallow)appendSimRow(cropRoot,"Pousio no fim do horizonte",cropCounts.fallow,trajectories,{water_low:"#bd7956"});
-  cropRoot.append(el("p","Partida: "+cropLabel(start)+" · cada colheita anual é seguida pela próxima janela ZARC municipal; dias sem janela são simulados como pousio.","status"));
+  cropRoot.append(el("p","Partida: "+cropLabel(start)+" · cada colheita anual é seguida pela próxima oportunidade de decisão; destinos respeitam o calendário MAPA ou a hipótese marcada de cobertura, e os intervalos são pousio.","status"));
 
   envRoot.replaceChildren();
   for(const state of profile.water_markov.states)appendSimRow(envRoot,"Água "+state.label.toLowerCase(),waterCounts[state.id]||0,trajectories,{water_low:"#bd7956",water_medium:"#c6a54b",water_high:"#67966c"}[state.id]);
@@ -1060,27 +1079,28 @@ async function renderSimulation(seed){
     tr.append(el("td",dest.name),el("td",pct(before[dest.id])),el("td",pct(after[dest.id])),el("td",(delta>0?"+":"")+fmt(100*delta,1)+" pp",delta>0?"delta-up":delta<0?"delta-down":""));body.append(tr);
   }
   table.append(body);changes.append(table);
-  byId("probability-context").textContent="Linha da cultura inicial "+cropLabel(start)+" condicionada ao decêndio ZARC "+decendioName(decendioForDay(selectedGraphPlantingDay()))+" · início: água média e SoilGrids "+fmt(startSoc,1)+" g/kg · ambiente final mediano: água "+waterLabels[finalWater].toLowerCase()+" e "+fmt(socMedian,1)+" g/kg. A comparação mantém PAM + prior entre destinos permitidos; cada trajetória sorteia sua própria linha Dirichlet.";
+  byId("probability-context").textContent="Linha da cultura inicial "+cropLabel(start)+" condicionada ao contexto de plantio no decêndio "+decendioName(decendioForDay(selectedGraphPlantingDay()))+" · início: água média e SoilGrids "+fmt(startSoc,1)+" g/kg · ambiente final mediano: água "+waterLabels[finalWater].toLowerCase()+" e "+fmt(socMedian,1)+" g/kg. A comparação mantém PAM + prior entre destinos permitidos; cada trajetória sorteia sua própria linha Dirichlet.";
 
   pathRoot.replaceChildren();
   for(let index=0;index<paths.length;index++){
     const path=paths[index],line=el("div",undefined,"sample-path");line.append(el("strong","Trajetória completa "+(index+1)+" · ciclo de 60 meses"),trajectoryTimeline(path,active.economics.crop_inputs));pathRoot.append(line);
   }
   renderEconomicOptimization(start,rotationSamples);
-  progress.value=trajectories;progressText.textContent=trajectories.toLocaleString("pt-BR")+" / "+trajectories.toLocaleString("pt-BR")+" · concluído";status.textContent="Simulação concluída · "+trajectories.toLocaleString("pt-BR")+" trajetórias · "+horizonMonths+" meses · colheitas seguem ciclos editáveis; novos plantios usam janelas ZARC; o pousio espera a próxima janela. Rendimento de anuais repetidas recebe a hipótese editável indicada acima.";
+  progress.value=trajectories;progressText.textContent=trajectories.toLocaleString("pt-BR")+" / "+trajectories.toLocaleString("pt-BR")+" · concluído";status.textContent="Simulação concluída · "+trajectories.toLocaleString("pt-BR")+" trajetórias · "+horizonMonths+" meses · colheitas seguem ciclos editáveis; novos plantios respeitam calendário MAPA ou hipótese marcada; o pousio espera a próxima janela aplicável. Rendimento de anuais repetidas recebe a hipótese editável indicada acima.";
 }
 
 function renderProfile(){
   const profileRenderId=++simulationRunId;active=profiles[byId("case-select").value];latestRun=null;
   byId("soil-baseline").textContent=fmt(active.soil.organic_carbon_top_0_30_g_kg,1)+" g/kg";
   byId("soil-scope").textContent="SoilGrids · "+active.soil.scope+" · "+active.soil.sample_point_basis;
-  byId("crop-period").textContent=active.crop_markov.annual_observation_count+" anos municipais · "+active.crop_markov.period[0]+"–"+active.crop_markov.period[1]+" · "+active.crop_markov.adjacent_year_transition_count+" pares consecutivos · "+active.crop_markov.states.length+" estados de cultura.";
-  byId("crop-data-note").textContent="Uma cultura principal por talhão. Soja, milho, cana e café podem iniciar; as demais são destinos Markov somente quando há janela municipal ZARC standalone elegível. As contagens PAM são de cultura dominante municipal, não trocas observadas no mesmo talhão. Datas são decêndios do calendário 2026/2027 repetidos nos cinco anos; classes de solo e grupos de cultivar são agregados.";
+  byId("crop-period").textContent=active.crop_markov.annual_observation_count+" anos municipais · "+active.crop_markov.period[0]+"–"+active.crop_markov.period[1]+" · "+active.crop_markov.adjacent_year_transition_count+" pares consecutivos · top "+active.crop_markov.top_crop_limit+" por área · "+active.crop_markov.states.length+" estados de cultura.";
+  byId("crop-data-note").textContent="Uma cultura principal por talhão. Soja, milho, cana e café podem iniciar; as demais são destinos quando há janela municipal MAPA ou uma hipótese explicitamente marcada para cobertura sem dado. A cadeia considera a distribuição PAM do top 5 por área e forma transições marginais entre anos com independência assumida; a PAM não liga culturas ao mesmo talhão. A série rank 1 aparece como diagnóstico separado. Datas são decêndios das tábuas anual 2026/2027 e perene vigente repetidas nos cinco anos; classes de solo e grupos de cultivar são agregados."+beanCalendarAuditNote();
   const lifecycle=active.crop_markov.lifecycle_rules||{},coffeeRule=lifecycle.coffee,cover=coffeeRule?.associated_management,lifecycleNote=byId("crop-lifecycle-note");
   lifecycleNote.replaceChildren();
   lifecycleNote.append(el("strong","Perenes e maturação."),document.createTextNode(" Café e cana permanecem como cultura principal durante o horizonte por falta de idade/reforma. A cultura inicial é tratada como estabelecida; ao entrar numa cultura nova, a receita espera o ciclo ou a maturação correspondente e custos de formação são cobrados."));
   if(cover){lifecycleNote.append(document.createTextNode(" No café, a subcadeia de cobertura permite café + milheto, braquiária, nabo forrageiro, crotalária ou mucuna; o cafezal não é removido. Como não há contagem local de transições entre coberturas, todas partem de prior uniforme explícita e são identificadas como hipótese."));for(const [index,url] of cover.source_urls.entries()){const link=el("a",index===0?"Embrapa — prática nas entrelinhas":"Embrapa — relação solo/água");link.href=url;link.target="_blank";link.rel="noreferrer";lifecycleNote.append(document.createTextNode(" "),link,index===0?document.createTextNode(" · "):document.createTextNode("."));}}
-  byId("crop-source-detail").textContent="Fonte: "+active.crop_markov.source.publisher+" · "+active.crop_markov.source.survey+", tabela "+active.crop_markov.source.table+" · município IBGE "+active.crop_markov.source.municipality_ibge_code+" · área colhida em hectares. Foram derivados "+active.crop_markov.annual_observation_count+" estados anuais de maior área entre produtos do catálogo e "+active.crop_markov.adjacent_year_transition_count+" transições entre anos consecutivos.";
+  const rankOnePairs=active.crop_markov.transitions.reduce((sum,row)=>sum+Number(row.count||0),0);
+  byId("crop-source-detail").textContent="Fonte: "+active.crop_markov.source.publisher+" · "+active.crop_markov.source.survey+", tabela "+active.crop_markov.source.table+" · município IBGE "+active.crop_markov.source.municipality_ibge_code+" · área colhida em hectares. Para cada ano, o top "+active.crop_markov.top_crop_limit+" entre as culturas mapeadas é normalizado pela área do próprio top 5. Os "+active.crop_markov.area_weighted_transition_pair_count+" pares anuais geram massa esperada pela multiplicação das participações t × t+1; "+rankOnePairs+" pares da sequência rank 1 são informados separadamente, sem dupla contagem na probabilidade.";
   byId("mapbiomas-note").textContent="O relatório de pesquisa cita sequências e seis tabelas MapBiomas, mas esses arquivos não estão neste checkout. Os assets oficiais de uso agrícola e carbono do solo são publicados pelo MapBiomas; não foram usados para preencher contagens ausentes nesta página. Assim, a cadeia fica baseada na PAM e identifica sua escala municipal.";
   byId("water-period").textContent="Estados hídricos por quinzena · treino "+active.water_markov.years[0]+"–"+active.water_markov.years[1]+" · balanço de referência Kc=1.";
   byId("water-provenance").textContent=active.water_markov.provenance+" Cada bloco climático é sorteado para um ano do horizonte; a classe de água evolui a cada quinzena e condiciona as transições ao fim dos ciclos.";

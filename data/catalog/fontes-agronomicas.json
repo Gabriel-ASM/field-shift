@@ -1,16 +1,20 @@
 {
   "scope": "Fontes agronômicas públicas usadas para contextualizar e restringir as simulações de água nos perfis de exemplo; não são observações de talhão.",
-  "profiles": ["ariquemes-ro", "franca-sp", "varginha-mg"],
+  "profiles": [
+    "ariquemes-ro",
+    "franca-sp",
+    "varginha-mg"
+  ],
   "sources": [
     {
       "name": "ZARC / SISZARC — MAPA",
       "url": "https://sistemasweb.agricultura.gov.br/siszarc/base.action",
       "open_dataset": "https://dados.agricultura.gov.br/dataset/tabua-de-risco-zoneamento-agricola-de-risco-climatico",
-      "download": "relatórios SISZARC XLS filtrados por safra, cultura e UF",
-      "period": "safra 2026/2027",
-      "content": "Cultura oficial, município, grupo de cultivar, código de solo, portaria e 36 decêndios com risco 0/20/30/40.",
-      "status": "baixado e normalizado para culturas consultadas por UF; linhas reduzidas ao município em data/profiles/*/zarc-planting-windows.json",
-      "role": "filtro de elegibilidade e janela de plantio; não gera contagens de transição"
+      "download": "tábuas abertas nacionais em CSV: anual 2026/2027 e perene/olerícola/sem safra; preservadas em data/raw/mapa-siszarc/*municipal-extract.csv após filtro apenas pelos três geocódigos IBGE; relatórios XLS de consultas exploratórias também são preservados",
+      "period": "safra anual 2026/2027 e recurso vigente perene/olerícola/sem safra no momento da coleta",
+      "content": "Linhas municipais oficiais, cultura, safra, grupo/código de ciclo, código oficial de solo, portaria, sistema/clima e 36 decêndios de risco; extração nacional filtrada por município sem alterar as linhas.",
+      "status": "tábuas abertas baixadas e normalizadas para Ariquemes-RO, Franca-SP e Varginha-MG em data/profiles/*/zarc-planting-windows.json; prioriza linha standalone MAPA e preserva estrato/códigos. Feijão tem calendário oficial nos três municípios.",
+      "role": "filtro de elegibilidade e janela de plantio; não gera contagens de transição. Para coberturas de rotação listadas, hipótese de qualquer decêndio só se não houver linha standalone MAPA no município; nunca substitui linha oficial."
     },
     {
       "name": "Produção Agrícola Municipal (PAM) / IBGE SIDRA",
@@ -31,7 +35,10 @@
     {
       "name": "Yahoo Finance — CBOT futures",
       "url": "https://finance.yahoo.com/markets/commodities/",
-      "contracts": ["ZSK27.CBT", "ZCK27.CBT"],
+      "contracts": [
+        "ZSK27.CBT",
+        "ZCK27.CBT"
+      ],
       "period": "fechamento de 2026-11-13; vencimentos maio/2027",
       "content": "Fechamento diário de soja e milho, convertido de centavos de dólar/bushel para BRL/tonelada.",
       "status": "snapshot histórico preservado em data/raw/yahoo-finance/ e normalizado em data/reference/yahoo-harvest-futures.json",

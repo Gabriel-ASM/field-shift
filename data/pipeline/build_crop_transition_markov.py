@@ -1,4 +1,4 @@
-"""Derive an explicit single-crop Markov chain from municipal PAM histories."""
+"""Derive a top-five area-weighted crop Markov proxy from municipal PAM histories."""
 
 from __future__ import annotations
 
@@ -64,7 +64,7 @@ def annual_effective_kc(crop: dict) -> tuple[float | None, str]:
     return annual_demand, "derived from FAO-56 phase Kc/duration; off-crop reference Kc=1"
 
 
-def build_profile(profile_dir: Path, crop_water_parameters: dict, alpha_per_destination: float, lifecycle_rules: dict) -> dict:
+def build_profile(profile_dir: Path, crop_water_parameters: dict, alpha_per_destination: float, lifecycle_rules: dict, top_crop_limit: int = 5) -> dict:
     pam = read_json(profile_dir / "pam-history.json")
     manifest_path = profile_dir / "manifest.json"
     manifest = read_json(manifest_path)
@@ -102,42 +102,74 @@ def build_profile(profile_dir: Path, crop_water_parameters: dict, alpha_per_dest
 
     annual = []
     for year, areas in sorted(areas_by_year.items()):
-        dominant = max(areas, key=lambda state_id: (areas[state_id], state_id))
+        ranked = sorted(areas, key=lambda state_id: (-areas[state_id], state_id))[:top_crop_limit]
+        top_area = sum(areas[state_id] for state_id in ranked)
+        ranked_crops = [
+            {
+                "rank": index + 1,
+                "state_id": state_id,
+                "crop_name": names[state_id],
+                "harvested_area_ha": areas[state_id],
+                "area_share_within_top5": areas[state_id] / top_area,
+            }
+            for index, state_id in enumerate(ranked)
+        ]
+        dominant = ranked_crops[0]
         annual.append({
             "year": year,
-            "state_id": dominant,
-            "crop_name": names[dominant],
-            "harvested_area_ha": areas[dominant],
+            "state_id": dominant["state_id"],
+            "crop_name": dominant["crop_name"],
+            "harvested_area_ha": dominant["harvested_area_ha"],
+            "top5_area_total_ha": top_area,
+            "top5_crops": ranked_crops,
             "reported_crop_areas_ha": areas,
         })
 
-    edge_counts: dict[tuple[str, str], int] = {}
-    edge_year_pairs: dict[tuple[str, str], list[list[int]]] = {}
-    outgoing: dict[str, int] = {}
+    dominant_edge_counts: dict[tuple[str, str], int] = {}
+    dominant_edge_year_pairs: dict[tuple[str, str], list[list[int]]] = {}
+    dominant_outgoing: dict[str, int] = {}
+    area_weighted_edge_mass: dict[tuple[str, str], float] = {}
+    area_weighted_outgoing: dict[str, float] = {}
+    adjacent_year_pairs = 0
     for current, following in zip(annual, annual[1:]):
         if int(following["year"]) != int(current["year"]) + 1:
             continue
+        adjacent_year_pairs += 1
         key = (current["state_id"], following["state_id"])
-        edge_counts[key] = edge_counts.get(key, 0) + 1
-        edge_year_pairs.setdefault(key, []).append([current["year"], following["year"]])
-        outgoing[current["state_id"]] = outgoing.get(current["state_id"], 0) + 1
+        dominant_edge_counts[key] = dominant_edge_counts.get(key, 0) + 1
+        dominant_edge_year_pairs.setdefault(key, []).append([current["year"], following["year"]])
+        dominant_outgoing[current["state_id"]] = dominant_outgoing.get(current["state_id"], 0) + 1
+
+        # PAM has municipal crop areas, not field-linked pairs. The outer product
+        # is the maximum-entropy joint distribution consistent with each year's
+        # top-five area shares; it is expected transition mass, not an observed
+        # field rotation.
+        source_shares = {item["state_id"]: item["area_share_within_top5"] for item in current["top5_crops"]}
+        destination_shares = {item["state_id"]: item["area_share_within_top5"] for item in following["top5_crops"]}
+        for source, source_share in source_shares.items():
+            area_weighted_outgoing[source] = area_weighted_outgoing.get(source, 0.0) + source_share
+            for destination, destination_share in destination_shares.items():
+                pair = (source, destination)
+                area_weighted_edge_mass[pair] = area_weighted_edge_mass.get(pair, 0.0) + source_share * destination_share
 
     transitions = [
         {
             "from_state": source,
             "to_state": destination,
-            "count": count,
-            "outgoing_count": outgoing[source],
-            "observed_year_pairs": edge_year_pairs[(source, destination)],
+            "count": dominant_edge_counts.get((source, destination), 0),
+            "outgoing_count": dominant_outgoing.get(source, 0),
+            "observed_year_pairs": dominant_edge_year_pairs.get((source, destination), []),
+            "area_weighted_count": round(area_weighted_edge_mass.get((source, destination), 0.0), 12),
+            "area_weighted_outgoing_count": round(area_weighted_outgoing.get(source, 0.0), 12),
         }
-        for (source, destination), count in sorted(edge_counts.items())
+        for source, destination in sorted(set(dominant_edge_counts) | set(area_weighted_edge_mass))
     ]
     observed_years = [item["year"] for item in annual]
     profile = manifest["location"]
     payload = {
-        "schema_version": "1.1.0",
-        "model": "municipal_catalog_dominant_crop_markov_proxy",
-        "unit_of_analysis": "município-ano; uma cultura de maior área entre os produtos do catálogo, não o mesmo talhão",
+        "schema_version": "1.2.0",
+        "model": "municipal_top5_area_weighted_markov_proxy",
+        "unit_of_analysis": "distribuições anuais de área PAM no município; transições marginais entre anos, não o mesmo talhão",
         "source": {
             "publisher": pam["source"]["publisher"],
             "survey": pam["source"]["survey"],
@@ -147,23 +179,28 @@ def build_profile(profile_dir: Path, crop_water_parameters: dict, alpha_per_dest
             "municipality": profile["municipality"],
             "period": [min(observed_years), max(observed_years)] if observed_years else [],
         },
-        "state_definition": "A cultura do catálogo com maior área colhida PAM no município-ano; produtos fora do catálogo não competem pelo estado dominante. Café arábica e canephora são agregados no estado Café.",
-        "probability_definition": "Transições PAM + prior Dirichlet uniforme e fatores ambientais por trajetória; regras de ciclo impedem trocas anuais para culturas perenes/semiperenes sem idade ou reforma observadas.",
+        "state_definition": f"Distribuição das {top_crop_limit} culturas do catálogo com maior área colhida PAM no município-ano, ponderadas pela participação na área somada do top {top_crop_limit}. Produtos fora do catálogo não competem. Café arábica e canephora são agregados no estado Café.",
+        "probability_definition": "Massa de transição top-5 = participação de área da cultura de origem no ano t × participação da cultura de destino no ano t+1, somada nos pares anuais consecutivos; supõe independência entre talhões agregados e não é uma rotação observada. A cadeia usa essa massa fracionária + prior Dirichlet uniforme e fatores ambientais por trajetória; contagens do dominante rank 1 ficam separadas para auditoria.",
+        "transition_weighting_method": "max_entropy_outer_product_of_top5_area_shares",
+        "top_crop_limit": top_crop_limit,
+        "area_weighted_transition_pair_count": adjacent_year_pairs,
         "alpha_per_destination": alpha_per_destination,
         "period": [min(observed_years), max(observed_years)] if observed_years else [],
         "annual_observation_count": len(annual),
-        "adjacent_year_transition_count": sum(edge_counts.values()),
+        "adjacent_year_transition_count": adjacent_year_pairs,
         "states": states,
         "initial_crop_ids": [crop["id"] for crop in CATALOG if crop["initial"]],
         "lifecycle_rules": {crop_id: lifecycle_rules[crop_id] for crop_id in ("coffee", "sugarcane") if crop_id in lifecycle_rules},
         "transitions": transitions,
         "annual_sequence": annual,
         "limitations": [
-            "O estado é dominante apenas entre os produtos incluídos no catálogo; produtos PAM fora dele, como arroz, não competem pelo estado dominante.",
-            "A cultura de maior área entre os produtos do catálogo não identifica o cultivo ou a rotação do mesmo talhão.",
-            "A prior uniforme torna todas as culturas destinos possíveis; quando count=0, a probabilidade não é frequência observada.",
+            f"O top {top_crop_limit} é calculado apenas entre os produtos PAM mapeados ao catálogo; produtos fora dele, como arroz, não competem pelo ranking.",
+            "As participações anuais são área colhida municipal e não identificam talhões, sucessões ou consórcios individuais.",
+            "A massa de transição fracionária é o produto independente das participações top-5 em anos consecutivos; ela é uma aproximação de máxima entropia, não contagem observada de pares de lavouras.",
+            "As transições rank 1 são mantidas como auditoria, mas a cadeia probabilística usa a massa top-5 ponderada para não duplicar os mesmos pares anuais como evidência independente.",
+            "A prior uniforme torna todas as culturas elegíveis destinos possíveis; quando area_weighted_count=0, a probabilidade não é frequência observada.",
             "PAM não cobre todas as culturas de cobertura do catálogo; essas linhas dependem integralmente da prior.",
-            "A transição da cultura dominante municipal não é transição do mesmo talhão. Para café e cana, regras estruturais mantêm a cultura no horizonte enquanto faltam idade e histórico de reforma; cobertura de entrelinha é manejo associado, não destino Markov.",
+            "Para café e cana, regras estruturais mantêm a cultura no horizonte enquanto faltam idade e histórico de reforma; cobertura de entrelinha é manejo associado, não destino Markov.",
         ],
     }
     validate_contract("crop_transition_markov", payload, source=f"{profile_dir.name}/crop-transition-markov.json")
@@ -173,11 +210,11 @@ def build_profile(profile_dir: Path, crop_water_parameters: dict, alpha_per_dest
     manifest.setdefault("datasets", {})[output.name] = {
         "origem": "IBGE PAM/SIDRA tabela 5457; derivado de pam-history.json",
         "responsavel": "Field Shift derivação; build_crop_transition_markov.py",
-        "frequencia": "anual; uma cultura dominante por município-ano",
-        "unidade": f"transições da cultura de maior área entre produtos do catálogo em anos consecutivos; pseudocontagem alpha={alpha_per_destination:g} separada das observações",
+        "frequencia": f"anual; top {top_crop_limit} culturas por município-ano e pares consecutivos",
+        "unidade": f"massa de transição esperada fracionária, formada pelo produto das participações da área top-{top_crop_limit}; pares rank 1 inteiros mantidos como diagnóstico; prior alpha={alpha_per_destination:g} por destino elegível",
         "periodo": f"{payload['period'][0]}–{payload['period'][1]}" if payload["period"] else "sem dados",
         "resolucao": "município IBGE; não identifica pixel ou talhão",
-        "qualidade": "contagens empíricas PAM; a prior uniforme habilita destinos sem contagem e está marcada no payload",
+        "qualidade": "áreas colhidas PAM observadas; transições top-5 são pseudo-observações marginais com independência assumida; pares rank 1 são diagnósticos, não transições de talhão",
         "sha256": sha256(output.read_bytes()).hexdigest(),
         "contract_id": "crop_transition_markov",
     }

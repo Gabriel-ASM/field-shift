@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import csv
 from hashlib import sha256
 import re
 import unicodedata
@@ -51,19 +52,40 @@ def number(value: object) -> float | None:
 
 def crop_parameter_id(label: object) -> str | None:
     crop = norm(label)
+    if "feijao" in crop:
+        return "dry_bean"
     if "soja" in crop:
         return "soybean"
     if "amendoim" in crop:
         return "peanut"
     if "milho" in crop and "braquiaria" not in crop:
         return "maize_grain"
-    if "sorgo" in crop:
+    if "sorgo" in crop and "forrageiro" not in crop:
         return "sorghum_grain"
+    if "aveia" in crop:
+        return "oat"
+    if "milheto" in crop:
+        return "millet"
+    if "trigo" in crop:
+        return "wheat"
     if "cana" in crop:
         return "sugarcane"
     if "cafe" in crop:
         return "coffee_bare"
     return None
+
+
+def crop_parameter_mapping_support(label: object) -> str:
+    crop = norm(label)
+    if "feijao" in crop:
+        return "PAM aggregates feijao_em_grao; official ZARC variants are grouped in dry_bean"
+    if "aveia" in crop:
+        return "proxy: generic MAPA Aveia calendar is mapped to the modeled Aveia-preta rotation state"
+    if "sorgo" in crop and "forrageiro" in crop:
+        return "not mapped: forage sorghum is not the modeled grain sorghum state"
+    if "milho" in crop and "braquiaria" in crop:
+        return "not mapped: consortium is not a single-crop field state"
+    return "official crop label mapped to the closest catalog state" if crop_parameter_id(label) else "official crop not represented in the 14-state catalog"
 
 
 def load_pam() -> tuple[dict[str, dict[str, dict[str, object]]], dict[str, object]]:
@@ -147,53 +169,98 @@ def load_pam() -> tuple[dict[str, dict[str, dict[str, object]]], dict[str, objec
 
 def read_zarc() -> dict[str, list[dict[str, object]]]:
     result: dict[str, list[dict[str, object]]] = {key: [] for key in PROFILE_CITIES}
-    files = sorted(path for path in RAW_ZARC.rglob("*.xls") if path.is_file())
-    for path in files:
-        try:
-            sheet = xlrd.open_workbook(path, on_demand=True).sheet_by_index(0)
-        except Exception as exc:
-            raise RuntimeError(f"Cannot parse SISZARC XLS {path}: {exc}") from exc
-        header_row = next(
-            (index for index in range(min(sheet.nrows, 30))
-             if any(norm(cell).startswith("safra") for cell in sheet.row_values(index))),
-            None,
-        )
-        if header_row is None:
-            continue
-        header = sheet.row_values(header_row)
-        decendio_cols = [index for index, label in enumerate(header) if re.fullmatch(r"(?:dec|dev)\s*\d+", norm(label))]
-        if len(decendio_cols) != 36:
-            continue
-        for row_index in range(header_row + 1, sheet.nrows):
-            row = sheet.row_values(row_index)
-            if len(row) < max(decendio_cols) + 1:
+    extracts = sorted(RAW_ZARC.glob("zarc-*-municipal-extract.csv"))
+    if extracts:
+        profile_by_code = {code: profile_id for profile_id, (code, _, _) in PROFILE_CITIES.items()}
+        for path in extracts:
+            resource_kind = "perennial/olericulture/no-season" if "perennial" in path.name else "annual"
+            with path.open("r", encoding="utf-8-sig", newline="") as stream:
+                reader = csv.DictReader(stream, delimiter=";")
+                for raw in reader:
+                    row = {str(key).lstrip("\ufeff"): value for key, value in raw.items() if key is not None}
+                    profile_id = profile_by_code.get(str(row.get("geocodigo", "")).strip())
+                    if profile_id is None:
+                        continue
+                    label = str(row.get("Nome_cultura", "")).strip()
+                    risk_codes = [int(number(row.get(f"dec{index}")) or 0) for index in range(1, 37)]
+                    initial_year = str(row.get("SafraIni", "")).strip()
+                    final_year = str(row.get("SafraFin", "")).strip()
+                    season = f"{initial_year}/{final_year}" if initial_year and final_year else resource_kind
+                    ordinance = str(row.get("Portaria", "")).strip()
+                    date_match = re.search(r"(\d{2})[-/](\d{2})[-/](\d{4})", ordinance)
+                    result[profile_id].append({
+                        "season": season,
+                        "crop": label,
+                        "crop_parameter_id": crop_parameter_id(label),
+                        "crop_parameter_id_support": crop_parameter_mapping_support(label),
+                        "uf": str(row.get("UF", "")).strip().upper(),
+                        "portaria": ordinance,
+                        "portaria_date": f"{date_match.group(3)}-{date_match.group(2)}-{date_match.group(1)}" if date_match else None,
+                        "municipality": str(row.get("municipio", "")).strip(),
+                        "cultivar_group": f"Cod_Ciclo={str(row.get('Cod_Ciclo', '')).strip()}",
+                        "cultivar_group_code": str(row.get("Cod_Ciclo", "")).strip(),
+                        "zarc_soil_class": f"Cod_Solo={str(row.get('Cod_Solo', '')).strip()}",
+                        "zarc_soil_class_code": str(row.get("Cod_Solo", "")).strip(),
+                        "climate_code": str(row.get("Cod_Clima", "")).strip(),
+                        "climate_label": str(row.get("Nome_Clima", "")).strip(),
+                        "cultivation_system_code": str(row.get("Cod_Outros_Manejos", "")).strip(),
+                        "cultivation_system_label": str(row.get("Nome_Outros_Manejos", "")).strip(),
+                        "decendio_values": risk_codes,
+                        "planting_decendios_by_risk_percent": {
+                            str(risk): [index + 1 for index, value in enumerate(risk_codes) if value == risk]
+                            for risk in (20, 30, 40)
+                        },
+                        "source_file": path.relative_to(ROOT).as_posix(),
+                        "source": "MAPA open-data CSV; original row retained in municipal extract filtered by IBGE geocode",
+                    })
+    else:
+        files = sorted(path for path in RAW_ZARC.rglob("*.xls") if path.is_file())
+        for path in files:
+            try:
+                sheet = xlrd.open_workbook(path, on_demand=True).sheet_by_index(0)
+            except Exception as exc:
+                raise RuntimeError(f"Cannot parse SISZARC XLS {path}: {exc}") from exc
+            header_row = next(
+                (index for index in range(min(sheet.nrows, 30))
+                 if any(norm(cell).startswith("safra") for cell in sheet.row_values(index))),
+                None,
+            )
+            if header_row is None:
                 continue
-            uf = str(row[4]).strip().upper()
-            city = norm(row[7])
-            profile_id = next((key for key, (_, city_name, city_uf) in PROFILE_CITIES.items()
-                               if city == city_name and uf == city_uf), None)
-            if profile_id is None:
+            header = sheet.row_values(header_row)
+            decendio_cols = [index for index, label in enumerate(header) if re.fullmatch(r"(?:dec|dev)\s*\d+", norm(label))]
+            if len(decendio_cols) != 36:
                 continue
-            risk_codes = [int(number(row[index]) or 0) for index in decendio_cols]
-            source_file = path.relative_to(ROOT).as_posix()
-            result[profile_id].append({
-                "season": str(row[0]).strip(),
-                "crop": str(row[3]).strip(),
-                "crop_parameter_id": crop_parameter_id(row[3]),
-                "uf": uf,
-                "portaria": str(row[5]).strip(),
-                "portaria_date": str(row[6]).strip(),
-                "municipality": str(row[7]).strip(),
-                "cultivar_group": str(row[9]).strip(),
-                "zarc_soil_class": str(row[10]).strip(),
-                "decendio_values": risk_codes,
-                "planting_decendios_by_risk_percent": {
-                    str(risk): [i + 1 for i, value in enumerate(risk_codes) if value == risk]
-                    for risk in (20, 30, 40)
-                },
-                "source_file": source_file,
-                "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF",
-            })
+            for row_index in range(header_row + 1, sheet.nrows):
+                row = sheet.row_values(row_index)
+                if len(row) < max(decendio_cols) + 1:
+                    continue
+                uf = str(row[4]).strip().upper()
+                city = norm(row[7])
+                profile_id = next((key for key, (_, city_name, city_uf) in PROFILE_CITIES.items()
+                                   if city == city_name and uf == city_uf), None)
+                if profile_id is None:
+                    continue
+                risk_codes = [int(number(row[index]) or 0) for index in decendio_cols]
+                result[profile_id].append({
+                    "season": str(row[0]).strip(),
+                    "crop": str(row[3]).strip(),
+                    "crop_parameter_id": crop_parameter_id(row[3]),
+                    "crop_parameter_id_support": crop_parameter_mapping_support(row[3]),
+                    "uf": uf,
+                    "portaria": str(row[5]).strip(),
+                    "portaria_date": str(row[6]).strip(),
+                    "municipality": str(row[7]).strip(),
+                    "cultivar_group": str(row[9]).strip(),
+                    "zarc_soil_class": str(row[10]).strip(),
+                    "decendio_values": risk_codes,
+                    "planting_decendios_by_risk_percent": {
+                        str(risk): [i + 1 for i, value in enumerate(risk_codes) if value == risk]
+                        for risk in (20, 30, 40)
+                    },
+                    "source_file": path.relative_to(ROOT).as_posix(),
+                    "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF",
+                })
     for profile_rows in result.values():
         profile_rows.sort(key=lambda row: (str(row["season"]), str(row["crop"]), str(row["cultivar_group"]), str(row["zarc_soil_class"])))
     return result
@@ -215,14 +282,14 @@ def main() -> None:
                 "system": "SISZARC — Publicações do Zarc",
                 "url": "https://sistemasweb.agricultura.gov.br/siszarc/base.action",
                 "open_dataset": "https://dados.agricultura.gov.br/dataset/tabua-de-risco-zoneamento-agricola-de-risco-climatico",
-                "current_season": "2026 / 2027",
-                "download_scope": "filtered SISZARC XLS exports per crop and UF; raw exports include the selected UF and were reduced here to the example municipality",
+                "current_season": "annual 2026/2027 plus current perennial/olericulture/no-season resource",
+                "download_scope": "official MAPA national CSV rows filtered only by the three example municipality IBGE codes; original rows and 36 risk decendios are preserved",
                 "license": "Creative Commons Attribution (MAPA open-data catalog)",
                 "dictionary_url": "https://dados.agricultura.gov.br/dataset/6d3d141c-885e-41a4-ab7f-dc8ff323b96f/resource/bebb0ebb-bc75-460c-b900-a7a1ebd87bee/download/dicionario-de-dados-tabua-de-risco-2026.pdf",
             },
             "row_count": len(zarc[profile_id]),
             "risk_semantics": "Each decendio entry preserves the MAPA report value 0/20/30/40. Non-zero values are published risk levels; zero means no planting indication for that row/decendio. The displayed group and official ZARC soil code must match the producer's cultivar and soil classification.",
-            "soil_matching": "Official ZARC soil codes are not inferred from mapped SoilGrids AWC. Codes remain verbatim from the report (including older numeric classes and AD classes); interface asks the user to select the applicable code.",
+            "soil_matching": "Official Cod_Solo and Cod_Ciclo values are preserved verbatim; they are not inferred from mapped SoilGrids AWC or decoded into a plot-specific class. The simulation unions published rows and does not assert eligibility for a producer's specific cultivar/soil stratum.",
             "rows": zarc[profile_id],
         }
         zarc_file.write_text(json.dumps(zarc_payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -243,9 +310,9 @@ def main() -> None:
             "responsavel": "MAPA, SPA/DEGER/CGRA",
             "frequencia": "por safra; catálogo atualiza semanalmente",
             "unidade": "decêndios; classe de risco; grupo de cultivar; classe de solo",
-            "periodo": "safra 2026/2027 nas culturas efetivamente consultadas para a UF",
+            "periodo": "tábua anual safra 2026/2027 e tábua atual perene/olerícola/sem safra, filtradas pelos três municípios de demonstração",
             "resolucao": "município × cultura × grupo × solo × decêndio",
-            "qualidade": "portaria oficial; elegibilidade depende de confirmar grupo e código oficial de solo do produtor; nenhum código ZARC é inferido do SoilGrids",
+            "qualidade": "linhas oficiais MAPA; Cod_Ciclo e Cod_Solo preservados como códigos; elegibilidade exibida é união municipal e depende de confirmar o estrato real do produtor; nenhum código ZARC é inferido do SoilGrids",
             "sha256": sha256(zarc_file.read_bytes()).hexdigest(),
         }
         raw_reports = []
@@ -281,7 +348,7 @@ def main() -> None:
         assumptions_path = profile_dir / "assumptions.json"
         assumptions = json.loads(assumptions_path.read_text(encoding="utf-8"))
         assumptions["crop_data_ingestion"] = {
-            "zarc": "official municipality/crop/soil/group/decendio windows are stored for current-season queried crops; action eligibility filters the annual crop scenarios by cultivar group, ZARC soil class, risk and planting decendio",
+            "zarc": "annual 2026/2027 and perennial/no-season MAPA rows are stored for all published products in the three municipality extracts; official rows take precedence over fallback calendars for rotation-only crops",
             "pam": "1988-2025 municipality-by-product history is stored as yield/context; it is not used to infer a causal crop stress response or production price forecast",
             "fao56": "FAO-56 Kc curves and phase durations parameterize separate crop- and planting-window-conditioned derived Markov transitions when both the ZARC window and an internally consistent annual crop cycle exist; Kc=1 remains the off-crop reference demand",
         }

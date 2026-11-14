@@ -6,33 +6,35 @@ A demonstração trabalha com **uma cultura por talhão em cada passo anual**. O
 
 O pipeline `data/pipeline/build_crop_transition_markov.py` deriva `data/profiles/<perfil>/crop-transition-markov.json` de `pam-history.json`:
 
-1. Soma as áreas PAM por cultura em cada município-ano. Café arábica e canephora são combinados; aveia em grão é usada como proxy de aveia-preta.
-2. Seleciona uma única cultura por ano: a de maior área colhida entre os produtos do catálogo. Produtos PAM fora do catálogo, como arroz, não competem por essa posição.
-3. Conta transições entre anos civis consecutivos. Anos com lacuna não formam uma aresta.
-4. Mantém as contagens e os anos de cada aresta separados da prior.
+1. Soma a área PAM por cultura em cada município-ano. Café arábica e canephora são combinados; aveia em grão é usada como proxy de aveia-preta.
+2. Ordena as culturas mapeadas por área e guarda as cinco maiores. Cada uma recebe participação `área_cultura / soma_das_áreas_top5`; culturas fora do catálogo, como arroz, não competem pelo top 5.
+3. Para cada par de anos civis consecutivos sem lacuna, soma a massa esperada `participação_t(i) × participação_t+1(j)` a cada aresta i→j. Essa distribuição conjunta de máxima entropia assume independência entre as marginais municipais. Não é contagem observada de talhões ou de sucessões.
+4. Preserva os pares rank 1 inteiros e anos de cada mudança como diagnóstico auditável, sem somá-los de novo à massa top-5.
 
 | Item | Definição |
 |---|---|
 | Estado | Uma das 14 culturas individuais do catálogo |
 | Início selecionável | Soja, milho, cana-de-açúcar ou café |
-| Observação histórica | Cultura de maior área PAM entre os produtos do catálogo naquele ano |
-| Aresta observada | Mudança da cultura dominante entre dois anos consecutivos |
+| Marginal anual | Participações de área das cinco maiores culturas PAM mapeadas |
+| Massa de aresta | Soma dos produtos das participações em anos consecutivos; fracionária e baseada em independência assumida |
+| Diagnóstico rank 1 | Mudanças da cultura que ocupou o primeiro lugar entre anos consecutivos; não usadas como uma segunda contagem |
 | Evidência disponível | 38 anos e até 37 pares consecutivos por município |
 | Escala | Município-ano; não o mesmo talhão |
 
-A PAM não mostra qual cultura foi plantada no mesmo campo no ano seguinte. Por isso, as contagens são um proxy regional para a demo, e a página não as apresenta como frequências de rotação parcelar. As candidatas sem produto PAM correspondente (braquiária, milheto, nabo forrageiro, crotalária e mucuna) ficam visíveis na matriz, mas têm `n=0` e nenhuma contagem empírica.
+A PAM não mostra qual cultura foi plantada no mesmo campo no ano seguinte. A cadeia usa marginais municipais top-5 para criar massa de transição sob independência; por isso ela é um proxy regional e não frequência de rotação parcelar. Braquiária, milheto, nabo forrageiro, crotalária e mucuna não têm produto PAM correspondente e recebem apenas a prior Dirichlet, embora continuem visíveis na matriz.
 
 ## Probabilidade Markov condicionada pelo ambiente
 
-Para não eliminar destinos por falta de amostras, cada linha recebe uma prior Dirichlet uniforme com `α = 0,5` em cada um dos 14 destinos:
+Para não eliminar destinos por falta de suporte, cada linha recebe uma prior Dirichlet uniforme com `α = 0,5` em cada destino elegível:
 
 ```text
-base(source → destination) = (count + 0,5) / (saídas_observadas + 14 × 0,5)
+M(i → j) = Σₜ participaçãoₜ(i) × participaçãoₜ₊₁(j)
+base(i → j) = (M(i → j) + 0,5) / (suporte_top5_elegível(i) + m_elegível × 0,5)
 ```
 
-Essa pseudocontagem não é dado. Quando uma cultura de destino não aparece no histórico, sua probabilidade deriva da prior e deve ser lida como hipótese. A matriz deixa `count/n` observável ao lado de cada probabilidade.
+Essa pseudocontagem não é dado. Uma cultura sem massa de destino ainda recebe α: com suporte zero e 14 destinos elegíveis, a probabilidade-base é 7,1%; com suporte positivo cai conforme aumenta o denominador. Os 6–7% são possíveis em linhas pouco apoiadas, mas não são piso, frequência observada ou proporção fixa para toda cultura rara. A prior α=0,5 da cadeia Markov é independente do `n₀` que ajusta a confiabilidade do score econômico das rotas.
 
-Em cada trajetória, o Monte Carlo sorteia uma linha Dirichlet por estado com parâmetros `count + 0,5`. Depois de simular um ano do ambiente, repondera cada destino e normaliza a linha:
+Em cada trajetória, o Monte Carlo sorteia uma linha Dirichlet por estado com parâmetros `M(i → j) + 0,5`; massas fracionárias são formas Dirichlet válidas. Depois de simular um ano do ambiente, repondera cada destino e normaliza a linha:
 
 ```text
 Pₜ(j | i, ambiente) ∝ baseₜ(i → j)
@@ -46,7 +48,9 @@ Pₜ(j | i, ambiente) ∝ baseₜ(i → j)
 
 Cada trajetória começa com uma cultura principal já estabelecida, água média e carbono inicial de SoilGrids. O ambiente é atualizado a cada quinzena usando um bloco sazonal NASA POWER sorteado para cada ano; a demanda hídrica acompanha a cultura ativa e o carbono evolui com a faixa hipotética da cultura/cobertura. No fim do ciclo de uma cultura anual, o talhão entra em pousio até a próxima oportunidade municipal de decisão.
 
-Na decisão, a linha PAM da cultura atual é ajustada pela água e carbono simulados. Os destinos possíveis são culturas com janela ZARC standalone no município em algum momento dos 365 dias seguintes, respeitando também as regras de ciclo perene. A decisão sorteia uma única cultura principal. O plantio só acontece na próxima janela própria dessa cultura; o período até lá continua como pousio. A cultura recém-plantada só gera receita após completar o ciclo/maturação indicado. A janela SISZARC 2026/2027 é repetida nos cinco anos, agrega riscos 20/30/40 e une grupos de cultivar e classes oficiais de solo, pois o exemplo não seleciona o estrato de uma gleba.
+Na decisão, a linha de massa PAM top-5 da cultura atual é ajustada pela água e carbono simulados. Os destinos possíveis são culturas com janela MAPA standalone no município em algum momento dos 365 dias seguintes, respeitando também as regras de ciclo perene. A decisão sorteia uma única cultura principal. O plantio só acontece na próxima janela aplicável dessa cultura; o período até lá continua como pousio. A cultura recém-plantada só gera receita após completar o ciclo/maturação indicado. As tábuas MAPA anual 2026/2027 e perene vigente são repetidas nos cinco anos como hipótese, agregam riscos 20/30/40 e unem grupos de cultivar e classes oficiais de solo, pois o exemplo não seleciona o estrato de uma gleba.
+
+Para manter alternativas de rotação sem calendário publicado, `crop-cycle-assumptions.json` libera qualquer decêndio apenas para nabo forrageiro, braquiária, crotalária, mucuna e aveia-preta quando o perfil não tem linha standalone mapeada. Aveia-preta tem um proxy oficial genérico “Aveia” em Franca e Varginha; apenas Ariquemes usa a hipótese. Soja, milho, cana, café, feijão, amendoim, sorgo, milheto e demais culturas comerciais não recebem esse fallback. Uma linha oficial sem risco 20/30/40 bloqueia a cultura naquele perfil, sem substituição pela hipótese. A lista é uma premissa exploratória de disponibilidade e não afirma que qualquer data seja agronomicamente adequada.
 
 Replantios consecutivos reduzem o rendimento bruto por uma hipótese editável específica por cultura: soja perde 8 pontos percentuais por repetição até 20%, e milho 2,2 pontos até 4,3%. Outras anuais/coberturas mantêm o padrão genérico de 8 pontos até 40%. Os valores de soja e milho se ancoram em estudos de outras regiões e em ensaios brasileiros limitados, não são calibração local. A penalidade afeta receita e VPL, mas não custos nem probabilidades Markov; portanto, uma sequência pode continuar frequente mesmo depois de deixar de liderar o ranking econômico. Esse efeito é somente por replantio consecutivo da mesma cultura: o modelo não simula pragas, doenças ou pressão entre culturas da mesma família. O calendário também não prova que toda janela agregada seja adequada a qualquer talhão; os dias de pousio deixam explícito quando a próxima semeadura só ocorre depois.
 
@@ -54,17 +58,18 @@ Replantios consecutivos reduzem o rendimento bruto por uma hipótese editável e
 
 O HTML mostra os 14 estados como nós e todas as 196 transições possíveis como setas, incluindo laços da cultura para si mesma. Selecione um nó para destacar suas 14 saídas. A espessura da seta representa P média no contexto de água e carbono selecionado; o rótulo mostra essa probabilidade com duas casas decimais. A lista lateral discrimina cada destino:
 
-- `k/n PAM`: contagem observada na cadeia municipal e número de saídas históricas da cultura de origem.
-- `P₀`: `(k + α)/(n_elegível + m_elegível × α)`, antes de reponderar ambiente; o histórico e a prior são condicionados aos destinos elegíveis pelo calendário e pelas regras perenes.
+- `massa/suporte top-5`: massa fracionária esperada i→j e suporte fracionário da cultura de origem após restringir destinos elegíveis.
+- `rank 1 PAM`: pares inteiros em que a cultura de maior área mudou, mostrados como diagnóstico; não entram de novo no peso da aresta.
+- `P₀`: `(M(i→j) + α)/(suporte_top5_elegível + m_elegível × α)`, antes de reponderar ambiente; a massa e a prior são condicionadas aos destinos elegíveis pelo calendário e pelas regras perenes.
 - fatores de água e solo: multiplicadores de destino aplicados antes de normalizar a linha.
 - `Dirichlet 90%`: intervalo empírico de 5º a 95º percentil calculado com 1.200 sorteios da linha posterior, mantendo o contexto ambiental fixo. Não é intervalo de confiança das rotações reais do talhão.
 - `MC`: quantas trajetórias passaram pela origem e quantas escolheram aquela seta no ano exibido. As cores dos nós mostram a frequência de ocupação por ano.
 
-Assim ficam distintos o suporte observado na PAM, a massa da prior, a probabilidade média contextualizada e as frequências realmente sorteadas. As linhas de posterior usadas pelo Monte Carlo são sorteadas novamente em cada trajetória; água e carbono também variam no tempo. Por isso, a frequência de uma seta no Monte Carlo pode diferir da P média fixa exibida no grafo.
+Assim ficam distintos as áreas PAM observadas, a aproximação de transição top-5, o diagnóstico rank 1, a massa da prior, a probabilidade média contextualizada e as frequências realmente sorteadas. As linhas de posterior usadas pelo Monte Carlo são sorteadas novamente em cada trajetória; água e carbono também variam no tempo. Por isso, a frequência de uma seta no Monte Carlo pode diferir da P média fixa exibida no grafo.
 
 Ao carregar a página, o Monte Carlo inicia depois da primeira pintura da interface e percorre 100.000 trajetórias. A barra atualiza a cada 1.000 e o grafo recebe novas frequências a cada 5.000 trajetórias. As frequências e estatísticas econômicas são acumuladas durante a execução; para cada rota, a interface conserva apenas os valores de VPL e uma trilha compacta de exemplo, evitando guardar os caminhos completos das 100.000 simulações. Uma execução usa a mesma linha Dirichlet sorteada por estado ao longo de cada trajetória; cada nova trajetória sorteia seus próprios parâmetros.
 
-O seletor de decêndio do grafo representa o contexto da decisão; destinos com janela própria mais tarde no horizonte anual podem ser sorteados e esperam em pousio até o plantio. O grafo preserva os 14 nós para inspeção, inclusive os destinos bloqueados na janela contextual, que aparecem com probabilidade operacional zero. As setas exibem suporte PAM, probabilidade contextual, fatores de água/solo, intervalo Dirichlet e contagem Monte Carlo no recorte escolhido. Sem idade do cafezal ou histórico de reforma, café só transita para café no horizonte; a mesma regra vale para cana. Para café, uma subcadeia separada acompanha coberturas de entrelinha sem substituir a cultura principal.
+O seletor de decêndio do grafo representa o contexto da decisão; destinos com janela própria mais tarde no horizonte anual podem ser sorteados e esperam em pousio até o plantio. O grafo preserva os 14 nós para inspeção, inclusive os destinos bloqueados na janela contextual, que aparecem com probabilidade operacional zero. As setas exibem massa top-5, suporte fracionário, diagnóstico rank 1, probabilidade contextual, fatores de água/solo, intervalo Dirichlet e contagem Monte Carlo no recorte escolhido. Sem idade do cafezal ou histórico de reforma, café só transita para café no horizonte; a mesma regra vale para cana. Para café, uma subcadeia separada acompanha coberturas de entrelinha sem substituir a cultura principal.
 
 ### Água
 

@@ -49,14 +49,14 @@
     "soil_carbon_deficit_span_g_kg": 10,
     "soil_log_weight_coefficient": 0.8,
     "rotation_prior_alpha_per_destination": 0.5,
-    "rotation_prior_distribution": "Uniforme sobre as 14 culturas do catálogo; aplicada a todos os destinos, além das contagens PAM observadas. A probabilidade posterior representa um prior explícito onde falta histórico, não uma frequência observada."
+    "rotation_prior_distribution": "Uniforme sobre as culturas elegíveis do catálogo; pseudomassa alpha=0,5 por destino somada à massa fracionária de transição derivada das participações PAM top-5. Sem massa top-5, a probabilidade vem apenas da prior; não é frequência observada. Independente do n0 de credibilidade do ranking econômico."
   },
   "crop_lifecycle_rules": {
     "horizon_years": 5,
     "coffee": {
       "mode": "persistent_within_horizon",
       "allowed_destinations": ["coffee"],
-      "rationale": "Café é perene; a série municipal de cultura dominante não prova que o mesmo cafezal foi substituído. Como não temos idade nem calendário de renovação do talhão, o estado café permanece café ao longo deste horizonte de cinco anos.",
+      "rationale": "Café é perene; marginais de área municipal da PAM não provam que o mesmo cafezal foi substituído. Como não temos idade nem calendário de renovação do talhão, o estado café permanece café ao longo deste horizonte de cinco anos.",
       "source_urls": [
         "https://www.atermaisdigital.cnptia.embrapa.br/web/cafe/planejamento-do-plantio",
         "https://www.alice.cnptia.embrapa.br/alice/handle/doc/1041399"

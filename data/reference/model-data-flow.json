@@ -2,9 +2,21 @@
   "schema_version": "1.1.0",
   "purpose": "Rastrear cada dado da origem até Markov e Monte Carlo, separando observação, regra de elegibilidade, referência agronômica e saída derivada.",
   "examples": [
-    {"profile": "ariquemes-ro", "municipality_ibge": "1100023", "uf": "RO"},
-    {"profile": "franca-sp", "municipality_ibge": "3516200", "uf": "SP"},
-    {"profile": "varginha-mg", "municipality_ibge": "3170701", "uf": "MG"}
+    {
+      "profile": "ariquemes-ro",
+      "municipality_ibge": "1100023",
+      "uf": "RO"
+    },
+    {
+      "profile": "franca-sp",
+      "municipality_ibge": "3516200",
+      "uf": "SP"
+    },
+    {
+      "profile": "varginha-mg",
+      "municipality_ibge": "3170701",
+      "uf": "MG"
+    }
   ],
   "sources": {
     "nasa_challenge_resource_page": {
@@ -15,16 +27,30 @@
     "nasa_power": {
       "raw": "data/raw/nasa_power/",
       "normalized": "data/profiles/<profile>/climate-daily.csv",
-      "fields": ["PRECTOTCORR", "T2M_MAX", "T2M_MIN", "ALLSKY_SFC_SW_DWN", "RH2M", "WS2M"],
+      "fields": [
+        "PRECTOTCORR",
+        "T2M_MAX",
+        "T2M_MIN",
+        "ALLSKY_SFC_SW_DWN",
+        "RH2M",
+        "WS2M"
+      ],
       "period": "1981-01-01 a 2026-11-06",
       "transform": "ET0 FAO-56 Penman–Monteith; fallback Hargreaves–Samani onde faltou radiação; totais e classes de chuva por quinzena do calendário local",
-      "consumed_by": ["environment.json", "Markov water balance", "seasonal climate blocks in Monte Carlo"]
+      "consumed_by": [
+        "environment.json",
+        "Markov water balance",
+        "seasonal climate blocks in Monte Carlo"
+      ]
     },
     "soilgrids": {
       "raw": "data/raw/soilgrids/",
       "normalized": "data/profiles/<profile>/soil-profile.json",
       "transform": "camadas 0–100 cm; CAD derivada por Saxton–Rawls com SOC×1.724",
-      "consumed_by": ["daily water bucket", "water class thresholds in Markov"],
+      "consumed_by": [
+        "daily water bucket",
+        "water class thresholds in Markov"
+      ],
       "not_equivalent_to": "classe de solo AD1–AD6 do ZARC"
     },
     "ibge": {
@@ -33,63 +59,135 @@
       "not_used_for": "seleção de fazenda ou talhão no mapa"
     },
     "mapa_zarc": {
-      "raw": "data/raw/mapa-siszarc/*.xls",
+      "raw": [
+        "data/raw/mapa-siszarc/zarc-annual-2026-2027-municipal-extract.csv",
+        "data/raw/mapa-siszarc/zarc-perennial-2026-municipal-extract.csv"
+      ],
       "normalized": "data/profiles/<profile>/zarc-planting-windows.json",
-      "dimensions": ["município", "cultura oficial", "safra", "grupo de cultivar", "solo ZARC", "risco", "decêndio"],
-      "consumed_by": ["interface filtra ações de plantio elegíveis", "somente habilita matriz de cultura quando há janela 20/30/40% e ciclo FAO-56 anual compatível"],
-      "not_used_as": "contagem de transição Markov ou classificação extraída de SoilGrids"
+      "dimensions": [
+        "município",
+        "cultura oficial",
+        "safra",
+        "grupo de cultivar",
+        "solo ZARC",
+        "risco",
+        "decêndio"
+      ],
+      "consumed_by": [
+        "interface filters planting actions by standalone municipal MAPA risk windows 20/30/40",
+        "the interactive Markov/Monte Carlo uses eligible crop calendars; listed rotation covers get all-year fallback only when no standalone official row exists",
+        "only official MAPA windows feed the crop-conditioned water process matrix"
+      ],
+      "not_used_as": "contagem de transição Markov ou classificação extraída de SoilGrids",
+      "source": "MAPA open-data catalog: annual 2026/2027 and current perennial/olericulture/no-season risk-table CSV; municipal extracts retain original rows and filter only three IBGE municipality codes",
+      "fallback": {
+        "configuration": "data/reference/crop-cycle-assumptions.json#rotation_calendar_fallback",
+        "crop_ids": [
+          "forage_radish",
+          "brachiaria",
+          "oat",
+          "crotalaria",
+          "mucuna"
+        ],
+        "rule": "All 36 decendios only when no standalone non-consortium MAPA row exists for that profile/crop; an official row with no 20/30/40 risk decendios blocks the crop and is never overridden. Oat is a proxy for modeled black oat in Franca/Varginha; Ariquemes has no mapped official oat row."
+      }
     },
     "ibge_pam": {
-      "raw": ["data/raw/ibge/pam-municipal-5457-1988-2025.json", "data/raw/ibge/pam-state-5457-1988-2025.json"],
+      "raw": [
+        "data/raw/ibge/pam-municipal-5457-1988-2025.json",
+        "data/raw/ibge/pam-state-5457-1988-2025.json"
+      ],
       "normalized": "data/profiles/<profile>/pam-history.json",
-      "dimensions": ["município", "produto", "ano"],
-      "consumed_by": ["rendimento municipal observado nos dados", "cultura PAM de maior área entre os produtos do catálogo por ano e contagens de transição", "preço unitário PAM e fallbacks estadual/macrorregional/nacional no VPL"],
-      "not_used_as": ["rendimento do talhão", "sequência de culturas no mesmo pixel ou campo", "efeito causal de Kc ou manejo", "distribuição IID de produtividade", "preço real; valores de produção são nominais"]
+      "dimensions": [
+        "município",
+        "produto",
+        "ano"
+      ],
+      "consumed_by": [
+        "rendimento municipal observado nos dados",
+        "participações PAM do top-5 de área e massa de transição esperada entre anos, com independência marginal assumida",
+        "preço unitário PAM e fallbacks estadual/macrorregional/nacional no VPL"
+      ],
+      "not_used_as": [
+        "rendimento do talhão",
+        "sequência de culturas no mesmo pixel ou campo",
+        "efeito causal de Kc ou manejo",
+        "distribuição IID de produtividade",
+        "preço real; valores de produção são nominais"
+      ]
     },
     "fao56": {
       "source_file": "data/reference/crop-water-parameters.json",
       "source_url": "https://www.fao.org/4/x0490e/x0490e0b.htm",
-      "consumed_by": ["interpola Kc por fase no balanço hídrico por cultura", "fornece Kc médio como multiplicador hídrico para a matriz de transição"],
+      "consumed_by": [
+        "interpola Kc por fase no balanço hídrico por cultura",
+        "fornece Kc médio como multiplicador hídrico para a matriz de transição"
+      ],
       "reference_status": "Kc e duração são parâmetros globais de literatura, não cultivar nem calibração brasileira"
     },
     "yahoo_finance": {
       "normalized": "data/reference/yahoo-harvest-futures.json",
-      "raw": ["data/raw/yahoo-finance/", "data/raw/bacen/"],
+      "raw": [
+        "data/raw/yahoo-finance/",
+        "data/raw/bacen/"
+      ],
       "as_of_date": "2026-11-13",
-      "products": ["soybean CBOT May 2027", "maize CBOT May 2027"],
+      "products": [
+        "soybean CBOT May 2027",
+        "maize CBOT May 2027"
+      ],
       "transformed_unit": "BRL/metric tonne using same-day BCB PTAX selling rate",
       "price_semantics": "exchange futures reference; not local farm-gate cash price",
-      "consumed_by": ["VPL pricing for soybean and maize in the economic rotation comparison"]
+      "consumed_by": [
+        "VPL pricing for soybean and maize in the economic rotation comparison"
+      ]
     },
     "conab_costs": {
       "raw": "data/raw/conab/costs/*.xls",
       "normalized": "data/reference/economic-benchmarks.json",
-      "crops": ["soybean", "maize_grain", "sugarcane", "coffee", "sorghum_grain", "wheat", "peanut", "oat", "mais proxies de custo para feijão e culturas de cobertura"],
+      "crops": [
+        "soybean",
+        "maize_grain",
+        "sugarcane",
+        "coffee",
+        "sorghum_grain",
+        "wheat",
+        "peanut",
+        "oat",
+        "mais proxies de custo para feijão e culturas de cobertura"
+      ],
       "measure": "CUSTO TOTAL in BRL/ha from official CONAB cost panels; original workbook, sheet, municipality, date, technology and total retained",
       "profile_match": "município selecionado quando há painel; senão outra cidade da mesma UF, da macrorregião ou painel nacional; cultura proxy identificada quando falta série do produto",
-      "consumed_by": ["per-hectare net cash flow in VPL comparison"]
+      "consumed_by": [
+        "per-hectare net cash flow in VPL comparison"
+      ]
     },
     "ipca": {
       "raw": "data/raw/ibge/ipca-table-1737-2017-202610.json",
       "source": "IBGE SIDRA table 1737, variable 2266",
-      "consumed_by": ["deflate PAM prices and CONAB costs to common reference month"]
+      "consumed_by": [
+        "deflate PAM prices and CONAB costs to common reference month"
+      ]
     }
   },
   "markov": {
     "crop_transition_empirical_model": {
       "file": "data/profiles/<profile>/crop-transition-markov.json",
       "source": "IBGE PAM/SIDRA tabela 5457; área colhida anual por cultura",
-      "state": "uma cultura por ano, definida como maior área PAM entre os produtos do catálogo; soja, milho, cana e café podem iniciar; as 14 culturas são destinos possíveis",
-      "transition": "mudança da cultura de maior área entre os produtos do catálogo em anos municipais consecutivos",
-      "probability": "cada trajetória sorteia linhas Dirichlet(count + alpha=0.5 por destino); repondera com fatores explícitos de água/solo e normaliza; o grafo mostra média contextual e intervalo empírico de 90% da linha posterior",
-      "support": "38 observações anuais e até 37 pares consecutivos por município; candidatas sem série PAM têm n=0 e dependem da prior",
-      "graph": "14 nós e 196 setas direcionadas, inclusive permanência na cultura; clique em um nó destaca as saídas e discrimina P0, contagem k/n PAM, fatores água/solo, intervalo Dirichlet e contagem MC",
+      "state": "uma cultura principal por vez; perfil PAM anual armazena as cinco maiores culturas mapeadas e suas participações na área top-5; soja, milho, cana e café podem iniciar",
+      "transition": "massa i→j é soma de participação PAM de i no ano t × participação de j no ano t+1; independência entre marginais municipais assumida; pares rank-1 inteiros são um diagnóstico separado",
+      "probability": "cada trajetória sorteia linhas Dirichlet(area_weighted_count + alpha=0.5 por destino); repondera com fatores explícitos de água/solo e normaliza; o grafo mostra média contextual e intervalo empírico de 90% da linha posterior",
+      "support": "38 distribuições anuais e até 37 pares consecutivos por município; transições são massa esperada fracionária, não pares observados de talhão; culturas sem PAM continuam com a prior",
+      "graph": "14 nós e 196 setas direcionadas, inclusive permanência na cultura; clique em um nó destaca as saídas e discrimina massa top-5, suporte fracionário, diagnóstico rank-1, P0, fatores água/solo, intervalo Dirichlet e contagem MC",
       "lifecycle_rules": "café e cana permanecem como cultura principal durante os cinco anos quando falta idade/reforma observada; braquiária entrelinhas é uma recomendação de manejo associado ao café, não um destino Markov",
-      "monte_carlo_overlay": "Monte Carlo automático e progressivo; frequência de ocupação dos nós e contagem das setas por ano nas 10.000 trajetórias; cada trajetória mantém uma linha Dirichlet sorteada por estado visitado",
-      "not_equivalent_to": "rotação do mesmo campo; a PAM não identifica talhão, ordem de safra ou culturas de cobertura"
+      "monte_carlo_overlay": "Monte Carlo interativo com 100.000 trajetórias; frequência de ocupação dos nós e contagem das setas por ano; cada trajetória mantém uma linha Dirichlet sorteada por estado visitado",
+      "not_equivalent_to": "rotação do mesmo campo; a PAM não identifica talhão, ordem de safra ou culturas de cobertura; o produto de marginais supõe independência"
     },
     "reference_model": {
-      "files": ["data/profiles/<profile>/states.json", "data/profiles/<profile>/transitions.json"],
+      "files": [
+        "data/profiles/<profile>/states.json",
+        "data/profiles/<profile>/transitions.json"
+      ],
       "state": "classe da água disponível baixa/média/alta",
       "index": "água atual × demanda ET0 de referência Kc=1 × classe de chuva → água seguinte",
       "support": "balanço hídrico diário derivado; não observado em talhão"
@@ -115,7 +213,7 @@
     "reported_output": "frequência e sequência dos estados de água; não produtividade, quebra de safra, lucro ou ranking"
   },
   "interactive_page_monte_carlo": {
-    "crop_state": "uma cultura principal por estado; duração de cada ciclo e maturação por cultura em data/reference/crop-cycle-assumptions.json; após colheita anual, a decisão Markov ocorre na próxima oportunidade municipal e o destino é semeado somente na sua própria janela ZARC standalone",
+    "crop_state": "uma cultura principal por estado; duração de cada ciclo e maturação por cultura em data/reference/crop-cycle-assumptions.json; após colheita anual, a decisão Markov ocorre na próxima oportunidade municipal; o destino segue janela MAPA standalone, exceto coberturas listadas sem linha oficial, que usam hipótese explícita de qualquer decêndio",
     "environment_order": "em cada quinzena sorteia água sob clima da NASA POWER e integra carbono pela cultura/cobertura ativa; no fim do ciclo repondera a linha Markov por água e carbono e sorteia o próximo nó",
     "water": "10.000 trajetórias; matriz quinzenal de água derivada de POWER, SoilGrids/Saxton–Rawls e Kc=1 de referência; cultura/cobertura ajusta a demanda",
     "soil_carbon": "SoilGrids inicial 0–30 cm; taxa hipotética por cultura é integrada pelo tempo decorrido em data/reference/soil-crop-response-hypotheses.json; cobertura de café usa fração de área de data/reference/crop-cycle-assumptions.json",
@@ -123,22 +221,43 @@
     "graph_output": "ocupação dos 14 nós no fechamento de cada ano e contagens de transições ocorridas no ano; uma cultura principal por talhão, com subcadeia de coberturas entrelinhas para café",
     "execution": "inicia após a renderização inicial; atualiza progresso a cada 200 trajetórias e o overlay do grafo a cada 1.000; permite cancelar a execução anterior ao mudar perfil/cultura/semente",
     "perennial_constraints": "café e cana têm apenas transição para si mesmos no horizonte sem idade/reforma; a formação de novas culturas tem atraso e custo; café tem cadeia de cobertura entrelinhas separada com prior uniforme e zero contagens observadas",
-    "planting_calendar": "MAPA SISZARC 2026/2027; união municipal de risco 20/30/40, grupos de cultivar e classes de solo; calendário repetido nos cinco anos; só destinos com janela nos 365 dias seguintes são elegíveis; espera até a janela do destino é contabilizada como pousio; linhas de consórcio/mistura são excluídas da cadeia principal",
-    "repeated_crop_effect": "soja: 8 pontos percentuais por replantio até 20%; milho: 2,2 pontos até 4,3%; demais anuais/coberturas: hipótese genérica de 8 pontos até 40%; valores editáveis na interface, afetam rendimento bruto/VPL, não Markov nem custos; referências são externas/ensaios limitados, sem calibração municipal"
+    "planting_calendar": "Tábua MAPA anual 2026/2027 e tábua perene vigente; união municipal de risco 20/30/40, grupos de cultivar e classes de solo; calendário repetido nos cinco anos; só destinos com janela nos 365 dias seguintes são elegíveis; espera até plantio é pousio; coberturas de rotação listadas usam qualquer decêndio apenas na ausência de linha standalone MAPA; linha oficial sem risco prevalece e bloqueia; linhas de consórcio/mistura são excluídas da cadeia principal",
+    "repeated_crop_effect": "soja: 8 pontos percentuais por replantio até 20%; milho: 2,2 pontos até 4,3%; demais anuais/coberturas: hipótese genérica de 8 pontos até 40%; valores editáveis na interface, afetam rendimento bruto/VPL, não Markov nem custos; referências são externas/ensaios limitados, sem calibração municipal",
+    "crop_calendar_fallback": "Hipótese explicitamente configurada para nabo forrageiro, braquiária, aveia, crotalária e mucuna; só aplicada se não existir qualquer linha oficial standalone para a cultura no município. Aveia genérica é proxy de aveia-preta em Franca/Varginha; Ariquemes usa fallback."
   },
   "economic_optimization": {
     "objective": "ordenar o VPL médio condicional por hectare em horizonte de 60 meses, com ciclos variáveis, maturação e eventos de produção; mostrar chance de rota separadamente",
     "decision_scope": "agrupar as 10.000 trajetórias pelo estado principal/cobertura no fechamento de cada ano; calcular o VPL de cada colheita, custo de formação e custo de cobertura na data do evento; exibir frequência Monte Carlo e probabilidade Markov separadamente, sem descartar rotas raras",
     "formula": "VPL = sum_event(((PAM yield × price_real_history × environmental yield factor) − CONAB cost)/(1+r_real)^(day/365)); formação perene recebe custo proxy no plantio e por ano de maturação (último intervalo proporcional), e receita só após a maturação",
-    "risk_outputs": ["média", "mediana", "P5–P95", "probabilidade de VPL negativo", "VPL médio dos 5% piores"],
+    "risk_outputs": [
+      "média",
+      "mediana",
+      "P5–P95",
+      "probabilidade de VPL negativo",
+      "VPL médio dos 5% piores"
+    ],
     "environment_role": "Monte Carlo updates water and soil carbon; explicit uncalibrated water/SOC yield multipliers change crop revenue; environmental variables are not arbitrary additive VPL weights",
-    "economic_coverage_by_profile": {"ariquemes-ro": "14/14 linhas com valores completos", "franca-sp": "14/14 linhas com valores completos", "varginha-mg": "14/14 linhas com valores completos"},
+    "economic_coverage_by_profile": {
+      "ariquemes-ro": "14/14 linhas com valores completos",
+      "franca-sp": "14/14 linhas com valores completos",
+      "varginha-mg": "14/14 linhas com valores completos"
+    },
     "hypotheses_and_proxies": "valores PAM/Yahoo/CONAB observados são separados de proxies; feijão, milheto e aveia-preta têm proxy identificado; nabo, braquiária, crotalária e mucuna começam com receita comercial zero e custo proxy; rendimento, preço e custo são editáveis",
     "unsupported_states": "nenhum estado sem entrada econômica inicial; hipóteses de receita zero para coberturas e proxies não são observações de rendimento/preço/custo dessas culturas",
     "status": "ranking exploratório só entre rotas vistas na amostra; rotas raras têm baixa precisão e o método não garante o ótimo entre todas as sequências possíveis; não é prova causal nem política dinâmica",
     "probability_weighting": "a probabilidade Markov/frequência não multiplica o VPL condicional; uma rota rara pode liderar, mas recebe sinalização de suporte baixo",
     "market_assumptions": "all crop prices use the median real PAM unit price for 2017–2025, deflated by IPCA to the reference month; projected trend is recent 3-year median CAGR, capped at ±5% annually and editable; Yahoo May-2027 futures remain separate exchange references",
-    "limitations": ["municipal PAM yield is not parcel yield", "CONAB panel can be same-UF proxy instead of exact municipality", "annual PAM transition counts are reused per harvest cycle although within-year field transitions are unobserved", "ZARC eligibility unions risk levels, cultivar groups, and soil classes because the interface does not select the parcel stratum; the 2026/2027 calendar is repeated across years", "crop-specific soybean and maize yield penalties are editable external benchmarks/hypotheses, not locally calibrated sequence response", "first new-perennial harvest applies the mature-crop PAM median yield because no local yield-by-age curve is available", "perennial formation cost is a fraction of production proxy, not observed establishment investment", "coffee interrow cover chain has no observed transition counts and its uniform prior is a scenario", "water/SOC yield response is uncalibrated" ]
+    "limitations": [
+      "municipal PAM yield is not parcel yield",
+      "CONAB panel can be same-UF proxy instead of exact municipality",
+      "annual PAM transition counts are reused per harvest cycle although within-year field transitions are unobserved",
+      "ZARC eligibility unions risk levels, cultivar groups, and soil classes because the interface does not select the parcel stratum; the 2026/2027 calendar is repeated across years",
+      "crop-specific soybean and maize yield penalties are editable external benchmarks/hypotheses, not locally calibrated sequence response",
+      "first new-perennial harvest applies the mature-crop PAM median yield because no local yield-by-age curve is available",
+      "perennial formation cost is a fraction of production proxy, not observed establishment investment",
+      "coffee interrow cover chain has no observed transition counts and its uniform prior is a scenario",
+      "water/SOC yield response is uncalibrated"
+    ]
   },
   "not_yet_ingested_or_calibrated": [
     "MapBiomas Coleção 11 e dados por pixel de segunda safra para transições do mesmo local",

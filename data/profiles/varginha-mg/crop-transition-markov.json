@@ -1,7 +1,7 @@
 {
-  "schema_version": "1.1.0",
-  "model": "municipal_catalog_dominant_crop_markov_proxy",
-  "unit_of_analysis": "município-ano; uma cultura de maior área entre os produtos do catálogo, não o mesmo talhão",
+  "schema_version": "1.2.0",
+  "model": "municipal_top5_area_weighted_markov_proxy",
+  "unit_of_analysis": "distribuições anuais de área PAM no município; transições marginais entre anos, não o mesmo talhão",
   "source": {
     "publisher": "IBGE",
     "survey": "Produção Agrícola Municipal (PAM)",
@@ -14,8 +14,11 @@
       2025
     ]
   },
-  "state_definition": "A cultura do catálogo com maior área colhida PAM no município-ano; produtos fora do catálogo não competem pelo estado dominante. Café arábica e canephora são agregados no estado Café.",
-  "probability_definition": "Transições PAM + prior Dirichlet uniforme e fatores ambientais por trajetória; regras de ciclo impedem trocas anuais para culturas perenes/semiperenes sem idade ou reforma observadas.",
+  "state_definition": "Distribuição das 5 culturas do catálogo com maior área colhida PAM no município-ano, ponderadas pela participação na área somada do top 5. Produtos fora do catálogo não competem. Café arábica e canephora são agregados no estado Café.",
+  "probability_definition": "Massa de transição top-5 = participação de área da cultura de origem no ano t × participação da cultura de destino no ano t+1, somada nos pares anuais consecutivos; supõe independência entre talhões agregados e não é uma rotação observada. A cadeia usa essa massa fracionária + prior Dirichlet uniforme e fatores ambientais por trajetória; contagens do dominante rank 1 ficam separadas para auditoria.",
+  "transition_weighting_method": "max_entropy_outer_product_of_top5_area_shares",
+  "top_crop_limit": 5,
+  "area_weighted_transition_pair_count": 37,
   "alpha_per_destination": 0.5,
   "period": [
     1988,
@@ -177,7 +180,7 @@
       "allowed_destinations": [
         "coffee"
       ],
-      "rationale": "Café é perene; a série municipal de cultura dominante não prova que o mesmo cafezal foi substituído. Como não temos idade nem calendário de renovação do talhão, o estado café permanece café ao longo deste horizonte de cinco anos.",
+      "rationale": "Café é perene; marginais de área municipal da PAM não provam que o mesmo cafezal foi substituído. Como não temos idade nem calendário de renovação do talhão, o estado café permanece café ao longo deste horizonte de cinco anos.",
       "source_urls": [
         "https://www.atermaisdigital.cnptia.embrapa.br/web/cafe/planejamento-do-plantio",
         "https://www.alice.cnptia.embrapa.br/alice/handle/doc/1041399"
@@ -266,7 +269,54 @@
           2024,
           2025
         ]
-      ]
+      ],
+      "area_weighted_count": 10.020934649991,
+      "area_weighted_outgoing_count": 11.337979863594
+    },
+    {
+      "from_state": "coffee",
+      "to_state": "dry_bean",
+      "count": 0,
+      "outgoing_count": 13,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.56505265815,
+      "area_weighted_outgoing_count": 11.337979863594
+    },
+    {
+      "from_state": "coffee",
+      "to_state": "maize_grain",
+      "count": 0,
+      "outgoing_count": 13,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.58943125914,
+      "area_weighted_outgoing_count": 11.337979863594
+    },
+    {
+      "from_state": "coffee",
+      "to_state": "soybean",
+      "count": 0,
+      "outgoing_count": 13,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.132914530514,
+      "area_weighted_outgoing_count": 11.337979863594
+    },
+    {
+      "from_state": "coffee",
+      "to_state": "sugarcane",
+      "count": 0,
+      "outgoing_count": 13,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.024957641641,
+      "area_weighted_outgoing_count": 11.337979863594
+    },
+    {
+      "from_state": "coffee",
+      "to_state": "wheat",
+      "count": 0,
+      "outgoing_count": 13,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.004689124158,
+      "area_weighted_outgoing_count": 11.337979863594
     },
     {
       "from_state": "dry_bean",
@@ -278,7 +328,9 @@
           2011,
           2012
         ]
-      ]
+      ],
+      "area_weighted_count": 1.138386458851,
+      "area_weighted_outgoing_count": 10.630519959866
     },
     {
       "from_state": "dry_bean",
@@ -326,7 +378,72 @@
           2010,
           2011
         ]
-      ]
+      ],
+      "area_weighted_count": 4.447734459654,
+      "area_weighted_outgoing_count": 10.630519959866
+    },
+    {
+      "from_state": "dry_bean",
+      "to_state": "maize_grain",
+      "count": 0,
+      "outgoing_count": 11,
+      "observed_year_pairs": [],
+      "area_weighted_count": 4.819939273443,
+      "area_weighted_outgoing_count": 10.630519959866
+    },
+    {
+      "from_state": "dry_bean",
+      "to_state": "peanut",
+      "count": 0,
+      "outgoing_count": 11,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.004203453027,
+      "area_weighted_outgoing_count": 10.630519959866
+    },
+    {
+      "from_state": "dry_bean",
+      "to_state": "sorghum_grain",
+      "count": 0,
+      "outgoing_count": 11,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.000457394011,
+      "area_weighted_outgoing_count": 10.630519959866
+    },
+    {
+      "from_state": "dry_bean",
+      "to_state": "soybean",
+      "count": 0,
+      "outgoing_count": 11,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.004297746765,
+      "area_weighted_outgoing_count": 10.630519959866
+    },
+    {
+      "from_state": "dry_bean",
+      "to_state": "sugarcane",
+      "count": 0,
+      "outgoing_count": 11,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.214577208765,
+      "area_weighted_outgoing_count": 10.630519959866
+    },
+    {
+      "from_state": "dry_bean",
+      "to_state": "wheat",
+      "count": 0,
+      "outgoing_count": 11,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.000923965351,
+      "area_weighted_outgoing_count": 10.630519959866
+    },
+    {
+      "from_state": "maize_grain",
+      "to_state": "coffee",
+      "count": 0,
+      "outgoing_count": 13,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.911887915389,
+      "area_weighted_outgoing_count": 14.402606470581
     },
     {
       "from_state": "maize_grain",
@@ -338,7 +455,9 @@
           2000,
           2001
         ]
-      ]
+      ],
+      "area_weighted_count": 5.137969165958,
+      "area_weighted_outgoing_count": 14.402606470581
     },
     {
       "from_state": "maize_grain",
@@ -394,7 +513,297 @@
           1999,
           2000
         ]
-      ]
+      ],
+      "area_weighted_count": 8.105315548588,
+      "area_weighted_outgoing_count": 14.402606470581
+    },
+    {
+      "from_state": "maize_grain",
+      "to_state": "peanut",
+      "count": 0,
+      "outgoing_count": 13,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.005731918927,
+      "area_weighted_outgoing_count": 14.402606470581
+    },
+    {
+      "from_state": "maize_grain",
+      "to_state": "sorghum_grain",
+      "count": 0,
+      "outgoing_count": 13,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.001329967146,
+      "area_weighted_outgoing_count": 14.402606470581
+    },
+    {
+      "from_state": "maize_grain",
+      "to_state": "soybean",
+      "count": 0,
+      "outgoing_count": 13,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.007480730639,
+      "area_weighted_outgoing_count": 14.402606470581
+    },
+    {
+      "from_state": "maize_grain",
+      "to_state": "sugarcane",
+      "count": 0,
+      "outgoing_count": 13,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.232544736926,
+      "area_weighted_outgoing_count": 14.402606470581
+    },
+    {
+      "from_state": "maize_grain",
+      "to_state": "wheat",
+      "count": 0,
+      "outgoing_count": 13,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.000346487007,
+      "area_weighted_outgoing_count": 14.402606470581
+    },
+    {
+      "from_state": "peanut",
+      "to_state": "dry_bean",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.004689442217,
+      "area_weighted_outgoing_count": 0.010421949149
+    },
+    {
+      "from_state": "peanut",
+      "to_state": "maize_grain",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.005497309514,
+      "area_weighted_outgoing_count": 0.010421949149
+    },
+    {
+      "from_state": "peanut",
+      "to_state": "peanut",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 7.522312e-06,
+      "area_weighted_outgoing_count": 0.010421949149
+    },
+    {
+      "from_state": "peanut",
+      "to_state": "sorghum_grain",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 5.07303e-07,
+      "area_weighted_outgoing_count": 0.010421949149
+    },
+    {
+      "from_state": "peanut",
+      "to_state": "sugarcane",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.000227167803,
+      "area_weighted_outgoing_count": 0.010421949149
+    },
+    {
+      "from_state": "sorghum_grain",
+      "to_state": "dry_bean",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.000383411514,
+      "area_weighted_outgoing_count": 0.001820117248
+    },
+    {
+      "from_state": "sorghum_grain",
+      "to_state": "maize_grain",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.001409731837,
+      "area_weighted_outgoing_count": 0.001820117248
+    },
+    {
+      "from_state": "sorghum_grain",
+      "to_state": "peanut",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 8.04678e-07,
+      "area_weighted_outgoing_count": 0.001820117248
+    },
+    {
+      "from_state": "sorghum_grain",
+      "to_state": "sorghum_grain",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 7.55459e-07,
+      "area_weighted_outgoing_count": 0.001820117248
+    },
+    {
+      "from_state": "sorghum_grain",
+      "to_state": "sugarcane",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 2.541376e-05,
+      "area_weighted_outgoing_count": 0.001820117248
+    },
+    {
+      "from_state": "soybean",
+      "to_state": "coffee",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.096431101451,
+      "area_weighted_outgoing_count": 0.106167041888
+    },
+    {
+      "from_state": "soybean",
+      "to_state": "dry_bean",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.002255749516,
+      "area_weighted_outgoing_count": 0.106167041888
+    },
+    {
+      "from_state": "soybean",
+      "to_state": "maize_grain",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.005565998043,
+      "area_weighted_outgoing_count": 0.106167041888
+    },
+    {
+      "from_state": "soybean",
+      "to_state": "soybean",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.001792798034,
+      "area_weighted_outgoing_count": 0.106167041888
+    },
+    {
+      "from_state": "soybean",
+      "to_state": "sugarcane",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.000121394844,
+      "area_weighted_outgoing_count": 0.106167041888
+    },
+    {
+      "from_state": "sugarcane",
+      "to_state": "coffee",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.052261816662,
+      "area_weighted_outgoing_count": 0.504484597674
+    },
+    {
+      "from_state": "sugarcane",
+      "to_state": "dry_bean",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.210078591925,
+      "area_weighted_outgoing_count": 0.504484597674
+    },
+    {
+      "from_state": "sugarcane",
+      "to_state": "maize_grain",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.23099242543,
+      "area_weighted_outgoing_count": 0.504484597674
+    },
+    {
+      "from_state": "sugarcane",
+      "to_state": "peanut",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.000198998599,
+      "area_weighted_outgoing_count": 0.504484597674
+    },
+    {
+      "from_state": "sugarcane",
+      "to_state": "sorghum_grain",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 3.1493329e-05,
+      "area_weighted_outgoing_count": 0.504484597674
+    },
+    {
+      "from_state": "sugarcane",
+      "to_state": "soybean",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.000150681506,
+      "area_weighted_outgoing_count": 0.504484597674
+    },
+    {
+      "from_state": "sugarcane",
+      "to_state": "sugarcane",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.010730166739,
+      "area_weighted_outgoing_count": 0.504484597674
+    },
+    {
+      "from_state": "sugarcane",
+      "to_state": "wheat",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 4.0423484e-05,
+      "area_weighted_outgoing_count": 0.504484597674
+    },
+    {
+      "from_state": "wheat",
+      "to_state": "coffee",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.005033269962,
+      "area_weighted_outgoing_count": 0.006
+    },
+    {
+      "from_state": "wheat",
+      "to_state": "dry_bean",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.000641634981,
+      "area_weighted_outgoing_count": 0.006
+    },
+    {
+      "from_state": "wheat",
+      "to_state": "maize_grain",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 0.000285171103,
+      "area_weighted_outgoing_count": 0.006
+    },
+    {
+      "from_state": "wheat",
+      "to_state": "sugarcane",
+      "count": 0,
+      "outgoing_count": 0,
+      "observed_year_pairs": [],
+      "area_weighted_count": 3.9923954e-05,
+      "area_weighted_outgoing_count": 0.006
     }
   ],
   "annual_sequence": [
@@ -403,6 +812,37 @@
       "state_id": "maize_grain",
       "crop_name": "Milho",
       "harvested_area_ha": 2500.0,
+      "top5_area_total_ha": 3581.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 2500.0,
+          "area_share_within_top5": 0.6981290142418319
+        },
+        {
+          "rank": 2,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1000.0,
+          "area_share_within_top5": 0.27925160569673274
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 80.0,
+          "area_share_within_top5": 0.02234012845573862
+        },
+        {
+          "rank": 4,
+          "state_id": "peanut",
+          "crop_name": "Amendoim",
+          "harvested_area_ha": 1.0,
+          "area_share_within_top5": 0.00027925160569673273
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 1.0,
         "sugarcane": 80.0,
@@ -415,6 +855,37 @@
       "state_id": "maize_grain",
       "crop_name": "Milho",
       "harvested_area_ha": 3000.0,
+      "top5_area_total_ha": 3961.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 3000.0,
+          "area_share_within_top5": 0.7573844988639232
+        },
+        {
+          "rank": 2,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 880.0,
+          "area_share_within_top5": 0.22216611966675082
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 80.0,
+          "area_share_within_top5": 0.02019691996970462
+        },
+        {
+          "rank": 4,
+          "state_id": "peanut",
+          "crop_name": "Amendoim",
+          "harvested_area_ha": 1.0,
+          "area_share_within_top5": 0.00025246149962130775
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 1.0,
         "sugarcane": 80.0,
@@ -427,6 +898,37 @@
       "state_id": "maize_grain",
       "crop_name": "Milho",
       "harvested_area_ha": 3483.0,
+      "top5_area_total_ha": 4564.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 3483.0,
+          "area_share_within_top5": 0.7631463628396143
+        },
+        {
+          "rank": 2,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1000.0,
+          "area_share_within_top5": 0.21910604732690622
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 80.0,
+          "area_share_within_top5": 0.017528483786152498
+        },
+        {
+          "rank": 4,
+          "state_id": "peanut",
+          "crop_name": "Amendoim",
+          "harvested_area_ha": 1.0,
+          "area_share_within_top5": 0.00021910604732690623
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 1.0,
         "sugarcane": 80.0,
@@ -439,6 +941,44 @@
       "state_id": "maize_grain",
       "crop_name": "Milho",
       "harvested_area_ha": 3500.0,
+      "top5_area_total_ha": 4634.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 3500.0,
+          "area_share_within_top5": 0.7552870090634441
+        },
+        {
+          "rank": 2,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1050.0,
+          "area_share_within_top5": 0.22658610271903323
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 80.0,
+          "area_share_within_top5": 0.017263703064307294
+        },
+        {
+          "rank": 4,
+          "state_id": "sorghum_grain",
+          "crop_name": "Sorgo",
+          "harvested_area_ha": 3.0,
+          "area_share_within_top5": 0.0006473888649115235
+        },
+        {
+          "rank": 5,
+          "state_id": "peanut",
+          "crop_name": "Amendoim",
+          "harvested_area_ha": 1.0,
+          "area_share_within_top5": 0.00021579628830384117
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 1.0,
         "sugarcane": 80.0,
@@ -452,6 +992,44 @@
       "state_id": "maize_grain",
       "crop_name": "Milho",
       "harvested_area_ha": 3100.0,
+      "top5_area_total_ha": 4685.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 3100.0,
+          "area_share_within_top5": 0.6616862326574173
+        },
+        {
+          "rank": 2,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1500.0,
+          "area_share_within_top5": 0.32017075773745995
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 80.0,
+          "area_share_within_top5": 0.017075773745997867
+        },
+        {
+          "rank": 4,
+          "state_id": "sorghum_grain",
+          "crop_name": "Sorgo",
+          "harvested_area_ha": 3.0,
+          "area_share_within_top5": 0.0006403415154749199
+        },
+        {
+          "rank": 5,
+          "state_id": "peanut",
+          "crop_name": "Amendoim",
+          "harvested_area_ha": 2.0,
+          "area_share_within_top5": 0.00042689434364994664
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 2.0,
         "sugarcane": 80.0,
@@ -465,6 +1043,44 @@
       "state_id": "maize_grain",
       "crop_name": "Milho",
       "harvested_area_ha": 4000.0,
+      "top5_area_total_ha": 5635.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 4000.0,
+          "area_share_within_top5": 0.709849157054126
+        },
+        {
+          "rank": 2,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1550.0,
+          "area_share_within_top5": 0.27506654835847383
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 80.0,
+          "area_share_within_top5": 0.01419698314108252
+        },
+        {
+          "rank": 4,
+          "state_id": "sorghum_grain",
+          "crop_name": "Sorgo",
+          "harvested_area_ha": 3.0,
+          "area_share_within_top5": 0.0005323868677905945
+        },
+        {
+          "rank": 5,
+          "state_id": "peanut",
+          "crop_name": "Amendoim",
+          "harvested_area_ha": 2.0,
+          "area_share_within_top5": 0.000354924578527063
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 2.0,
         "sugarcane": 80.0,
@@ -478,6 +1094,30 @@
       "state_id": "maize_grain",
       "crop_name": "Milho",
       "harvested_area_ha": 3500.0,
+      "top5_area_total_ha": 3537.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 3500.0,
+          "area_share_within_top5": 0.9895391574780887
+        },
+        {
+          "rank": 2,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 35.0,
+          "area_share_within_top5": 0.009895391574780888
+        },
+        {
+          "rank": 3,
+          "state_id": "peanut",
+          "crop_name": "Amendoim",
+          "harvested_area_ha": 2.0,
+          "area_share_within_top5": 0.0005654509471303364
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 2.0,
         "sugarcane": 35.0,
@@ -489,6 +1129,37 @@
       "state_id": "maize_grain",
       "crop_name": "Milho",
       "harvested_area_ha": 3500.0,
+      "top5_area_total_ha": 5737.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 3500.0,
+          "area_share_within_top5": 0.6100749520655395
+        },
+        {
+          "rank": 2,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 2200.0,
+          "area_share_within_top5": 0.38347568415548194
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 35.0,
+          "area_share_within_top5": 0.006100749520655395
+        },
+        {
+          "rank": 4,
+          "state_id": "peanut",
+          "crop_name": "Amendoim",
+          "harvested_area_ha": 2.0,
+          "area_share_within_top5": 0.0003486142583231654
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 2.0,
         "sugarcane": 35.0,
@@ -501,6 +1172,37 @@
       "state_id": "maize_grain",
       "crop_name": "Milho",
       "harvested_area_ha": 3500.0,
+      "top5_area_total_ha": 5737.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 3500.0,
+          "area_share_within_top5": 0.6100749520655395
+        },
+        {
+          "rank": 2,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 2200.0,
+          "area_share_within_top5": 0.38347568415548194
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 35.0,
+          "area_share_within_top5": 0.006100749520655395
+        },
+        {
+          "rank": 4,
+          "state_id": "peanut",
+          "crop_name": "Amendoim",
+          "harvested_area_ha": 2.0,
+          "area_share_within_top5": 0.0003486142583231654
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 2.0,
         "sugarcane": 35.0,
@@ -513,6 +1215,37 @@
       "state_id": "maize_grain",
       "crop_name": "Milho",
       "harvested_area_ha": 3500.0,
+      "top5_area_total_ha": 5137.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 3500.0,
+          "area_share_within_top5": 0.6813315164492895
+        },
+        {
+          "rank": 2,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1600.0,
+          "area_share_within_top5": 0.31146583609110373
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 35.0,
+          "area_share_within_top5": 0.0068133151644928945
+        },
+        {
+          "rank": 4,
+          "state_id": "peanut",
+          "crop_name": "Amendoim",
+          "harvested_area_ha": 2.0,
+          "area_share_within_top5": 0.0003893322951138797
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 2.0,
         "sugarcane": 35.0,
@@ -525,6 +1258,37 @@
       "state_id": "maize_grain",
       "crop_name": "Milho",
       "harvested_area_ha": 3500.0,
+      "top5_area_total_ha": 5137.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 3500.0,
+          "area_share_within_top5": 0.6813315164492895
+        },
+        {
+          "rank": 2,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1600.0,
+          "area_share_within_top5": 0.31146583609110373
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 35.0,
+          "area_share_within_top5": 0.0068133151644928945
+        },
+        {
+          "rank": 4,
+          "state_id": "peanut",
+          "crop_name": "Amendoim",
+          "harvested_area_ha": 2.0,
+          "area_share_within_top5": 0.0003893322951138797
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 2.0,
         "sugarcane": 35.0,
@@ -537,6 +1301,37 @@
       "state_id": "maize_grain",
       "crop_name": "Milho",
       "harvested_area_ha": 3500.0,
+      "top5_area_total_ha": 5137.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 3500.0,
+          "area_share_within_top5": 0.6813315164492895
+        },
+        {
+          "rank": 2,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1600.0,
+          "area_share_within_top5": 0.31146583609110373
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 35.0,
+          "area_share_within_top5": 0.0068133151644928945
+        },
+        {
+          "rank": 4,
+          "state_id": "peanut",
+          "crop_name": "Amendoim",
+          "harvested_area_ha": 2.0,
+          "area_share_within_top5": 0.0003893322951138797
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 2.0,
         "sugarcane": 35.0,
@@ -549,6 +1344,37 @@
       "state_id": "maize_grain",
       "crop_name": "Milho",
       "harvested_area_ha": 3500.0,
+      "top5_area_total_ha": 5137.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 3500.0,
+          "area_share_within_top5": 0.6813315164492895
+        },
+        {
+          "rank": 2,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1600.0,
+          "area_share_within_top5": 0.31146583609110373
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 35.0,
+          "area_share_within_top5": 0.0068133151644928945
+        },
+        {
+          "rank": 4,
+          "state_id": "peanut",
+          "crop_name": "Amendoim",
+          "harvested_area_ha": 2.0,
+          "area_share_within_top5": 0.0003893322951138797
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 2.0,
         "sugarcane": 35.0,
@@ -561,6 +1387,37 @@
       "state_id": "dry_bean",
       "crop_name": "Feijão",
       "harvested_area_ha": 1100.0,
+      "top5_area_total_ha": 1937.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1100.0,
+          "area_share_within_top5": 0.5678884873515746
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 800.0,
+          "area_share_within_top5": 0.41300980898296336
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 35.0,
+          "area_share_within_top5": 0.018069179143004648
+        },
+        {
+          "rank": 4,
+          "state_id": "peanut",
+          "crop_name": "Amendoim",
+          "harvested_area_ha": 2.0,
+          "area_share_within_top5": 0.0010325245224574084
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 2.0,
         "sugarcane": 35.0,
@@ -573,6 +1430,37 @@
       "state_id": "dry_bean",
       "crop_name": "Feijão",
       "harvested_area_ha": 1100.0,
+      "top5_area_total_ha": 1972.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1100.0,
+          "area_share_within_top5": 0.5578093306288032
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 800.0,
+          "area_share_within_top5": 0.4056795131845842
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 70.0,
+          "area_share_within_top5": 0.035496957403651115
+        },
+        {
+          "rank": 4,
+          "state_id": "peanut",
+          "crop_name": "Amendoim",
+          "harvested_area_ha": 2.0,
+          "area_share_within_top5": 0.0010141987829614604
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 2.0,
         "sugarcane": 70.0,
@@ -585,6 +1473,37 @@
       "state_id": "dry_bean",
       "crop_name": "Feijão",
       "harvested_area_ha": 1200.0,
+      "top5_area_total_ha": 2173.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1200.0,
+          "area_share_within_top5": 0.5522319374137138
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 900.0,
+          "area_share_within_top5": 0.4141739530602853
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 70.0,
+          "area_share_within_top5": 0.032213529682466636
+        },
+        {
+          "rank": 4,
+          "state_id": "peanut",
+          "crop_name": "Amendoim",
+          "harvested_area_ha": 3.0,
+          "area_share_within_top5": 0.0013805798435342844
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 3.0,
         "sugarcane": 70.0,
@@ -597,6 +1516,37 @@
       "state_id": "dry_bean",
       "crop_name": "Feijão",
       "harvested_area_ha": 1400.0,
+      "top5_area_total_ha": 2473.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1400.0,
+          "area_share_within_top5": 0.5661140315406389
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 1000.0,
+          "area_share_within_top5": 0.4043671653861706
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 70.0,
+          "area_share_within_top5": 0.028305701577031946
+        },
+        {
+          "rank": 4,
+          "state_id": "peanut",
+          "crop_name": "Amendoim",
+          "harvested_area_ha": 3.0,
+          "area_share_within_top5": 0.001213101496158512
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 3.0,
         "sugarcane": 70.0,
@@ -609,6 +1559,37 @@
       "state_id": "dry_bean",
       "crop_name": "Feijão",
       "harvested_area_ha": 1400.0,
+      "top5_area_total_ha": 2473.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1400.0,
+          "area_share_within_top5": 0.5661140315406389
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 1000.0,
+          "area_share_within_top5": 0.4043671653861706
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 70.0,
+          "area_share_within_top5": 0.028305701577031946
+        },
+        {
+          "rank": 4,
+          "state_id": "peanut",
+          "crop_name": "Amendoim",
+          "harvested_area_ha": 3.0,
+          "area_share_within_top5": 0.001213101496158512
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 3.0,
         "sugarcane": 70.0,
@@ -621,6 +1602,30 @@
       "state_id": "dry_bean",
       "crop_name": "Feijão",
       "harvested_area_ha": 1400.0,
+      "top5_area_total_ha": 2470.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1400.0,
+          "area_share_within_top5": 0.5668016194331984
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 1000.0,
+          "area_share_within_top5": 0.4048582995951417
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 70.0,
+          "area_share_within_top5": 0.02834008097165992
+        }
+      ],
       "reported_crop_areas_ha": {
         "sugarcane": 70.0,
         "dry_bean": 1400.0,
@@ -632,6 +1637,30 @@
       "state_id": "dry_bean",
       "crop_name": "Feijão",
       "harvested_area_ha": 1400.0,
+      "top5_area_total_ha": 2470.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1400.0,
+          "area_share_within_top5": 0.5668016194331984
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 1000.0,
+          "area_share_within_top5": 0.4048582995951417
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 70.0,
+          "area_share_within_top5": 0.02834008097165992
+        }
+      ],
       "reported_crop_areas_ha": {
         "sugarcane": 70.0,
         "dry_bean": 1400.0,
@@ -643,6 +1672,30 @@
       "state_id": "dry_bean",
       "crop_name": "Feijão",
       "harvested_area_ha": 1500.0,
+      "top5_area_total_ha": 2570.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1500.0,
+          "area_share_within_top5": 0.5836575875486382
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 1000.0,
+          "area_share_within_top5": 0.38910505836575876
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 70.0,
+          "area_share_within_top5": 0.027237354085603113
+        }
+      ],
       "reported_crop_areas_ha": {
         "sugarcane": 70.0,
         "dry_bean": 1500.0,
@@ -654,6 +1707,30 @@
       "state_id": "dry_bean",
       "crop_name": "Feijão",
       "harvested_area_ha": 1500.0,
+      "top5_area_total_ha": 2570.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1500.0,
+          "area_share_within_top5": 0.5836575875486382
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 1000.0,
+          "area_share_within_top5": 0.38910505836575876
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 70.0,
+          "area_share_within_top5": 0.027237354085603113
+        }
+      ],
       "reported_crop_areas_ha": {
         "sugarcane": 70.0,
         "dry_bean": 1500.0,
@@ -665,6 +1742,30 @@
       "state_id": "dry_bean",
       "crop_name": "Feijão",
       "harvested_area_ha": 1400.0,
+      "top5_area_total_ha": 2470.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1400.0,
+          "area_share_within_top5": 0.5668016194331984
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 1000.0,
+          "area_share_within_top5": 0.4048582995951417
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 70.0,
+          "area_share_within_top5": 0.02834008097165992
+        }
+      ],
       "reported_crop_areas_ha": {
         "sugarcane": 70.0,
         "dry_bean": 1400.0,
@@ -676,6 +1777,30 @@
       "state_id": "dry_bean",
       "crop_name": "Feijão",
       "harvested_area_ha": 1400.0,
+      "top5_area_total_ha": 2470.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1400.0,
+          "area_share_within_top5": 0.5668016194331984
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 1000.0,
+          "area_share_within_top5": 0.4048582995951417
+        },
+        {
+          "rank": 3,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 70.0,
+          "area_share_within_top5": 0.02834008097165992
+        }
+      ],
       "reported_crop_areas_ha": {
         "sugarcane": 70.0,
         "dry_bean": 1400.0,
@@ -687,6 +1812,37 @@
       "state_id": "coffee",
       "crop_name": "Café",
       "harvested_area_ha": 7670.0,
+      "top5_area_total_ha": 9940.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "coffee",
+          "crop_name": "Café",
+          "harvested_area_ha": 7670.0,
+          "area_share_within_top5": 0.7716297786720322
+        },
+        {
+          "rank": 2,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1600.0,
+          "area_share_within_top5": 0.16096579476861167
+        },
+        {
+          "rank": 3,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 600.0,
+          "area_share_within_top5": 0.060362173038229376
+        },
+        {
+          "rank": 4,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 70.0,
+          "area_share_within_top5": 0.007042253521126761
+        }
+      ],
       "reported_crop_areas_ha": {
         "coffee": 7670.0,
         "sugarcane": 70.0,
@@ -699,6 +1855,37 @@
       "state_id": "coffee",
       "crop_name": "Café",
       "harvested_area_ha": 8120.0,
+      "top5_area_total_ha": 10390.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "coffee",
+          "crop_name": "Café",
+          "harvested_area_ha": 8120.0,
+          "area_share_within_top5": 0.7815206929740135
+        },
+        {
+          "rank": 2,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1600.0,
+          "area_share_within_top5": 0.15399422521655437
+        },
+        {
+          "rank": 3,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 600.0,
+          "area_share_within_top5": 0.05774783445620789
+        },
+        {
+          "rank": 4,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 70.0,
+          "area_share_within_top5": 0.006737247353224254
+        }
+      ],
       "reported_crop_areas_ha": {
         "coffee": 8120.0,
         "sugarcane": 70.0,
@@ -711,6 +1898,44 @@
       "state_id": "coffee",
       "crop_name": "Café",
       "harvested_area_ha": 7870.0,
+      "top5_area_total_ha": 10000.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "coffee",
+          "crop_name": "Café",
+          "harvested_area_ha": 7870.0,
+          "area_share_within_top5": 0.787
+        },
+        {
+          "rank": 2,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1400.0,
+          "area_share_within_top5": 0.14
+        },
+        {
+          "rank": 3,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 600.0,
+          "area_share_within_top5": 0.06
+        },
+        {
+          "rank": 4,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 70.0,
+          "area_share_within_top5": 0.007
+        },
+        {
+          "rank": 5,
+          "state_id": "wheat",
+          "crop_name": "Trigo",
+          "harvested_area_ha": 60.0,
+          "area_share_within_top5": 0.006
+        }
+      ],
       "reported_crop_areas_ha": {
         "coffee": 7870.0,
         "sugarcane": 70.0,
@@ -724,6 +1949,37 @@
       "state_id": "coffee",
       "crop_name": "Café",
       "harvested_area_ha": 7060.0,
+      "top5_area_total_ha": 8416.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "coffee",
+          "crop_name": "Café",
+          "harvested_area_ha": 7060.0,
+          "area_share_within_top5": 0.8388783269961977
+        },
+        {
+          "rank": 2,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 900.0,
+          "area_share_within_top5": 0.10693916349809886
+        },
+        {
+          "rank": 3,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 400.0,
+          "area_share_within_top5": 0.04752851711026616
+        },
+        {
+          "rank": 4,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 56.0,
+          "area_share_within_top5": 0.006653992395437262
+        }
+      ],
       "reported_crop_areas_ha": {
         "coffee": 7060.0,
         "sugarcane": 56.0,
@@ -736,6 +1992,30 @@
       "state_id": "coffee",
       "crop_name": "Café",
       "harvested_area_ha": 8000.0,
+      "top5_area_total_ha": 9400.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "coffee",
+          "crop_name": "Café",
+          "harvested_area_ha": 8000.0,
+          "area_share_within_top5": 0.851063829787234
+        },
+        {
+          "rank": 2,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 1000.0,
+          "area_share_within_top5": 0.10638297872340426
+        },
+        {
+          "rank": 3,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 400.0,
+          "area_share_within_top5": 0.0425531914893617
+        }
+      ],
       "reported_crop_areas_ha": {
         "coffee": 8000.0,
         "dry_bean": 1000.0,
@@ -747,6 +2027,44 @@
       "state_id": "coffee",
       "crop_name": "Café",
       "harvested_area_ha": 7410.0,
+      "top5_area_total_ha": 8002.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "coffee",
+          "crop_name": "Café",
+          "harvested_area_ha": 7410.0,
+          "area_share_within_top5": 0.926018495376156
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 400.0,
+          "area_share_within_top5": 0.04998750312421894
+        },
+        {
+          "rank": 3,
+          "state_id": "soybean",
+          "crop_name": "Soja",
+          "harvested_area_ha": 96.0,
+          "area_share_within_top5": 0.011997000749812546
+        },
+        {
+          "rank": 4,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 90.0,
+          "area_share_within_top5": 0.011247188202949263
+        },
+        {
+          "rank": 5,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 6.0,
+          "area_share_within_top5": 0.0007498125468632841
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 1.0,
         "coffee": 7410.0,
@@ -761,6 +2079,44 @@
       "state_id": "coffee",
       "crop_name": "Café",
       "harvested_area_ha": 8270.0,
+      "top5_area_total_ha": 8875.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "coffee",
+          "crop_name": "Café",
+          "harvested_area_ha": 8270.0,
+          "area_share_within_top5": 0.931830985915493
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 400.0,
+          "area_share_within_top5": 0.04507042253521127
+        },
+        {
+          "rank": 3,
+          "state_id": "soybean",
+          "crop_name": "Soja",
+          "harvested_area_ha": 100.0,
+          "area_share_within_top5": 0.011267605633802818
+        },
+        {
+          "rank": 4,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 95.0,
+          "area_share_within_top5": 0.010704225352112675
+        },
+        {
+          "rank": 5,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 10.0,
+          "area_share_within_top5": 0.0011267605633802818
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 1.0,
         "coffee": 8270.0,
@@ -775,6 +2131,44 @@
       "state_id": "coffee",
       "crop_name": "Café",
       "harvested_area_ha": 7228.0,
+      "top5_area_total_ha": 7899.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "coffee",
+          "crop_name": "Café",
+          "harvested_area_ha": 7228.0,
+          "area_share_within_top5": 0.9150525382959869
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 400.0,
+          "area_share_within_top5": 0.0506393214330928
+        },
+        {
+          "rank": 3,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 140.0,
+          "area_share_within_top5": 0.017723762501582477
+        },
+        {
+          "rank": 4,
+          "state_id": "soybean",
+          "crop_name": "Soja",
+          "harvested_area_ha": 120.0,
+          "area_share_within_top5": 0.015191796429927839
+        },
+        {
+          "rank": 5,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 11.0,
+          "area_share_within_top5": 0.0013925813394100519
+        }
+      ],
       "reported_crop_areas_ha": {
         "peanut": 1.0,
         "coffee": 7228.0,
@@ -789,6 +2183,44 @@
       "state_id": "coffee",
       "crop_name": "Café",
       "harvested_area_ha": 9078.0,
+      "top5_area_total_ha": 9985.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "coffee",
+          "crop_name": "Café",
+          "harvested_area_ha": 9078.0,
+          "area_share_within_top5": 0.9091637456184276
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 600.0,
+          "area_share_within_top5": 0.06009013520280421
+        },
+        {
+          "rank": 3,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 175.0,
+          "area_share_within_top5": 0.017526289434151226
+        },
+        {
+          "rank": 4,
+          "state_id": "soybean",
+          "crop_name": "Soja",
+          "harvested_area_ha": 120.0,
+          "area_share_within_top5": 0.012018027040560842
+        },
+        {
+          "rank": 5,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 12.0,
+          "area_share_within_top5": 0.0012018027040560841
+        }
+      ],
       "reported_crop_areas_ha": {
         "coffee": 9078.0,
         "sugarcane": 12.0,
@@ -802,6 +2234,44 @@
       "state_id": "coffee",
       "crop_name": "Café",
       "harvested_area_ha": 7475.0,
+      "top5_area_total_ha": 8305.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "coffee",
+          "crop_name": "Café",
+          "harvested_area_ha": 7475.0,
+          "area_share_within_top5": 0.9000602046959663
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 500.0,
+          "area_share_within_top5": 0.060204695966285374
+        },
+        {
+          "rank": 3,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 200.0,
+          "area_share_within_top5": 0.024081878386514148
+        },
+        {
+          "rank": 4,
+          "state_id": "soybean",
+          "crop_name": "Soja",
+          "harvested_area_ha": 120.0,
+          "area_share_within_top5": 0.014449127031908489
+        },
+        {
+          "rank": 5,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 10.0,
+          "area_share_within_top5": 0.0012040939193257074
+        }
+      ],
       "reported_crop_areas_ha": {
         "coffee": 7475.0,
         "sugarcane": 10.0,
@@ -815,6 +2285,44 @@
       "state_id": "coffee",
       "crop_name": "Café",
       "harvested_area_ha": 7635.0,
+      "top5_area_total_ha": 8363.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "coffee",
+          "crop_name": "Café",
+          "harvested_area_ha": 7635.0,
+          "area_share_within_top5": 0.9129498983618318
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 400.0,
+          "area_share_within_top5": 0.04782972617481765
+        },
+        {
+          "rank": 3,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 200.0,
+          "area_share_within_top5": 0.023914863087408825
+        },
+        {
+          "rank": 4,
+          "state_id": "soybean",
+          "crop_name": "Soja",
+          "harvested_area_ha": 120.0,
+          "area_share_within_top5": 0.014348917852445294
+        },
+        {
+          "rank": 5,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 8.0,
+          "area_share_within_top5": 0.000956594523496353
+        }
+      ],
       "reported_crop_areas_ha": {
         "coffee": 7635.0,
         "sugarcane": 8.0,
@@ -828,6 +2336,44 @@
       "state_id": "coffee",
       "crop_name": "Café",
       "harvested_area_ha": 8231.0,
+      "top5_area_total_ha": 9051.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "coffee",
+          "crop_name": "Café",
+          "harvested_area_ha": 8231.0,
+          "area_share_within_top5": 0.9094022759916032
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 450.0,
+          "area_share_within_top5": 0.04971826317533974
+        },
+        {
+          "rank": 3,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 240.0,
+          "area_share_within_top5": 0.026516407026847863
+        },
+        {
+          "rank": 4,
+          "state_id": "soybean",
+          "crop_name": "Soja",
+          "harvested_area_ha": 120.0,
+          "area_share_within_top5": 0.013258203513423931
+        },
+        {
+          "rank": 5,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 10.0,
+          "area_share_within_top5": 0.0011048502927853276
+        }
+      ],
       "reported_crop_areas_ha": {
         "coffee": 8231.0,
         "sugarcane": 10.0,
@@ -841,6 +2387,44 @@
       "state_id": "coffee",
       "crop_name": "Café",
       "harvested_area_ha": 7950.0,
+      "top5_area_total_ha": 8800.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "coffee",
+          "crop_name": "Café",
+          "harvested_area_ha": 7950.0,
+          "area_share_within_top5": 0.9034090909090909
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 450.0,
+          "area_share_within_top5": 0.05113636363636364
+        },
+        {
+          "rank": 3,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 270.0,
+          "area_share_within_top5": 0.03068181818181818
+        },
+        {
+          "rank": 4,
+          "state_id": "soybean",
+          "crop_name": "Soja",
+          "harvested_area_ha": 120.0,
+          "area_share_within_top5": 0.013636363636363636
+        },
+        {
+          "rank": 5,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 10.0,
+          "area_share_within_top5": 0.0011363636363636363
+        }
+      ],
       "reported_crop_areas_ha": {
         "coffee": 7950.0,
         "sugarcane": 10.0,
@@ -854,6 +2438,44 @@
       "state_id": "coffee",
       "crop_name": "Café",
       "harvested_area_ha": 6575.0,
+      "top5_area_total_ha": 7413.0,
+      "top5_crops": [
+        {
+          "rank": 1,
+          "state_id": "coffee",
+          "crop_name": "Café",
+          "harvested_area_ha": 6575.0,
+          "area_share_within_top5": 0.8869553487117227
+        },
+        {
+          "rank": 2,
+          "state_id": "maize_grain",
+          "crop_name": "Milho",
+          "harvested_area_ha": 400.0,
+          "area_share_within_top5": 0.05395926075812761
+        },
+        {
+          "rank": 3,
+          "state_id": "soybean",
+          "crop_name": "Soja",
+          "harvested_area_ha": 300.0,
+          "area_share_within_top5": 0.04046944556859571
+        },
+        {
+          "rank": 4,
+          "state_id": "dry_bean",
+          "crop_name": "Feijão",
+          "harvested_area_ha": 130.0,
+          "area_share_within_top5": 0.017536759746391475
+        },
+        {
+          "rank": 5,
+          "state_id": "sugarcane",
+          "crop_name": "Cana-de-açúcar",
+          "harvested_area_ha": 8.0,
+          "area_share_within_top5": 0.0010791852151625524
+        }
+      ],
       "reported_crop_areas_ha": {
         "coffee": 6575.0,
         "sugarcane": 8.0,
@@ -864,10 +2486,12 @@
     }
   ],
   "limitations": [
-    "O estado é dominante apenas entre os produtos incluídos no catálogo; produtos PAM fora dele, como arroz, não competem pelo estado dominante.",
-    "A cultura de maior área entre os produtos do catálogo não identifica o cultivo ou a rotação do mesmo talhão.",
-    "A prior uniforme torna todas as culturas destinos possíveis; quando count=0, a probabilidade não é frequência observada.",
+    "O top 5 é calculado apenas entre os produtos PAM mapeados ao catálogo; produtos fora dele, como arroz, não competem pelo ranking.",
+    "As participações anuais são área colhida municipal e não identificam talhões, sucessões ou consórcios individuais.",
+    "A massa de transição fracionária é o produto independente das participações top-5 em anos consecutivos; ela é uma aproximação de máxima entropia, não contagem observada de pares de lavouras.",
+    "As transições rank 1 são mantidas como auditoria, mas a cadeia probabilística usa a massa top-5 ponderada para não duplicar os mesmos pares anuais como evidência independente.",
+    "A prior uniforme torna todas as culturas elegíveis destinos possíveis; quando area_weighted_count=0, a probabilidade não é frequência observada.",
     "PAM não cobre todas as culturas de cobertura do catálogo; essas linhas dependem integralmente da prior.",
-    "A transição da cultura dominante municipal não é transição do mesmo talhão. Para café e cana, regras estruturais mantêm a cultura no horizonte enquanto faltam idade e histórico de reforma; cobertura de entrelinha é manejo associado, não destino Markov."
+    "Para café e cana, regras estruturais mantêm a cultura no horizonte enquanto faltam idade e histórico de reforma; cobertura de entrelinha é manejo associado, não destino Markov."
   ]
 }

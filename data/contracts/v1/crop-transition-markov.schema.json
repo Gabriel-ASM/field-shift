@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://fieldshift.local/contracts/v1/crop-transition-markov.schema.json",
-  "title": "Markov da cultura PAM de maior área entre os produtos do catálogo",
+  "title": "Markov com participações PAM das cinco maiores culturas",
   "type": "object",
   "required": [
     "schema_version",
@@ -14,6 +14,9 @@
     "period",
     "annual_observation_count",
     "adjacent_year_transition_count",
+    "transition_weighting_method",
+    "top_crop_limit",
+    "area_weighted_transition_pair_count",
     "states",
     "initial_crop_ids",
     "lifecycle_rules",
@@ -23,7 +26,7 @@
   ],
   "properties": {
     "schema_version": {"type": "string"},
-    "model": {"const": "municipal_catalog_dominant_crop_markov_proxy"},
+    "model": {"const": "municipal_top5_area_weighted_markov_proxy"},
     "unit_of_analysis": {"type": "string"},
     "source": {"type": "object"},
     "state_definition": {"type": "string"},
@@ -32,6 +35,9 @@
     "period": {"type": "array", "prefixItems": [{"type": "integer"}, {"type": "integer"}], "minItems": 2, "maxItems": 2},
     "annual_observation_count": {"type": "integer", "minimum": 0},
     "adjacent_year_transition_count": {"type": "integer", "minimum": 0},
+    "transition_weighting_method": {"const": "max_entropy_outer_product_of_top5_area_shares"},
+    "top_crop_limit": {"type": "integer", "minimum": 1, "maximum": 5},
+    "area_weighted_transition_pair_count": {"type": "integer", "minimum": 0},
     "states": {
       "type": "array",
       "items": {
@@ -81,13 +87,15 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["from_state", "to_state", "count", "outgoing_count", "observed_year_pairs"],
+        "required": ["from_state", "to_state", "count", "outgoing_count", "observed_year_pairs", "area_weighted_count", "area_weighted_outgoing_count"],
         "properties": {
           "from_state": {"type": "string"},
           "to_state": {"type": "string"},
           "count": {"type": "integer", "minimum": 0},
           "outgoing_count": {"type": "integer", "minimum": 0},
-          "observed_year_pairs": {"type": "array", "items": {"type": "array", "prefixItems": [{"type": "integer"}, {"type": "integer"}], "minItems": 2, "maxItems": 2}}
+          "observed_year_pairs": {"type": "array", "items": {"type": "array", "prefixItems": [{"type": "integer"}, {"type": "integer"}], "minItems": 2, "maxItems": 2}},
+          "area_weighted_count": {"type": "number", "minimum": 0},
+          "area_weighted_outgoing_count": {"type": "number", "minimum": 0}
         }
       }
     },
@@ -95,12 +103,27 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["year", "state_id", "crop_name", "harvested_area_ha", "reported_crop_areas_ha"],
+        "required": ["year", "state_id", "crop_name", "harvested_area_ha", "top5_area_total_ha", "top5_crops", "reported_crop_areas_ha"],
         "properties": {
           "year": {"type": "integer"},
           "state_id": {"type": "string"},
           "crop_name": {"type": "string"},
           "harvested_area_ha": {"type": "number", "minimum": 0},
+          "top5_area_total_ha": {"type": "number", "minimum": 0},
+          "top5_crops": {
+            "type": "array", "minItems": 1, "maxItems": 5,
+            "items": {
+              "type": "object",
+              "required": ["rank", "state_id", "crop_name", "harvested_area_ha", "area_share_within_top5"],
+              "properties": {
+                "rank": {"type": "integer", "minimum": 1, "maximum": 5},
+                "state_id": {"type": "string"},
+                "crop_name": {"type": "string"},
+                "harvested_area_ha": {"type": "number", "minimum": 0},
+                "area_share_within_top5": {"type": "number", "minimum": 0, "maximum": 1}
+              }
+            }
+          },
           "reported_crop_areas_ha": {"type": "object", "additionalProperties": {"type": "number", "minimum": 0}}
         }
       }
