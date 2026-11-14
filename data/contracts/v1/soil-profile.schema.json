@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://fieldshift.local/contracts/soil-profile.schema.json",
+  "$id": "https://fieldshift.local/contracts/v1/soil-profile.schema.json",
   "title": "Perfil estático de solo",
   "description": "Separar análise do talhão de estimativas de mapas e priors regionais. Cada valor informa profundidade, unidade, origem e qualidade.",
   "type": "object",

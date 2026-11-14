@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://fieldshift.local/contracts/climate-daily.schema.json",
+  "$id": "https://fieldshift.local/contracts/v1/climate-daily.schema.json",
   "title": "Observação meteorológica diária por local",
   "description": "Registro normalizado; preserve a fonte e a qualidade de cada variável. Não misture observação, estimativa e projeção.",
   "type": "object",

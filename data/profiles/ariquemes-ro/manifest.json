@@ -2,6 +2,8 @@
   "profile": "ariquemes-ro",
   "version": "1.0.0",
   "natureza": "mista",
+  "contract_version": "v1",
+  "contract_registry": "data/contracts/registry.json",
   "description": "Perfil municipal de demonstração com séries ambientais reais da NASA e mapas estimados de solo. O balanço de referência não representa cultura, manejo ou talhão observado.",
   "location": {
     "municipality": "Ariquemes",
@@ -20,7 +22,8 @@
       "periodo": "1981-01-01 a 2026-11-06",
       "resolucao": "ponto amostrado no centroide municipal; grade nativa POWER, variável dependente",
       "qualidade": "T2M/chuva/humidade/vento; radiação ausente em 1981-1983 e em quatro dias recentes usa Hargreaves-Samani para ET0; chuva POWER sem correção contra IMERG",
-      "sha256": "a95c8b422137f3119cef1206ce36710dfa6d9f1d90fd28420dd4aa1a09b01bd8"
+      "sha256": "a95c8b422137f3119cef1206ce36710dfa6d9f1d90fd28420dd4aa1a09b01bd8",
+      "contract_id": "climate_daily"
     },
     "soil-profile.json": {
       "origem": "ISRIC SoilGrids v2.0; AWC derivada por Saxton & Rawls (2006)",
@@ -30,7 +33,8 @@
       "periodo": "mapa estático consultado em 2026-11-13",
       "resolucao": "célula SoilGrids 250 m no centroide IBGE municipal",
       "qualidade": "estimativa mapeada; AWC de pedotransfer; sem análise local",
-      "sha256": "665d0a16184b5bdcc09c9a08580f490221b121542c5dcf1515ef174ba89512c9"
+      "sha256": "665d0a16184b5bdcc09c9a08580f490221b121542c5dcf1515ef174ba89512c9",
+      "contract_id": "soil_profile"
     },
     "states.json": {
       "origem": "classes 1/3 e 2/3 do plano MVP aplicadas ao balanço de referência",
@@ -40,7 +44,8 @@
       "periodo": "estado discreto calculado com climatologia 1981-2025",
       "resolucao": "ponto de referência municipal; 15 dias",
       "qualidade": "estado hídrico derivado; solo/cultura não classificados",
-      "sha256": "f929edfc968eab1cebb2d6289a7a105497e55789b303cd8e3a3052d1e47c7410"
+      "sha256": "f929edfc968eab1cebb2d6289a7a105497e55789b303cd8e3a3052d1e47c7410",
+      "contract_id": "markov_state"
     },
     "transitions.json": {
       "origem": "transições do balanço hídrico de NASA POWER + SoilGrids/Saxton-Rawls",
@@ -50,7 +55,8 @@
       "periodo": "1983-01-01 a 2025-12-31; spin-up 1981-1982 descartado",
       "resolucao": "ponto municipal; classes ambientais por percentis de chuva quinzenal",
       "qualidade": "derivado de modelo de referência, não observado em talhão; linhas esparsas agrupadas e identificadas",
-      "sha256": "cbf416f667e9407036ede09a8b36013ee2b32d88a8546071d8e2b2f3237f3e0a"
+      "sha256": "cbf416f667e9407036ede09a8b36013ee2b32d88a8546071d8e2b2f3237f3e0a",
+      "contract_id": "markov_transition"
     },
     "environment.json": {
       "origem": "classes quinzenais de precipitação NASA POWER; limiares por mês/quinzena, P20/P80",
@@ -70,7 +76,7 @@
       "periodo": "aplicado à série 1981-2025",
       "resolucao": "perfil de referência municipal",
       "qualidade": "suposições explícitas; não substituir dados de talhão",
-      "sha256": "d81b93708d4ca2e657c3a7a9828c47f28dc6565ff61e45ac0f89ed89b60d4f73"
+      "sha256": "6f1852e41dbfcc7d2e22a43452a4bde2bdf47248754b533f0bc51e0e53f2bf7b"
     },
     "climate-summary.json": {
       "origem": "agregação de climate-daily.csv",
@@ -140,7 +146,8 @@
       "periodo": "1988–2025",
       "resolucao": "município IBGE; não identifica pixel ou talhão",
       "qualidade": "contagens empíricas PAM; a prior uniforme habilita destinos sem contagem e está marcada no payload",
-      "sha256": "731ff1cca9250ef72ef9e22cd656c651ab95739b6c7b713f08bb8c866a29c339"
+      "sha256": "9b9d63137817ac3b2b136ebe238539d253fa1ff639ef7f33cd51f8b22db080d5",
+      "contract_id": "crop_transition_markov"
     }
   },
   "raw_sources": {

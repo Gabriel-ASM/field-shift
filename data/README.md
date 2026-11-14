@@ -10,7 +10,7 @@ A síntese mais recente da coleta está em [`research/field_shift_cerne_dos_dado
 | `profiles/<id>/` | Clima/solo normalizados; PAM e ZARC; estado hídrico de referência; transições de referência e por cultura/fase/decêndio; história ambiental, premissas e manifesto |
 | `processed/` | Execução registrada de referência e resultados de Monte Carlo por ação agrícola quando gerados |
 | `catalog/` | Inventário do PR, fontes recomendadas no desafio e perfis dos exemplos |
-| `contracts/` | JSON Schemas para clima, solo, estado, transição de cultura Markov, observação de campo e manifesto |
+| `contracts/registry.json`, `contracts/v1/` | Registro da versão ativa e JSON Schemas versionados para clima, solo, Markov, observações, políticas e manifestos; detalhes em [`contracts/README.md`](contracts/README.md) |
 | `reference/` | FAO‑56 Kc/fases, preços futuros congelados, custos econômicos extraídos, cobertura de dados, contratos e desenhos de pesquisa |
 
 Cada perfil tem 16.746 dias NASA POWER de 1981-01-01 a 2026-11-06. O Monte Carlo usa os 45 anos completos, 1981–2025. O ponto meteorológico e a célula SoilGrids são os centroides de área calculados a partir da malha municipal IBGE. São pontos regionais para demonstração, não localização de fazenda, talhão ou média municipal.
@@ -29,7 +29,7 @@ O [catálogo de recursos do desafio](catalog/fontes-desafio-nasa.json) distingue
 
 ## Ingestão de clima
 
-Os JSON originais do NASA POWER estão em `raw/nasa_power/`. Cada perfil em `profiles/` tem uma linha diária por data, com a origem, as unidades, o padrão temporal e as flags de qualidade. O contrato é `contracts/climate-daily.schema.json`.
+Os JSON originais do NASA POWER estão em `raw/nasa_power/`. Cada perfil em `profiles/` tem uma linha diária por data, com a origem, as unidades, o padrão temporal e as flags de qualidade. O contrato é resolvido pelo nome lógico `climate_daily` no registro ativo (`contracts/v1/climate-daily.schema.json` na versão atual).
 
 Parâmetros usados: `PRECTOTCORR` (mm/dia), `T2M_MAX` e `T2M_MIN` (°C), `ALLSKY_SFC_SW_DWN` (MJ/m²/dia), `RH2M` (%) e `WS2M` (m/s). O POWER retorna `time_standard=LST`: as datas são em hora solar local, não devem ser rotuladas como dia civil ou convertidas silenciosamente para UTC−3.
 
@@ -42,7 +42,7 @@ O POWER `PRECTOTCORR` é a chuva disponível nos perfis atuais. A pesquisa do Oe
 
 ## Ingestão de solo
 
-As respostas originais SoilGrids v2.0 estão em `raw/soilgrids/`. `soil-profile.json` guarda as camadas de 0–5, 5–15, 15–30, 30–60 e 60–100 cm e o perfil estático de 0–100 cm. O contrato `contracts/soil-profile.schema.json` mantém cada intervalo e unidade separados.
+As respostas originais SoilGrids v2.0 estão em `raw/soilgrids/`. `soil-profile.json` guarda as camadas de 0–5, 5–15, 15–30, 30–60 e 60–100 cm e o perfil estático de 0–100 cm. O contrato `soil_profile` mantém cada intervalo e unidade separados; o produtor valida o payload antes de gravá-lo.
 
 O endpoint retorna valores codificados junto com `d_factor` e unidades de destino. O pipeline divide pelo fator indicado: por exemplo, 281 → 28,1% de argila e 44 → pH 4,4. O carbono orgânico é convertido de dg/kg para g/kg. A água disponível em cada camada é derivada das equações de capacidade de campo (33 kPa) e ponto de murcha (1.500 kPa) de Saxton & Rawls (2006), com areia/argila como frações 0–1 e matéria orgânica aproximada como SOC × 1,724. A soma ponderada das camadas compõe a CAD em mm até 1 m.
 
@@ -82,7 +82,7 @@ A página agrupa sequências completas de cinco transições vistas nas 10.000 t
 
 O contrato ponta a ponta está em `reference/model-data-flow.json`; `field_shift.data.load_crop_scenario()` carrega a matriz condicionada à cultura e ao decêndio para o mesmo motor Markov/Monte Carlo.
 
-O motor adiciona Dirichlet `α=0,5` por destino viável a cada linha de contagem. Essa pseudocontagem representa incerteza da matriz, não dados. Como as linhas são derivadas do mesmo balanço, o modelo não tem evidência de efeito de ação agrícola. O esquema `contracts/field-observation.schema.json` permanece separado para dados pareados reais de manejo quando existirem.
+O motor adiciona Dirichlet `α=0,5` por destino viável a cada linha de contagem. Essa pseudocontagem representa incerteza da matriz, não dados. Como as linhas são derivadas do mesmo balanço, o modelo não tem evidência de efeito de ação agrícola. O contrato versionado `field_observation` permanece separado para dados pareados reais de manejo quando existirem.
 
 ## Simulação Monte Carlo
 

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://fieldshift.local/contracts/markov-transition.schema.json",
+  "$id": "https://fieldshift.local/contracts/v1/markov-transition.schema.json",
   "title": "Contagens de transições para um perfil Markov",
   "description": "Arquivo JSON de transições é uma lista. Contagens podem ser observadas, derivadas por processo físico, agrupadas ou priorizadas.",
   "type": "array",

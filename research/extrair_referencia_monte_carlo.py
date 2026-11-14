@@ -51,6 +51,13 @@ def records_from_header(sheet, header_label):
 
 def main():
     workbook = load_workbook(SOURCE, data_only=True, read_only=True)
+    registry_path = ROOT / "data" / "contracts" / "registry.json"
+    contract_registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    contract_version = contract_registry["current_version"]
+    active_contract_files = {
+        name: f"data/contracts/{contract_version}/{filename}"
+        for name, filename in contract_registry["versions"][contract_version]["contracts"].items()
+    }
     config_rows = rows(workbook["Configuracao"])
     draft_config = {
         str(row[1]).strip(): row[2]
@@ -74,10 +81,9 @@ def main():
         "workbook_draft_configuration": draft_config,
         "configuration_note": "Preservada como referência da planilha. A taxa de 10% a.a. e outros parâmetros ilustrativos da planilha não substituem os valores vigentes em docs/plano-mvp.md; para esta execução o MVP usa as definições do plano.",
         "active_ingestion_contracts": {
-            "daily_climate": "data/contracts/climate-daily.schema.json",
-            "soil_profile": "data/contracts/soil-profile.schema.json",
-            "field_observation": "data/contracts/field-observation.schema.json",
-            "markov_transition_counts": "data/contracts/markov-transition.schema.json",
+            "registry": "data/contracts/registry.json",
+            "version": contract_version,
+            "schemas": active_contract_files,
         },
     }
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)

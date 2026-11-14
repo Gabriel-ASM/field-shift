@@ -12,4 +12,4 @@ Os pontos são centroides municipais e não observações de talhão. As matrize
 
 ## Adicionar perfil
 
-Use `data/pipeline/build_profiles.py` como referência de normalização, mas mantenha os arquivos originais, os metadados de origem, data, período, unidade e qualidade. Não copie estimativas entre municípios. Para modelar ação agrícola, acrescente observações longitudinais da mesma unidade de manejo no contrato `data/contracts/field-observation.schema.json`; as transições precisam ficar separadas de estados derivados por clima.
+Use `data/pipeline/build_profiles.py` como referência de normalização, mas mantenha os arquivos originais, os metadados de origem, data, período, unidade e qualidade. Não copie estimativas entre municípios. O manifesto registra a versão do conjunto de contratos e cada `contract_id`; os pipelines resolvem esquemas pelo `data/contracts/registry.json` e validam antes de publicar os derivados. Para modelar ação agrícola, acrescente observações longitudinais da mesma unidade de manejo pelo contrato lógico `field_observation`; mantenha essas transições separadas de estados derivados por clima.

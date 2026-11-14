@@ -1531,9 +1531,17 @@
   },
   "configuration_note": "Preservada como referência da planilha. A taxa de 10% a.a. e outros parâmetros ilustrativos da planilha não substituem os valores vigentes em docs/plano-mvp.md; para esta execução o MVP usa as definições do plano.",
   "active_ingestion_contracts": {
-    "daily_climate": "data/contracts/climate-daily.schema.json",
-    "soil_profile": "data/contracts/soil-profile.schema.json",
-    "field_observation": "data/contracts/field-observation.schema.json",
-    "markov_transition_counts": "data/contracts/markov-transition.schema.json"
+    "registry": "data/contracts/registry.json",
+    "version": "v1",
+    "schemas": {
+      "climate_daily": "data/contracts/v1/climate-daily.schema.json",
+      "soil_profile": "data/contracts/v1/soil-profile.schema.json",
+      "markov_state": "data/contracts/v1/markov-state.schema.json",
+      "markov_transition": "data/contracts/v1/markov-transition.schema.json",
+      "crop_transition_markov": "data/contracts/v1/crop-transition-markov.schema.json",
+      "field_observation": "data/contracts/v1/field-observation.schema.json",
+      "profile_manifest": "data/contracts/v1/profile-manifest.schema.json",
+      "strategy_policy": "data/contracts/v1/strategy-policy.schema.json"
+    }
   }
 }

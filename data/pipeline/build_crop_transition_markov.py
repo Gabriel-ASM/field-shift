@@ -6,6 +6,8 @@ from hashlib import sha256
 import json
 from pathlib import Path
 
+from contract_registry import current_contract_version, validate_contract
+
 
 ROOT = Path(__file__).resolve().parents[2]
 PROFILE_ROOT = ROOT / "data" / "profiles"
@@ -62,7 +64,7 @@ def annual_effective_kc(crop: dict) -> tuple[float | None, str]:
     return annual_demand, "derived from FAO-56 phase Kc/duration; off-crop reference Kc=1"
 
 
-def build_profile(profile_dir: Path, crop_water_parameters: dict, alpha_per_destination: float) -> dict:
+def build_profile(profile_dir: Path, crop_water_parameters: dict, alpha_per_destination: float, lifecycle_rules: dict) -> dict:
     pam = read_json(profile_dir / "pam-history.json")
     manifest_path = profile_dir / "manifest.json"
     manifest = read_json(manifest_path)
@@ -133,7 +135,7 @@ def build_profile(profile_dir: Path, crop_water_parameters: dict, alpha_per_dest
     observed_years = [item["year"] for item in annual]
     profile = manifest["location"]
     payload = {
-        "schema_version": "1.0.0",
+        "schema_version": "1.1.0",
         "model": "municipal_catalog_dominant_crop_markov_proxy",
         "unit_of_analysis": "município-ano; uma cultura de maior área entre os produtos do catálogo, não o mesmo talhão",
         "source": {
@@ -146,13 +148,14 @@ def build_profile(profile_dir: Path, crop_water_parameters: dict, alpha_per_dest
             "period": [min(observed_years), max(observed_years)] if observed_years else [],
         },
         "state_definition": "A cultura do catálogo com maior área colhida PAM no município-ano; produtos fora do catálogo não competem pelo estado dominante. Café arábica e canephora são agregados no estado Café.",
-        "probability_definition": "Contagem PAM + prior Dirichlet uniforme alpha=0.5 por destino, reponderada pela água e hipótese explícita de carbono do solo durante o Monte Carlo.",
+        "probability_definition": "Transições PAM + prior Dirichlet uniforme e fatores ambientais por trajetória; regras de ciclo impedem trocas anuais para culturas perenes/semiperenes sem idade ou reforma observadas.",
         "alpha_per_destination": alpha_per_destination,
         "period": [min(observed_years), max(observed_years)] if observed_years else [],
         "annual_observation_count": len(annual),
         "adjacent_year_transition_count": sum(edge_counts.values()),
         "states": states,
         "initial_crop_ids": [crop["id"] for crop in CATALOG if crop["initial"]],
+        "lifecycle_rules": {crop_id: lifecycle_rules[crop_id] for crop_id in ("coffee", "sugarcane") if crop_id in lifecycle_rules},
         "transitions": transitions,
         "annual_sequence": annual,
         "limitations": [
@@ -160,8 +163,10 @@ def build_profile(profile_dir: Path, crop_water_parameters: dict, alpha_per_dest
             "A cultura de maior área entre os produtos do catálogo não identifica o cultivo ou a rotação do mesmo talhão.",
             "A prior uniforme torna todas as culturas destinos possíveis; quando count=0, a probabilidade não é frequência observada.",
             "PAM não cobre todas as culturas de cobertura do catálogo; essas linhas dependem integralmente da prior.",
+            "A transição da cultura dominante municipal não é transição do mesmo talhão. Para café e cana, regras estruturais mantêm a cultura no horizonte enquanto faltam idade e histórico de reforma; cobertura de entrelinha é manejo associado, não destino Markov.",
         ],
     }
+    validate_contract("crop_transition_markov", payload, source=f"{profile_dir.name}/crop-transition-markov.json")
     output = profile_dir / "crop-transition-markov.json"
     write_json(output, payload)
     manifest.setdefault("datasets", {}).pop("crop-portfolio-markov.json", None)
@@ -174,7 +179,11 @@ def build_profile(profile_dir: Path, crop_water_parameters: dict, alpha_per_dest
         "resolucao": "município IBGE; não identifica pixel ou talhão",
         "qualidade": "contagens empíricas PAM; a prior uniforme habilita destinos sem contagem e está marcada no payload",
         "sha256": sha256(output.read_bytes()).hexdigest(),
+        "contract_id": "crop_transition_markov",
     }
+    manifest["contract_version"] = current_contract_version()
+    manifest["contract_registry"] = "data/contracts/registry.json"
+    validate_contract("profile_manifest", manifest, source=f"{profile_dir.name}/manifest.json")
     write_json(manifest_path, manifest)
     return payload
 
@@ -183,9 +192,10 @@ def main() -> None:
     water_parameters = read_json(ROOT / "data" / "reference" / "crop-water-parameters.json")
     soil_hypotheses = read_json(ROOT / "data" / "reference" / "soil-crop-response-hypotheses.json")
     alpha_per_destination = float(soil_hypotheses["probability_modifiers"]["rotation_prior_alpha_per_destination"])
+    lifecycle_rules = soil_hypotheses.get("crop_lifecycle_rules", {})
     for profile_dir in sorted(PROFILE_ROOT.iterdir()):
         if profile_dir.is_dir() and (profile_dir / "pam-history.json").exists():
-            payload = build_profile(profile_dir, water_parameters, alpha_per_destination)
+            payload = build_profile(profile_dir, water_parameters, alpha_per_destination, lifecycle_rules)
             print(
                 f"{payload['source']['municipality_ibge_code']}: "
                 f"{payload['annual_observation_count']} anos, "

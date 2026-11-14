@@ -17,6 +17,8 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 from statistics import mean
 
+from contract_registry import current_contract_version, validate_contract
+
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
@@ -391,25 +393,31 @@ def climate_summary(rows: list[dict], location_id: str) -> dict:
 
 def profile_manifest(location: dict, raw_climate: Path, raw_soil: Path, climate_path: Path, soil_path: Path, transitions_path: Path, history_path: Path, states_path: Path, assumptions_path: Path, summary_path: Path, derivation_path: Path) -> dict:
     datasets = {
-        "climate-daily.csv": {"origem": "NASA POWER Daily API v2.10.3", "responsavel": "NASA Langley Research Center", "frequencia": "diária, horário padrão local solar (LST)", "unidade": "mm/d; °C; MJ/m²/d; %; m/s", "periodo": f"1981-01-01 a {LAST_DAY.isoformat()}", "resolucao": "ponto amostrado no centroide municipal; grade nativa POWER, variável dependente", "qualidade": "T2M/chuva/humidade/vento; radiação ausente em 1981-1983 e em quatro dias recentes usa Hargreaves-Samani para ET0; chuva POWER sem correção contra IMERG", "sha256": sha256(climate_path)},
-        "soil-profile.json": {"origem": "ISRIC SoilGrids v2.0; AWC derivada por Saxton & Rawls (2006)", "responsavel": "ISRIC / Field Shift derivação", "frequencia": "perfil estático; predição média", "unidade": "%; g/kg; pH; mm de água disponível", "periodo": "mapa estático consultado em 2026-11-13", "resolucao": "célula SoilGrids 250 m no centroide IBGE municipal", "qualidade": "estimativa mapeada; AWC de pedotransfer; sem análise local", "sha256": sha256(soil_path)},
-        "states.json": {"origem": "classes 1/3 e 2/3 do plano MVP aplicadas ao balanço de referência", "responsavel": "Field Shift derivação", "frequencia": "estado de água por quinzena", "unidade": "fração da AWC em 0-100 cm", "periodo": "estado discreto calculado com climatologia 1981-2025", "resolucao": "ponto de referência municipal; 15 dias", "qualidade": "estado hídrico derivado; solo/cultura não classificados", "sha256": sha256(states_path)},
-        "transitions.json": {"origem": "transições do balanço hídrico de NASA POWER + SoilGrids/Saxton-Rawls", "responsavel": "Field Shift derivação", "frequencia": "quinzenal", "unidade": "contagens por água atual × ambiente × água seguinte", "periodo": "1983-01-01 a 2025-12-31; spin-up 1981-1982 descartado", "resolucao": "ponto municipal; classes ambientais por percentis de chuva quinzenal", "qualidade": "derivado de modelo de referência, não observado em talhão; linhas esparsas agrupadas e identificadas", "sha256": sha256(transitions_path)},
+        "climate-daily.csv": {"origem": "NASA POWER Daily API v2.10.3", "responsavel": "NASA Langley Research Center", "frequencia": "diária, horário padrão local solar (LST)", "unidade": "mm/d; °C; MJ/m²/d; %; m/s", "periodo": f"1981-01-01 a {LAST_DAY.isoformat()}", "resolucao": "ponto amostrado no centroide municipal; grade nativa POWER, variável dependente", "qualidade": "T2M/chuva/humidade/vento; radiação ausente em 1981-1983 e em quatro dias recentes usa Hargreaves-Samani para ET0; chuva POWER sem correção contra IMERG", "sha256": sha256(climate_path), "contract_id": "climate_daily"},
+        "soil-profile.json": {"origem": "ISRIC SoilGrids v2.0; AWC derivada por Saxton & Rawls (2006)", "responsavel": "ISRIC / Field Shift derivação", "frequencia": "perfil estático; predição média", "unidade": "%; g/kg; pH; mm de água disponível", "periodo": "mapa estático consultado em 2026-11-13", "resolucao": "célula SoilGrids 250 m no centroide IBGE municipal", "qualidade": "estimativa mapeada; AWC de pedotransfer; sem análise local", "sha256": sha256(soil_path), "contract_id": "soil_profile"},
+        "states.json": {"origem": "classes 1/3 e 2/3 do plano MVP aplicadas ao balanço de referência", "responsavel": "Field Shift derivação", "frequencia": "estado de água por quinzena", "unidade": "fração da AWC em 0-100 cm", "periodo": "estado discreto calculado com climatologia 1981-2025", "resolucao": "ponto de referência municipal; 15 dias", "qualidade": "estado hídrico derivado; solo/cultura não classificados", "sha256": sha256(states_path), "contract_id": "markov_state"},
+        "transitions.json": {"origem": "transições do balanço hídrico de NASA POWER + SoilGrids/Saxton-Rawls", "responsavel": "Field Shift derivação", "frequencia": "quinzenal", "unidade": "contagens por água atual × ambiente × água seguinte", "periodo": "1983-01-01 a 2025-12-31; spin-up 1981-1982 descartado", "resolucao": "ponto municipal; classes ambientais por percentis de chuva quinzenal", "qualidade": "derivado de modelo de referência, não observado em talhão; linhas esparsas agrupadas e identificadas", "sha256": sha256(transitions_path), "contract_id": "markov_transition"},
         "environment.json": {"origem": "classes quinzenais de precipitação NASA POWER; limiares por mês/quinzena, P20/P80", "responsavel": "Field Shift derivação", "frequencia": "quinzenal; anos completos", "unidade": "classe seca/normal/úmida", "periodo": "1981-01-01 a 2025-12-31", "resolucao": "ponto municipal; 24 períodos por ano", "qualidade": "dados POWER e classes derivadas; blocos sazonais usados no Monte Carlo", "sha256": sha256(history_path)},
         "assumptions.json": {"origem": "regras e premissas declaradas no plano MVP e nesta ingestão", "responsavel": "Field Shift", "frequencia": "por execução", "unidade": "ver arquivo", "periodo": "aplicado à série 1981-2025", "resolucao": "perfil de referência municipal", "qualidade": "suposições explícitas; não substituir dados de talhão", "sha256": sha256(assumptions_path)},
         "climate-summary.json": {"origem": "agregação de climate-daily.csv", "responsavel": "Field Shift", "frequencia": "por perfil", "unidade": "mm/ano", "periodo": "anos completos 1981-2025", "resolucao": "ponto municipal", "qualidade": "estatística descritiva de dados ambientais NASA POWER", "sha256": sha256(summary_path)},
         "markov-derivation.json": {"origem": "climate-daily.csv + soil-profile.json", "responsavel": "Field Shift", "frequencia": "quinzenal", "unidade": "mm, fração da CAD e classes", "periodo": "1981-2025", "resolucao": "ponto municipal", "qualidade": "balanço de referência sem cultura; limitações descritas no arquivo", "sha256": sha256(derivation_path)},
     }
+    manifest_path = climate_path.parent / "manifest.json"
+    existing_manifest = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else {}
+    datasets = {**existing_manifest.get("datasets", {}), **datasets}
+    raw_sources = {
+        **existing_manifest.get("raw_sources", {}),
+        "nasa_power_json": {"path": str(raw_climate.relative_to(ROOT)).replace("\\", "/"), "sha256": sha256(raw_climate), "query": f"https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M_MAX,T2M_MIN,RH2M,WS2M,ALLSKY_SFC_SW_DWN,PRECTOTCORR&community=AG&longitude={location['lon']}&latitude={location['lat']}&start=19810101&end=20261106&format=JSON", "api_start": "19810101", "api_end": "20261106", "time_standard": "LST", "retrieved_at": "2026-11-13"},
+        "soilgrids_json": {"path": str(raw_soil.relative_to(ROOT)).replace("\\", "/"), "sha256": sha256(raw_soil), "query": f"https://rest.isric.org/soilgrids/v2.0/properties/query?lon={location['lon']}&lat={location['lat']}&property=clay&property=sand&property=silt&property=phh2o&property=soc&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean", "value": "mean", "depths": [f"{top}-{bottom}cm" for top, bottom in DEPTHS], "retrieved_at": "2026-11-13"},
+        "ibge_malha_geojson": {"path": f"data/raw/ibge/ibge-malha-municipal-{location['ibge_code']}.geojson", "sha256": sha256(RAW_IBGE / f"ibge-malha-municipal-{location['ibge_code']}.geojson"), "query": f"https://servicodados.ibge.gov.br/api/v3/malhas/municipios/{location['ibge_code']}?formato=application/vnd.geo%2Bjson&qualidade=intermediaria", "retrieved_at": "2026-11-13"},
+    }
     return {
         "profile": location["id"], "version": "1.0.0", "natureza": "mista",
+        "contract_version": current_contract_version(), "contract_registry": "data/contracts/registry.json",
         "description": "Perfil municipal de demonstração com séries ambientais reais da NASA e mapas estimados de solo. O balanço de referência não representa cultura, manejo ou talhão observado.",
         "location": {"municipality": location["municipality"], "uf": location["uf"], "ibge_code": location["ibge_code"], "longitude": location["lon"], "latitude": location["lat"], "coordinate_basis": "centroide de área da malha municipal IBGE; perfil regional, não seleção de talhão"},
         "datasets": datasets,
-        "raw_sources": {
-            "nasa_power_json": {"path": str(raw_climate.relative_to(ROOT)).replace("\\", "/"), "sha256": sha256(raw_climate), "query": f"https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M_MAX,T2M_MIN,RH2M,WS2M,ALLSKY_SFC_SW_DWN,PRECTOTCORR&community=AG&longitude={location['lon']}&latitude={location['lat']}&start=19810101&end=20261106&format=JSON", "api_start": "19810101", "api_end": "20261106", "time_standard": "LST", "retrieved_at": "2026-11-13"},
-            "soilgrids_json": {"path": str(raw_soil.relative_to(ROOT)).replace("\\", "/"), "sha256": sha256(raw_soil), "query": f"https://rest.isric.org/soilgrids/v2.0/properties/query?lon={location['lon']}&lat={location['lat']}&property=clay&property=sand&property=silt&property=phh2o&property=soc&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean", "value": "mean", "depths": [f"{top}-{bottom}cm" for top, bottom in DEPTHS], "retrieved_at": "2026-11-13"},
-            "ibge_malha_geojson": {"path": f"data/raw/ibge/ibge-malha-municipal-{location['ibge_code']}.geojson", "sha256": sha256(RAW_IBGE / f"ibge-malha-municipal-{location['ibge_code']}.geojson"), "query": f"https://servicodados.ibge.gov.br/api/v3/malhas/municipios/{location['ibge_code']}?formato=application/vnd.geo%2Bjson&qualidade=intermediaria", "retrieved_at": "2026-11-13"},
-        },
+        "raw_sources": raw_sources,
     }
 
 
@@ -424,12 +432,32 @@ def build_location(location: dict) -> dict:
     profile.mkdir(parents=True, exist_ok=True)
     climate = power_rows(location)
     soil = soil_profile(location)
+    for index, row in enumerate(climate, start=2):
+        validate_contract("climate_daily", {
+            "location_id": row["location_id"],
+            "date_local": row["_date"].isoformat(),
+            "time_basis": row["time_basis"],
+            "timezone": row["timezone"],
+            "source": row["source"],
+            "source_status": row["source_status"],
+            "precipitation_mm": row["precipitation_mm"],
+            "tmax_c": row["tmax_c"],
+            "tmin_c": row["tmin_c"],
+            "solar_mj_m2_day": row["solar_mj_m2_day"],
+            "relative_humidity_pct": row["relative_humidity_pct"],
+            "wind_2m_ms": row["wind_2m_ms"],
+            "eto_mm_day": row["eto_mm_day"],
+            "eto_method": row["eto_method"],
+            "quality": {"valid": row["quality_valid"], "flags": row["quality_flags"], "missing_variables": row["missing_variables"]},
+        }, source=f"{location['id']}/climate-daily.csv linha {index}")
+    validate_contract("soil_profile", soil, source=f"{location['id']}/soil-profile.json")
     climate_path = profile / "climate-daily.csv"
     soil_path = profile / "soil-profile.json"
     states_path = profile / "states.json"
     transitions_path = profile / "transitions.json"
     history_path = profile / "environment.json"
     assumptions_path = profile / "assumptions.json"
+    existing_assumptions = json.loads(assumptions_path.read_text(encoding="utf-8")) if assumptions_path.exists() else {}
     write_climate_csv(climate_path, climate)
     write_json(soil_path, soil)
 
@@ -438,6 +466,8 @@ def build_location(location: dict) -> dict:
         for water in STATE_ORDER
     ]
     history, transitions, markov_meta = climate_history(climate, soil["available_water_capacity_mm"])
+    validate_contract("markov_state", state_records, source=f"{location['id']}/states.json")
+    validate_contract("markov_transition", transitions, source=f"{location['id']}/transitions.json")
     write_json(states_path, state_records)
     write_json(transitions_path, transitions)
     write_json(history_path, history)
@@ -464,12 +494,21 @@ def build_location(location: dict) -> dict:
         "monte_carlo": {"steps": 120, "trajectories": 10000, "seed": 2026, "block_periods": 2, "sample_transition_parameters_per_trajectory": True},
         "not_available": ["field_observations", "crop-specific transition counts", "ZARC planting eligibility", "field-measured soil and initial water", "crop yield, prices, costs, and VPL"],
     }
+    assumptions = {**existing_assumptions, **assumptions}
+    assumptions["not_available"] = list(dict.fromkeys(
+        [*existing_assumptions.get("not_available", []), *assumptions["not_available"]]
+    ))
+    assumptions["monte_carlo"] = {
+        **existing_assumptions.get("monte_carlo", {}),
+        **assumptions.get("monte_carlo", {}),
+    }
     write_json(assumptions_path, assumptions)
     summary = climate_summary(climate, location["id"])
     summary_path = profile / "climate-summary.json"
     derivation_path = profile / "markov-derivation.json"
     write_json(summary_path, summary)
     metadata = profile_manifest(location, raw_climate, raw_soil, climate_path, soil_path, transitions_path, history_path, states_path, assumptions_path, summary_path, derivation_path)
+    validate_contract("profile_manifest", metadata, source=f"{location['id']}/manifest.json")
     write_json(profile / "manifest.json", metadata)
     return {"location": location, "summary": summary, "awc_mm": soil["available_water_capacity_mm"], "soil": soil}
 

@@ -1,3 +1,4 @@
 beautifulsoup4>=4.14,<5
 requests>=2.33,<3
 xlrd>=2.0,<3
+jsonschema>=4.22,<5

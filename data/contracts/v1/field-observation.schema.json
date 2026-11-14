@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://fieldshift.local/contracts/field-observation.schema.json",
+  "$id": "https://fieldshift.local/contracts/v1/field-observation.schema.json",
   "title": "Observação quinzenal de manejo e estado do talhão",
   "description": "Registro pareado usado para estimar transições: o próximo estado precisa pertencer à mesma unidade de manejo.",
   "type": "object",

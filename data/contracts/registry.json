@@ -1,0 +1,19 @@
+{
+  "registry_version": "1.0.0",
+  "current_version": "v1",
+  "versions": {
+    "v1": {
+      "status": "active",
+      "contracts": {
+        "climate_daily": "climate-daily.schema.json",
+        "soil_profile": "soil-profile.schema.json",
+        "markov_state": "markov-state.schema.json",
+        "markov_transition": "markov-transition.schema.json",
+        "crop_transition_markov": "crop-transition-markov.schema.json",
+        "field_observation": "field-observation.schema.json",
+        "profile_manifest": "profile-manifest.schema.json",
+        "strategy_policy": "strategy-policy.schema.json"
+      }
+    }
+  }
+}

@@ -84,7 +84,8 @@
       "probability": "cada trajetória sorteia linhas Dirichlet(count + alpha=0.5 por destino); repondera com fatores explícitos de água/solo e normaliza; o grafo mostra média contextual e intervalo empírico de 90% da linha posterior",
       "support": "38 observações anuais e até 37 pares consecutivos por município; candidatas sem série PAM têm n=0 e dependem da prior",
       "graph": "14 nós e 196 setas direcionadas, inclusive permanência na cultura; clique em um nó destaca as saídas e discrimina P0, contagem k/n PAM, fatores água/solo, intervalo Dirichlet e contagem MC",
-      "monte_carlo_overlay": "cor e frequência dos nós por ano; contagem observada das setas por ano entre as 10.000 trajetórias",
+      "lifecycle_rules": "café e cana permanecem como cultura principal durante os cinco anos quando falta idade/reforma observada; braquiária entrelinhas é uma recomendação de manejo associado ao café, não um destino Markov",
+      "monte_carlo_overlay": "Monte Carlo automático e progressivo; frequência de ocupação dos nós e contagem das setas por ano nas 10.000 trajetórias; cada trajetória mantém uma linha Dirichlet sorteada por estado visitado",
       "not_equivalent_to": "rotação do mesmo campo; a PAM não identifica talhão, ordem de safra ou culturas de cobertura"
     },
     "reference_model": {
@@ -119,7 +120,9 @@
     "water": "10.000 trajetórias; matriz quinzenal de água derivada de POWER, SoilGrids/Saxton–Rawls e Kc=1 de referência",
     "soil_carbon": "SoilGrids inicial 0–30 cm; faixas anuais e coeficientes hipotéticos em data/reference/soil-crop-response-hypotheses.json",
     "joint_crop_water": "condicionamento hipotético no simulador; faltam observações pareadas por pixel/talhão para calibração",
-    "graph_output": "ocupação dos 14 nós e frequência das arestas em cada um dos cinco anos; uma cultura por trajetória e ano"
+    "graph_output": "ocupação dos 14 nós e frequência das arestas em cada um dos cinco anos; uma cultura por trajetória e ano",
+    "execution": "inicia após a renderização inicial; atualiza progresso a cada 200 trajetórias e o overlay do grafo a cada 1.000; permite cancelar a execução anterior ao mudar perfil/cultura/semente",
+    "perennial_constraints": "café e cana têm apenas transição para si mesmos no horizonte sem idade/reforma; recomendação de braquiária nas entrelinhas do café é apresentada à parte e não recebe efeito numérico sem coeficiente compatível"
   },
   "economic_optimization": {
     "objective": "maximizar o VPL esperado por hectare entre as sequências completas de cinco transições observadas no Monte Carlo após a cultura inicial",

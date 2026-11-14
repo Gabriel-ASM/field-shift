@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://fieldshift.local/contracts/strategy-policy.schema.json",
+  "$id": "https://fieldshift.local/contracts/v1/strategy-policy.schema.json",
   "title": "Política de ações por estado para simulação",
   "type": "object",
   "required": ["name", "actions_by_state", "provenance"],

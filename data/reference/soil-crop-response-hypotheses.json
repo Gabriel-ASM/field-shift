@@ -51,6 +51,39 @@
     "rotation_prior_alpha_per_destination": 0.5,
     "rotation_prior_distribution": "Uniforme sobre as 14 culturas do catálogo; aplicada a todos os destinos, além das contagens PAM observadas. A probabilidade posterior representa um prior explícito onde falta histórico, não uma frequência observada."
   },
+  "crop_lifecycle_rules": {
+    "horizon_years": 5,
+    "coffee": {
+      "mode": "persistent_within_horizon",
+      "allowed_destinations": ["coffee"],
+      "rationale": "Café é perene; a série municipal de cultura dominante não prova que o mesmo cafezal foi substituído. Como não temos idade nem calendário de renovação do talhão, o estado café permanece café ao longo deste horizonte de cinco anos.",
+      "source_urls": [
+        "https://www.atermaisdigital.cnptia.embrapa.br/web/cafe/planejamento-do-plantio",
+        "https://www.alice.cnptia.embrapa.br/alice/handle/doc/1041399"
+      ],
+      "associated_management": {
+        "id": "brachiaria_interrow_cover",
+        "label": "Braquiária manejada nas entrelinhas do café",
+        "role": "cobertura/manejo associado; não é substituição do café nem estado da cadeia Markov",
+        "source_urls": [
+          "https://www.embrapa.br/busca-de-noticias/-/noticia/60899851/braquiaria-na-entrelinha-do-cafe-traz-ganhos-ao-produtor-e-ao-meio-ambiente",
+          "https://www.alice.cnptia.embrapa.br/alice/handle/doc/1029866"
+        ],
+        "status": "recommendation_reference_only",
+        "simulation_effect": "Não altera numericamente carbono, água, rendimento ou VPL: os efeitos publicados dependem de local e manejo e não há um coeficiente compatível/calibrado neste perfil."
+      }
+    },
+    "sugarcane": {
+      "mode": "persistent_within_horizon",
+      "allowed_destinations": ["sugarcane"],
+      "rationale": "Cana é semiperene e costuma ter diversos cortes antes da reforma. Sem idade do canavial ou número de cortes já realizados, não se presume reforma dentro do horizonte de cinco anos.",
+      "source_urls": [
+        "https://www.embrapa.br/web/agencia-de-informacao-tecnologica/cultivos/cana-de-acucar/producao/manejo/rotacao-e-reforma",
+        "https://www.embrapa.br/web/agencia-de-informacao-tecnologica/cultivos/cana-de-acucar/producao/manejo"
+      ],
+      "associated_management": null
+    }
+  },
   "economic_yield_response": {
     "status": "uncalibrated_hypothesis",
     "warning": "Multiplicadores exploratórios de rendimento, não estimados com experimento local. São aplicados à mediana municipal PAM apenas para visualizar como água e carbono alterariam o VPL.",

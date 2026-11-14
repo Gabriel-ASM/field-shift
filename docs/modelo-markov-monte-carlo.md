@@ -66,6 +66,10 @@ O HTML mostra os 14 estados como nós e todas as 196 transições possíveis com
 
 Assim ficam distintos o suporte observado na PAM, a massa da prior, a probabilidade média contextualizada e as frequências realmente sorteadas. As linhas de posterior usadas pelo Monte Carlo são sorteadas novamente em cada trajetória; água e carbono também variam no tempo. Por isso, a frequência de uma seta no Monte Carlo pode diferir da P média fixa exibida no grafo.
 
+Ao carregar a página, o Monte Carlo inicia depois da primeira pintura da interface. A barra avança a cada 200 trajetórias e o grafo recebe novas frequências a cada 1.000. Uma execução usa a mesma linha Dirichlet sorteada por estado ao longo de cada trajetória; cada nova trajetória sorteia seus próprios parâmetros. A seta mostra a transição da cultura anterior para a atual, e o brilho de cada nó mostra quantas trajetórias ocupam essa cultura no ano selecionado.
+
+As linhas do grafo continuam completas, mas restrições de ciclo ficam explícitas. Sem idade do cafezal ou histórico de reforma, café só transita para café no horizonte; a mesma regra conservadora vale para cana enquanto faltarem idade e número de cortes. As arestas bloqueadas aparecem tracejadas em ferrugem e com probabilidade operacional zero. Braquiária manejada nas entrelinhas é exibida como opção de manejo associado ao nó Café, fora do conjunto de destinos Markov. Seu efeito não é inserido numericamente no Monte Carlo porque não há coeficiente compatível com estes perfis.
+
 ### Água
 
 Os dados `states.json`, `transitions.json` e `environment.json` guardam os estados hídricos. A chuva e ETo da NASA POWER alimentam o balanço de referência Kc=1; a CAD é derivada do SoilGrids por Saxton–Rawls. Para cada cultura, o `Kc` anual efetivo combina as fases FAO‑56 com a demanda Kc=1 fora do ciclo. Após cada classe hídrica sorteada, o armazenamento representativo muda por `(Kc_efetivo − 1) × ETo_quinzenal / CAD` e a classe é reavaliada nos cortes publicados. Culturas sem uma curva válida usam Kc=1. Esse ajuste é um balanço resumido, não medição do talhão.
@@ -95,9 +99,12 @@ O multiplicador de rendimento combina classe hídrica e carbono do solo: água b
 ## Reproduzir os artefatos
 
 ```powershell
+python data/pipeline/build_profiles.py
 python data/pipeline/build_crop_transition_markov.py
 python data/pipeline/build_economic_benchmarks.py
 python -m field_shift.visualize --output docs/visualizacao.html --seed 2026
 ```
+
+Os pipelines resolvem os contratos ativos por nome lógico em `data/contracts/registry.json`; instale os requisitos de `data/pipeline/requirements.txt` antes de reconstruir os perfis.
 
 O motor de água×fase×decêndio em `data/pipeline/build_crop_markov.py` segue disponível para cenários de balanço hídrico no CLI; não é confundido com a cadeia de transição entre culturas desta página.

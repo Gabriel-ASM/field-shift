@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://fieldshift.example/contracts/crop-transition-markov.schema.json",
+  "$id": "https://fieldshift.local/contracts/v1/crop-transition-markov.schema.json",
   "title": "Markov da cultura PAM de maior área entre os produtos do catálogo",
   "type": "object",
   "required": [
@@ -16,6 +16,7 @@
     "adjacent_year_transition_count",
     "states",
     "initial_crop_ids",
+    "lifecycle_rules",
     "transitions",
     "annual_sequence",
     "limitations"
@@ -49,6 +50,33 @@
       }
     },
     "initial_crop_ids": {"type": "array", "items": {"type": "string"}},
+    "lifecycle_rules": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["mode", "allowed_destinations", "rationale", "source_urls", "associated_management"],
+        "properties": {
+          "mode": {"type": "string", "enum": ["persistent_within_horizon"]},
+          "allowed_destinations": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+          "rationale": {"type": "string", "minLength": 1},
+          "source_urls": {"type": "array", "minItems": 1, "items": {"type": "string", "format": "uri"}},
+          "associated_management": {
+            "type": ["object", "null"],
+            "required": ["id", "label", "role", "source_urls", "status", "simulation_effect"],
+            "properties": {
+              "id": {"type": "string"},
+              "label": {"type": "string"},
+              "role": {"type": "string"},
+              "source_urls": {"type": "array", "minItems": 1, "items": {"type": "string", "format": "uri"}},
+              "status": {"type": "string"},
+              "simulation_effect": {"type": "string"}
+            },
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    },
     "transitions": {
       "type": "array",
       "items": {

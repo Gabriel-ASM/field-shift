@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://fieldshift.local/contracts/markov-state.schema.json",
+  "$id": "https://fieldshift.local/contracts/v1/markov-state.schema.json",
   "title": "Estados discretos de um perfil Markov",
   "description": "Arquivo JSON de estados é uma lista. Cada item representa uma combinação de cultura/fase/água/solo/histórico.",
   "type": "array",

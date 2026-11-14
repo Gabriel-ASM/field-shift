@@ -51,6 +51,7 @@
   #crop-markov-graph { display:block; width:100%; min-width:720px; height:auto; }
   .graph-edge { fill:none; stroke:#85968a; opacity:.075; transition:opacity .18s,stroke-width .18s; }
   .graph-edge.is-outgoing { stroke:#377a4e; opacity:.78; }
+  .graph-edge.lifecycle-blocked,.graph-edge.is-outgoing.lifecycle-blocked { stroke:#ae765e; stroke-dasharray:4 5; opacity:.24; }
   .graph-edge-label { fill:#203428; font-size:10px; font-weight:800; text-anchor:middle; paint-order:stroke; stroke:#fff; stroke-width:4px; stroke-linejoin:round; }
   .graph-node { cursor:pointer; outline:none; }
   .graph-node rect { stroke:#9ba99e; stroke-width:1.4px; transition:stroke-width .18s,filter .18s; }
@@ -80,6 +81,11 @@
   .sim-row span { color:var(--muted); font-size:.7rem; font-variant-numeric:tabular-nums; white-space:nowrap; }
   .sim-bar { grid-column:1 / -1; height:7px; overflow:hidden; border-radius:99px; background:#edf1ed; }
   .sim-bar i { display:block; height:100%; border-radius:inherit; background:var(--green); }
+  .mc-progress { display:grid; grid-template-columns:minmax(150px,1fr) auto; gap:8px 12px; align-items:center; margin-top:8px; }
+  .mc-progress progress { width:100%; height:11px; accent-color:var(--green); }
+  .mc-progress span { min-width:118px; color:var(--muted); font-size:.75rem; font-variant-numeric:tabular-nums; text-align:right; }
+  .perennial-note { margin-top:12px; padding:13px 15px; border-left:3px solid #557d54; border-radius:0 8px 8px 0; background:#f2f7f0; font-size:.81rem; line-height:1.5; }
+  .perennial-note a { font-weight:650; }
   .sample-paths { display:grid; gap:7px; margin-top:11px; }
   .sample-path { padding:8px 10px; border-radius:8px; background:var(--soft); font-size:.7rem; line-height:1.5; }
   .sample-path strong { margin-right:5px; }
@@ -112,6 +118,8 @@
     .simulation-grid { grid-template-columns:1fr; }
     .crop-graph-layout { grid-template-columns:1fr; }
     .graph-edge-list { grid-template-columns:1fr 1fr; max-height:260px; }
+    .mc-progress { grid-template-columns:1fr; }
+    .mc-progress span { text-align:left; }
   }
   @media(max-width:440px) { .section-head { display:block; } .controls { margin-top:10px; } .controls label { width:100%; } }
   @media(prefers-reduced-motion:reduce) { *,*::before,*::after { scroll-behavior:auto !important; animation-duration:.01ms !important; transition-duration:.01ms !important; } }
@@ -151,6 +159,7 @@
       </div>
     </div>
     <p id="crop-data-note" class="data-note"></p>
+    <div id="crop-lifecycle-note" class="perennial-note"></div>
     <h3 class="graph-heading">Grafo da cadeia completa</h3>
     <p class="small-muted">Cada nó é uma cultura anual. O Monte Carlo colore os nós conforme a frequência em cada ano; as setas mostram a probabilidade média após água e carbono. Clique em um nó para ver todas as saídas, a incerteza da prior Dirichlet, o suporte PAM e as transições realmente sorteadas pelo Monte Carlo.</p>
     <div class="graph-controls">
@@ -178,7 +187,7 @@
         <ol id="graph-edge-list" class="graph-edge-list"></ol>
       </aside>
     </div>
-    <div class="graph-legend"><span>Seta mais larga = maior P Markov.</span><span>Brilho do nó = mais trajetórias Monte Carlo naquele estado/ano.</span><span>Contagem PAM k/n não é sequência do mesmo talhão.</span></div>
+    <div class="graph-legend"><span>Seta mais larga = maior P Markov.</span><span>Brilho do nó = mais trajetórias Monte Carlo naquele estado/ano.</span><span>Seta tracejada ferrugem = transição bloqueada pelo ciclo da cultura.</span><span>Contagem PAM k/n não é sequência do mesmo talhão.</span></div>
     <div class="matrix-caption">
       <span>Origem nas linhas · próxima cultura nas colunas · cada estado contém uma cultura.</span>
       <span>Célula: probabilidade ajustada pelo ambiente · transições PAM observadas k/n.</span>
@@ -193,7 +202,7 @@
     <div class="section-head">
       <div>
         <h2 id="monte-carlo-title">Monte Carlo · ambiente e rotação</h2>
-        <p>10.000 trajetórias · cinco transições anuais · uma cultura por talhão em cada ano.</p>
+        <p>A execução começa automaticamente ao abrir a página. 10.000 trajetórias · cinco transições anuais · uma cultura por talhão em cada ano; o progresso e a frequência dos nós atualizam durante a execução.</p>
       </div>
       <div class="controls">
         <label for="simulation-seed">Semente
@@ -203,6 +212,7 @@
       </div>
     </div>
     <p id="run-status" class="status" aria-live="polite"></p>
+    <div class="mc-progress"><progress id="simulation-progress" max="10000" value="0" aria-label="Progresso do Monte Carlo"></progress><span id="simulation-progress-text" aria-live="polite">Aguardando simulação</span></div>
     <div class="simulation-grid">
       <div class="simulation-card">
         <h3>Culturas ao fim de cinco anos</h3>
@@ -303,7 +313,7 @@ const economicData=JSON.parse(document.getElementById("economic-data").textConte
 const waterLabels={water_low:"Baixa",water_medium:"Média",water_high:"Alta"};
 const rainLabels={dry:"seca",normal:"normal",wet:"úmida"};
 const trajectories=10000,horizon=5;
-let active=null,latestRun=null,selectedGraphCropId=null,cachedCropTransitionProfile=null,cachedCropTransitions=null;
+let active=null,latestRun=null,selectedGraphCropId=null,cachedCropTransitionProfile=null,cachedCropTransitions=null,simulationRunId=0;
 const graphIntervalCache=new Map();
 
 function byId(id){return document.getElementById(id);}
@@ -317,6 +327,8 @@ function currentSeed(){return Math.max(0,Number.parseInt(byId("simulation-seed")
 function cropStates(){return active.crop_markov.states;}
 function cropStateMap(){return Object.fromEntries(cropStates().map(state=>[state.id,state]));}
 function cropLabel(id){const state=cropStateMap()[id];return state?state.name:id;}
+function cropLifecycleRule(sourceId){return active.crop_markov.lifecycle_rules?.[sourceId]||null;}
+function cropAllowedDestinations(sourceId){const rule=cropLifecycleRule(sourceId);return rule?.mode==="persistent_within_horizon"?new Set(rule.allowed_destinations):new Set(cropStates().map(state=>state.id));}
 function outgoingCount(stateId){return active.crop_markov.transitions.filter(row=>row.from_state===stateId).reduce((sum,row)=>sum+row.count,0);}
 function cropTransitionMap(){if(cachedCropTransitionProfile!==active){cachedCropTransitions=new Map(active.crop_markov.transitions.map(row=>[row.from_state+"|"+row.to_state,row]));cachedCropTransitionProfile=active;}return cachedCropTransitions;}
 function observedCount(from,to){const edge=cropTransitionMap().get(from+"|"+to);return edge?edge.count:0;}
@@ -350,9 +362,10 @@ function cropEnvironmentalFactors(crop,waterId,soc){
 
 function cropProbabilities(sourceId,waterId,soc,baseWeights=null){
   if(!baseWeights)return Object.fromEntries(Object.entries(cropProbabilitySummary(sourceId,waterId,soc)).map(([id,summary])=>[id,summary.mean]));
-  const crops=cropStates(),weights={};
+  const crops=cropStates(),weights={},allowed=cropAllowedDestinations(sourceId);
   for(const dest of crops){
-    const base=baseWeights?Number(baseWeights[dest.id]||0):observedCount(sourceId,dest.id)+alpha();
+    if(!allowed.has(dest.id)){weights[dest.id]=0;continue;}
+    const base=Number(baseWeights[dest.id]||0);
     const factors=cropEnvironmentalFactors(dest,waterId,soc);
     weights[dest.id]=base*factors.waterFactor*factors.soilFactor;
   }
@@ -364,10 +377,10 @@ function cropProbabilitySummary(sourceId,waterId,soc,samples=1200){
   const cacheKey=[active?.crop_markov?.source?.municipality_ibge_code,sourceId,waterId,Number(soc).toFixed(1),samples].join("|");
   if(graphIntervalCache.has(cacheKey))return graphIntervalCache.get(cacheKey);
   let hash=2166136261;for(const char of cacheKey){hash^=char.charCodeAt(0);hash=Math.imul(hash,16777619);}
-  const rng=seeded(hash),crops=cropStates(),values=Object.fromEntries(crops.map(crop=>[crop.id,[]]));
+  const rng=seeded(hash),crops=cropStates(),allowed=cropAllowedDestinations(sourceId),values=Object.fromEntries(crops.map(crop=>[crop.id,[]]));
   for(let sample=0;sample<samples;sample++){
     const weights={};let total=0;
-    for(const dest of crops){const factor=cropEnvironmentalFactors(dest,waterId,soc),weight=gammaRandom(observedCount(sourceId,dest.id)+alpha(),rng)*factor.waterFactor*factor.soilFactor;weights[dest.id]=weight;total+=weight;}
+    for(const dest of crops){if(!allowed.has(dest.id)){weights[dest.id]=0;continue;}const factor=cropEnvironmentalFactors(dest,waterId,soc),weight=gammaRandom(observedCount(sourceId,dest.id)+alpha(),rng)*factor.waterFactor*factor.soilFactor;weights[dest.id]=weight;total+=weight;}
     for(const dest of crops)values[dest.id].push(weights[dest.id]/total);
   }
   const result=Object.fromEntries(crops.map(crop=>{const draws=values[crop.id];return[crop.id,{mean:draws.reduce((sum,value)=>sum+value,0)/draws.length,lower:quantile(draws,.05),upper:quantile(draws,.95)}];}));
@@ -381,7 +394,7 @@ function blendColor(from,to,fraction){
   const a=from.match(/[a-f0-9]{2}/gi).map(value=>parseInt(value,16)),b=to.match(/[a-f0-9]{2}/gi).map(value=>parseInt(value,16));
   return "#"+a.map((value,index)=>Math.round(value+(b[index]-value)*clamp(fraction,0,1)).toString(16).padStart(2,"0")).join("");
 }
-function renderCropGraph(waterId,soc,nodeCountsByYear={},edgeCountsByYear={}){
+function renderCropGraph(waterId,soc,nodeCountsByYear={},edgeCountsByYear={},completedTrajectories=0){
   if(!active)return;
   const states=cropStates(),countNodes=byId("crop-graph-nodes"),countEdges=byId("crop-graph-edges"),countLabels=byId("crop-graph-edge-labels"),yearSelect=byId("graph-year-select");
   const year=Math.max(0,Number(yearSelect.value)||0),nodeCounts=nodeCountsByYear[year]||{},edgeCounts=edgeCountsByYear[year]||{},maxCount=Math.max(1,...Object.values(nodeCounts).map(Number));
@@ -392,8 +405,8 @@ function renderCropGraph(waterId,soc,nodeCountsByYear={},edgeCountsByYear={}){
   countNodes.replaceChildren();countEdges.replaceChildren();countLabels.replaceChildren();
   const transitions=[];
   for(const source of states){
-    const probabilities=cropProbabilities(source.id,waterId,soc),sourceTotal=outgoingCount(source.id);
-    for(const destination of states){const factors=cropEnvironmentalFactors(destination,waterId,soc),posterior=source.id===selectedGraphCropId?probabilitySummaries[destination.id]:null;transitions.push({source,destination,probability:Number(posterior?.mean??probabilities[destination.id]??0),interval:posterior,observed:observedCount(source.id,destination.id),sourceTotal,baseProbability:(observedCount(source.id,destination.id)+alpha())/(sourceTotal+states.length*alpha()),waterFactor:factors.waterFactor,soilFactor:factors.soilFactor});}
+    const probabilities=cropProbabilities(source.id,waterId,soc),sourceTotal=outgoingCount(source.id),allowed=cropAllowedDestinations(source.id),lifecycle=cropLifecycleRule(source.id);
+    for(const destination of states){const factors=cropEnvironmentalFactors(destination,waterId,soc),posterior=source.id===selectedGraphCropId?probabilitySummaries[destination.id]:null;transitions.push({source,destination,probability:Number(posterior?.mean??probabilities[destination.id]??0),interval:posterior,observed:observedCount(source.id,destination.id),sourceTotal,baseProbability:(observedCount(source.id,destination.id)+alpha())/(sourceTotal+states.length*alpha()),waterFactor:factors.waterFactor,soilFactor:factors.soilFactor,lifecycleOverride:Boolean(lifecycle&&!allowed.has(destination.id)),lifecycle});}
   }
   for(const edge of transitions){
     const start=positions.get(edge.source.id),end=positions.get(edge.destination.id),isOutgoing=edge.source.id===selectedGraphCropId,dx=end.x-start.x,dy=end.y-start.y,length=Math.max(1,Math.hypot(dx,dy));
@@ -407,25 +420,26 @@ function renderCropGraph(waterId,soc,nodeCountsByYear={},edgeCountsByYear={}){
       d="M "+sx+" "+sy+" Q "+cx+" "+cy+" "+ex+" "+ey;
       const t=.79,u=1-t;labelX=u*u*sx+2*u*t*cx+t*t*ex;labelY=u*u*sy+2*u*t*cy+t*t*ey-4;
     }
-    const path=svgNode("path",{d,class:"graph-edge"+(isOutgoing?" is-outgoing":""),"stroke-width":isOutgoing?1.2+8*Math.sqrt(edge.probability):.7+2*Math.sqrt(edge.probability),"marker-end":"url(#crop-arrow)"});
+    const path=svgNode("path",{d,class:"graph-edge"+(isOutgoing?" is-outgoing":"")+(edge.lifecycleOverride?" lifecycle-blocked":""),"stroke-width":isOutgoing?1.2+8*Math.sqrt(edge.probability):.7+2*Math.sqrt(edge.probability),"marker-end":"url(#crop-arrow)"});
     const sourceCount=Number(nodeCounts[edge.source.id]||0),edgeCount=Number(edgeCounts[edge.source.id+"|"+edge.destination.id]||0),edgeFrequency=sourceCount?edgeCount/sourceCount:0;
-    const interval=edge.interval||{lower:edge.probability,upper:edge.probability},title=svgNode("title");title.textContent=edge.source.name+" → "+edge.destination.name+": P média contextual "+fmt(100*edge.probability,2)+"%; intervalo Dirichlet 90% "+fmt(100*interval.lower,2)+"–"+fmt(100*interval.upper,2)+"%; P₀=(k+α)/(n+14α)="+fmt(100*edge.baseProbability,2)+"%, k/n PAM "+edge.observed+"/"+edge.sourceTotal+", α="+fmt(alpha(),1)+", fatores água/solo "+fmt(edge.waterFactor,3)+"/"+fmt(edge.soilFactor,3)+"; Monte Carlo ano "+year+": "+edgeCount+" transições ("+fmt(100*edgeFrequency,1)+"% das saídas deste nó).";path.append(title);countEdges.append(path);
+    const interval=edge.interval||{lower:edge.probability,upper:edge.probability},title=svgNode("title");title.textContent=edge.source.name+" → "+edge.destination.name+": P média contextual "+fmt(100*edge.probability,2)+"%; intervalo Dirichlet 90% "+fmt(100*interval.lower,2)+"–"+fmt(100*interval.upper,2)+"%; P₀=(k+α)/(n+14α)="+fmt(100*edge.baseProbability,2)+"%, k/n PAM "+edge.observed+"/"+edge.sourceTotal+", α="+fmt(alpha(),1)+", fatores água/solo "+fmt(edge.waterFactor,3)+"/"+fmt(edge.soilFactor,3)+(edge.lifecycleOverride?"; destino bloqueado pela regra de ciclo: "+edge.lifecycle.rationale:"")+"; Monte Carlo ano "+year+": "+edgeCount+" transições ("+fmt(100*edgeFrequency,1)+"% das saídas deste nó).";path.append(title);countEdges.append(path);
     if(isOutgoing){const label=svgNode("text",{x:labelX,y:labelY,class:"graph-edge-label"});label.textContent=fmt(100*edge.probability,2)+"%";countLabels.append(label);}
   }
   for(const state of states){
-    const point=positions.get(state.id),count=Number(nodeCounts[state.id]||0),frequency=count/trajectories,relative=count/maxCount,group=svgNode("g",{class:"graph-node"+(state.id===selectedGraphCropId?" is-selected":""),transform:"translate("+point.x+" "+point.y+")",role:"button",tabindex:"0","aria-label":state.name+", frequência Monte Carlo no ano "+year+" de "+pct(frequency)+(state.id===selectedGraphCropId?", nó selecionado":"")});
+    const point=positions.get(state.id),count=Number(nodeCounts[state.id]||0),frequency=completedTrajectories?count/completedTrajectories:0,relative=count/maxCount,group=svgNode("g",{class:"graph-node"+(state.id===selectedGraphCropId?" is-selected":""),transform:"translate("+point.x+" "+point.y+")",role:"button",tabindex:"0","aria-label":state.name+", frequência Monte Carlo no ano "+year+" de "+pct(frequency)+(state.id===selectedGraphCropId?", nó selecionado":"")});
     const rect=svgNode("rect",{x:-63,y:-30,width:126,height:60,rx:13,fill:blendColor("#edf2ed","#377a4e",relative*.85)}),name=svgNode("text",{x:0,y:-4,class:"graph-node-name",fill:relative>.58?"#fff":"#26382b"}),frequencyText=svgNode("text",{x:0,y:15,class:"graph-node-frequency",fill:relative>.58?"#f2f8f3":"#58695d"});
     name.textContent=state.name;frequencyText.textContent="MC "+pct(frequency)+" · n="+count.toLocaleString("pt-BR");
     const title=svgNode("title");title.textContent=state.name+" · P(MC ano "+year+")="+pct(frequency)+(state.initial_selectable?" · cultura inicial permitida":" · destino de transição");group.append(rect,name,frequencyText,title);
-    group.addEventListener("click",()=>{selectedGraphCropId=state.id;renderCropGraph(waterId,soc,nodeCountsByYear,edgeCountsByYear);});
-    group.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();selectedGraphCropId=state.id;renderCropGraph(waterId,soc,nodeCountsByYear,edgeCountsByYear);}});
+    group.addEventListener("click",()=>{selectedGraphCropId=state.id;renderCropGraph(waterId,soc,nodeCountsByYear,edgeCountsByYear,completedTrajectories);});
+    group.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();selectedGraphCropId=state.id;renderCropGraph(waterId,soc,nodeCountsByYear,edgeCountsByYear,completedTrajectories);}});
     countNodes.append(group);
   }
   const outgoing=transitions.filter(edge=>edge.source.id===selectedGraphCropId).sort((a,b)=>b.probability-a.probability),totalAtNode=Number(nodeCounts[selectedGraphCropId]||0),sideTitle=byId("graph-selected-title"),sideContext=byId("graph-selected-context"),sideList=byId("graph-edge-list");
   sideTitle.textContent="Saídas de "+(selected?.name||"—");
-  sideContext.textContent="Ano "+year+": Monte Carlo ocupa o nó em "+pct(totalAtNode/trajectories)+" das trajetórias (n="+totalAtNode.toLocaleString("pt-BR")+"). P nas setas é a média posterior no cenário água "+waterLabels[waterId].toLowerCase()+" / carbono "+fmt(soc,1)+" g/kg; intervalo de 90% sorteia 1.200 linhas Dirichlet. Frequências MC vêm das trajetórias completas, com ambiente variável por ano.";
+  const lifecycle=cropLifecycleRule(selectedGraphCropId),denominator=Math.max(1,completedTrajectories),mcState=(completedTrajectories?"amostra parcial "+completedTrajectories.toLocaleString("pt-BR")+"/"+trajectories.toLocaleString("pt-BR"):"simulação ainda não iniciada");
+  sideContext.textContent="Ano "+year+": "+mcState+" · "+pct(totalAtNode/denominator)+" das trajetórias concluídas ocupam este nó (n="+totalAtNode.toLocaleString("pt-BR")+"). P nas setas é a média posterior no cenário água "+waterLabels[waterId].toLowerCase()+" / carbono "+fmt(soc,1)+" g/kg; intervalo de 90% sorteia 1.200 linhas Dirichlet. Frequências vêm do Monte Carlo com ambiente variável."+(lifecycle?" Regra de ciclo: "+lifecycle.rationale:"" );
   sideList.replaceChildren();
-  for(const edge of outgoing){const edgeCount=Number(edgeCounts[edge.source.id+"|"+edge.destination.id]||0),mcShare=totalAtNode?edgeCount/totalAtNode:0,interval=edge.interval||{lower:edge.probability,upper:edge.probability},li=document.createElement("li"),strong=el("strong","→ "+edge.destination.name+" · P média "+fmt(100*edge.probability,2)+"%"),small=el("small","Dirichlet 90%: "+fmt(100*interval.lower,2)+"–"+fmt(100*interval.upper,2)+"% · P₀ "+fmt(100*edge.baseProbability,2)+"% (α="+fmt(alpha(),1)+") · fatores água/solo "+fmt(edge.waterFactor,3)+"/"+fmt(edge.soilFactor,3)+" · PAM k/n "+edge.observed+"/"+edge.sourceTotal+" · MC: "+edgeCount+"/"+totalAtNode+" ("+pct(mcShare)+")");li.append(strong,document.createElement("br"),small);sideList.append(li);}
+  for(const edge of outgoing){const edgeCount=Number(edgeCounts[edge.source.id+"|"+edge.destination.id]||0),mcShare=totalAtNode?edgeCount/totalAtNode:0,interval=edge.interval||{lower:edge.probability,upper:edge.probability},li=document.createElement("li"),strong=el("strong","→ "+edge.destination.name+" · P média "+fmt(100*edge.probability,2)+"%"),ruleNote=edge.lifecycleOverride?" · bloqueada pela regra de ciclo":"",small=el("small","Dirichlet 90%: "+fmt(100*interval.lower,2)+"–"+fmt(100*interval.upper,2)+"% · P₀ "+fmt(100*edge.baseProbability,2)+"% (α="+fmt(alpha(),1)+") · fatores água/solo "+fmt(edge.waterFactor,3)+"/"+fmt(edge.soilFactor,3)+" · PAM k/n "+edge.observed+"/"+edge.sourceTotal+ruleNote+" · MC: "+edgeCount+"/"+totalAtNode+" ("+pct(mcShare)+")");li.append(strong,document.createElement("br"),small);sideList.append(li);}
   byId("graph-environment").textContent="Ambiente das setas: água "+waterLabels[waterId].toLowerCase()+" · carbono "+fmt(soc,1)+" g/kg · origem selecionada: "+(selected?.name||"—");
 }
 
@@ -454,7 +468,7 @@ function renderCropMatrix(){
   }
   table.append(tbody);
   byId("crop-matrix-note").textContent="Matriz completa: "+states.length+" estados de cultura. Contexto exibido: água "+waterLabels[waterId].toLowerCase()+" · carbono "+fmt(soc,1)+" g/kg. Células âmbar têm menos de cinco saídas PAM; as candidatas sem dados entram pela prior uniforme explícita.";
-  renderCropGraph(waterId,soc,latestRun?.nodeCountsByYear||{},latestRun?.edgeCountsByYear||{});
+  renderCropGraph(waterId,soc,latestRun?.nodeCountsByYear||{},latestRun?.edgeCountsByYear||{},latestRun?.completed||0);
 }
 
 function renderWaterMatrix(){
@@ -501,14 +515,13 @@ function gammaRandom(shape,rng){
     if(draw<1-0.0331*x*x*x*x||Math.log(draw)<0.5*x*x+d*(1-cube+Math.log(cube)))return d*cube;
   }
 }
-function sampleCropRows(rng){
-  const rows={};
-  for(const source of cropStates()){
-    const weights={};let total=0;
-    for(const dest of cropStates()){const value=gammaRandom(observedCount(source.id,dest.id)+alpha(),rng);weights[dest.id]=value;total+=value;}
-    rows[source.id]=Object.fromEntries(Object.entries(weights).map(([id,value])=>[id,value/total]));
+function sampleCropRow(sourceId,rng){
+  const weights={},allowed=cropAllowedDestinations(sourceId);let total=0;
+  for(const dest of cropStates()){
+    if(!allowed.has(dest.id)){weights[dest.id]=0;continue;}
+    const value=gammaRandom(observedCount(sourceId,dest.id)+alpha(),rng);weights[dest.id]=value;total+=value;
   }
-  return rows;
+  return Object.fromEntries(Object.entries(weights).map(([id,value])=>[id,value/total]));
 }
 function drawProbability(probabilities,rng){
   let draw=rng();for(const [id,p] of Object.entries(probabilities)){draw-=p;if(draw<0)return id;}return Object.keys(probabilities).at(-1)||null;
@@ -540,11 +553,12 @@ function soilDelta(cropId,rng){
   return Number(range[0])+rng()*(Number(range[1])-Number(range[0]));
 }
 function sampleTrajectory(startCrop,rng,environmentYears){
-  const posteriorRows=sampleCropRows(rng),path=[{year:0,crop:startCrop,water:"water_medium",soc:active.soil.organic_carbon_top_0_30_g_kg}],crop=startCrop,water="water_medium",soc=active.soil.organic_carbon_top_0_30_g_kg;
+  const posteriorRows={},path=[{year:0,crop:startCrop,water:"water_medium",soc:active.soil.organic_carbon_top_0_30_g_kg}],crop=startCrop,water="water_medium",soc=active.soil.organic_carbon_top_0_30_g_kg;
   for(let year=1;year<=horizon;year++){
     const selected=environmentYears[Math.floor(rng()*environmentYears.length)];
     for(const climate of selected[1])water=advanceWaterForCrop(water,climate,crop,rng);
     soc=Math.max(0.1,soc+soilDelta(crop,rng));
+    if(!posteriorRows[crop])posteriorRows[crop]=sampleCropRow(crop,rng);
     const probabilities=cropProbabilities(crop,water,soc,posteriorRows[crop]);
     const next=drawProbability(probabilities,rng),transitionProbability=probabilities[next];
     path.push({year,crop:next,water,soc,transitionProbability,climateYear:selected[0],environmentCrop:crop});crop=next;
@@ -663,23 +677,35 @@ function appendSimRow(root,label,count,total,color){
   const row=el("div",undefined,"sim-row"),ratio=count/total;row.append(el("strong",label),el("span",count.toLocaleString("pt-BR")+" / "+total.toLocaleString("pt-BR")+" · "+pct(ratio)));
   const bar=el("div",undefined,"sim-bar"),fill=document.createElement("i");fill.style.width=(100*ratio)+"%";if(color)fill.style.background=color;bar.append(fill);row.append(bar);root.append(row);
 }
-function renderSimulation(seed){
-  const status=byId("run-status");status.textContent="Executando "+trajectories.toLocaleString("pt-BR")+" trajetórias com a semente "+seed+".";
+async function renderSimulation(seed){
+  const runId=++simulationRunId,status=byId("run-status"),progress=byId("simulation-progress"),progressText=byId("simulation-progress-text");
+  status.textContent="Preparando Monte Carlo com "+trajectories.toLocaleString("pt-BR")+" trajetórias e semente "+seed+".";progress.value=0;progressText.textContent="Aguardando primeira amostra";
   const profile=active,history=Object.entries(profile.water_markov.environment_years).filter(([,block])=>Array.isArray(block)&&block.length===profile.water_markov.periods_per_year);
-  if(!history.length){status.textContent="Não há blocos climáticos completos para simular.";return;}
+  if(!history.length){status.textContent="Não há blocos climáticos completos para simular.";progressText.textContent="Sem clima completo";return;}
   const start=byId("initial-crop-select").value,rng=seeded(seed),cropCounts={},waterCounts={},socValues=[],paths=[],rotationSamples=new Map(),nodeCountsByYear=Array.from({length:horizon+1},()=>({})),edgeCountsByYear=Array.from({length:horizon+1},()=>({}));
+  latestRun={cropCounts,waterCounts,nodeCountsByYear,edgeCountsByYear,rotationSamples,seed,completed:0};
+  const cropRoot=byId("crop-simulation-results"),envRoot=byId("environment-simulation-results"),pathRoot=byId("sample-paths");cropRoot.replaceChildren(el("p","Amostrando trajetórias…","status"));envRoot.replaceChildren(el("p","Amostrando água e carbono…","status"));pathRoot.replaceChildren(el("p","Os caminhos aparecem ao final da simulação.","small-muted"));
+  const yieldToBrowser=()=>new Promise(resolve=>requestAnimationFrame(()=>resolve())),progressEvery=200,graphEvery=1000;
   for(let trajectory=0;trajectory<trajectories;trajectory++){
     const result=sampleTrajectory(start,rng,history);cropCounts[result.crop]=(cropCounts[result.crop]||0)+1;waterCounts[result.water]=(waterCounts[result.water]||0)+1;socValues.push(result.soc);
     for(const step of result.path){nodeCountsByYear[step.year][step.crop]=(nodeCountsByYear[step.year][step.crop]||0)+1;if(step.year>0){const key=step.environmentCrop+"|"+step.crop;edgeCountsByYear[step.year][key]=(edgeCountsByYear[step.year][key]||0)+1;}}
     const sequenceKey=result.path.map(step=>step.crop).join("|");if(!rotationSamples.has(sequenceKey))rotationSamples.set(sequenceKey,[]);rotationSamples.get(sequenceKey).push(result.path);
     if(trajectory<5)paths.push(result.path);
+    if((trajectory+1)%progressEvery===0||trajectory===trajectories-1){
+      const completed=trajectory+1;latestRun={cropCounts,waterCounts,nodeCountsByYear,edgeCountsByYear,rotationSamples,seed,completed};
+      progress.value=completed;progressText.textContent=completed.toLocaleString("pt-BR")+" / "+trajectories.toLocaleString("pt-BR")+" trajetórias";status.textContent="Monte Carlo em execução · "+fmt(100*completed/trajectories,0)+"% · " + completed.toLocaleString("pt-BR")+" / "+trajectories.toLocaleString("pt-BR");
+      if(completed%graphEvery===0||completed===trajectories)renderCropGraph(byId("matrix-water-select").value,Number(byId("matrix-carbon-input").value),nodeCountsByYear,edgeCountsByYear,completed);
+      await yieldToBrowser();if(runId!==simulationRunId)return;
+    }
   }
-  const cropRoot=byId("crop-simulation-results");cropRoot.replaceChildren();
+  status.textContent="Trajetórias concluídas; consolidando frequências, ambiente e VPL.";progressText.textContent="Consolidando resultados";
+  await yieldToBrowser();if(runId!==simulationRunId)return;
+  cropRoot.replaceChildren();
   const sortedCrops=[...cropStates()].sort((a,b)=>(cropCounts[b.id]||0)-(cropCounts[a.id]||0));
   for(const crop of sortedCrops)appendSimRow(cropRoot,crop.name,cropCounts[crop.id]||0,trajectories);
   cropRoot.append(el("p","Partida: "+cropLabel(start)+" · uma cultura inicial por trajetória · 5 transições anuais.","status"));
 
-  const envRoot=byId("environment-simulation-results");envRoot.replaceChildren();
+  envRoot.replaceChildren();
   for(const state of profile.water_markov.states)appendSimRow(envRoot,"Água "+state.label.toLowerCase(),waterCounts[state.id]||0,trajectories,{water_low:"#bd7956",water_medium:"#c6a54b",water_high:"#67966c"}[state.id]);
   const socMedian=quantile(socValues,0.5),socP10=quantile(socValues,0.1),socP90=quantile(socValues,0.9);
   envRoot.append(el("p","Carbono do solo mediano: "+fmt(socMedian,2)+" g/kg · P10–P90: "+fmt(socP10,2)+"–"+fmt(socP90,2)+" g/kg.","status"));
@@ -687,7 +713,7 @@ function renderSimulation(seed){
 
   const finalWater=[...Object.entries(waterCounts)].sort((a,b)=>b[1]-a[1])[0]?.[0]||"water_medium";
   byId("matrix-water-select").value=finalWater;byId("matrix-carbon-input").value=socMedian.toFixed(1);
-  latestRun={cropCounts,waterCounts,socMedian,socP10,socP90,nodeCountsByYear,edgeCountsByYear,rotationSamples,seed};
+  latestRun={cropCounts,waterCounts,socMedian,socP10,socP90,nodeCountsByYear,edgeCountsByYear,rotationSamples,seed,completed:trajectories};
   renderCropMatrix();
   const startWater="water_medium",startSoc=profile.soil.organic_carbon_top_0_30_g_kg;
   const before=cropProbabilities(start,startWater,startSoc),after=cropProbabilities(start,finalWater,socMedian);
@@ -702,7 +728,7 @@ function renderSimulation(seed){
   table.append(body);changes.append(table);
   byId("probability-context").textContent="Linha da cultura inicial "+cropLabel(start)+" · início: água média e SoilGrids "+fmt(startSoc,1)+" g/kg · ambiente final mediano: água "+waterLabels[finalWater].toLowerCase()+" e "+fmt(socMedian,1)+" g/kg. A comparação mantém a média posterior PAM + prior; cada trajetória sorteia sua própria linha Dirichlet.";
 
-  const pathRoot=byId("sample-paths");pathRoot.replaceChildren();
+  pathRoot.replaceChildren();
   for(let index=0;index<paths.length;index++){
     const path=paths[index],line=el("div",undefined,"sample-path");
     const parts=["Ano 0: "+cropLabel(path[0].crop)+" (início)"];
@@ -710,15 +736,19 @@ function renderSimulation(seed){
     line.append(el("strong","Trajetória "+(index+1)+" ·"),document.createTextNode(parts.join(" → ")));pathRoot.append(line);
   }
   renderEconomicOptimization(start,rotationSamples);
-  status.textContent="Simulação concluída · "+trajectories.toLocaleString("pt-BR")+" trajetórias · semente "+seed+". Em cada ano: ambiente primeiro, probabilidade Markov depois.";
+  progress.value=trajectories;progressText.textContent=trajectories.toLocaleString("pt-BR")+" / "+trajectories.toLocaleString("pt-BR")+" · concluído";status.textContent="Simulação concluída · "+trajectories.toLocaleString("pt-BR")+" trajetórias · semente "+seed+". Em cada ano: ambiente primeiro, probabilidade Markov depois.";
 }
 
 function renderProfile(){
-  active=profiles[byId("case-select").value];latestRun=null;
+  const profileRenderId=++simulationRunId;active=profiles[byId("case-select").value];latestRun=null;
   byId("soil-baseline").textContent=fmt(active.soil.organic_carbon_top_0_30_g_kg,1)+" g/kg";
   byId("soil-scope").textContent="SoilGrids · "+active.soil.scope+" · "+active.soil.sample_point_basis;
   byId("crop-period").textContent=active.crop_markov.annual_observation_count+" anos municipais · "+active.crop_markov.period[0]+"–"+active.crop_markov.period[1]+" · "+active.crop_markov.adjacent_year_transition_count+" pares consecutivos · "+active.crop_markov.states.length+" estados de cultura.";
-  byId("crop-data-note").textContent="Uma cultura por estado. As quatro culturas principais podem iniciar a simulação; todas as 14 culturas do catálogo são destinos. A PAM identifica a cultura de maior área entre os produtos deste catálogo no município; produtos fora dele não competem e a série não acompanha o mesmo talhão. Onde falta série (especialmente coberturas), a matriz usa apenas a prior explícita por destino.";
+  byId("crop-data-note").textContent="Uma cultura principal por estado. Soja, milho, cana e café podem iniciar; as 14 culturas continuam visíveis no grafo. As contagens PAM são de cultura dominante municipal, não trocas no mesmo talhão. Café e cana têm regra estrutural de permanência durante o horizonte porque não temos idade ou histórico de reforma.";
+  const lifecycle=active.crop_markov.lifecycle_rules||{},coffeeRule=lifecycle.coffee,cover=coffeeRule?.associated_management,lifecycleNote=byId("crop-lifecycle-note");
+  lifecycleNote.replaceChildren();
+  lifecycleNote.append(el("strong","Culturas perenes: permanência no estado Markov."),document.createTextNode(" Café e cana permanecem no mesmo nó durante os cinco anos simulados. Essa é uma regra estrutural transparente por falta de idade/cortes do talhão; não usamos uma troca de dominância municipal como se fosse renovação do mesmo cafezal ou canavial."));
+  if(cover){lifecycleNote.append(document.createTextNode(" Para café, a referência agronômica é manejar uma cobertura nas entrelinhas, como "+cover.label+". Isso é manejo associado ao nó Café, não destino da cadeia nem substituição do café. O efeito quantitativo não entra no Monte Carlo porque as fontes não fornecem coeficiente local compatível."));for(const [index,url] of cover.source_urls.entries()){const link=el("a",index===0?"Embrapa — prática nas entrelinhas":"Embrapa — relação solo/água");link.href=url;link.target="_blank";link.rel="noreferrer";lifecycleNote.append(document.createTextNode(" "),link,index===0?document.createTextNode(" · "):document.createTextNode("."));}}
   byId("crop-source-detail").textContent="Fonte: "+active.crop_markov.source.publisher+" · "+active.crop_markov.source.survey+", tabela "+active.crop_markov.source.table+" · município IBGE "+active.crop_markov.source.municipality_ibge_code+" · área colhida em hectares. Foram derivados "+active.crop_markov.annual_observation_count+" estados anuais de maior área entre produtos do catálogo e "+active.crop_markov.adjacent_year_transition_count+" transições entre anos consecutivos.";
   byId("mapbiomas-note").textContent="O relatório de pesquisa cita sequências e seis tabelas MapBiomas, mas esses arquivos não estão neste checkout. Os assets oficiais de uso agrícola e carbono do solo são publicados pelo MapBiomas; não foram usados para preencher contagens ausentes nesta página. Assim, a cadeia fica baseada na PAM e identifica sua escala municipal.";
   byId("water-period").textContent="Estados hídricos por quinzena · treino "+active.water_markov.years[0]+"–"+active.water_markov.years[1]+" · balanço de referência Kc=1.";
@@ -733,19 +763,30 @@ function renderProfile(){
   for(let year=0;year<=horizon;year++)graphYearSelect.add(new Option(year===0?"0 · estado inicial":""+year+" · safra "+year,String(year)));
   graphYearSelect.value=String(horizon);selectedGraphCropId=cropSelect.value;
   byId("matrix-carbon-input").value=active.soil.organic_carbon_top_0_30_g_kg.toFixed(1);
-  renderCropTimeline();renderCropMatrix();renderWaterMatrix();renderSimulation(currentSeed());
+  renderCropTimeline();renderCropMatrix();renderWaterMatrix();byId("simulation-progress").value=0;byId("simulation-progress-text").textContent="Aguardando simulação";byId("run-status").textContent="Cadeia pronta; o Monte Carlo começará após a página aparecer.";
+  requestAnimationFrame(()=>{if(profileRenderId===simulationRunId)startSimulation(currentSeed());});
+}
+
+function startSimulation(seed){
+  const runId=simulationRunId+1;
+  void renderSimulation(seed).catch(error=>{
+    if(runId!==simulationRunId)return;
+    byId("run-status").textContent="Monte Carlo interrompido: "+(error?.message||String(error));
+    byId("simulation-progress-text").textContent="Falha após "+Number(byId("simulation-progress").value||0).toLocaleString("pt-BR")+" trajetórias";
+    console.error("Falha no Monte Carlo",error);
+  });
 }
 
 for(const item of cases.cases)byId("case-select").add(new Option(item.municipality+" · "+item.uf,item.profile));
 renderVplReferences();
 byId("case-select").addEventListener("change",renderProfile);
-byId("initial-crop-select").addEventListener("change",()=>{selectedGraphCropId=byId("initial-crop-select").value;renderSimulation(currentSeed());});
+byId("initial-crop-select").addEventListener("change",()=>{selectedGraphCropId=byId("initial-crop-select").value;startSimulation(currentSeed());});
 byId("matrix-water-select").addEventListener("change",renderCropMatrix);
 byId("matrix-carbon-input").addEventListener("input",renderCropMatrix);
-byId("graph-year-select").addEventListener("change",()=>renderCropGraph(byId("matrix-water-select").value,Number(byId("matrix-carbon-input").value),latestRun?.nodeCountsByYear||{},latestRun?.edgeCountsByYear||{}));
+byId("graph-year-select").addEventListener("change",()=>renderCropGraph(byId("matrix-water-select").value,Number(byId("matrix-carbon-input").value),latestRun?.nodeCountsByYear||{},latestRun?.edgeCountsByYear||{},latestRun?.completed||0));
 byId("apply-economic-inputs").addEventListener("click",applyEconomicInputs);
-byId("simulation-seed").addEventListener("change",()=>renderSimulation(currentSeed()));
-byId("run-simulation").addEventListener("click",()=>renderSimulation(currentSeed()));
+byId("simulation-seed").addEventListener("change",()=>startSimulation(currentSeed()));
+byId("run-simulation").addEventListener("click",()=>startSimulation(currentSeed()));
 byId("case-select").value=cases.cases[0].profile;
 renderProfile();
 </script>
