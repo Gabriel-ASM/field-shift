@@ -352,54 +352,79 @@ def pam_crop_values(
 
     municipal_rows = [
         row for row in municipal_pam.get("records", [])
-        if row.get("crop") == pam_product and 2021 <= int(row.get("year", 0)) <= 2025
-        and number(row.get("yield_kg_ha")) and number(row.get("unit_value_brl_per_tonne_nominal"))
+        if row.get("crop") == pam_product
+        and number(row.get("unit_value_brl_per_tonne_nominal"))
     ]
     scope = "municipality"
     source_notes = []
     annual = []
     if municipal_rows:
-        annual = [{"year": int(row["year"]), "yield_kg_ha": float(row["yield_kg_ha"]), "unit_value_brl_per_tonne_nominal": float(row["unit_value_brl_per_tonne_nominal"])} for row in municipal_rows]
+        annual = [{"year": int(row["year"]), "yield_kg_ha": number(row.get("yield_kg_ha")), "unit_value_brl_per_tonne_nominal": number(row.get("unit_value_brl_per_tonne_nominal"))} for row in municipal_rows]
     else:
         uf_code = next((code for code, uf in UF_CODES.items() if uf == info["uf"]), None)
-        local_state = [row for row in state_rows if row["uf_code"] == uf_code and row["product_id"] == product_id and 2021 <= int(row["year"]) <= 2025]
+        local_state = [row for row in state_rows if row["uf_code"] == uf_code and row["product_id"] == product_id]
         if local_state:
             annual = aggregate_state_harvests(local_state)
             scope = "state"
             source_notes.append("Rendimento/preço PAM estadual usado como proxy quando falta série municipal.")
         else:
             region_states = {code for code, uf in UF_CODES.items() if macroregion(uf) == macroregion(info["uf"])}
-            regional = [row for row in state_rows if row["uf_code"] in region_states and row["product_id"] == product_id and 2021 <= int(row["year"]) <= 2025]
+            regional = [row for row in state_rows if row["uf_code"] in region_states and row["product_id"] == product_id]
             if regional:
                 annual = aggregate_state_harvests(regional)
                 scope = "macroregion"
                 source_notes.append("Mediana/valor unitário PAM da macrorregião usado como proxy; dado municipal/estadual ausente.")
             else:
-                national = [row for row in state_rows if row["product_id"] == product_id and 2021 <= int(row["year"]) <= 2025]
+                national = [row for row in state_rows if row["product_id"] == product_id]
                 annual = aggregate_state_harvests(national)
                 scope = "Brazil"
                 source_notes.append("Mediana/valor unitário PAM nacional usado como proxy; recorte regional sem colheita identificável.")
-    valid_yields = [float(row["yield_kg_ha"]) for row in annual if row.get("yield_kg_ha") is not None and float(row["yield_kg_ha"]) > 0]
+    valid_yields = [float(row["yield_kg_ha"]) for row in annual if 2021 <= int(row["year"]) <= 2025 and row.get("yield_kg_ha") is not None and float(row["yield_kg_ha"]) > 0]
     valid_prices = [row for row in annual if row.get("unit_value_brl_per_tonne_nominal") is not None and float(row["unit_value_brl_per_tonne_nominal"]) > 0]
     if not valid_prices and scope != "Brazil":
-        national = [row for row in state_rows if row["product_id"] == product_id and 2021 <= int(row["year"]) <= 2025]
+        national = [row for row in state_rows if row["product_id"] == product_id]
         valid_prices = [row for row in aggregate_state_harvests(national) if row.get("unit_value_brl_per_tonne_nominal") is not None and float(row["unit_value_brl_per_tonne_nominal"]) > 0]
         if valid_prices:
             scope = "Brazil"
             source_notes.append("Preço unitário PAM nacional substitui preço local sem comercialização informada.")
     yield_value = median(valid_yields) if valid_yields else None
     if valid_prices:
+        history = []
+        for row in valid_prices:
+            year = int(row["year"])
+            nominal_price = float(row["unit_value_brl_per_tonne_nominal"])
+            price_deflator = deflator(indices, annual_indices, year, None)
+            if 2017 <= year <= 2025 and price_deflator:
+                history.append({"year": year, "nominal_brl_per_tonne": nominal_price,
+                                "real_brl_per_tonne": nominal_price * price_deflator,
+                                "ipca_deflator": price_deflator})
+        history.sort(key=lambda item: item["year"])
         latest = max(valid_prices, key=lambda row: int(row["year"]))
         latest_year = int(latest["year"])
         nominal_price = float(latest["unit_value_brl_per_tonne_nominal"])
-        price_deflator = deflator(indices, annual_indices, latest_year, None)
+        robust_history = history or [{"year": latest_year, "real_brl_per_tonne": nominal_price}]
+        base_price = median([item["real_brl_per_tonne"] for item in robust_history])
+        first = robust_history[:3]
+        last = robust_history[-3:]
+        years_between = max(1, int(last[-1]["year"]) - int(first[0]["year"]))
+        first_level = median([item["real_brl_per_tonne"] for item in first])
+        last_level = median([item["real_brl_per_tonne"] for item in last])
+        raw_trend = (last_level / first_level) ** (1 / years_between) - 1 if first_level > 0 else 0.0
+        trend = max(-0.05, min(0.05, raw_trend))
         price = {
-            "brl_per_tonne": nominal_price * price_deflator if price_deflator else nominal_price,
-            "source": "IBGE PAM; valor da produção / toneladas produzidas, no recorte " + PAM_SCOPE_LABELS.get(scope, scope) + "; IPCA para moeda-base.",
+            "brl_per_tonne": base_price,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
             "scope": scope,
             "observed_year": latest_year,
             "observed_nominal_brl_per_tonne": nominal_price,
-            "deflator_factor": price_deflator,
+            "history_start_year": robust_history[0]["year"],
+            "history_end_year": robust_history[-1]["year"],
+            "history_real_brl_per_tonne": history,
+            "historical_median_real_brl_per_tonne": base_price,
+            "recent_trend_raw_annual_fraction": raw_trend,
+            "trend_annual_fraction": trend,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
             "editable_hypothesis": scope != "municipality",
         }
     else:
@@ -499,12 +524,12 @@ def economic_inputs(
             yield_value, price, yield_source, assumption_notes = pam_crop_values(profile_id, crop_id, pam, state_rows, indices, annual_indices)
             pam_id = info["coffee_pam"] if crop_id == "coffee" else PAM_CROPS.get(crop_id)
             quote = quotes.get(crop_id)
-            if quote:
-                price = {
+            if quote and price:
+                price["yahoo_futures_reference"] = {
                     "brl_per_tonne": float(quote["price_brl_per_metric_ton"]),
                     "source": "Fechamento congelado de futuro CBOT no Yahoo Finance, convertido pela PTAX de venda do mesmo dia; referência de bolsa, não preço local à vista.",
                     "quote_date": quote["quote_date"], "symbol": quote["symbol"], "contract": quote["contract_name"],
-                    "unit": "BRL/metric tonne", "editable_hypothesis": False,
+                    "unit": "BRL/metric tonne",
                 }
             cost = choose_cost_panel(profile_id, crop_id, profiles, panels, lookup, source_urls, indices, annual_indices)
             cost_complete = bool(cost and cost.get("total_cost_brl_ha_reference_month") is not None)
@@ -543,10 +568,10 @@ def economic_inputs(
     recent_inflation = float(ipca_meta["last_twelve_month_change_percent"]) / 100
     real_rate = (1 + nominal_rate) / (1 + recent_inflation) - 1
     return {
-        "schema_version": "1.1.0",
+        "schema_version": "1.2.0",
         "purpose": "Base econômica rastreável e editável para comparar rotações; hipóteses e proxies têm origem identificada e não são recomendação agrícola nem previsão validada.",
         "reference_currency_month": ipca_meta["base_month"],
-        "reference_currency_basis": "R$ constantes do último mês IPCA disponível na coleta; preços Yahoo do dia 2026-11-13 são mantidos como referência futura congelada.",
+            "reference_currency_basis": "R$ constantes do último mês IPCA disponível na coleta. Preço-base usa mediana da série PAM real; fechamento Yahoo de futuros permanece apenas como referência separada.",
         "sources": {
             "conab_cost_workbooks": sources,
             "ibge_pam": {
@@ -579,10 +604,10 @@ def economic_inputs(
             "O IPCA geral equaliza datas monetárias, mas não mede inflação de insumos agropecuários.",
             "Painéis CONAB não são sempre do mesmo município, safra, sistema tecnológico ou tipo de empreendimento dos exemplos; a localidade e o nível de correspondência ficam visíveis.",
             "O VPL inclui as 14 culturas do catálogo com valores iniciais rastreáveis ou hipóteses/proxies explicitamente marcados e editáveis. Nabo, braquiária, crotalária e mucuna começam sem receita comercial e com custo proxy; feijão, milheto e aveia-preta também usam proxies identificados. Esses valores não são observações dessas culturas.",
-            "Preço e custo permanecem constantes em termos reais no horizonte; preços futuros Yahoo de maio/2027 são referências de bolsa, não oferta local nem curva de cinco anos.",
-            "Café e cana são perenes/semi-perenes; o painel de custo pode representar etapa de produção, e a cadeia anual não modela idade, implantação ou reforma do canavial/cafezal.",
+            "Preço-base é a mediana real da série histórica PAM; a tendência recente é limitada a ±5% ao ano e pode ser editada. Yahoo CBOT é mostrado apenas como referência, não como preço local nem previsão garantida.",
+            "Café e cana são perenes/semi-perenes; atraso e manutenção de formação são hipóteses explícitas, mas os painéis CONAB não medem o investimento de implantação do cafezal/canavial.",
             "A resposta de produtividade a água e carbono é hipótese explícita não calibrada; resultados VPL são exploratórios e não provam superioridade agronômica nem causal.",
-            "A página ranqueia sequências completas de cinco transições que apareceram nas 10.000 trajetórias Monte Carlo; VPL e frequência dependem da amostra, e sequências raras têm alta incerteza. A probabilidade Markov indica plausibilidade sob a cadeia municipal, não validação agronômica nem restrição de manejo.",
+            "A página agrupa os caminhos pelos estados no fechamento de cada ano e calcula o VPL com os eventos de ciclo; VPL e frequência dependem da amostra, e rotas raras têm alta incerteza. A matriz PAM é anual mas usada a cada ciclo como prior temporal explícita, não validação agronômica nem restrição de manejo.",
         ],
     }
 
@@ -593,11 +618,11 @@ def main() -> None:
     payload = economic_inputs(sources, panels, indices, annual_indices, ipca_meta)
     OUTPUT.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     coverage = {
-        "schema_version": "1.1.0",
+        "schema_version": "1.2.0",
         "status": "all_states_editable_exploratory_vpl_available",
         "source_of_truth": "data/reference/economic-benchmarks.json",
-        "objective": "maximizar o VPL esperado por hectare em cinco safras futuras entre sequências completas observadas nas trajetórias Monte Carlo iniciadas pela cultura escolhida",
-        "sequence_ranking": "agrupar por sequência completa de cinco transições as rotas amostradas em 10.000 trajetórias; calcular média, mediana, faixa, probabilidade de prejuízo e cauda do VPL a partir dos ambientes simulados em que a sequência ocorreu; exibir frequência Monte Carlo e probabilidade Markov média separadamente; sinalizar que rotas raras têm baixa precisão",
+        "objective": "maximizar o VPL esperado por hectare em horizonte de 60 meses, usando eventos de colheita por ciclo e transições Markov ao fim dos ciclos da cultura escolhida",
+        "sequence_ranking": "agrupar os caminhos pelos estados de cultura/cobertura no fechamento de cada ano; calcular VPL dos eventos reais de colheita, formação e cobertura, descontados pelo mês do fluxo; exibir frequência Monte Carlo e probabilidade Markov média separadamente, sem descartar rotas raras",
         "profile_coverage": {
             profile_id: {
                 "included_crop_ids": profile["economically_supported_crop_ids"],
@@ -607,8 +632,8 @@ def main() -> None:
         },
         "markov_states": "Todas as 14 culturas são destinos Markov e têm uma linha econômica inicial editável nos três perfis. Valores observados, proxies e hipóteses de receita zero para coberturas estão diferenciados nos campos de fonte; a inclusão de cada cultura no ranking pode ser alterada na página.",
         "price_sources": {
-            "soybean_and_maize": "Yahoo CBOT May-2027, snapshot 2026-11-13, convertido por PTAX; referência de bolsa, sem base local",
-            "sugarcane_and_coffee": "valor unitário municipal da PAM no último ano válido, convertido a moeda-base por IPCA",
+            "all_crops": "mediana real dos preços unitários anuais PAM 2017–2025 (valor da produção / toneladas), deflacionada por IPCA; curva futura aplica tendência recente limitada ±5%/ano",
+            "soybean_and_maize": "Yahoo CBOT May-2027, snapshot 2026-11-13, convertido por PTAX; mantido como referência de bolsa lado a lado, não substitui a série local PAM",
         },
         "cost_source": "Custo total CONAB por hectare quando há painel direto; para culturas sem painel, proxy de custo por cultura indicada, localidade, ano, sistema produtivo e fator IPCA constam em economic-benchmarks.json. Todos os valores podem ser editados na interface.",
         "known_limits": payload["limitations"],

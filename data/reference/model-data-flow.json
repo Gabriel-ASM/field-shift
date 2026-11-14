@@ -109,33 +109,34 @@
     "horizon_steps": 120,
     "step_days": "quinzena do calendário",
     "trajectories": 10000,
-    "environment_resampling": "blocos contíguos de duas quinzenas, mesma época do ano, retirados de anos completos 1981–2025",
+    "environment_resampling": "um bloco de 24 quinzenas é sorteado com reposição para cada ano do horizonte de cinco anos; cada bloco preserva a ordem sazonal NASA POWER",
     "paired_comparison": "baseline Kc=1 e ação agrícola selecionada compartilham cada caminho ambiental e o mesmo uniforme por passo; matriz Dirichlet é sorteada separadamente por estratégia",
     "transition_parameter_uncertainty": "Dirichlet(count + 0.5) apenas nos destinos viáveis contados na linha",
     "reported_output": "frequência e sequência dos estados de água; não produtividade, quebra de safra, lucro ou ranking"
   },
   "interactive_page_monte_carlo": {
-    "crop_state": "uma cultura por estado; cinco transições anuais",
-    "environment_order": "reamostra 24 quinzenas NASA POWER, evolui água, atualiza carbono por faixa hipotética, então repondera probabilidades Markov e sorteia uma cultura",
-    "water": "10.000 trajetórias; matriz quinzenal de água derivada de POWER, SoilGrids/Saxton–Rawls e Kc=1 de referência",
-    "soil_carbon": "SoilGrids inicial 0–30 cm; faixas anuais e coeficientes hipotéticos em data/reference/soil-crop-response-hypotheses.json",
+    "crop_state": "uma cultura principal por estado; duração de cada ciclo e maturação por cultura em data/reference/crop-cycle-assumptions.json; Markov é sorteado ao fim do ciclo",
+    "environment_order": "em cada quinzena sorteia água sob clima da NASA POWER e integra carbono pela cultura/cobertura ativa; no fim do ciclo repondera a linha Markov por água e carbono e sorteia o próximo nó",
+    "water": "10.000 trajetórias; matriz quinzenal de água derivada de POWER, SoilGrids/Saxton–Rawls e Kc=1 de referência; cultura/cobertura ajusta a demanda",
+    "soil_carbon": "SoilGrids inicial 0–30 cm; taxa hipotética por cultura é integrada pelo tempo decorrido em data/reference/soil-crop-response-hypotheses.json; cobertura de café usa fração de área de data/reference/crop-cycle-assumptions.json",
     "joint_crop_water": "condicionamento hipotético no simulador; faltam observações pareadas por pixel/talhão para calibração",
-    "graph_output": "ocupação dos 14 nós e frequência das arestas em cada um dos cinco anos; uma cultura por trajetória e ano",
+    "graph_output": "ocupação dos 14 nós no fechamento de cada ano e contagens de transições ocorridas no ano; uma cultura principal por talhão, com subcadeia de coberturas entrelinhas para café",
     "execution": "inicia após a renderização inicial; atualiza progresso a cada 200 trajetórias e o overlay do grafo a cada 1.000; permite cancelar a execução anterior ao mudar perfil/cultura/semente",
-    "perennial_constraints": "café e cana têm apenas transição para si mesmos no horizonte sem idade/reforma; recomendação de braquiária nas entrelinhas do café é apresentada à parte e não recebe efeito numérico sem coeficiente compatível"
+    "perennial_constraints": "café e cana têm apenas transição para si mesmos no horizonte sem idade/reforma; a formação de novas culturas tem atraso e custo; café tem cadeia de cobertura entrelinhas separada com prior uniforme e zero contagens observadas"
   },
   "economic_optimization": {
-    "objective": "maximizar o VPL esperado por hectare entre as sequências completas de cinco transições observadas no Monte Carlo após a cultura inicial",
-    "decision_scope": "agrupar as rotas completas geradas nas 10.000 trajetórias; calcular as estatísticas de VPL nos ambientes associados a cada sequência e mostrar separadamente frequência Monte Carlo e probabilidade Markov média; apresentar todas as rotas amostradas e destacar as com n>=20",
-    "formula": "VPL = sum_t(((PAM yield × price × environmental yield factor) − CONAB total cost)/(1+r_real)^t)",
+    "objective": "ordenar o VPL médio condicional por hectare em horizonte de 60 meses, com ciclos variáveis, maturação e eventos de produção; mostrar chance de rota separadamente",
+    "decision_scope": "agrupar as 10.000 trajetórias pelo estado principal/cobertura no fechamento de cada ano; calcular o VPL de cada colheita, custo de formação e custo de cobertura na data do evento; exibir frequência Monte Carlo e probabilidade Markov separadamente, sem descartar rotas raras",
+    "formula": "VPL = sum_event(((PAM yield × price_real_history × environmental yield factor) − CONAB cost)/(1+r_real)^(day/365)); formação perene recebe custo proxy no plantio e por ano de maturação (último intervalo proporcional), e receita só após a maturação",
     "risk_outputs": ["média", "mediana", "P5–P95", "probabilidade de VPL negativo", "VPL médio dos 5% piores"],
     "environment_role": "Monte Carlo updates water and soil carbon; explicit uncalibrated water/SOC yield multipliers change crop revenue; environmental variables are not arbitrary additive VPL weights",
     "economic_coverage_by_profile": {"ariquemes-ro": "14/14 linhas com valores completos", "franca-sp": "14/14 linhas com valores completos", "varginha-mg": "14/14 linhas com valores completos"},
     "hypotheses_and_proxies": "valores PAM/Yahoo/CONAB observados são separados de proxies; feijão, milheto e aveia-preta têm proxy identificado; nabo, braquiária, crotalária e mucuna começam com receita comercial zero e custo proxy; rendimento, preço e custo são editáveis",
     "unsupported_states": "nenhum estado sem entrada econômica inicial; hipóteses de receita zero para coberturas e proxies não são observações de rendimento/preço/custo dessas culturas",
     "status": "ranking exploratório só entre rotas vistas na amostra; rotas raras têm baixa precisão e o método não garante o ótimo entre todas as sequências possíveis; não é prova causal nem política dinâmica",
-    "market_assumptions": "frozen Yahoo May-2027 futures for soy/maize; latest municipal PAM unit values for cane/coffee; price and costs flat in real terms over horizon; no market volatility",
-    "limitations": ["municipal PAM yield is not parcel yield", "CONAB panel can be same-UF proxy instead of exact municipality", "perennial crop age, establishment and field renovation are not modeled", "water/SOC yield response is uncalibrated" ]
+    "probability_weighting": "a probabilidade Markov/frequência não multiplica o VPL condicional; uma rota rara pode liderar, mas recebe sinalização de suporte baixo",
+    "market_assumptions": "all crop prices use the median real PAM unit price for 2017–2025, deflated by IPCA to the reference month; projected trend is recent 3-year median CAGR, capped at ±5% annually and editable; Yahoo May-2027 futures remain separate exchange references",
+    "limitations": ["municipal PAM yield is not parcel yield", "CONAB panel can be same-UF proxy instead of exact municipality", "annual PAM transition counts are reused per harvest cycle although within-year field transitions are unobserved", "cycle and maturation values are editable hypotheses and crop calendars/ZARC windows are not yet integrated; repeated same-crop cycles are possible", "first new-perennial harvest applies the mature-crop PAM median yield because no local yield-by-age curve is available", "perennial formation cost is a fraction of production proxy, not observed establishment investment", "coffee interrow cover chain has no observed transition counts and its uniform prior is a scenario", "water/SOC yield response is uncalibrated" ]
   },
   "not_yet_ingested_or_calibrated": [
     "MapBiomas Coleção 11 e dados por pixel de segunda safra para transições do mesmo local",
@@ -147,6 +148,7 @@
     "custos oficiais comparáveis para culturas e perfis sem cobertura no VPL demonstrativo, em especial soja/cana em Ariquemes e coberturas",
     "preços futuros para anos além de maio/2027 e incerteza conjunta de mercado",
     "resposta de produtividade por água/solo calibrada e valor econômico das culturas de cobertura",
-    "otimização dinâmica da política de cultura em cada ano, incluindo fase/idade de cana e café"
+    "janelas de plantio ZARC e produtividade/custos por cultivar incorporados ao relógio dos ciclos",
+    "otimização dinâmica da política de cultura em cada ciclo, incluindo fase/idade de cana e café"
   ]
 }

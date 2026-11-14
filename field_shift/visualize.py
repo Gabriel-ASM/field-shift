@@ -74,6 +74,7 @@ def water_markov(profile_dir: Path) -> dict:
 def export_page(output: Path, seed: int) -> None:
     catalog = read_json(ROOT / "data" / "catalog" / "perfis-exemplo.json")
     soil_hypotheses = read_json(ROOT / "data" / "reference" / "soil-crop-response-hypotheses.json")
+    crop_cycles = read_json(ROOT / "data" / "reference" / "crop-cycle-assumptions.json")
     economic_prices = read_json(ROOT / "data" / "reference" / "yahoo-harvest-futures.json")
     economic_benchmarks = read_json(ROOT / "data" / "reference" / "economic-benchmarks.json")
     rng = Random(seed)
@@ -125,6 +126,7 @@ def export_page(output: Path, seed: int) -> None:
         "<!-- CASE_DATA -->": payload_json({"seed": seed, "cases": cases}),
         "<!-- PROFILE_DATA -->": payload_json(profile_data),
         "<!-- SOIL_HYPOTHESES -->": payload_json(soil_hypotheses),
+        "<!-- CROP_CYCLES -->": payload_json(crop_cycles),
         "<!-- ECONOMIC_DATA -->": payload_json({
             "price_snapshot": economic_prices,
             "discount_rate": economic_benchmarks["discount_rate"],

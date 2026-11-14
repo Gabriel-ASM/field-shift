@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Relógio agronômico exploratório para o Monte Carlo, com horizonte de 60 meses, ciclos de colheita variáveis e atraso de maturação ao entrar em uma cultura nova.",
+  "time_basis": {
+    "horizon_months": 60,
+    "days_per_year": 365,
+    "environment_periods_per_year": 24,
+    "markov_transition_clock": "A matriz PAM é anual e não contém calendário de talhão. Nesta demonstração ela é usada como prior de decisão ao fim de cada ciclo da cultura; a duração do ciclo determina quando a transição ocorre. A probabilidade intra-anual não é observada e deve ser validada com dados de rotação parcelar.",
+    "initial_crop_rule": "A cultura escolhida no tempo zero é tratada como estabelecida e produtiva: não recebe atraso de implantação/maturação. A primeira receita ocorre ao fim do próximo ciclo de colheita.",
+    "new_crop_rule": "Uma cultura destino começa recém-implantada. Os custos de formação são pagos durante o atraso; não há receita antes de atingir a maturação indicada."
+  },
+  "crops": {
+    "soybean": {"cycle_days": 115, "maturation_days": 115, "class": "annual", "support": "published_reference", "basis": "Ciclo médio representativo entre 100, 115 e 130 dias usados nas fases de soja do ZARC/Embrapa; não identifica cultivar nem janela local."},
+    "maize_grain": {"cycle_days": 125, "maturation_days": 125, "class": "annual", "support": "published_reference_global", "basis": "Ciclo de 125 dias de milho em região tropical úmida na FAO-56; não distingue cultivar, verão e segunda safra brasileiras."},
+    "sorghum_grain": {"cycle_days": 130, "maturation_days": 130, "class": "annual", "support": "published_reference_internal_discrepancy", "basis": "FAO-56 reporta 130 dias, mas soma de fases é 125; conserva o total publicado e mantém a inconsistência visível. Proxy de sorgo também é usado em custos de milheto."},
+    "millet": {"cycle_days": 75, "maturation_days": 75, "class": "cover_or_annual", "support": "literature_range_midpoint", "basis": "Ponto médio aproximado do intervalo Embrapa de 60–90 dias até florescimento para milheto de cobertura."},
+    "dry_bean": {"cycle_days": 110, "maturation_days": 110, "class": "annual", "support": "published_reference_global", "basis": "Ciclo de 110 dias de feijão-seco continental na FAO-56; varia por cultivar e região."},
+    "peanut": {"cycle_days": 130, "maturation_days": 130, "class": "annual", "support": "published_reference_global", "basis": "Ciclo de 130 dias de amendoim na FAO-56; referência climática externa, não calendário local brasileiro."},
+    "oat": {"cycle_days": 100, "maturation_days": 100, "class": "cover_or_annual", "support": "literature_range", "basis": "Intervalo de ciclo de aveias de cobertura da referência Embrapa; aveia-preta não é equivalente à aveia em grão usada no preço PAM."},
+    "wheat": {"cycle_days": 150, "maturation_days": 150, "class": "annual", "support": "published_reference_global", "basis": "Referência de ciclo de cereais de 150 dias FAO-56; não representa cultivar ou janela ZARC local."},
+    "sugarcane": {"cycle_days": 365, "maturation_days": 540, "class": "perennial_or_semiperennial", "support": "published_reference_plus_hypothesis", "basis": "Embrapa descreve maturação da cana-planta em 16–18 meses; modelo usa 18 meses (540 dias). Canavial estabelecido recebe cortes anuais simplificados; idade e número de cortes são desconhecidos."},
+    "coffee": {"cycle_days": 365, "maturation_days": 1095, "class": "perennial", "support": "literature_range_midpoint", "basis": "Cafezal existente é produtivo no tempo zero; Embrapa informa retorno financeiro a partir do 3º/4º ano. Modelo usa 36 meses até receita comercial significativa e colheitas anuais simplificadas."},
+    "forage_radish": {"cycle_days": 75, "maturation_days": 75, "class": "cover", "support": "literature_range_midpoint", "basis": "Ponto médio aproximado do intervalo Embrapa de 60–90 dias até florescimento."},
+    "brachiaria": {"cycle_days": 120, "maturation_days": 120, "class": "cover", "support": "management_interval_hypothesis", "basis": "Intervalo operacional de manejo/revisão da cobertura; braquiária pode permanecer por mais tempo e não tem ciclo de colheita anual comparável."},
+    "crotalaria": {"cycle_days": 105, "maturation_days": 105, "class": "cover", "support": "literature_range_midpoint", "basis": "Ponto médio aproximado do intervalo Embrapa de 90–120 dias para Crotalaria juncea de cobertura."},
+    "mucuna": {"cycle_days": 120, "maturation_days": 120, "class": "cover", "support": "species_unspecified_hypothesis", "basis": "Hipótese de 4 meses; a duração muda materialmente entre mucuna-anã e mucuna-preta, não identificadas no catálogo PAM."}
+  },
+  "new_perennial_formation": {
+    "coffee_annual_formation_cost_fraction": 0.55,
+    "sugarcane_annual_formation_cost_fraction": 0.65,
+    "payment_timing": "Cobrar uma parcela no plantio e uma no início de cada ano de formação; prorratear a última parcela pelo número de dias restantes até a maturação. A receita começa apenas na primeira colheita após maturar.",
+    "interpretation": "Frações editáveis do custo anual de produção cobradas durante a formação. Não são custos CONAB medidos para implantação; custos de plantio/reforma podem estar subestimados."
+  },
+  "associated_cover_chain": {
+    "applies_to_primary_crop": "coffee",
+    "states": ["millet", "brachiaria", "forage_radish", "crotalaria", "mucuna"],
+    "default_initial_cover": "millet",
+    "observed_transition_counts": 0,
+    "prior_alpha_per_destination": 1.0,
+    "prior_distribution": "Uniforme entre as cinco coberturas listadas; prior explícita porque PAM e dados pesquisados não registram a sequência de coberturas nas entrelinhas deste talhão.",
+    "covered_area_fraction": 0.3,
+    "cost_proxy_fraction": 0.25,
+    "combined_water_demand": "Kc_eff = Kc_café + fração_área × (Kc_cobertura − 1), com Kc=1 para cobertura sem curva publicada. É uma hipótese de mistura, não coeficiente medido para cafezal local.",
+    "soil_effect": "Delta de carbono da cadeia hipotética da cultura principal + fração_área × delta da cobertura; ambas são faixas exploratórias editáveis, não efeito causal medido.",
+    "sources": [
+      "https://www.atermaisdigital.cnptia.embrapa.br/web/cafe/planejamento-do-plantio",
+      "https://www.alice.cnptia.embrapa.br/alice/handle/doc/1041399",
+      "https://ainfo.cnptia.embrapa.br/digital/bitstream/item/201211/1/CT-168-22-08-2019-1.pdf"
+    ]
+  },
+  "sources": [
+    {"publisher": "Embrapa", "title": "ZARC da soja — ciclos e fases", "url": "https://www.embrapa.br/documents/1355202/83794724/4.%2BJRenato%2B-%2BZARC%2BSoja%2B06%2BADs%2B_%2B2023%2B_%2BSeminario%2BZARC.pdf/3bed6875-beb3-fbb6-fe37-c7f033a45629", "use": "Ciclos de soja de 100, 115 e 130 dias; modelo usa 115 dias como referência média."},
+    {"publisher": "Embrapa", "title": "Plantio da cana-de-açúcar", "url": "https://www.embrapa.br/web/agencia-de-informacao-tecnologica/cultivos/cana-de-acucar/producao/manejo/plantio", "use": "Maturação da cana-planta em 16–18 meses; modelo usa 18 meses."},
+    {"publisher": "Embrapa", "title": "Planejamento do plantio do café", "url": "https://www.atermaisdigital.cnptia.embrapa.br/web/cafe/planejamento-do-plantio", "use": "Cafezal perene e retorno financeiro a partir do 3º/4º ano; modelo usa 36 meses até receita comercial significativa."},
+    {"publisher": "Embrapa", "title": "Culturas de cobertura — ciclo até florescimento", "url": "https://ainfo.cnptia.embrapa.br/digital/bitstream/item/201211/1/CT-168-22-08-2019-1.pdf", "use": "Referências de ciclo para milheto, nabo forrageiro e crotalária; não são previsão local."},
+    {"publisher": "FAO", "title": "Irrigation and Drainage Paper 56, Tables 11–12", "url": "https://www.fao.org/4/x0490e/x0490e0b.htm", "use": "Curvas Kc/duração usadas como referência hídrica no projeto; duração global não é calendário varietal brasileiro."}
+  ],
+  "limitations": [
+    "Ciclos são editáveis hipóteses por cultura; a página ainda não seleciona cultivar, época de semeadura ou janela ZARC no Monte Carlo. Repetições sucessivas da mesma cultura podem ocorrer e não são uma recomendação de calendário.",
+    "A cadeia PAM mede dominância anual municipal, não rotação sequencial do mesmo talhão. Usá-la no fim de cada ciclo não equivale a estimar uma probabilidade observada intra-anual.",
+    "A produtividade da primeira colheita após maturação usa a mediana PAM de culturas adultas; não há uma curva local de produtividade por idade, então a primeira safra perene pode estar superestimada.",
+    "O custo CONAB disponível não separa consistentemente implantação, formação, trato anual e colheita; os custos de formação perene usam frações explícitas de proxy.",
+    "Coberturas intercalares do café formam uma subcadeia independente com prior uniforme e zero contagens observadas; isso mantém o café como cultura principal e não inventa frequência empírica."
+  ]
+}

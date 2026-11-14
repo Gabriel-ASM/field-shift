@@ -1,8 +1,8 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "purpose": "Base econômica rastreável e editável para comparar rotações; hipóteses e proxies têm origem identificada e não são recomendação agrícola nem previsão validada.",
   "reference_currency_month": "202610",
-  "reference_currency_basis": "R$ constantes do último mês IPCA disponível na coleta; preços Yahoo do dia 2026-11-13 são mantidos como referência futura congelada.",
+  "reference_currency_basis": "R$ constantes do último mês IPCA disponível na coleta. Preço-base usa mediana da série PAM real; fechamento Yahoo de futuros permanece apenas como referência separada.",
   "sources": {
     "conab_cost_workbooks": [
       {
@@ -27247,13 +27247,83 @@
           "yield_kg_ha_median_2021_2025": 3453.0,
           "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 2586.506213351836,
-            "source": "Fechamento congelado de futuro CBOT no Yahoo Finance, convertido pela PTAX de venda do mesmo dia; referência de bolsa, não preço local à vista.",
-            "quote_date": "2026-11-13",
-            "symbol": "ZSK27.CBT",
-            "contract": "Soybean Futures,May-2027",
-            "unit": "BRL/metric tonne",
-            "editable_hypothesis": false
+            "brl_per_tonne": 1966.321648812475,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
+            "scope": "municipality",
+            "observed_year": 2025,
+            "observed_nominal_brl_per_tonne": 1888.0038619357954,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 1033.3059585728624,
+                "real_brl_per_tonne": 1642.482431722121,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 1100.0,
+                "real_brl_per_tonne": 1686.681026456955,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 1066.6883539362395,
+                "real_brl_per_tonne": 1576.7432826296063,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 1151.5080205514373,
+                "real_brl_per_tonne": 1649.1538977853354,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 2573.8418899300514,
+                "real_brl_per_tonne": 3403.619246182257,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 2886.1716878860457,
+                "real_brl_per_tonne": 3492.530119011539,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 2307.63573437162,
+                "real_brl_per_tonne": 2669.8096385985873,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 1773.8081693025372,
+                "real_brl_per_tonne": 1966.321648812475,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 1888.0038619357954,
+                "real_brl_per_tonne": 1992.9307258897018,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 1966.321648812475,
+            "recent_trend_raw_annual_fraction": 0.02446926508728775,
+            "trend_annual_fraction": 0.02446926508728775,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
+            "editable_hypothesis": false,
+            "yahoo_futures_reference": {
+              "brl_per_tonne": 2586.506213351836,
+              "source": "Fechamento congelado de futuro CBOT no Yahoo Finance, convertido pela PTAX de venda do mesmo dia; referência de bolsa, não preço local à vista.",
+              "quote_date": "2026-11-13",
+              "symbol": "ZSK27.CBT",
+              "contract": "Soybean Futures,May-2027",
+              "unit": "BRL/metric tonne"
+            }
           },
           "cost_panel": {
             "source_file": "data/raw/conab/costs/serie-historica-custos-soja-1997-a-2026.xls",
@@ -27288,13 +27358,83 @@
           "yield_kg_ha_median_2021_2025": 4750.0,
           "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 1033.519644521931,
-            "source": "Fechamento congelado de futuro CBOT no Yahoo Finance, convertido pela PTAX de venda do mesmo dia; referência de bolsa, não preço local à vista.",
-            "quote_date": "2026-11-13",
-            "symbol": "ZCK27.CBT",
-            "contract": "Corn Futures,May-2027",
-            "unit": "BRL/metric tonne",
-            "editable_hypothesis": false
+            "brl_per_tonne": 1255.7085012087314,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
+            "scope": "municipality",
+            "observed_year": 2025,
+            "observed_nominal_brl_per_tonne": 1189.5960401179066,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 760.0600600600601,
+                "real_brl_per_tonne": 1208.1468081598025,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 750.0,
+                "real_brl_per_tonne": 1150.0097907661057,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 700.0,
+                "real_brl_per_tonne": 1034.71674155608,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 1380.0347222222222,
+                "real_brl_per_tonne": 1976.4427173872364,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 1463.0116959064328,
+                "real_brl_per_tonne": 1934.6700296777772,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 1368.7719298245613,
+                "real_brl_per_tonne": 1656.338467678357,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 1309.2756183745582,
+                "real_brl_per_tonne": 1514.7610229178424,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 851.7870962194388,
+                "real_brl_per_tonne": 944.232548062942,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 1189.5960401179066,
+                "real_brl_per_tonne": 1255.7085012087314,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 1255.7085012087314,
+            "recent_trend_raw_annual_fraction": 0.011051812515993076,
+            "trend_annual_fraction": 0.011051812515993076,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
+            "editable_hypothesis": false,
+            "yahoo_futures_reference": {
+              "brl_per_tonne": 1033.519644521931,
+              "source": "Fechamento congelado de futuro CBOT no Yahoo Finance, convertido pela PTAX de venda do mesmo dia; referência de bolsa, não preço local à vista.",
+              "quote_date": "2026-11-13",
+              "symbol": "ZCK27.CBT",
+              "contract": "Corn Futures,May-2027",
+              "unit": "BRL/metric tonne"
+            }
           },
           "cost_panel": {
             "source_file": "data/raw/conab/costs/milho_2a_safra_serie_historica_2005-2026.xls",
@@ -27329,12 +27469,74 @@
           "yield_kg_ha_median_2021_2025": 35240.0,
           "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 749.4586446083271,
-            "source": "IBGE PAM; valor da produção / toneladas produzidas, no recorte municipal; IPCA para moeda-base.",
+            "brl_per_tonne": 315.52994554974293,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
             "scope": "municipality",
             "observed_year": 2025,
             "observed_nominal_brl_per_tonne": 710.0,
-            "deflator_factor": 1.0555755557863762,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 69.56521739130434,
+                "real_brl_per_tonne": 110.57678171328443,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 44.927536231884055,
+                "real_brl_per_tonne": 68.88947538888748,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 179.8507462686567,
+                "real_brl_per_tonne": 265.84939735076256,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 137.30929264909847,
+                "real_brl_per_tonne": 196.65008938970988,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 327.8008298755187,
+                "real_brl_per_tonne": 433.480089761517,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 260.748959778086,
+                "real_brl_per_tonne": 315.52994554974293,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 634.5062429057889,
+                "real_brl_per_tonne": 734.0893789383699,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 800.2270147559591,
+                "real_brl_per_tonne": 887.0765905300375,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 710.0,
+                "real_brl_per_tonne": 749.4586446083271,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 315.52994554974293,
+            "recent_trend_raw_annual_fraction": 0.2702390679563018,
+            "trend_annual_fraction": 0.05,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
             "editable_hypothesis": false
           },
           "cost_panel": {
@@ -27370,12 +27572,74 @@
           "yield_kg_ha_median_2021_2025": 2308.0,
           "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 24190.48409979186,
-            "source": "IBGE PAM; valor da produção / toneladas produzidas, no recorte municipal; IPCA para moeda-base.",
+            "brl_per_tonne": 8155.629458369733,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
             "scope": "municipality",
             "observed_year": 2025,
             "observed_nominal_brl_per_tonne": 22916.866506794566,
-            "deflator_factor": 1.0555755557863762,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 1000.0,
+                "real_brl_per_tonne": 1589.5412371284638,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 4500.0,
+                "real_brl_per_tonne": 6900.058744596634,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 4000.0,
+                "real_brl_per_tonne": 5912.667094606171,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 4056.3002680965146,
+                "real_brl_per_tonne": 5809.306820560051,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 6167.34693877551,
+                "real_brl_per_tonne": 8155.629458369733,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 11903.08370044053,
+                "real_brl_per_tonne": 14403.813365431797,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 10291.161178509532,
+                "real_brl_per_tonne": 11906.316450866556,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 15757.864632983794,
+                "real_brl_per_tonne": 17468.084149750994,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 22916.866506794566,
+                "real_brl_per_tonne": 24190.48409979186,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 8155.629458369733,
+            "recent_trend_raw_annual_fraction": 0.1450059171270106,
+            "trend_annual_fraction": 0.05,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
             "editable_hypothesis": false
           },
           "cost_panel": {
@@ -27412,11 +27676,25 @@
           "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
             "brl_per_tonne": 794.1949419726069,
-            "source": "IBGE PAM; valor da produção / toneladas produzidas, no recorte municipal; IPCA para moeda-base.",
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
             "scope": "municipality",
             "observed_year": 2025,
             "observed_nominal_brl_per_tonne": 752.3809523809524,
-            "deflator_factor": 1.0555755557863762,
+            "history_start_year": 2025,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 752.3809523809524,
+                "real_brl_per_tonne": 794.1949419726069,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 794.1949419726069,
+            "recent_trend_raw_annual_fraction": 0.0,
+            "trend_annual_fraction": 0.0,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
             "editable_hypothesis": false
           },
           "cost_panel": {
@@ -27453,11 +27731,73 @@
           "yield_source": "IBGE PAM; mediana 2021–2025 em Brazil; proxy regional editável, não é rendimento municipal/talhão.",
           "price": {
             "brl_per_tonne": 1150.1370901931748,
-            "source": "IBGE PAM; valor da produção / toneladas produzidas, no recorte nacional; IPCA para moeda-base.",
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
             "scope": "Brazil",
             "observed_year": 2025,
             "observed_nominal_brl_per_tonne": 1089.5829141632148,
-            "deflator_factor": 1.0555755557863762,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 542.293334364923,
+                "real_brl_per_tonne": 861.9976175929394,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 700.6395408792014,
+                "real_brl_per_tonne": 1074.323109078601,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 725.8467683155318,
+                "real_brl_per_tonne": 1072.9225756863686,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 1067.7322902189585,
+                "real_brl_per_tonne": 1529.1729078557485,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 1396.7745788396724,
+                "real_brl_per_tonne": 1847.0788192999787,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 1517.9032438021284,
+                "real_brl_per_tonne": 1836.8009148503436,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 991.2682589349703,
+                "real_brl_per_tonne": 1146.8437209229114,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 1166.2323542436563,
+                "real_brl_per_tonne": 1292.8049184690158,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 1089.5829141632148,
+                "real_brl_per_tonne": 1150.1370901931748,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 1150.1370901931748,
+            "recent_trend_raw_annual_fraction": 0.008724695210240219,
+            "trend_annual_fraction": 0.008724695210240219,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
             "editable_hypothesis": true
           },
           "cost_panel": {
@@ -27494,12 +27834,74 @@
           "yield_kg_ha_median_2021_2025": 333.0,
           "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 4222.302223145505,
-            "source": "IBGE PAM; valor da produção / toneladas produzidas, no recorte municipal; IPCA para moeda-base.",
+            "brl_per_tonne": 5784.729363548336,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
             "scope": "municipality",
             "observed_year": 2025,
             "observed_nominal_brl_per_tonne": 4000.0,
-            "deflator_factor": 1.0555755557863762,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 4333.333333333333,
+                "real_brl_per_tonne": 6888.012027556676,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 2000.0,
+                "real_brl_per_tonne": 3066.6927753762816,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 5000.0,
+                "real_brl_per_tonne": 7390.833868257715,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 5000.0,
+                "real_brl_per_tonne": 7160.844164140446,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 4250.0,
+                "real_brl_per_tonne": 5620.151670104225,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 5000.0,
+                "real_brl_per_tonne": 6050.454540993742,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 5000.0,
+                "real_brl_per_tonne": 5784.729363548336,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 4000.0,
+                "real_brl_per_tonne": 4434.1246879827695,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 4000.0,
+                "real_brl_per_tonne": 4222.302223145505,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 5784.729363548336,
+            "recent_trend_raw_annual_fraction": -0.0535683602617919,
+            "trend_annual_fraction": -0.05,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
             "editable_hypothesis": false
           },
           "cost_panel": {
@@ -27533,16 +27935,23 @@
         "peanut": {
           "label": "Amendoim",
           "pam_product": "amendoim_em_casca",
-          "yield_kg_ha_median_2021_2025": 1454.5454545454545,
-          "yield_source": "IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
+          "yield_kg_ha_median_2021_2025": null,
+          "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 10362.071969646078,
-            "source": "IBGE PAM; valor da produção / toneladas produzidas, no recorte estadual; IPCA para moeda-base.",
-            "scope": "state",
-            "observed_year": 2025,
-            "observed_nominal_brl_per_tonne": 9816.51376146789,
-            "deflator_factor": 1.0555755557863762,
-            "editable_hypothesis": true
+            "brl_per_tonne": 1500.0,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
+            "scope": "municipality",
+            "observed_year": 2009,
+            "observed_nominal_brl_per_tonne": 1500.0,
+            "history_start_year": 2009,
+            "history_end_year": 2009,
+            "history_real_brl_per_tonne": [],
+            "historical_median_real_brl_per_tonne": 1500.0,
+            "recent_trend_raw_annual_fraction": 0.0,
+            "trend_annual_fraction": 0.0,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
+            "editable_hypothesis": false
           },
           "cost_panel": {
             "source_file": "data/raw/conab/costs/serie-historica-custos-amendoim-2005-a-2024.xls",
@@ -27563,14 +27972,15 @@
             "proxy": false,
             "source_note": "Custo total CONAB do produto no painel; localidade, ano e sistema estão identificados."
           },
-          "eligible_for_economic_comparison": true,
-          "include_in_vpl": true,
+          "eligible_for_economic_comparison": false,
+          "include_in_vpl": false,
           "editable": true,
           "assumption_notes": [
-            "Rendimento/preço PAM estadual usado como proxy quando falta série municipal.",
             "Custo CONAB: painel nacional; confira a localidade e edite o valor se necessário."
           ],
-          "missing_inputs": []
+          "missing_inputs": [
+            "PAM yield or explicit zero-harvest case"
+          ]
         },
         "oat": {
           "label": "Aveia em grão (proxy; não equivale a aveia-preta de cobertura)",
@@ -27578,12 +27988,74 @@
           "yield_kg_ha_median_2021_2025": 2177.850562866182,
           "yield_source": "Mediana/valor unitário PAM nacional usado como proxy; recorte regional sem colheita identificável.A PAM mede aveia em grão; esta é uma aproximação da aveia-preta de cobertura e pode ser editada. IBGE PAM; mediana 2021–2025 em Brazil; proxy regional editável, não é rendimento municipal/talhão.",
           "price": {
-            "brl_per_tonne": 1018.3023383318053,
-            "source": "Aveia em grão usada como proxy para aveia-preta; IBGE PAM; valor da produção / toneladas produzidas, no recorte nacional; IPCA para moeda-base.",
+            "brl_per_tonne": 975.7313229528074,
+            "price_basis": "median_real_history",
+            "source": "Aveia em grão usada como proxy para aveia-preta; IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
             "scope": "Brazil",
             "observed_year": 2025,
             "observed_nominal_brl_per_tonne": 964.6891998869723,
-            "deflator_factor": 1.0555755557863762,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 353.7823062503895,
+                "real_brl_per_tonne": 562.3515647514052,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 410.6193647108015,
+                "real_brl_per_tonne": 629.6217195941067,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 459.7481836133383,
+                "real_brl_per_tonne": 679.5844892638854,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 681.2962973269294,
+                "real_brl_per_tonne": 975.7313229528074,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 956.0044046855163,
+                "real_brl_per_tonne": 1264.2093533224236,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 1140.7439824269734,
+                "real_brl_per_tonne": 1380.4039217173133,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 761.9348963558629,
+                "real_brl_per_tonne": 881.5174336123835,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 1010.2437715396246,
+                "real_brl_per_tonne": 1119.8867120661685,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 964.6891998869723,
+                "real_brl_per_tonne": 1018.3023383318053,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 975.7313229528074,
+            "recent_trend_raw_annual_fraction": 0.0619391450242428,
+            "trend_annual_fraction": 0.05,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
             "editable_hypothesis": true
           },
           "cost_panel": {
@@ -27702,11 +28174,25 @@
           "yield_source": "Proxy de colheita: dados de sorgo em grão aplicados ao milheto; rendimento e preço são editáveis. IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
             "brl_per_tonne": 794.1949419726069,
-            "source": "Proxy sorgo em grão → milheto; IBGE PAM; valor da produção / toneladas produzidas, no recorte municipal; IPCA para moeda-base.",
+            "price_basis": "median_real_history",
+            "source": "Proxy sorgo em grão → milheto; IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
             "scope": "municipality",
             "observed_year": 2025,
             "observed_nominal_brl_per_tonne": 752.3809523809524,
-            "deflator_factor": 1.0555755557863762,
+            "history_start_year": 2025,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 752.3809523809524,
+                "real_brl_per_tonne": 794.1949419726069,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 794.1949419726069,
+            "recent_trend_raw_annual_fraction": 0.0,
+            "trend_annual_fraction": 0.0,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
             "editable_hypothesis": true,
             "proxy_crop_id": "sorghum_grain"
           },
@@ -27828,7 +28314,6 @@
         "sorghum_grain",
         "wheat",
         "dry_bean",
-        "peanut",
         "oat",
         "forage_radish",
         "brachiaria",
@@ -27836,7 +28321,9 @@
         "crotalaria",
         "mucuna"
       ],
-      "economic_exclusions": []
+      "economic_exclusions": [
+        "peanut"
+      ]
     },
     "franca-sp": {
       "municipality": "Franca",
@@ -27848,13 +28335,83 @@
           "yield_kg_ha_median_2021_2025": 3425.0,
           "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 2586.506213351836,
-            "source": "Fechamento congelado de futuro CBOT no Yahoo Finance, convertido pela PTAX de venda do mesmo dia; referência de bolsa, não preço local à vista.",
-            "quote_date": "2026-11-13",
-            "symbol": "ZSK27.CBT",
-            "contract": "Soybean Futures,May-2027",
-            "unit": "BRL/metric tonne",
-            "editable_hypothesis": false
+            "brl_per_tonne": 1942.5672198894974,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
+            "scope": "municipality",
+            "observed_year": 2025,
+            "observed_nominal_brl_per_tonne": 1840.2919708029196,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 1034.9862258953167,
+                "real_brl_per_tonne": 1645.1532859205615,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 1039.8989898989898,
+                "real_brl_per_tonne": 1594.5253597221624,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 1030.0,
+                "real_brl_per_tonne": 1522.5117768610892,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 1040.0979491888584,
+                "real_brl_per_tonne": 1489.5958659166965,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 2500.1520218911523,
+                "real_brl_per_tonne": 3306.1726026696506,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 3166.6666666666665,
+                "real_brl_per_tonne": 3831.9545426293694,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 2666.6666666666665,
+                "real_brl_per_tonne": 3085.1889938924455,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 2000.0,
+                "real_brl_per_tonne": 2217.0623439913848,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 1840.2919708029196,
+                "real_brl_per_tonne": 1942.5672198894974,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 1942.5672198894974,
+            "recent_trend_raw_annual_fraction": 0.04206140069903164,
+            "trend_annual_fraction": 0.04206140069903164,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
+            "editable_hypothesis": false,
+            "yahoo_futures_reference": {
+              "brl_per_tonne": 2586.506213351836,
+              "source": "Fechamento congelado de futuro CBOT no Yahoo Finance, convertido pela PTAX de venda do mesmo dia; referência de bolsa, não preço local à vista.",
+              "quote_date": "2026-11-13",
+              "symbol": "ZSK27.CBT",
+              "contract": "Soybean Futures,May-2027",
+              "unit": "BRL/metric tonne"
+            }
           },
           "cost_panel": {
             "source_file": "data/raw/conab/costs/serie-historica-custos-soja-1997-a-2026.xls",
@@ -27889,13 +28446,83 @@
           "yield_kg_ha_median_2021_2025": 6400.0,
           "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 1033.519644521931,
-            "source": "Fechamento congelado de futuro CBOT no Yahoo Finance, convertido pela PTAX de venda do mesmo dia; referência de bolsa, não preço local à vista.",
-            "quote_date": "2026-11-13",
-            "symbol": "ZCK27.CBT",
-            "contract": "Corn Futures,May-2027",
-            "unit": "BRL/metric tonne",
-            "editable_hypothesis": false
+            "brl_per_tonne": 1145.4697321501192,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
+            "scope": "municipality",
+            "observed_year": 2025,
+            "observed_nominal_brl_per_tonne": 1085.1612903225807,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 582.9861111111111,
+                "real_brl_per_tonne": 926.6804642842676,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 570.0,
+                "real_brl_per_tonne": 874.0074409822403,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 590.0,
+                "real_brl_per_tonne": 872.1183964544103,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 680.0,
+                "real_brl_per_tonne": 973.8748063231008,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 1500.0,
+                "real_brl_per_tonne": 1983.5829423897264,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 1600.0,
+                "real_brl_per_tonne": 1936.1454531179972,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 1333.3333333333333,
+                "real_brl_per_tonne": 1542.5944969462228,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 1300.0,
+                "real_brl_per_tonne": 1441.0905235943999,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 1085.1612903225807,
+                "real_brl_per_tonne": 1145.4697321501192,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 1145.4697321501192,
+            "recent_trend_raw_annual_fraction": 0.06450331084878091,
+            "trend_annual_fraction": 0.05,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
+            "editable_hypothesis": false,
+            "yahoo_futures_reference": {
+              "brl_per_tonne": 1033.519644521931,
+              "source": "Fechamento congelado de futuro CBOT no Yahoo Finance, convertido pela PTAX de venda do mesmo dia; referência de bolsa, não preço local à vista.",
+              "quote_date": "2026-11-13",
+              "symbol": "ZCK27.CBT",
+              "contract": "Corn Futures,May-2027",
+              "unit": "BRL/metric tonne"
+            }
           },
           "cost_panel": {
             "source_file": "data/raw/conab/costs/milho_2a_safra_serie_historica_2005-2026.xls",
@@ -27931,11 +28558,73 @@
           "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
             "brl_per_tonne": 119.80705812026844,
-            "source": "IBGE PAM; valor da produção / toneladas produzidas, no recorte municipal; IPCA para moeda-base.",
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
             "scope": "municipality",
             "observed_year": 2025,
             "observed_nominal_brl_per_tonne": 113.49927294500043,
-            "deflator_factor": 1.0555755557863762,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 50.0,
+                "real_brl_per_tonne": 79.47706185642319,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 53.0,
+                "real_brl_per_tonne": 81.26735854747146,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 54.0,
+                "real_brl_per_tonne": 79.82100577718332,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 52.99935567010309,
+                "real_brl_per_tonne": 75.90402535069232,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 107.35026455026455,
+                "real_brl_per_tonne": 141.95876908195288,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 131.10899470899471,
+                "real_brl_per_tonne": 158.6538024804323,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 131.67073667073666,
+                "real_brl_per_tonne": 152.33591534785018,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 143.99900266093334,
+                "real_brl_per_tonne": 159.62738318593526,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 113.49927294500043,
+                "real_brl_per_tonne": 119.80705812026844,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 119.80705812026844,
+            "recent_trend_raw_annual_fraction": 0.08414067541739678,
+            "trend_annual_fraction": 0.05,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
             "editable_hypothesis": false
           },
           "cost_panel": {
@@ -27971,12 +28660,74 @@
           "yield_kg_ha_median_2021_2025": 1500.0,
           "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 39618.943906958,
-            "source": "IBGE PAM; valor da produção / toneladas produzidas, no recorte municipal; IPCA para moeda-base.",
+            "brl_per_tonne": 17631.799937653675,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
             "scope": "municipality",
             "observed_year": 2025,
             "observed_nominal_brl_per_tonne": 37533.025172644244,
-            "deflator_factor": 1.0555755557863762,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 4084.0240533073297,
+                "real_brl_per_tonne": 6491.724646156536,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 4110.007788161994,
+                "real_brl_per_tonne": 6302.065595348318,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 6900.04327131112,
+                "real_brl_per_tonne": 10199.414700409996,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 7600.0,
+                "real_brl_per_tonne": 10884.48312949348,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 13333.296703296703,
+                "real_brl_per_tonne": 17631.799937653675,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 20500.0,
+                "real_brl_per_tonne": 24806.86361807434,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 15833.333333333334,
+                "real_brl_per_tonne": 18318.309651236395,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 33000.0,
+                "real_brl_per_tonne": 36581.528675857844,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 37533.025172644244,
+                "real_brl_per_tonne": 39618.943906958,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 17631.799937653675,
+            "recent_trend_raw_annual_fraction": 0.2412598845144558,
+            "trend_annual_fraction": 0.05,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
             "editable_hypothesis": false
           },
           "cost_panel": {
@@ -28007,16 +28758,30 @@
         "sorghum_grain": {
           "label": "Sorgo",
           "pam_product": "sorgo_em_grao",
-          "yield_kg_ha_median_2021_2025": 3281.2850997096657,
-          "yield_source": "IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
+          "yield_kg_ha_median_2021_2025": null,
+          "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 872.3115393361821,
-            "source": "IBGE PAM; valor da produção / toneladas produzidas, no recorte estadual; IPCA para moeda-base.",
-            "scope": "state",
-            "observed_year": 2025,
-            "observed_nominal_brl_per_tonne": 826.38474768993,
-            "deflator_factor": 1.0555755557863762,
-            "editable_hypothesis": true
+            "brl_per_tonne": 1087.8950644129982,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
+            "scope": "municipality",
+            "observed_year": 2018,
+            "observed_nominal_brl_per_tonne": 709.4907407407408,
+            "history_start_year": 2018,
+            "history_end_year": 2018,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 709.4907407407408,
+                "real_brl_per_tonne": 1087.8950644129982,
+                "ipca_deflator": 1.5333463876881408
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 1087.8950644129982,
+            "recent_trend_raw_annual_fraction": 0.0,
+            "trend_annual_fraction": 0.0,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
+            "editable_hypothesis": false
           },
           "cost_panel": {
             "source_file": "data/raw/conab/costs/seriehistoricacustossorgo2013a2026.xls",
@@ -28037,14 +28802,15 @@
             "proxy": false,
             "source_note": "Custo total CONAB do produto no painel; localidade, ano e sistema estão identificados."
           },
-          "eligible_for_economic_comparison": true,
-          "include_in_vpl": true,
+          "eligible_for_economic_comparison": false,
+          "include_in_vpl": false,
           "editable": true,
           "assumption_notes": [
-            "Rendimento/preço PAM estadual usado como proxy quando falta série municipal.",
             "Custo CONAB: mesma macrorregião; confira a localidade e edite o valor se necessário."
           ],
-          "missing_inputs": []
+          "missing_inputs": [
+            "PAM yield or explicit zero-harvest case"
+          ]
         },
         "wheat": {
           "label": "Trigo",
@@ -28052,12 +28818,74 @@
           "yield_kg_ha_median_2021_2025": 2905.8381608806576,
           "yield_source": "IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
           "price": {
-            "brl_per_tonne": 1426.2622810193116,
-            "source": "IBGE PAM; valor da produção / toneladas produzidas, no recorte estadual; IPCA para moeda-base.",
+            "brl_per_tonne": 1474.7503121434975,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
             "scope": "state",
             "observed_year": 2025,
             "observed_nominal_brl_per_tonne": 1351.1702437603185,
-            "deflator_factor": 1.0555755557863762,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 597.6899504989393,
+                "real_brl_per_tonne": 950.0528233353343,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 828.1984698350291,
+                "real_brl_per_tonne": 1269.9151320103874,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 834.1815415604174,
+                "real_brl_per_tonne": 1233.0594379280326,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 1308.0795240758632,
+                "real_brl_per_tonne": 1873.3907252420515,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 1553.0266666360444,
+                "real_brl_per_tonne": 2053.704803343756,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 1760.5930335980256,
+                "real_brl_per_tonne": 2130.4776229950244,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 1274.6925737238726,
+                "real_brl_per_tonne": 1474.7503121434975,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 1446.0262756444615,
+                "real_brl_per_tonne": 1602.965202076721,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 1351.1702437603185,
+                "real_brl_per_tonne": 1426.2622810193116,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 1474.7503121434975,
+            "recent_trend_raw_annual_fraction": 0.022625953570418078,
+            "trend_annual_fraction": 0.022625953570418078,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
             "editable_hypothesis": true
           },
           "cost_panel": {
@@ -28091,16 +28919,42 @@
         "dry_bean": {
           "label": "Feijão",
           "pam_product": "feijao_em_grao",
-          "yield_kg_ha_median_2021_2025": 2829.418702132799,
-          "yield_source": "IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
+          "yield_kg_ha_median_2021_2025": null,
+          "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 4238.0728730690835,
-            "source": "IBGE PAM; valor da produção / toneladas produzidas, no recorte estadual; IPCA para moeda-base.",
-            "scope": "state",
-            "observed_year": 2025,
-            "observed_nominal_brl_per_tonne": 4014.940332633821,
-            "deflator_factor": 1.0555755557863762,
-            "editable_hypothesis": true
+            "brl_per_tonne": 3938.4642902772457,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
+            "scope": "municipality",
+            "observed_year": 2020,
+            "observed_nominal_brl_per_tonne": 2750.0,
+            "history_start_year": 2017,
+            "history_end_year": 2020,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 1375.0,
+                "real_brl_per_tonne": 2185.619201051638,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 3395.8333333333335,
+                "real_brl_per_tonne": 5019.608002191698,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 2750.0,
+                "real_brl_per_tonne": 3938.4642902772457,
+                "ipca_deflator": 1.4321688328280893
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 3938.4642902772457,
+            "recent_trend_raw_annual_fraction": 0.0,
+            "trend_annual_fraction": 0.0,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
+            "editable_hypothesis": false
           },
           "cost_panel": {
             "source_file": "data/raw/conab/costs/serie-historica-custos-soja-1997-a-2026.xls",
@@ -28121,15 +28975,16 @@
             "proxy": true,
             "source_note": "Hipótese editável de custo: painel CONAB de Soja usado como proxy para Feijão."
           },
-          "eligible_for_economic_comparison": true,
-          "include_in_vpl": true,
+          "eligible_for_economic_comparison": false,
+          "include_in_vpl": false,
           "editable": true,
           "assumption_notes": [
-            "Rendimento/preço PAM estadual usado como proxy quando falta série municipal.",
             "Hipótese editável de custo: painel CONAB de Soja usado como proxy para Feijão.",
             "Custo CONAB: mesma UF · outro município; confira a localidade e edite o valor se necessário."
           ],
-          "missing_inputs": []
+          "missing_inputs": [
+            "PAM yield or explicit zero-harvest case"
+          ]
         },
         "peanut": {
           "label": "Amendoim",
@@ -28137,12 +28992,74 @@
           "yield_kg_ha_median_2021_2025": 3873.6388585593295,
           "yield_source": "IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
           "price": {
-            "brl_per_tonne": 3386.0556562610545,
-            "source": "IBGE PAM; valor da produção / toneladas produzidas, no recorte estadual; IPCA para moeda-base.",
+            "brl_per_tonne": 3499.0673650060744,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
             "scope": "state",
             "observed_year": 2025,
             "observed_nominal_brl_per_tonne": 3207.781420950518,
-            "deflator_factor": 1.0555755557863762,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 1644.0598356659573,
+                "real_brl_per_tonne": 2613.300905097685,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 1518.7655113681146,
+                "real_brl_per_tonne": 2328.7936106016305,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 1777.9188333167024,
+                "real_brl_per_tonne": 2628.060545658065,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 2443.1947440837,
+                "real_brl_per_tonne": 3499.0673650060744,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 3309.435254835221,
+                "real_brl_per_tonne": 4376.359546956228,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 3066.6062209627235,
+                "real_brl_per_tonne": 3710.8723070127135,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 3667.045033240392,
+                "real_brl_per_tonne": 4242.572616247956,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 4134.018898134993,
+                "real_brl_per_tonne": 4582.688814201924,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 3207.781420950518,
+                "real_brl_per_tonne": 3386.0556562610545,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 3499.0673650060744,
+            "recent_trend_raw_annual_fraction": 0.06244139451160313,
+            "trend_annual_fraction": 0.05,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
             "editable_hypothesis": true
           },
           "cost_panel": {
@@ -28179,12 +29096,74 @@
           "yield_kg_ha_median_2021_2025": 2147.750395659055,
           "yield_source": "Rendimento/preço PAM estadual usado como proxy quando falta série municipal.A PAM mede aveia em grão; esta é uma aproximação da aveia-preta de cobertura e pode ser editada. IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
           "price": {
-            "brl_per_tonne": 1310.7692781261,
-            "source": "Aveia em grão usada como proxy para aveia-preta; IBGE PAM; valor da produção / toneladas produzidas, no recorte estadual; IPCA para moeda-base.",
+            "brl_per_tonne": 1145.434063350431,
+            "price_basis": "median_real_history",
+            "source": "Aveia em grão usada como proxy para aveia-preta; IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
             "scope": "state",
             "observed_year": 2025,
             "observed_nominal_brl_per_tonne": 1241.7578930667935,
-            "deflator_factor": 1.0555755557863762,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 341.0008976660682,
+                "real_brl_per_tonne": 542.0349887380388,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 354.2490118577075,
+                "real_brl_per_tonne": 543.1864426741091,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 442.86691755046184,
+                "real_brl_per_tonne": 654.63116267257,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 863.6055410248958,
+                "real_brl_per_tonne": 1236.8289397134956,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 904.139328444616,
+                "real_brl_per_tonne": 1195.6235662976285,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 1263.1191115321858,
+                "real_brl_per_tonne": 1528.4889528371789,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 676.3763472181765,
+                "real_brl_per_tonne": 782.53082331251,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 1033.2898995418436,
+                "real_brl_per_tonne": 1145.434063350431,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 1241.7578930667935,
+                "real_brl_per_tonne": 1310.7692781261,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 1145.434063350431,
+            "recent_trend_raw_annual_fraction": 0.0977479797888019,
+            "trend_annual_fraction": 0.05,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
             "editable_hypothesis": true
           },
           "cost_panel": {
@@ -28299,15 +29278,29 @@
         "millet": {
           "label": "Milheto",
           "pam_product": null,
-          "yield_kg_ha_median_2021_2025": 3281.2850997096657,
-          "yield_source": "Rendimento/preço PAM estadual usado como proxy quando falta série municipal.Proxy de colheita: dados de sorgo em grão aplicados ao milheto; rendimento e preço são editáveis. IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
+          "yield_kg_ha_median_2021_2025": null,
+          "yield_source": "Proxy de colheita: dados de sorgo em grão aplicados ao milheto; rendimento e preço são editáveis. IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 872.3115393361821,
-            "source": "Proxy sorgo em grão → milheto; IBGE PAM; valor da produção / toneladas produzidas, no recorte estadual; IPCA para moeda-base.",
-            "scope": "state",
-            "observed_year": 2025,
-            "observed_nominal_brl_per_tonne": 826.38474768993,
-            "deflator_factor": 1.0555755557863762,
+            "brl_per_tonne": 1087.8950644129982,
+            "price_basis": "median_real_history",
+            "source": "Proxy sorgo em grão → milheto; IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
+            "scope": "municipality",
+            "observed_year": 2018,
+            "observed_nominal_brl_per_tonne": 709.4907407407408,
+            "history_start_year": 2018,
+            "history_end_year": 2018,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 709.4907407407408,
+                "real_brl_per_tonne": 1087.8950644129982,
+                "ipca_deflator": 1.5333463876881408
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 1087.8950644129982,
+            "recent_trend_raw_annual_fraction": 0.0,
+            "trend_annual_fraction": 0.0,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
             "editable_hypothesis": true,
             "proxy_crop_id": "sorghum_grain"
           },
@@ -28330,16 +29323,17 @@
             "proxy": true,
             "source_note": "Hipótese editável de custo: painel CONAB de Sorgo usado como proxy para Milheto."
           },
-          "eligible_for_economic_comparison": true,
-          "include_in_vpl": true,
+          "eligible_for_economic_comparison": false,
+          "include_in_vpl": false,
           "editable": true,
           "assumption_notes": [
-            "Rendimento/preço PAM estadual usado como proxy quando falta série municipal.",
             "Proxy de colheita: dados de sorgo em grão aplicados ao milheto; rendimento e preço são editáveis.",
             "Hipótese editável de custo: painel CONAB de Sorgo usado como proxy para Milheto.",
             "Custo CONAB: mesma macrorregião; confira a localidade e edite o valor se necessário."
           ],
-          "missing_inputs": []
+          "missing_inputs": [
+            "PAM yield or explicit zero-harvest case"
+          ]
         },
         "crotalaria": {
           "label": "Crotalária",
@@ -28427,18 +29421,19 @@
         "maize_grain",
         "sugarcane",
         "coffee",
-        "sorghum_grain",
         "wheat",
-        "dry_bean",
         "peanut",
         "oat",
         "forage_radish",
         "brachiaria",
-        "millet",
         "crotalaria",
         "mucuna"
       ],
-      "economic_exclusions": []
+      "economic_exclusions": [
+        "sorghum_grain",
+        "dry_bean",
+        "millet"
+      ]
     },
     "varginha-mg": {
       "municipality": "Varginha",
@@ -28450,13 +29445,83 @@
           "yield_kg_ha_median_2021_2025": 3717.0,
           "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 2586.506213351836,
-            "source": "Fechamento congelado de futuro CBOT no Yahoo Finance, convertido pela PTAX de venda do mesmo dia; referência de bolsa, não preço local à vista.",
-            "quote_date": "2026-11-13",
-            "symbol": "ZSK27.CBT",
-            "contract": "Soybean Futures,May-2027",
-            "unit": "BRL/metric tonne",
-            "editable_hypothesis": false
+            "brl_per_tonne": 1956.6495704652757,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
+            "scope": "municipality",
+            "observed_year": 2025,
+            "observed_nominal_brl_per_tonne": 2000.0,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 1230.952380952381,
+                "real_brl_per_tonne": 1956.6495704652757,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 1230.952380952381,
+                "real_brl_per_tonne": 1887.4763867494496,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 1119.6581196581196,
+                "real_brl_per_tonne": 1655.041430327796,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 1300.9259259259259,
+                "real_brl_per_tonne": 1863.1455649291345,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 2599.0888382687926,
+                "real_brl_per_tonne": 3437.005523563672,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 3000.0,
+                "real_brl_per_tonne": 3630.272724596245,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 2514.0997830802603,
+                "real_brl_per_tonne": 2908.6773676149764,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 1615.7407407407406,
+                "real_brl_per_tonne": 1791.0989769745213,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 2000.0,
+                "real_brl_per_tonne": 2111.1511115727526,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 1956.6495704652757,
+            "recent_trend_raw_annual_fraction": 0.01409752818749399,
+            "trend_annual_fraction": 0.01409752818749399,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
+            "editable_hypothesis": false,
+            "yahoo_futures_reference": {
+              "brl_per_tonne": 2586.506213351836,
+              "source": "Fechamento congelado de futuro CBOT no Yahoo Finance, convertido pela PTAX de venda do mesmo dia; referência de bolsa, não preço local à vista.",
+              "quote_date": "2026-11-13",
+              "symbol": "ZSK27.CBT",
+              "contract": "Soybean Futures,May-2027",
+              "unit": "BRL/metric tonne"
+            }
           },
           "cost_panel": {
             "source_file": "data/raw/conab/costs/serie-historica-custos-soja-1997-a-2026.xls",
@@ -28491,13 +29556,83 @@
           "yield_kg_ha_median_2021_2025": 7567.0,
           "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 1033.519644521931,
-            "source": "Fechamento congelado de futuro CBOT no Yahoo Finance, convertido pela PTAX de venda do mesmo dia; referência de bolsa, não preço local à vista.",
-            "quote_date": "2026-11-13",
-            "symbol": "ZCK27.CBT",
-            "contract": "Corn Futures,May-2027",
-            "unit": "BRL/metric tonne",
-            "editable_hypothesis": false
+            "brl_per_tonne": 1074.1266246210669,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
+            "scope": "municipality",
+            "observed_year": 2025,
+            "observed_nominal_brl_per_tonne": 1250.0,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 500.0,
+                "real_brl_per_tonne": 794.7706185642319,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 550.0,
+                "real_brl_per_tonne": 843.3405132284774,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 575.0,
+                "real_brl_per_tonne": 849.9458948496372,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 750.0,
+                "real_brl_per_tonne": 1074.1266246210669,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 1550.144927536232,
+                "real_brl_per_tonne": 2049.8940243285524,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 1400.0,
+                "real_brl_per_tonne": 1694.1272714782476,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 982.3754789272031,
+                "real_brl_per_tonne": 1136.5552557960102,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 900.1468428781204,
+                "real_brl_per_tonne": 997.8408347039051,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 1250.0,
+                "real_brl_per_tonne": 1319.4694447329703,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 1074.1266246210669,
+            "recent_trend_raw_annual_fraction": 0.03800261793018467,
+            "trend_annual_fraction": 0.03800261793018467,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
+            "editable_hypothesis": false,
+            "yahoo_futures_reference": {
+              "brl_per_tonne": 1033.519644521931,
+              "source": "Fechamento congelado de futuro CBOT no Yahoo Finance, convertido pela PTAX de venda do mesmo dia; referência de bolsa, não preço local à vista.",
+              "quote_date": "2026-11-13",
+              "symbol": "ZCK27.CBT",
+              "contract": "Corn Futures,May-2027",
+              "unit": "BRL/metric tonne"
+            }
           },
           "cost_panel": {
             "source_file": "data/raw/conab/costs/milho_2a_safra_serie_historica_2005-2026.xls",
@@ -28533,11 +29668,73 @@
           "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
             "brl_per_tonne": 194.44812869749035,
-            "source": "IBGE PAM; valor da produção / toneladas produzidas, no recorte municipal; IPCA para moeda-base.",
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
             "scope": "municipality",
             "observed_year": 2025,
             "observed_nominal_brl_per_tonne": 184.21052631578948,
-            "deflator_factor": 1.0555755557863762,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 118.27956989247312,
+                "real_brl_per_tonne": 188.01025385390432,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 120.0,
+                "real_brl_per_tonne": 184.0015665225769,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 115.15151515151516,
+                "real_brl_per_tonne": 170.2131436326019,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 117.6470588235294,
+                "real_brl_per_tonne": 168.49045092095167,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 174.28571428571428,
+                "real_brl_per_tonne": 230.4734466395682,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 181.25,
+                "real_brl_per_tonne": 219.32897711102314,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 185.71428571428572,
+                "real_brl_per_tonne": 214.86137636036676,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 190.2439024390244,
+                "real_brl_per_tonne": 210.89129613576586,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 184.21052631578948,
+                "real_brl_per_tonne": 194.44812869749035,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 194.44812869749035,
+            "recent_trend_raw_annual_fraction": 0.01719599589206,
+            "trend_annual_fraction": 0.01719599589206,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
             "editable_hypothesis": false
           },
           "cost_panel": {
@@ -28573,12 +29770,74 @@
           "yield_kg_ha_median_2021_2025": 1320.0,
           "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 33672.848067175495,
-            "source": "IBGE PAM; valor da produção / toneladas produzidas, no recorte municipal; IPCA para moeda-base.",
+            "brl_per_tonne": 15999.621003635351,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
             "scope": "municipality",
             "observed_year": 2025,
             "observed_nominal_brl_per_tonne": 31899.988477935247,
-            "deflator_factor": 1.0555755557863762,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 7440.02541296061,
+                "real_brl_per_tonne": 11826.22719918462,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 7199.976967812518,
+                "real_brl_per_tonne": 11040.058675033137,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 6640.03192621497,
+                "real_brl_per_tonne": 9815.07456931642,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 8125.985621521336,
+                "real_brl_per_tonne": 11637.783343152047,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 14600.0,
+                "real_brl_per_tonne": 19306.873972593337,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 20547.380585516177,
+                "real_brl_per_tonne": 24864.1984338326,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 13829.18715649407,
+                "real_brl_per_tonne": 15999.621003635351,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 20993.801841217755,
+                "real_brl_per_tonne": 23272.28375969044,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 31899.988477935247,
+                "real_brl_per_tonne": 33672.848067175495,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 15999.621003635351,
+            "recent_trend_raw_annual_fraction": 0.09769946555845932,
+            "trend_annual_fraction": 0.05,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
             "editable_hypothesis": false
           },
           "cost_panel": {
@@ -28611,16 +29870,23 @@
         "sorghum_grain": {
           "label": "Sorgo",
           "pam_product": "sorgo_em_grao",
-          "yield_kg_ha_median_2021_2025": 3306.5794490664634,
-          "yield_source": "IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
+          "yield_kg_ha_median_2021_2025": null,
+          "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 741.5493750236673,
-            "source": "IBGE PAM; valor da produção / toneladas produzidas, no recorte estadual; IPCA para moeda-base.",
-            "scope": "state",
-            "observed_year": 2025,
-            "observed_nominal_brl_per_tonne": 702.5071497333342,
-            "deflator_factor": 1.0555755557863762,
-            "editable_hypothesis": true
+            "brl_per_tonne": 6000.0,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
+            "scope": "municipality",
+            "observed_year": 1993,
+            "observed_nominal_brl_per_tonne": 6000.0,
+            "history_start_year": 1993,
+            "history_end_year": 1993,
+            "history_real_brl_per_tonne": [],
+            "historical_median_real_brl_per_tonne": 6000.0,
+            "recent_trend_raw_annual_fraction": 0.0,
+            "trend_annual_fraction": 0.0,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
+            "editable_hypothesis": false
           },
           "cost_panel": {
             "source_file": "data/raw/conab/costs/seriehistoricacustossorgo2013a2026.xls",
@@ -28641,28 +29907,36 @@
             "proxy": false,
             "source_note": "Custo total CONAB do produto no painel; localidade, ano e sistema estão identificados."
           },
-          "eligible_for_economic_comparison": true,
-          "include_in_vpl": true,
+          "eligible_for_economic_comparison": false,
+          "include_in_vpl": false,
           "editable": true,
           "assumption_notes": [
-            "Rendimento/preço PAM estadual usado como proxy quando falta série municipal.",
             "Custo CONAB: mesma UF · outro município; confira a localidade e edite o valor se necessário."
           ],
-          "missing_inputs": []
+          "missing_inputs": [
+            "PAM yield or explicit zero-harvest case"
+          ]
         },
         "wheat": {
           "label": "Trigo",
           "pam_product": "trigo_em_grao",
-          "yield_kg_ha_median_2021_2025": 3168.6533121777074,
-          "yield_source": "IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
+          "yield_kg_ha_median_2021_2025": null,
+          "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 1428.6389333459185,
-            "source": "IBGE PAM; valor da produção / toneladas produzidas, no recorte estadual; IPCA para moeda-base.",
-            "scope": "state",
-            "observed_year": 2025,
-            "observed_nominal_brl_per_tonne": 1353.4217664614448,
-            "deflator_factor": 1.0555755557863762,
-            "editable_hypothesis": true
+            "brl_per_tonne": 583.3333333333334,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
+            "scope": "municipality",
+            "observed_year": 2014,
+            "observed_nominal_brl_per_tonne": 583.3333333333334,
+            "history_start_year": 2014,
+            "history_end_year": 2014,
+            "history_real_brl_per_tonne": [],
+            "historical_median_real_brl_per_tonne": 583.3333333333334,
+            "recent_trend_raw_annual_fraction": 0.0,
+            "trend_annual_fraction": 0.0,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
+            "editable_hypothesis": false
           },
           "cost_panel": {
             "source_file": "data/raw/conab/costs/seriehistoricacustostrigo1998a2025.xls",
@@ -28683,14 +29957,15 @@
             "proxy": false,
             "source_note": "Custo total CONAB do produto no painel; localidade, ano e sistema estão identificados."
           },
-          "eligible_for_economic_comparison": true,
-          "include_in_vpl": true,
+          "eligible_for_economic_comparison": false,
+          "include_in_vpl": false,
           "editable": true,
           "assumption_notes": [
-            "Rendimento/preço PAM estadual usado como proxy quando falta série municipal.",
             "Custo CONAB: mesma UF · outro município; confira a localidade e edite o valor se necessário."
           ],
-          "missing_inputs": []
+          "missing_inputs": [
+            "PAM yield or explicit zero-harvest case"
+          ]
         },
         "dry_bean": {
           "label": "Feijão",
@@ -28698,12 +29973,74 @@
           "yield_kg_ha_median_2021_2025": 1289.0,
           "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 3712.5072104077663,
-            "source": "IBGE PAM; valor da produção / toneladas produzidas, no recorte municipal; IPCA para moeda-base.",
+            "brl_per_tonne": 5027.306787471132,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
             "scope": "municipality",
             "observed_year": 2025,
             "observed_nominal_brl_per_tonne": 3517.0454545454545,
-            "deflator_factor": 1.0555755557863762,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 2301.7241379310344,
+                "real_brl_per_tonne": 3658.6854337353434,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 2449.6124031007753,
+                "real_brl_per_tonne": 3756.1043295306395,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 3401.0416666666665,
+                "real_brl_per_tonne": 5027.306787471132,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 3244.343891402715,
+                "real_brl_per_tonne": 4646.448204243167,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 4383.333333333333,
+                "real_brl_per_tonne": 5796.4701538722,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 5441.666666666667,
+                "real_brl_per_tonne": 6584.911358781523,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 4629.62962962963,
+                "real_brl_per_tonne": 5356.230892174384,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 4574.712643678161,
+                "real_brl_per_tonne": 5071.211568440063,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 3517.0454545454545,
+                "real_brl_per_tonne": 3712.5072104077663,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 5027.306787471132,
+            "recent_trend_raw_annual_fraction": 0.038237617804856905,
+            "trend_annual_fraction": 0.038237617804856905,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
             "editable_hypothesis": false
           },
           "cost_panel": {
@@ -28737,16 +30074,42 @@
         "peanut": {
           "label": "Amendoim",
           "pam_product": "amendoim_em_casca",
-          "yield_kg_ha_median_2021_2025": 3388.5544722339973,
-          "yield_source": "IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
+          "yield_kg_ha_median_2021_2025": null,
+          "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 3833.3685046710702,
-            "source": "IBGE PAM; valor da produção / toneladas produzidas, no recorte estadual; IPCA para moeda-base.",
-            "scope": "state",
-            "observed_year": 2025,
-            "observed_nominal_brl_per_tonne": 3631.5434585971548,
-            "deflator_factor": 1.0555755557863762,
-            "editable_hypothesis": true
+            "brl_per_tonne": 4768.623711385391,
+            "price_basis": "median_real_history",
+            "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
+            "scope": "municipality",
+            "observed_year": 2019,
+            "observed_nominal_brl_per_tonne": 4000.0,
+            "history_start_year": 2017,
+            "history_end_year": 2019,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 3000.0,
+                "real_brl_per_tonne": 4768.623711385391,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 3000.0,
+                "real_brl_per_tonne": 4600.039163064423,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 4000.0,
+                "real_brl_per_tonne": 5912.667094606171,
+                "ipca_deflator": 1.478166773651543
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 4768.623711385391,
+            "recent_trend_raw_annual_fraction": 0.0,
+            "trend_annual_fraction": 0.0,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
+            "editable_hypothesis": false
           },
           "cost_panel": {
             "source_file": "data/raw/conab/costs/serie-historica-custos-amendoim-2005-a-2024.xls",
@@ -28767,14 +30130,15 @@
             "proxy": false,
             "source_note": "Custo total CONAB do produto no painel; localidade, ano e sistema estão identificados."
           },
-          "eligible_for_economic_comparison": true,
-          "include_in_vpl": true,
+          "eligible_for_economic_comparison": false,
+          "include_in_vpl": false,
           "editable": true,
           "assumption_notes": [
-            "Rendimento/preço PAM estadual usado como proxy quando falta série municipal.",
             "Custo CONAB: mesma macrorregião; confira a localidade e edite o valor se necessário."
           ],
-          "missing_inputs": []
+          "missing_inputs": [
+            "PAM yield or explicit zero-harvest case"
+          ]
         },
         "oat": {
           "label": "Aveia em grão (proxy; não equivale a aveia-preta de cobertura)",
@@ -28782,12 +30146,74 @@
           "yield_kg_ha_median_2021_2025": 1488.0572037121558,
           "yield_source": "Rendimento/preço PAM estadual usado como proxy quando falta série municipal.A PAM mede aveia em grão; esta é uma aproximação da aveia-preta de cobertura e pode ser editada. IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
           "price": {
-            "brl_per_tonne": 696.5748990308989,
-            "source": "Aveia em grão usada como proxy para aveia-preta; IBGE PAM; valor da produção / toneladas produzidas, no recorte estadual; IPCA para moeda-base.",
+            "brl_per_tonne": 742.218884166382,
+            "price_basis": "median_real_history",
+            "source": "Aveia em grão usada como proxy para aveia-preta; IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
             "scope": "state",
             "observed_year": 2025,
             "observed_nominal_brl_per_tonne": 659.9005587164899,
-            "deflator_factor": 1.0555755557863762,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 406.49177949709866,
+                "real_brl_per_tonne": 646.1354460643689,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 436.7386254178707,
+                "real_brl_per_tonne": 669.6715936483761,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 481.7469879518072,
+                "real_brl_per_tonne": 712.1023908970716,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 518.2481751824818,
+                "real_brl_per_tonne": 742.218884166382,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 900.1264222503161,
+                "real_brl_per_tonne": 1190.3169447800128,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 1029.0439693424769,
+                "real_brl_per_tonne": 1245.2367514380828,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 766.1793272671506,
+                "real_brl_per_tonne": 886.4280104371992,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 788.3298924263827,
+                "real_brl_per_tonne": 873.888259570656,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 659.9005587164899,
+                "real_brl_per_tonne": 696.5748990308989,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 742.218884166382,
+            "recent_trend_raw_annual_fraction": 0.03383029263147175,
+            "trend_annual_fraction": 0.03383029263147175,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
             "editable_hypothesis": true
           },
           "cost_panel": {
@@ -28902,15 +30328,22 @@
         "millet": {
           "label": "Milheto",
           "pam_product": null,
-          "yield_kg_ha_median_2021_2025": 3306.5794490664634,
-          "yield_source": "Rendimento/preço PAM estadual usado como proxy quando falta série municipal.Proxy de colheita: dados de sorgo em grão aplicados ao milheto; rendimento e preço são editáveis. IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
+          "yield_kg_ha_median_2021_2025": null,
+          "yield_source": "Proxy de colheita: dados de sorgo em grão aplicados ao milheto; rendimento e preço são editáveis. IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
           "price": {
-            "brl_per_tonne": 741.5493750236673,
-            "source": "Proxy sorgo em grão → milheto; IBGE PAM; valor da produção / toneladas produzidas, no recorte estadual; IPCA para moeda-base.",
-            "scope": "state",
-            "observed_year": 2025,
-            "observed_nominal_brl_per_tonne": 702.5071497333342,
-            "deflator_factor": 1.0555755557863762,
+            "brl_per_tonne": 6000.0,
+            "price_basis": "median_real_history",
+            "source": "Proxy sorgo em grão → milheto; IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
+            "scope": "municipality",
+            "observed_year": 1993,
+            "observed_nominal_brl_per_tonne": 6000.0,
+            "history_start_year": 1993,
+            "history_end_year": 1993,
+            "history_real_brl_per_tonne": [],
+            "historical_median_real_brl_per_tonne": 6000.0,
+            "recent_trend_raw_annual_fraction": 0.0,
+            "trend_annual_fraction": 0.0,
+            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
             "editable_hypothesis": true,
             "proxy_crop_id": "sorghum_grain"
           },
@@ -28933,16 +30366,17 @@
             "proxy": true,
             "source_note": "Hipótese editável de custo: painel CONAB de Sorgo usado como proxy para Milheto."
           },
-          "eligible_for_economic_comparison": true,
-          "include_in_vpl": true,
+          "eligible_for_economic_comparison": false,
+          "include_in_vpl": false,
           "editable": true,
           "assumption_notes": [
-            "Rendimento/preço PAM estadual usado como proxy quando falta série municipal.",
             "Proxy de colheita: dados de sorgo em grão aplicados ao milheto; rendimento e preço são editáveis.",
             "Hipótese editável de custo: painel CONAB de Sorgo usado como proxy para Milheto.",
             "Custo CONAB: mesma UF · outro município; confira a localidade e edite o valor se necessário."
           ],
-          "missing_inputs": []
+          "missing_inputs": [
+            "PAM yield or explicit zero-harvest case"
+          ]
         },
         "crotalaria": {
           "label": "Crotalária",
@@ -29030,27 +30464,28 @@
         "maize_grain",
         "sugarcane",
         "coffee",
-        "sorghum_grain",
-        "wheat",
         "dry_bean",
-        "peanut",
         "oat",
         "forage_radish",
         "brachiaria",
-        "millet",
         "crotalaria",
         "mucuna"
       ],
-      "economic_exclusions": []
+      "economic_exclusions": [
+        "sorghum_grain",
+        "wheat",
+        "peanut",
+        "millet"
+      ]
     }
   },
   "limitations": [
     "O IPCA geral equaliza datas monetárias, mas não mede inflação de insumos agropecuários.",
     "Painéis CONAB não são sempre do mesmo município, safra, sistema tecnológico ou tipo de empreendimento dos exemplos; a localidade e o nível de correspondência ficam visíveis.",
     "O VPL inclui as 14 culturas do catálogo com valores iniciais rastreáveis ou hipóteses/proxies explicitamente marcados e editáveis. Nabo, braquiária, crotalária e mucuna começam sem receita comercial e com custo proxy; feijão, milheto e aveia-preta também usam proxies identificados. Esses valores não são observações dessas culturas.",
-    "Preço e custo permanecem constantes em termos reais no horizonte; preços futuros Yahoo de maio/2027 são referências de bolsa, não oferta local nem curva de cinco anos.",
-    "Café e cana são perenes/semi-perenes; o painel de custo pode representar etapa de produção, e a cadeia anual não modela idade, implantação ou reforma do canavial/cafezal.",
+    "Preço-base é a mediana real da série histórica PAM; a tendência recente é limitada a ±5% ao ano e pode ser editada. Yahoo CBOT é mostrado apenas como referência, não como preço local nem previsão garantida.",
+    "Café e cana são perenes/semi-perenes; atraso e manutenção de formação são hipóteses explícitas, mas os painéis CONAB não medem o investimento de implantação do cafezal/canavial.",
     "A resposta de produtividade a água e carbono é hipótese explícita não calibrada; resultados VPL são exploratórios e não provam superioridade agronômica nem causal.",
-    "A página ranqueia sequências completas de cinco transições que apareceram nas 10.000 trajetórias Monte Carlo; VPL e frequência dependem da amostra, e sequências raras têm alta incerteza. A probabilidade Markov indica plausibilidade sob a cadeia municipal, não validação agronômica nem restrição de manejo."
+    "A página agrupa os caminhos pelos estados no fechamento de cada ano e calcula o VPL com os eventos de ciclo; VPL e frequência dependem da amostra, e rotas raras têm alta incerteza. A matriz PAM é anual mas usada a cada ciclo como prior temporal explícita, não validação agronômica nem restrição de manejo."
   ]
 }

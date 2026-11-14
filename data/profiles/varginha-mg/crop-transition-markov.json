@@ -185,13 +185,13 @@
       "associated_management": {
         "id": "brachiaria_interrow_cover",
         "label": "Braquiária manejada nas entrelinhas do café",
-        "role": "cobertura/manejo associado; não é substituição do café nem estado da cadeia Markov",
+        "role": "estado de uma subcadeia de manejo associado; não substitui o café como cultura principal",
         "source_urls": [
           "https://www.embrapa.br/busca-de-noticias/-/noticia/60899851/braquiaria-na-entrelinha-do-cafe-traz-ganhos-ao-produtor-e-ao-meio-ambiente",
           "https://www.alice.cnptia.embrapa.br/alice/handle/doc/1029866"
         ],
-        "status": "recommendation_reference_only",
-        "simulation_effect": "Não altera numericamente carbono, água, rendimento ou VPL: os efeitos publicados dependem de local e manejo e não há um coeficiente compatível/calibrado neste perfil."
+        "status": "explicit_uncalibrated_simulation_hypothesis",
+        "simulation_effect": "Entra numa subcadeia uniforme de coberturas sem transições observadas. No Monte Carlo, a cobertura altera a demanda hídrica por Kc misto e o delta de carbono pela fração de área definida em data/reference/crop-cycle-assumptions.json; custo de cobertura usa fração do custo proxy. São hipóteses editáveis, sem coeficiente local calibrado."
       }
     },
     "sugarcane": {

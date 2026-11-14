@@ -146,7 +146,7 @@
       "periodo": "1988–2025",
       "resolucao": "município IBGE; não identifica pixel ou talhão",
       "qualidade": "contagens empíricas PAM; a prior uniforme habilita destinos sem contagem e está marcada no payload",
-      "sha256": "5b237490f4db40651712757f32784031d644d953ae518fd8402fd4cb87c6d825",
+      "sha256": "ad2e59eacf0cff1dfee558adf6d6d00284351e59fca54fb40928ad4ce4d43fe5",
       "contract_id": "crop_transition_markov"
     }
   },
