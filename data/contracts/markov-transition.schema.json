@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldshift.local/contracts/markov-transition.schema.json",
+  "title": "Contagens de transições para um perfil Markov",
+  "description": "Arquivo JSON de transições é uma lista. Contagens podem ser observadas, derivadas por processo físico, agrupadas ou priorizadas.",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "required": ["state", "action", "environment", "counts", "support", "provenance"],
+    "properties": {
+      "state": {"type": "string"},
+      "action": {"type": "string"},
+      "environment": {"type": "string"},
+      "counts": {"type": "object", "minProperties": 1, "additionalProperties": {"type": "integer", "minimum": 0}},
+      "support": {"type": "string", "enum": ["observed", "derived", "pooled", "prior"]},
+      "provenance": {"type": "string", "description": "Referência ao lote de observações, regra de derivação ou prior."},
+      "sample_size": {"type": "integer", "minimum": 0, "description": "Contagem direta do estado, ação e ambiente antes de eventual pooling."},
+      "effective_sample_size": {"type": "integer", "minimum": 0, "description": "Soma das contagens efetivamente usada na linha de transição."},
+      "pooling": {"type": ["string", "null"], "description": "Contextos agrupados para dar suporte a uma linha esparsa."}
+    },
+    "additionalProperties": false
+  }
+}

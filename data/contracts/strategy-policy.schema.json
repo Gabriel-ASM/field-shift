@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldshift.local/contracts/strategy-policy.schema.json",
+  "title": "Política de ações por estado para simulação",
+  "type": "object",
+  "required": ["name", "actions_by_state", "provenance"],
+  "properties": {
+    "name": {"type": "string"},
+    "actions_by_state": {"type": "object", "additionalProperties": {"type": "string"}},
+    "default_action": {"type": "string"},
+    "eligible_periods": {"type": "object", "additionalProperties": {"type": "array", "items": {"type": "integer", "minimum": 0, "maximum": 23}}},
+    "provenance": {"type": "string"},
+    "economic_model": {"type": ["string", "null"], "description": "Referência ao cálculo de fluxos e aos preços/custos versionados; nulo significa que o VPL não será calculado."}
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "id": "water_low",
+    "crop": "demanda_et0_de_referencia",
+    "phase": "balanco_hidrico_quinzenal",
+    "water": "baixa",
+    "soil": "mapeado_sem_classificacao",
+    "recent_crops": []
+  },
+  {
+    "id": "water_medium",
+    "crop": "demanda_et0_de_referencia",
+    "phase": "balanco_hidrico_quinzenal",
+    "water": "media",
+    "soil": "mapeado_sem_classificacao",
+    "recent_crops": []
+  },
+  {
+    "id": "water_high",
+    "crop": "demanda_et0_de_referencia",
+    "phase": "balanco_hidrico_quinzenal",
+    "water": "alta",
+    "soil": "mapeado_sem_classificacao",
+    "recent_crops": []
+  }
+]

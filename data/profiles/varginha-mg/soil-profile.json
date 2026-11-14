@@ -1,0 +1,103 @@
+{
+  "location_id": "varginha-mg",
+  "scope": "grid_cell",
+  "reference_date": null,
+  "source": "ISRIC SoilGrids v2.0 properties API (mean prediction); AWC derived by Saxton & Rawls (2006)",
+  "sample_point": {
+    "longitude": -45.40893209948429,
+    "latitude": -21.55749502356044,
+    "basis": "centroide de área da malha municipal IBGE consultada; não é posição de talhão"
+  },
+  "depth_cm": 100,
+  "available_water_capacity_mm": 123.83280410689858,
+  "available_water_fraction": null,
+  "texture_class": null,
+  "clay_pct": 45.19,
+  "sand_pct": 34.21,
+  "silt_pct": 20.6,
+  "ph_water": 5.25,
+  "organic_carbon_g_kg": 13.02,
+  "sibcs_order": null,
+  "layers": [
+    {
+      "depth_top_cm": 0,
+      "depth_bottom_cm": 5,
+      "clay_pct": 42.7,
+      "sand_pct": 36.2,
+      "silt_pct": 21.1,
+      "ph_water": 5.1,
+      "organic_carbon_g_kg": 35.7,
+      "organic_matter_pct_for_pedotransfer": 6.154680000000001,
+      "theta_33_volumetric": 0.39444330810505274,
+      "theta_1500_volumetric": 0.27033001769680004,
+      "available_water_fraction_volumetric": 0.1241132904082527,
+      "available_water_capacity_mm": 6.205664520412634
+    },
+    {
+      "depth_top_cm": 5,
+      "depth_bottom_cm": 15,
+      "clay_pct": 44.2,
+      "sand_pct": 35.0,
+      "silt_pct": 20.8,
+      "ph_water": 5.1,
+      "organic_carbon_g_kg": 22.6,
+      "organic_matter_pct_for_pedotransfer": 3.89624,
+      "theta_33_volumetric": 0.39511433030549276,
+      "theta_1500_volumetric": 0.2720470980544,
+      "available_water_fraction_volumetric": 0.12306723225109273,
+      "available_water_capacity_mm": 12.306723225109273
+    },
+    {
+      "depth_top_cm": 15,
+      "depth_bottom_cm": 30,
+      "clay_pct": 42.9,
+      "sand_pct": 35.8,
+      "silt_pct": 21.3,
+      "ph_water": 5.1,
+      "organic_carbon_g_kg": 16.5,
+      "organic_matter_pct_for_pedotransfer": 2.8446,
+      "theta_33_volumetric": 0.38702743005221396,
+      "theta_1500_volumetric": 0.262799430412,
+      "available_water_fraction_volumetric": 0.12422799964021397,
+      "available_water_capacity_mm": 18.634199946032094
+    },
+    {
+      "depth_top_cm": 30,
+      "depth_bottom_cm": 60,
+      "clay_pct": 46.0,
+      "sand_pct": 33.9,
+      "silt_pct": 20.1,
+      "ph_water": 5.2,
+      "organic_carbon_g_kg": 12.6,
+      "organic_matter_pct_for_pedotransfer": 2.17224,
+      "theta_33_volumetric": 0.400854480185054,
+      "theta_1500_volumetric": 0.277783175224,
+      "available_water_fraction_volumetric": 0.123071304961054,
+      "available_water_capacity_mm": 36.9213914883162
+    },
+    {
+      "depth_top_cm": 60,
+      "depth_bottom_cm": 100,
+      "clay_pct": 46.0,
+      "sand_pct": 33.4,
+      "silt_pct": 20.6,
+      "ph_water": 5.4,
+      "organic_carbon_g_kg": 6.8,
+      "organic_matter_pct_for_pedotransfer": 1.1723199999999998,
+      "theta_33_volumetric": 0.4001653868295709,
+      "theta_1500_volumetric": 0.275753324512,
+      "available_water_fraction_volumetric": 0.1244120623175709,
+      "available_water_capacity_mm": 49.764824927028364
+    }
+  ],
+  "quality": {
+    "status": "mapped_estimate",
+    "flags": [
+      "soilgrids_mean_prediction",
+      "awc_pedotransfer_derived",
+      "municipality_centroid_not_field_sample",
+      "not_a_field_soil_analysis"
+    ],
+    "uncertainty": "Média espacial SoilGrids em célula de 250 m. Sem amostra de campo e sem quantis inferior/superior no download; a célula no centroide pode não representar área agrícola do município."
+  }
+}

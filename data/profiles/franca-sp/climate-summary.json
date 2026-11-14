@@ -1,0 +1,17 @@
+{
+  "location_id": "franca-sp",
+  "available_daily_rows": 16746,
+  "latest_valid_climate_date": "2026-11-06",
+  "latest_solar_observation_date": "2026-11-03",
+  "training_first_date": "1981-01-01",
+  "training_last_date": "2025-12-31",
+  "training_years": 45,
+  "radiation_missing_days": 1095,
+  "eto_hargreaves_days": 1095,
+  "radiation_missing_days_all": 1099,
+  "eto_hargreaves_days_all": 1099,
+  "mean_annual_precipitation_mm": 1455.4682222222223,
+  "median_annual_precipitation_mm": 1470.77,
+  "mean_annual_eto_mm": 1635.106411824974,
+  "climate_quality": "NASA POWER PRECTOTCORR usado como chuva disponível neste perfil; relatório de pesquisa informa viés negativo de 14–18% frente a IMERG no Oeste do Paraná; não corrigido nem extrapolado para estes estados. RAD ausente nos 1.095 dias de 1981-1983 e em quatro dias do trecho recente; Hargreaves-Samani fornece ETo nesses dias. Última radiação observada 2026-11-03."
+}

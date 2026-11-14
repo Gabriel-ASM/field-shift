@@ -1,0 +1,396 @@
+{
+  "source": {
+    "publisher": "IBGE",
+    "survey": "Produção Agrícola Municipal (PAM)",
+    "table": 5457,
+    "url": "https://apisidra.ibge.gov.br/values/t/5457/n6/1100023,3516200,3170701/v/112,214,215,216/p/1988-2025/c782/40101,40103,40106,40112,40122,40124,40125,40127,40140,40141?formato=json",
+    "classification": {
+      "id": 782,
+      "name": "Produto das lavouras temporárias e permanentes",
+      "categories": {
+        "40101": "amendoim_em_casca",
+        "40103": "aveia_em_grao",
+        "40106": "cana_de_acucar",
+        "40112": "feijao_em_grao",
+        "40122": "milho_em_grao",
+        "40124": "soja_em_grao",
+        "40125": "sorgo_em_grao",
+        "40127": "trigo_em_grao",
+        "40140": "cafe_arabica",
+        "40141": "cafe_canephora"
+      }
+    },
+    "period": "1988–2025",
+    "municipalities_ibge": [
+      "1100023",
+      "3516200",
+      "3170701"
+    ],
+    "variables": {
+      "112": "rendimento_medio_kg_ha",
+      "214": "quantidade_produzida_t",
+      "215": "valor_producao_mil_reais",
+      "216": "area_colhida_ha"
+    },
+    "retrieved_at_http": "Sat, 14 Nov 2026 00:27:42 GMT",
+    "units": {
+      "112": "kg/ha",
+      "214": "t",
+      "215": "mil R$; nominal, not inflation-adjusted",
+      "216": "ha"
+    }
+  },
+  "profiles": {
+    "ariquemes-ro": {
+      "ibge_code": "1100023",
+      "pam_records": 380,
+      "pam_crops": {
+        "amendoim_em_casca": {
+          "valid_yield_years": 4,
+          "yield_min_kg_ha": 500.0,
+          "yield_median_kg_ha": 666.0,
+          "yield_max_kg_ha": 666.0,
+          "yield_mean_2021_2025_kg_ha": null,
+          "first_valid_year": 2006,
+          "last_valid_year": 2009,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "aveia_em_grao": {
+          "valid_yield_years": 0,
+          "yield_min_kg_ha": null,
+          "yield_median_kg_ha": null,
+          "yield_max_kg_ha": null,
+          "yield_mean_2021_2025_kg_ha": null,
+          "first_valid_year": null,
+          "last_valid_year": null,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "cafe_arabica": {
+          "valid_yield_years": 0,
+          "yield_min_kg_ha": null,
+          "yield_median_kg_ha": null,
+          "yield_max_kg_ha": null,
+          "yield_mean_2021_2025_kg_ha": null,
+          "first_valid_year": null,
+          "last_valid_year": null,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "cafe_canephora": {
+          "valid_yield_years": 14,
+          "yield_min_kg_ha": 600.0,
+          "yield_median_kg_ha": 1026.0,
+          "yield_max_kg_ha": 3381.0,
+          "yield_mean_2021_2025_kg_ha": 2244.8,
+          "first_valid_year": 2012,
+          "last_valid_year": 2025,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "cana_de_acucar": {
+          "valid_yield_years": 36,
+          "yield_min_kg_ha": 15000.0,
+          "yield_median_kg_ha": 48000.0,
+          "yield_max_kg_ha": 75000.0,
+          "yield_mean_2021_2025_kg_ha": 35536.0,
+          "first_valid_year": 1988,
+          "last_valid_year": 2025,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "feijao_em_grao": {
+          "valid_yield_years": 38,
+          "yield_min_kg_ha": 134.0,
+          "yield_median_kg_ha": 400.0,
+          "yield_max_kg_ha": 667.0,
+          "yield_mean_2021_2025_kg_ha": 396.6,
+          "first_valid_year": 1988,
+          "last_valid_year": 2025,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "milho_em_grao": {
+          "valid_yield_years": 38,
+          "yield_min_kg_ha": 865.0,
+          "yield_median_kg_ha": 1600.0,
+          "yield_max_kg_ha": 4838.0,
+          "yield_mean_2021_2025_kg_ha": 4478.8,
+          "first_valid_year": 1988,
+          "last_valid_year": 2025,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "soja_em_grao": {
+          "valid_yield_years": 19,
+          "yield_min_kg_ha": 2400.0,
+          "yield_median_kg_ha": 3116.0,
+          "yield_max_kg_ha": 3607.0,
+          "yield_mean_2021_2025_kg_ha": 3428.8,
+          "first_valid_year": 2002,
+          "last_valid_year": 2025,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "sorgo_em_grao": {
+          "valid_yield_years": 1,
+          "yield_min_kg_ha": 3000.0,
+          "yield_median_kg_ha": 3000.0,
+          "yield_max_kg_ha": 3000.0,
+          "yield_mean_2021_2025_kg_ha": 3000.0,
+          "first_valid_year": 2025,
+          "last_valid_year": 2025,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "trigo_em_grao": {
+          "valid_yield_years": 0,
+          "yield_min_kg_ha": null,
+          "yield_median_kg_ha": null,
+          "yield_max_kg_ha": null,
+          "yield_mean_2021_2025_kg_ha": null,
+          "first_valid_year": null,
+          "last_valid_year": null,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        }
+      },
+      "zarc_rows": 39,
+      "zarc_crops": [
+        "Milho 2ª Safra consorciado com Braquiária",
+        "Soja",
+        "Sorgo Granífero 2ª Safra"
+      ],
+      "zarc_files": [
+        "data/raw/mapa-siszarc/zarc-ro-2-safra-braqui-ria-2026-2027.xls",
+        "data/raw/mapa-siszarc/zarc-ro-soja-2026/2027.xls",
+        "data/raw/mapa-siszarc/zarc-ro-sorgo-gran-fero-2-safra-2026-2027.xls"
+      ]
+    },
+    "franca-sp": {
+      "ibge_code": "3516200",
+      "pam_records": 380,
+      "pam_crops": {
+        "amendoim_em_casca": {
+          "valid_yield_years": 0,
+          "yield_min_kg_ha": null,
+          "yield_median_kg_ha": null,
+          "yield_max_kg_ha": null,
+          "yield_mean_2021_2025_kg_ha": null,
+          "first_valid_year": null,
+          "last_valid_year": null,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "aveia_em_grao": {
+          "valid_yield_years": 0,
+          "yield_min_kg_ha": null,
+          "yield_median_kg_ha": null,
+          "yield_max_kg_ha": null,
+          "yield_mean_2021_2025_kg_ha": null,
+          "first_valid_year": null,
+          "last_valid_year": null,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "cafe_arabica": {
+          "valid_yield_years": 14,
+          "yield_min_kg_ha": 840.0,
+          "yield_median_kg_ha": 1500.0,
+          "yield_max_kg_ha": 2400.0,
+          "yield_mean_2021_2025_kg_ha": 1559.4,
+          "first_valid_year": 2012,
+          "last_valid_year": 2025,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "cafe_canephora": {
+          "valid_yield_years": 0,
+          "yield_min_kg_ha": null,
+          "yield_median_kg_ha": null,
+          "yield_max_kg_ha": null,
+          "yield_mean_2021_2025_kg_ha": null,
+          "first_valid_year": null,
+          "last_valid_year": null,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "cana_de_acucar": {
+          "valid_yield_years": 30,
+          "yield_min_kg_ha": 70000.0,
+          "yield_median_kg_ha": 80000.0,
+          "yield_max_kg_ha": 83333.0,
+          "yield_mean_2021_2025_kg_ha": 77148.4,
+          "first_valid_year": 1996,
+          "last_valid_year": 2025,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "feijao_em_grao": {
+          "valid_yield_years": 18,
+          "yield_min_kg_ha": 600.0,
+          "yield_median_kg_ha": 766.0,
+          "yield_max_kg_ha": 2400.0,
+          "yield_mean_2021_2025_kg_ha": null,
+          "first_valid_year": 1988,
+          "last_valid_year": 2020,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "milho_em_grao": {
+          "valid_yield_years": 38,
+          "yield_min_kg_ha": 2400.0,
+          "yield_median_kg_ha": 4272.0,
+          "yield_max_kg_ha": 7200.0,
+          "yield_mean_2021_2025_kg_ha": 6484.4,
+          "first_valid_year": 1988,
+          "last_valid_year": 2025,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "soja_em_grao": {
+          "valid_yield_years": 38,
+          "yield_min_kg_ha": 1560.0,
+          "yield_median_kg_ha": 2400.0,
+          "yield_max_kg_ha": 3780.0,
+          "yield_mean_2021_2025_kg_ha": 3495.8,
+          "first_valid_year": 1988,
+          "last_valid_year": 2025,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "sorgo_em_grao": {
+          "valid_yield_years": 13,
+          "yield_min_kg_ha": 1190.0,
+          "yield_median_kg_ha": 2114.0,
+          "yield_max_kg_ha": 3600.0,
+          "yield_mean_2021_2025_kg_ha": null,
+          "first_valid_year": 1994,
+          "last_valid_year": 2018,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "trigo_em_grao": {
+          "valid_yield_years": 0,
+          "yield_min_kg_ha": null,
+          "yield_median_kg_ha": null,
+          "yield_max_kg_ha": null,
+          "yield_mean_2021_2025_kg_ha": null,
+          "first_valid_year": null,
+          "last_valid_year": null,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        }
+      },
+      "zarc_rows": 33,
+      "zarc_crops": [
+        "Amendoim",
+        "Cana-de-Açúcar (açúcar e álcool)",
+        "Soja"
+      ],
+      "zarc_files": [
+        "data/raw/mapa-siszarc/zarc-sp-amendoim-2026-2027.xls",
+        "data/raw/mapa-siszarc/zarc-sp-cana-.xls",
+        "data/raw/mapa-siszarc/zarc-sp-soja-2026-2027.xls"
+      ]
+    },
+    "varginha-mg": {
+      "ibge_code": "3170701",
+      "pam_records": 380,
+      "pam_crops": {
+        "amendoim_em_casca": {
+          "valid_yield_years": 21,
+          "yield_min_kg_ha": 1000.0,
+          "yield_median_kg_ha": 1500.0,
+          "yield_max_kg_ha": 2000.0,
+          "yield_mean_2021_2025_kg_ha": null,
+          "first_valid_year": 1988,
+          "last_valid_year": 2019,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "aveia_em_grao": {
+          "valid_yield_years": 0,
+          "yield_min_kg_ha": null,
+          "yield_median_kg_ha": null,
+          "yield_max_kg_ha": null,
+          "yield_mean_2021_2025_kg_ha": null,
+          "first_valid_year": null,
+          "last_valid_year": null,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "cafe_arabica": {
+          "valid_yield_years": 14,
+          "yield_min_kg_ha": 1020.0,
+          "yield_median_kg_ha": 1500.0,
+          "yield_max_kg_ha": 2124.0,
+          "yield_mean_2021_2025_kg_ha": 1320.0,
+          "first_valid_year": 2012,
+          "last_valid_year": 2025,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "cafe_canephora": {
+          "valid_yield_years": 0,
+          "yield_min_kg_ha": null,
+          "yield_median_kg_ha": null,
+          "yield_max_kg_ha": null,
+          "yield_mean_2021_2025_kg_ha": null,
+          "first_valid_year": null,
+          "last_valid_year": null,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "cana_de_acucar": {
+          "valid_yield_years": 37,
+          "yield_min_kg_ha": 30000.0,
+          "yield_median_kg_ha": 40000.0,
+          "yield_max_kg_ha": 50000.0,
+          "yield_mean_2021_2025_kg_ha": 39200.0,
+          "first_valid_year": 1988,
+          "last_valid_year": 2025,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "feijao_em_grao": {
+          "valid_yield_years": 37,
+          "yield_min_kg_ha": 372.0,
+          "yield_median_kg_ha": 800.0,
+          "yield_max_kg_ha": 1371.0,
+          "yield_mean_2021_2025_kg_ha": 1278.6,
+          "first_valid_year": 1988,
+          "last_valid_year": 2025,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "milho_em_grao": {
+          "valid_yield_years": 38,
+          "yield_min_kg_ha": 1768.0,
+          "yield_median_kg_ha": 4500.0,
+          "yield_max_kg_ha": 8700.0,
+          "yield_mean_2021_2025_kg_ha": 7853.4,
+          "first_valid_year": 1988,
+          "last_valid_year": 2025,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "soja_em_grao": {
+          "valid_yield_years": 9,
+          "yield_min_kg_ha": 3600.0,
+          "yield_median_kg_ha": 3720.0,
+          "yield_max_kg_ha": 4375.0,
+          "yield_mean_2021_2025_kg_ha": 3707.4,
+          "first_valid_year": 2017,
+          "last_valid_year": 2025,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "sorgo_em_grao": {
+          "valid_yield_years": 3,
+          "yield_min_kg_ha": 3000.0,
+          "yield_median_kg_ha": 3000.0,
+          "yield_max_kg_ha": 3000.0,
+          "yield_mean_2021_2025_kg_ha": null,
+          "first_valid_year": 1991,
+          "last_valid_year": 1993,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "trigo_em_grao": {
+          "valid_yield_years": 1,
+          "yield_min_kg_ha": 1200.0,
+          "yield_median_kg_ha": 1200.0,
+          "yield_max_kg_ha": 1200.0,
+          "yield_mean_2021_2025_kg_ha": null,
+          "first_valid_year": 2014,
+          "last_valid_year": 2014,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        }
+      },
+      "zarc_rows": 33,
+      "zarc_crops": [
+        "Café Arábica Implantação",
+        "Milho 2ª Safra",
+        "Soja"
+      ],
+      "zarc_files": [
+        "data/raw/mapa-siszarc/zarc-mg-caf-.xls",
+        "data/raw/mapa-siszarc/zarc-mg-milho-2-safra-2026-2027.xls",
+        "data/raw/mapa-siszarc/zarc-mg-soja-2026-2027.xls"
+      ]
+    }
+  }
+}

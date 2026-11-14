@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldshift.local/contracts/profile-manifest.schema.json",
+  "title": "Manifesto do perfil de simulação",
+  "type": "object",
+  "required": ["profile", "version", "natureza", "datasets"],
+  "properties": {
+    "profile": {"type": "string"},
+    "version": {"type": "string"},
+    "natureza": {"type": "string", "enum": ["observada", "derivada", "mista"]},
+    "description": {"type": "string"},
+    "location": {
+      "type": ["object", "null"],
+      "properties": {
+        "municipality": {"type": "string"},
+        "uf": {"type": "string", "minLength": 2, "maxLength": 2},
+        "ibge_code": {"type": ["string", "null"]},
+        "longitude": {"type": "number", "minimum": -180, "maximum": 180},
+        "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+        "coordinate_basis": {"type": "string"}
+      },
+      "required": ["municipality", "uf"],
+      "additionalProperties": false
+    },
+    "datasets": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["origem", "responsavel", "frequencia", "unidade", "periodo", "resolucao", "qualidade"],
+        "properties": {
+          "origem": {"type": "string"},
+          "responsavel": {"type": "string"},
+          "frequencia": {"type": "string"},
+          "unidade": {"type": "string"},
+          "periodo": {"type": "string"},
+          "resolucao": {"type": "string"},
+          "qualidade": {"type": "string"},
+          "sha256": {"type": ["string", "null"]}
+        },
+        "additionalProperties": false
+      }
+    },
+    "raw_sources": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": {"type": "string"},
+          "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "query": {"type": "string"},
+          "retrieved_at": {"type": "string", "format": "date"},
+          "api_start": {"type": "string"},
+          "api_end": {"type": "string"},
+          "time_standard": {"type": "string"},
+          "value": {"type": "string"},
+          "depths": {"type": "array", "items": {"type": "string"}}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

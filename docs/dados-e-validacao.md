@@ -1,5 +1,11 @@
 # Dados e validação
 
+## Estado dos arquivos neste repositório
+
+O relatório da coleta descreve 22 conjuntos e 55 arquivos processados para Cascavel, Toledo e Assis Chateaubriand (PR). Os originais do PR, ZARC, PAM, MapBiomas e QC continuam ausentes deste checkout. Para os exemplos solicitados, baixamos NASA POWER Daily, SoilGrids e malhas IBGE para Ariquemes (RO), Franca (SP) e Varginha (MG); veja os manifestos em `data/profiles/` e os arquivos fonte em `data/raw/`. Esses pontos municipais não são medições de talhão. O [inventário do PR](../data/catalog/coleta-oeste-pr.json) e as [métricas transcritas](../data/reference/coleta-oeste-pr-validacao.json) registram a cobertura citada sem afirmar que seus arquivos estejam carregados.
+
+Os contratos em `data/contracts/` definem clima diário, solo em camadas, estado, observação pareada e transição. O HTML executa uma simulação de água no solo para os três perfis; não faz seleção de talhão no mapa, recomendação de cultura nem cálculo econômico. As fontes recomendadas na aba NASA Space Apps estão registradas em `data/catalog/fontes-desafio-nasa.json`.
+
 ## Dados previstos
 
 A cobertura alvo é nacional. Usar a malha municipal do IBGE para localizar as áreas e verificar a disponibilidade das camadas por município e cultura. Séries climáticas e mapas de solo mantêm sua resolução original ao alimentar as estimativas.
@@ -75,6 +81,6 @@ NASA fornece observações da Terra; histórico agrícola, análises de solo e p
 2. **Água e solo:** comparar classes estimadas com análises, sensores ou observações de campo; usar SMAP como referência de escala regional.
 3. **Transições e produção:** estimar em safras anteriores e testar em safras posteriores, sem misturar dados futuros no ajuste.
 4. **Robustez:** repetir com outras sementes e mais trajetórias; confirmar que os resultados estabilizam e que diferenças entre estratégias persistem.
-5. **Referência:** comparar com a rotação atual ou uma prática local documentada.
+5. **Rotação:** conferir se as sequências propostas respeitam as janelas e são coerentes com as práticas agronômicas documentadas.
 
 Sem histórico suficiente para estimar uma transição, usar uma premissa identificada como hipótese e reportar a incerteza. Simulação não transforma essa hipótese em dado observado.

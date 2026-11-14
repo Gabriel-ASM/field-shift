@@ -1,0 +1,78 @@
+{
+  "challenge_title": "Field Shift: Adapting Farms with NASA Data",
+  "challenge_resources_url": "https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/?tab=resources",
+  "retrieved_date": "2026-11-13",
+  "resources_listed_or_recommended": [
+    {
+      "name": "NASA POWER Daily",
+      "product": "Daily point data: T2M_MAX, T2M_MIN, RH2M, WS2M, ALLSKY_SFC_SW_DWN, PRECTOTCORR",
+      "url": "https://power.larc.nasa.gov/docs/services/api/temporal/daily/",
+      "project_status": "downloaded for Ariquemes-RO, Franca-SP and Varginha-MG; normalized to climate-daily.csv",
+      "role": "weather and water-balance reference"
+    },
+    {
+      "name": "GPM / IMERG",
+      "product": "IMERG precipitation rate and accumulation; challenge resource page links GPM",
+      "url": "https://gpm.nasa.gov/data/imerg",
+      "project_status": "not in this checkout; NASA POWER PRECTOTCORR is retained as the explicitly labeled rainfall fallback; no cross-source correction was applied",
+      "role": "preferred satellite rainfall source for the next ingestion"
+    },
+    {
+      "name": "SMAP",
+      "product": "Surface soil moisture and freeze/thaw; challenge resource page links SMAP",
+      "url": "https://www.earthdata.nasa.gov/data/platforms/space-based-platforms/smap",
+      "project_status": "not downloaded for these example points; use for regional comparison after the data access / product selection step",
+      "role": "soil-moisture comparison and validation"
+    },
+    {
+      "name": "Landsat",
+      "product": "Surface reflectance and vegetation indices",
+      "url": "https://earthexplorer.usgs.gov/",
+      "project_status": "catalogued; not needed for the reference water-balance run",
+      "role": "field-scale vegetation stress and bare-soil history"
+    },
+    {
+      "name": "MODIS / VIIRS",
+      "product": "NDVI and other vegetation indices",
+      "url": "https://lpdaac.usgs.gov/products/",
+      "project_status": "catalogued; not needed for the reference water-balance run",
+      "role": "seasonal vigor and vegetation-stress context"
+    },
+    {
+      "name": "SRTM elevation products",
+      "product": "Elevation and terrain",
+      "url": "https://www.earthdata.nasa.gov/data/instruments/srtm",
+      "project_status": "catalogued; NASA POWER point elevation is recorded; no independent SRTM raster ingested",
+      "role": "future slope, runoff and erosion context"
+    },
+    {
+      "name": "ECOSTRESS",
+      "product": "Land-surface temperature and evapotranspiration stress",
+      "url": "https://ecostress.jpl.nasa.gov/data",
+      "project_status": "catalogued; not required to derive the daily reference ET0 series",
+      "role": "future crop-water stress validation"
+    },
+    {
+      "name": "GRACE / GRACE-FO",
+      "product": "Regional groundwater and terrestrial-water storage trends",
+      "url": "https://grace.jpl.nasa.gov/data/get-data/",
+      "project_status": "catalogued; scale is regional and not used for a municipality-point bucket",
+      "role": "regional long-term water context"
+    },
+    {
+      "name": "SoilGrids",
+      "product": "250 m gridded texture, pH and soil organic carbon",
+      "url": "https://rest.isric.org/soilgrids/v2.0/docs",
+      "project_status": "supplemental non-NASA source; downloaded for each IBGE-centroid point and stored by depth",
+      "role": "mapped soil prior; available water capacity derived with Saxton & Rawls (2006)"
+    },
+    {
+      "name": "IBGE municipal boundaries",
+      "product": "Municipality GeoJSON used only to compute representative area centroids",
+      "url": "https://servicodados.ibge.gov.br/api/docs/malhas?versao=3",
+      "project_status": "downloaded for the three selected municipality codes",
+      "role": "coordinate index; no map-based field selection"
+    }
+  ],
+  "scope_note": "O desafio sugere várias fontes e permite combinar observações NASA com dados locais. Esta ingestão baixa as fontes abertas necessárias à demonstração; o catálogo preserva as fontes recomendadas ainda não incorporadas, sem tratá-las como carregadas."
+}

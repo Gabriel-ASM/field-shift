@@ -1,0 +1,31 @@
+{
+  "source_document": "research/relatorio_coleta_final_2026-11-10-v3.md",
+  "source_scope": "Cascavel, Toledo e Assis Chateaubriand, Paraná",
+  "nature": "estatísticas resumidas transcritas do relatório de coleta; não são séries observacionais brutas",
+  "validations": {
+    "eto_fao56_example18": {
+      "location": "Uccle, Bélgica; 6 de julho; 50.80°N; 100 m",
+      "expected_mm_day": 3.88,
+      "calculated_mm_day": 3.8803,
+      "relative_difference_pct": 0.0072,
+      "scope_note": "verifica a equação em um dia; não verifica ingestão nem preenchimento de lacunas do POWER"
+    },
+    "rainfall_product_comparison": {
+      "period": "1998-01-01/2025-09-29",
+      "correlation_daily": {"POWER_vs_IMERG": [0.72, 0.75], "POWER_vs_ERA5_Land": [0.67, 0.70], "IMERG_vs_ERA5_Land": [0.66, 0.69]},
+      "bias_of_test_sum_pct": {"IMERG_vs_POWER": [16.7, 18.3], "ERA5_Land_vs_POWER": [9.0, 11.9], "ERA5_Land_vs_IMERG": [-7.9, -4.7]},
+      "note": "Toledo e Assis Chateaubriand usam a mesma célula POWER; não extrapolar essas métricas para outras regiões."
+    },
+    "inmet_rain_gauges": {
+      "stations": 10,
+      "period": "2006-01-01/2025-09-29",
+      "all_station_daily_correlation": {"IMERG": 0.78, "ERA5_Land": 0.63},
+      "all_station_monthly_correlation": {"IMERG": 0.86, "ERA5_Land": 0.76},
+      "daily_sum_bias_pct": {"IMERG": 7.4, "ERA5_Land": -4.1},
+      "monthly_sum_bias_pct": {"IMERG": 5.7, "ERA5_Land": -5.3},
+      "limitations": ["estações fora dos municípios", "há lacunas longas", "POWER não entrou na comparação"]
+    },
+    "soil_water_capacity": {"soilgrids_saxton_rawls_mm_to_1m": [103, 121], "coverage": 3, "note": "prior cartográfico regional; não substitui análise do talhão"},
+    "mapbiomas_vs_pam_soybean_area_mean_difference_pct": {"Assis Chateaubriand": 11.5, "Cascavel": 12.6, "Toledo": 20.7}
+  }
+}

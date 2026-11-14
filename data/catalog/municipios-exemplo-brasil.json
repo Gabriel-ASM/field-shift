@@ -1,0 +1,11 @@
+{
+  "purpose": "Universo de municípios para ilustrar a seleção de um caso por estado na interface. Este catálogo não contém medições nem perfil de simulação.",
+  "default_seed": 2026,
+  "selection_rule": "Selecionar um nome de cada lista com random.Random(seed).choice; a semente reproduz a seleção.",
+  "municipality_candidates": {
+    "RO": ["Ariquemes", "Cacoal", "Ji-Paraná", "Porto Velho", "Vilhena"],
+    "SP": ["Bauru", "Campinas", "Franca", "Ribeirão Preto", "São José do Rio Preto"],
+    "MG": ["Montes Claros", "Patos de Minas", "Uberaba", "Uberlândia", "Varginha"]
+  },
+  "coverage_note": "Não há clima, solo, ZARC ou observações de manejo desses municípios neste checkout. Os nomes não implicam cobertura de dados."
+}

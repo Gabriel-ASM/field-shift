@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldshift.local/contracts/climate-daily.schema.json",
+  "title": "Observação meteorológica diária por local",
+  "description": "Registro normalizado; preserve a fonte e a qualidade de cada variável. Não misture observação, estimativa e projeção.",
+  "type": "object",
+  "required": ["location_id", "date_local", "time_basis", "source", "precipitation_mm", "quality"],
+  "properties": {
+    "location_id": {"type": "string", "minLength": 1},
+    "date_local": {"type": "string", "format": "date"},
+    "timezone": {"type": ["string", "null"], "examples": ["America/Porto_Velho", "America/Sao_Paulo"]},
+    "time_basis": {"type": "string", "enum": ["local_solar_time", "local_civil_time", "UTC"], "description": "POWER daily values use LST (local solar time); do not relabel them as civil-time days."},
+    "source": {"type": "string", "description": "Identificador da série de origem e versão do produto."},
+    "source_status": {"type": ["string", "null"], "enum": ["final", "provisional", "reprocessed", "forecast", null]},
+    "precipitation_mm": {"type": ["number", "null"], "minimum": 0},
+    "tmax_c": {"type": ["number", "null"]},
+    "tmin_c": {"type": ["number", "null"]},
+    "solar_mj_m2_day": {"type": ["number", "null"], "minimum": 0},
+    "relative_humidity_pct": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+    "wind_2m_ms": {"type": ["number", "null"], "minimum": 0},
+    "eto_mm_day": {"type": ["number", "null"], "minimum": 0},
+    "eto_method": {"type": ["string", "null"], "description": "Ex.: FAO-56 Penman-Monteith; registrar estimativas e preenchimentos."},
+    "quality": {
+      "type": "object",
+      "required": ["valid", "flags"],
+      "properties": {
+        "valid": {"type": "boolean"},
+        "flags": {"type": "array", "items": {"type": "string"}},
+        "missing_variables": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

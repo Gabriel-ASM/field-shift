@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldshift.local/contracts/field-observation.schema.json",
+  "title": "Observação quinzenal de manejo e estado do talhão",
+  "description": "Registro pareado usado para estimar transições: o próximo estado precisa pertencer à mesma unidade de manejo.",
+  "type": "object",
+  "required": ["field_id", "period_start", "state", "action", "next_state", "environment", "source_id"],
+  "properties": {
+    "field_id": {"type": "string"},
+    "period_start": {"type": "string", "format": "date"},
+    "state": {"type": "string"},
+    "action": {"type": "string"},
+    "next_state": {"type": "string"},
+    "environment": {"type": "string"},
+    "source_id": {"type": "string"},
+    "crop_yield_kg_ha": {"type": ["number", "null"], "minimum": 0},
+    "quality_flags": {"type": "array", "items": {"type": "string"}}
+  },
+  "additionalProperties": false
+}

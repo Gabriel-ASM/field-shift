@@ -1,0 +1,10 @@
+{
+  "name": "balanco_hidrico_referencia",
+  "provenance": "Cenário físico de referência para demonstrar persistência hídrica. A demanda é ET0 (Kc=1), não uma cultura ou manejo agrícola. Não é recomendação de rotação.",
+  "default_action": "reference_et0_demand",
+  "actions_by_state": {
+    "water_low": "reference_et0_demand",
+    "water_medium": "reference_et0_demand",
+    "water_high": "reference_et0_demand"
+  }
+}

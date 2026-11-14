@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Referência de coeficientes e duração de fases para ETc exploratória no balanço hídrico diário. Estes valores não são calibração regional brasileira nem produtividade observada.",
+  "source": {
+    "publisher": "FAO",
+    "document": "Irrigation and Drainage Paper 56, Crop Evapotranspiration: Guidelines for Computing Crop Water Requirements",
+    "chapter": "Chapter 6, Tables 11 and 12",
+    "url": "https://www.fao.org/4/x0490e/x0490e0b.htm",
+    "accessed": "2026-11-13",
+    "method": "Valores tabulados sem ajuste climático da equação 62. A UR mínima diária não existe nos perfis POWER atuais; portanto não se aplica uma correção de Kc que exigiria RHmin.",
+    "caveat": "Durações de fases da Tabela 11 vêm de regiões/climas de referência da FAO, não de cultivares ou calendários medidos em Ariquemes, Franca ou Varginha. Kc_ini é valor inicial aproximado, sensível à frequência de umedecimento."
+  },
+  "crops": [
+    {
+      "id": "soybean",
+      "name_pt": "Soja",
+      "kind": "annual_grain",
+      "kc": {"initial": 0.4, "mid": 1.15, "end": 0.5},
+      "stage_days": {"initial": 15, "development": 15, "mid": 40, "late": 15},
+      "duration_days": 85,
+      "reference_context": "Duração de soja nos trópicos, FAO-56 Table 11; Kc_ini e Kc padrão da família leguminosa, Table 12; Kc_mid/Kc_end de Soybeans.",
+      "support": "published_reference"
+    },
+    {
+      "id": "maize_grain",
+      "name_pt": "Milho-grão",
+      "kind": "annual_grain",
+      "kc": {"initial": 0.3, "mid": 1.2, "end": 0.35},
+      "stage_days": {"initial": 20, "development": 35, "mid": 40, "late": 30},
+      "duration_days": 125,
+      "reference_context": "Duração de 125 dias em região tropical úmida (exemplo FAO-56 Table 11); Kc_ini herdado do cabeçalho de cereais, Kc_end=0.35 para grão seco no campo (nota 11 da Table 12).",
+      "support": "published_reference"
+    },
+    {
+      "id": "sorghum_grain",
+      "name_pt": "Sorgo-grão",
+      "kind": "annual_grain",
+      "kc": {"initial": 0.3, "mid": 1.05, "end": 0.55},
+      "stage_days": {"initial": 20, "development": 35, "mid": 40, "late": 30},
+      "duration_days": 125,
+      "reference_context": "Kc_mid é o ponto médio da faixa 1.00–1.10 na Table 12; duração da linha geral Sorghum da Table 11 (130 dias), ajustada a 125 no MVP? No exact local cultivar duration; use only as prior.",
+      "support": "published_reference_range_midpoint"
+    },
+    {
+      "id": "millet",
+      "name_pt": "Milheto",
+      "kind": "annual_cover_or_grain",
+      "kc": {"initial": 0.3, "mid": 1.0, "end": 0.3},
+      "stage_days": {"initial": 15, "development": 25, "mid": 40, "late": 25},
+      "duration_days": 105,
+      "reference_context": "Cereais: Kc_ini herdado do cabeçalho da categoria; coeficientes e duração de Millet, FAO-56 Tables 11–12.",
+      "support": "published_reference"
+    },
+    {
+      "id": "dry_bean",
+      "name_pt": "Feijão-seco",
+      "kind": "annual_grain",
+      "kc": {"initial": 0.4, "mid": 1.15, "end": 0.35},
+      "stage_days": {"initial": 20, "development": 30, "mid": 40, "late": 20},
+      "duration_days": 110,
+      "reference_context": "Duração de feijão-seco de clima continental (110 dias), Table 11; Kc inicial de planejamento, Kc_mid e Kc_end padrão para beans dry/seed, Table 12.",
+      "support": "published_reference"
+    },
+    {
+      "id": "peanut",
+      "name_pt": "Amendoim",
+      "kind": "annual_grain",
+      "kc": {"initial": 0.4, "mid": 1.15, "end": 0.6},
+      "stage_days": {"initial": 25, "development": 35, "mid": 45, "late": 25},
+      "duration_days": 130,
+      "reference_context": "Duração de Groundnut, referência de estação seca na África Ocidental, Table 11; coeficientes de Groundnut, Table 12.",
+      "support": "published_reference"
+    },
+    {
+      "id": "oat",
+      "name_pt": "Aveia (referência para aveia-preta)",
+      "kind": "annual_cover_or_grain",
+      "kc": {"initial": 0.3, "mid": 1.15, "end": 0.25},
+      "stage_days": {"initial": 15, "development": 30, "mid": 65, "late": 40},
+      "duration_days": 150,
+      "reference_context": "Kc para Oats na categoria Cereals; duração na linha de cereais de East Africa, Table 11. Aveia-preta não tem linha varietal própria na fonte.",
+      "support": "group_proxy"
+    },
+    {
+      "id": "wheat",
+      "name_pt": "Trigo",
+      "kind": "annual_grain",
+      "kc": {"initial": 0.3, "mid": 1.15, "end": 0.25},
+      "stage_days": {"initial": 15, "development": 30, "mid": 65, "late": 40},
+      "duration_days": 150,
+      "reference_context": "Kc para Spring Wheat, herdado da categoria Cereals; duração da linha de cereais de East Africa, Table 11, sem ajuste regional brasileiro.",
+      "support": "group_proxy"
+    },
+    {
+      "id": "sugarcane",
+      "name_pt": "Cana-de-açúcar",
+      "kind": "perennial_or_semiperennial",
+      "kc": {"initial": 0.4, "mid": 1.25, "end": 0.75},
+      "stage_days": {"initial": 35, "development": 60, "mid": 190, "late": 120},
+      "duration_days": 405,
+      "reference_context": "Kc Table 12 para cana; duração do ciclo virgem em baixas latitudes, Table 11. A soqueira requer calendário próprio e não foi estimada como cultura anual.",
+      "support": "published_reference"
+    },
+    {
+      "id": "coffee_bare",
+      "name_pt": "Café sem cobertura ativa",
+      "kind": "perennial",
+      "kc": {"initial": 0.9, "mid": 0.95, "end": 0.95},
+      "stage_days": null,
+      "duration_days": null,
+      "reference_context": "Café, condição bare ground cover, FAO-56 Table 12. Coeficiente representativo do sistema/período, não uma curva fenológica anual para café brasileiro.",
+      "support": "published_reference"
+    },
+    {
+      "id": "coffee_weeds",
+      "name_pt": "Café com cobertura vegetal espontânea (proxy de manejo de entrelinha)",
+      "kind": "perennial_cover_system",
+      "kc": {"initial": 1.05, "mid": 1.1, "end": 1.1},
+      "stage_days": null,
+      "duration_days": null,
+      "reference_context": "FAO-56 Table 12, Coffee with weeds. Não equivale a braquiária controlada; cobertura/manejo devem ser informados para uso agronômico.",
+      "support": "published_reference_proxy"
+    },
+    {
+      "id": "brachiaria",
+      "name_pt": "Braquiária",
+      "kind": "cover_or_intercrop",
+      "kc": null,
+      "stage_days": null,
+      "duration_days": null,
+      "reference_context": "Não há linha própria de Brachiaria spp. na Tabela 12 da FAO-56. Não atribuir Kc numérico automaticamente.",
+      "support": "missing_crop_specific_parameter"
+    },
+    {
+      "id": "forage_radish",
+      "name_pt": "Nabo forrageiro",
+      "kind": "cover_crop",
+      "kc": null,
+      "stage_days": null,
+      "duration_days": null,
+      "reference_context": "Não há linha própria de Raphanus sativus para adubação verde na fonte selecionada.",
+      "support": "missing_crop_specific_parameter"
+    },
+    {
+      "id": "crotalaria",
+      "name_pt": "Crotalária",
+      "kind": "cover_crop",
+      "kc": null,
+      "stage_days": null,
+      "duration_days": null,
+      "reference_context": "Espécie não especificada no inventário de parâmetros FAO-56 consultado; não usar Kc proxy sem validação.",
+      "support": "missing_crop_specific_parameter"
+    },
+    {
+      "id": "mucuna",
+      "name_pt": "Mucuna",
+      "kind": "cover_crop",
+      "kc": null,
+      "stage_days": null,
+      "duration_days": null,
+      "reference_context": "Espécie não especificada no inventário de parâmetros FAO-56 consultado; não usar Kc proxy sem validação.",
+      "support": "missing_crop_specific_parameter"
+    }
+  ]
+}

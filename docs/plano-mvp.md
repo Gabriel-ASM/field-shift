@@ -11,19 +11,21 @@ Cobrir todo o Brasil desde o MVP. O produtor pode escolher qualquer município o
 
 Aplicar o catálogo por município, solo e janela, segundo o ZARC e regras agronômicas documentadas. Cana mantém a soqueira entre cortes e admite outra cultura na reforma. Café permanece no talhão durante o ciclo e admite manejo de entrelinha ou renovação. Habilitar resultados quantitativos para as combinações com dados suficientes.
 
-| Cultura atual | Referência quando o produtor não informa seu manejo | Alternativas candidatas |
-|---|---|---|
-| Soja ou milho | Repetir a sucessão anual elegível mais bem documentada na região | Soja → milho com braquiária, soja → sorgo, soja → cobertura com milheto ou aveia-preta conforme a região |
-| Cana | Manter a soqueira até a janela de reforma do perfil regional | Reforma com soja, amendoim ou crotalária antes do replantio |
-| Café | Manter o cafezal com manejo de entrelinha habitual da região | Comparar entrelinhas com braquiária ou cobertura leguminosa e renovar apenas quando elegível |
+| Cultura inicial | Rotações ou manejos candidatos |
+|---|---|
+| Soja ou milho | Sucessão com milho e braquiária, sorgo ou cobertura com milheto ou aveia-preta, conforme a região |
+| Cana | Reforma com soja, amendoim ou crotalária antes do replantio |
+| Café | Entrelinhas com braquiária ou cobertura leguminosa e renovação nas janelas elegíveis |
 
-Em cada local, comparar a referência, até duas alternativas fixas elegíveis e uma política adaptativa. Para soja e milho, a política troca a segunda safra comercial por cobertura ou pousio protegido quando a janela fecha ou a classe hídrica é baixa segundo o perfil. Para cana e café, adaptar a cobertura nas janelas de reforma ou de manejo da entrelinha. Registrar a justificativa da referência e a origem de cada regra.
+Começar pela cultura informada pelo produtor. Nas janelas posteriores, comparar culturas e coberturas elegíveis e propor uma sequência de rotação que respeite os intervalos agronômicos. A preferência pela cultura inicial pode ajustar sua pontuação nas janelas em que o retorno for elegível. Se a janela comercial fechar ou a água disponível limitar as candidatas, considerar cobertura ou pousio protegido. Registrar a origem de cada regra.
 
 ## 2. Dados e configuração inicial
 
 1. Usar a [triagem dos recursos do desafio](dados-e-validacao.md#conferência-das-fontes), as frequências da seção 3 do [relatório da coleta](../research/relatorio_coleta_final_2026-11-10-v3.md) e o [catálogo de responsáveis](dados-e-validacao.md#frequência-e-responsabilidade). Localizar o manifesto e os arquivos processados antes de calibrar.
 2. Priorizar POWER para meteorologia e ET₀ calculada, IMERG para chuva, ERA5-Land para extensão histórica, SMAP e INMET para comparação, SoilGrids e análise local para solo, MapBiomas para histórico descritivo, PAM para rendimento municipal e ZARC para elegibilidade. Conferir Kc e duração por fase com a FAO-56 e referências regionais. Documentar descontinuidades entre fontes e a escala das estimativas.
 3. Usar a malha municipal do IBGE como índice nacional e associar as camadas de clima, solo, calendário e produção à localização selecionada. Registrar cobertura e lacunas por município, cultura e safra. Carregar um perfil inicial por região e cultura. O produtor pode ajustar cultura atual, histórico, irrigação, solo, água, preço, custos e prioridades. Mostrar unidade, origem e data dos padrões. Quando faltar um dado essencial, indicar qual entrada precisa ser informada para gerar o resultado.
+
+**Estado deste checkout.** O relatório do Oeste do Paraná cita 22 conjuntos e 55 arquivos processados que não vieram neste checkout. Para os exemplos solicitados, foram baixados e normalizados NASA POWER Daily, SoilGrids v2.0 e malhas IBGE para Ariquemes (RO), Franca (SP) e Varginha (MG). Os perfis calculam um balanço hídrico de referência e rodam Markov + Monte Carlo, sem dados de talhão, cultura, manejo, produção ou economia. A página demonstra essa execução e registra as lacunas para a comparação de rotações.
 
 ## 3. Calibração das classes do estado
 
@@ -49,15 +51,15 @@ Usar o balanço hídrico como base para a evolução da água. Qualquer transiç
 
 **Desconto.** Usar por padrão o último fechamento disponível da curva soberana prefixada da ANBIMA na data base, no vértice de 1.260 dias úteis (cinco anos), como taxa anual única para fluxos nominais em reais. Como referência inicial, o fechamento de 12/11/2026 foi de 15,4211% a.a. O sistema deve atualizar o valor na data da simulação e permitir substituição pelo produtor. Em um cenário com fluxos reais, usar o vértice correspondente da ETTJ IPCA. [Série ANBIMA](https://www.anbima.com.br/informacoes/est-termo/CZ.asp) · [Consulta de 13/11/2026, coluna fechamento D-1](https://www.anbima.com.br/informacoes/curvas-intradiarias/CIntra.asp).
 
-Calcular o fluxo por hectare nas datas das operações e colheitas, com receita de produtividade × preço, custos de implantação, manejo, irrigação e colheita e valor residual quando aplicável a cana e café. Aplicar os choques do Monte Carlo sobre a curva base e usar as mesmas trajetórias de mercado para as estratégias comparadas. Para coberturas sem comercialização, registrar custos e medir a receita alternativa na comparação com a referência.
+Calcular o fluxo por hectare nas datas das operações e colheitas, com receita de produtividade × preço, custos de implantação, manejo, irrigação e colheita e valor residual quando aplicável a cana e café. Aplicar os choques do Monte Carlo sobre a curva base e usar as mesmas trajetórias de mercado para as estratégias comparadas. Para coberturas sem comercialização, registrar os custos e a receita das alternativas elegíveis.
 
-Filtrar estratégias inviáveis antes de pontuar. Mostrar VPL por hectare, mediana, faixa P5–P95, média dos 5% piores resultados, probabilidade de superar a referência, água e condição final do solo. Começar com 25% de peso para cada dimensão (VPL mediano, média dos 5% piores VPLs, menor déficit hídrico e menor frequência de solo limitante no fim do horizonte). Normalizar entre alternativas elegíveis no mesmo talhão. Dimensões empatadas recebem a mesma nota. O produtor pode alterar os pesos e comparar como o ranking muda.
+Filtrar estratégias inviáveis antes de pontuar. Mostrar sequência proposta, VPL por hectare, mediana, faixa P5–P95, média dos 5% piores resultados, água e condição final do solo. Começar com 25% de peso para cada dimensão (VPL mediano, média dos 5% piores VPLs, menor déficit hídrico e menor frequência de solo limitante no fim do horizonte). Normalizar entre alternativas elegíveis no mesmo talhão. Dimensões empatadas recebem a mesma nota. O produtor pode alterar os pesos e comparar como o ranking muda.
 
 ## 6. Validação e expansão
 
 Reservar as três safras completas mais recentes por cultura e região e ajustar com as anteriores. Em cada safra reservada, usar apenas dados disponíveis na data histórica da decisão. Comparar chuva e veranicos com estações, água com SMAP ou medições locais e produtividade com PAM ou registros do produtor. Registrar viés, erro absoluto e cobertura dos intervalos simulados. Incluir casos das cinco macrorregiões quando houver observações comparáveis e documentar lacunas. Usar a coleta do Oeste do Paraná como evidência regional.
 
-Executar três sementes com 10 mil trajetórias por estratégia. Como critério inicial, exigir que a primeira colocada seja a mesma nas três execuções e que a amplitude entre sementes do VPL mediano e da média dos 5% piores VPLs fique abaixo de 1% e 5%, respectivamente, do custo acumulado mediano por hectare da referência. Se algum critério falhar, aumentar para 30 mil trajetórias e sinalizar diferenças sem ordenação estável. Registrar versão, responsável e faixa de sensibilidade de cada premissa. Resultados de cenários diferentes podem levar a escolhas diferentes.
+Executar três sementes com 10 mil trajetórias por estratégia. Como critério inicial, exigir que a primeira colocada seja a mesma nas três execuções e que a amplitude entre sementes do VPL mediano e da média dos 5% piores VPLs fique abaixo de 1% e 5%, respectivamente, do custo acumulado mediano por hectare da rotação avaliada. Se algum critério falhar, aumentar para 30 mil trajetórias e sinalizar diferenças sem ordenação estável. Registrar versão, responsável e faixa de sensibilidade de cada premissa. Resultados de cenários diferentes podem levar a escolhas diferentes.
 
 Manter o motor comum e configurar por mercado as fontes, culturas, regras de calendário, moeda, unidades e parâmetros. Cada execução identifica região, versões dos dados, perfil, estratégia e semente. Pré-processar séries uma vez por região, reaproveitar cenários entre estratégias e processar trajetórias em lotes. A expansão deve exigir um novo perfil e calibração local, com o mesmo contrato de entrada e saída.
 

@@ -1,0 +1,137 @@
+[
+  {
+    "state": "water_low",
+    "action": "reference_et0_demand",
+    "environment": "dry",
+    "counts": {
+      "water_low": 112,
+      "water_medium": 1,
+      "water_high": 0
+    },
+    "support": "derived",
+    "provenance": "Balanço hídrico diário derivado de NASA POWER e AWC SoilGrids/Saxton-Rawls; contexto dry; n=113; spin-up 1981-1982 excluído. Não são transições de campo nem condicionadas a cultura/manejo.",
+    "sample_size": 113,
+    "effective_sample_size": 113,
+    "pooling": null
+  },
+  {
+    "state": "water_low",
+    "action": "reference_et0_demand",
+    "environment": "normal",
+    "counts": {
+      "water_low": 289,
+      "water_medium": 28,
+      "water_high": 8
+    },
+    "support": "derived",
+    "provenance": "Balanço hídrico diário derivado de NASA POWER e AWC SoilGrids/Saxton-Rawls; contexto normal; n=325; spin-up 1981-1982 excluído. Não são transições de campo nem condicionadas a cultura/manejo.",
+    "sample_size": 325,
+    "effective_sample_size": 325,
+    "pooling": null
+  },
+  {
+    "state": "water_low",
+    "action": "reference_et0_demand",
+    "environment": "wet",
+    "counts": {
+      "water_low": 56,
+      "water_medium": 17,
+      "water_high": 11
+    },
+    "support": "derived",
+    "provenance": "Balanço hídrico diário derivado de NASA POWER e AWC SoilGrids/Saxton-Rawls; contexto wet; n=84; spin-up 1981-1982 excluído. Não são transições de campo nem condicionadas a cultura/manejo.",
+    "sample_size": 84,
+    "effective_sample_size": 84,
+    "pooling": null
+  },
+  {
+    "state": "water_medium",
+    "action": "reference_et0_demand",
+    "environment": "dry",
+    "counts": {
+      "water_low": 27,
+      "water_medium": 4,
+      "water_high": 3
+    },
+    "support": "derived",
+    "provenance": "Balanço hídrico diário derivado de NASA POWER e AWC SoilGrids/Saxton-Rawls; contexto dry; n=34; spin-up 1981-1982 excluído. Não são transições de campo nem condicionadas a cultura/manejo.",
+    "sample_size": 34,
+    "effective_sample_size": 34,
+    "pooling": null
+  },
+  {
+    "state": "water_medium",
+    "action": "reference_et0_demand",
+    "environment": "normal",
+    "counts": {
+      "water_low": 27,
+      "water_medium": 30,
+      "water_high": 25
+    },
+    "support": "derived",
+    "provenance": "Balanço hídrico diário derivado de NASA POWER e AWC SoilGrids/Saxton-Rawls; contexto normal; n=82; spin-up 1981-1982 excluído. Não são transições de campo nem condicionadas a cultura/manejo.",
+    "sample_size": 82,
+    "effective_sample_size": 82,
+    "pooling": null
+  },
+  {
+    "state": "water_medium",
+    "action": "reference_et0_demand",
+    "environment": "wet",
+    "counts": {
+      "water_low": 4,
+      "water_medium": 8,
+      "water_high": 26
+    },
+    "support": "derived",
+    "provenance": "Balanço hídrico diário derivado de NASA POWER e AWC SoilGrids/Saxton-Rawls; contexto wet; n=38; spin-up 1981-1982 excluído. Não são transições de campo nem condicionadas a cultura/manejo.",
+    "sample_size": 38,
+    "effective_sample_size": 38,
+    "pooling": null
+  },
+  {
+    "state": "water_high",
+    "action": "reference_et0_demand",
+    "environment": "dry",
+    "counts": {
+      "water_low": 6,
+      "water_medium": 29,
+      "water_high": 28
+    },
+    "support": "derived",
+    "provenance": "Balanço hídrico diário derivado de NASA POWER e AWC SoilGrids/Saxton-Rawls; contexto dry; n=63; spin-up 1981-1982 excluído. Não são transições de campo nem condicionadas a cultura/manejo.",
+    "sample_size": 63,
+    "effective_sample_size": 63,
+    "pooling": null
+  },
+  {
+    "state": "water_high",
+    "action": "reference_et0_demand",
+    "environment": "normal",
+    "counts": {
+      "water_low": 0,
+      "water_medium": 35,
+      "water_high": 181
+    },
+    "support": "derived",
+    "provenance": "Balanço hídrico diário derivado de NASA POWER e AWC SoilGrids/Saxton-Rawls; contexto normal; n=216; spin-up 1981-1982 excluído. Não são transições de campo nem condicionadas a cultura/manejo.",
+    "sample_size": 216,
+    "effective_sample_size": 216,
+    "pooling": null
+  },
+  {
+    "state": "water_high",
+    "action": "reference_et0_demand",
+    "environment": "wet",
+    "counts": {
+      "water_low": 1,
+      "water_medium": 1,
+      "water_high": 75
+    },
+    "support": "derived",
+    "provenance": "Balanço hídrico diário derivado de NASA POWER e AWC SoilGrids/Saxton-Rawls; contexto wet; n=77; spin-up 1981-1982 excluído. Não são transições de campo nem condicionadas a cultura/manejo.",
+    "sample_size": 77,
+    "effective_sample_size": 77,
+    "pooling": null
+  }
+]

@@ -4,11 +4,13 @@ Proposta de apoio à decisão para comparar rotações de culturas usando observ
 
 O projeto responde ao desafio [Field Shift: Adapting Farms with NASA Data](https://www.spaceappschallenge.org/2026/challenges/field-shift-adapting-farms-with-nasa-data/) do NASA Space Apps Challenge 2026.
 
-> **Status:** núcleo Markov e Monte Carlo disponível com dados sintéticos. A calibração e a integração das fontes nacionais estão pendentes.
+> **Status:** NASA POWER Daily e SoilGrids baixados para três exemplos brasileiros; balanço hídrico de referência ligado a Markov + Monte Carlo. Sem transições de campo, cultura ou manejo, a execução não calcula recomendação de rotação nem VPL.
 
-## Rodar o exemplo
+## Executar o motor
 
-Na raiz do repositório, execute `python -m field_shift` com Python 3.10 ou posterior. O exemplo compara duas políticas em 500 trajetórias de cinco anos e imprime as probabilidades dos estados finais. A configuração do motor usa 10 mil trajetórias por padrão. Consulte o [formato dos dados](data/README.md) para conectar um perfil próprio.
+Para executar a simulação de referência nos três perfis, rode `python -m field_shift.demo`. Para um perfil isolado, use `python -m field_shift --profile data/profiles/ariquemes-ro --policy data/policies/balanco-hidrico-referencia.json --initial-state water_medium`. Os dados brutos estão em `data/raw/`, os normalizados e as contagens Markov em `data/profiles/`, e as fontes/gaps estão em `data/README.md`.
+
+Abra a [demonstração interativa](docs/visualizacao.html) para conferir os dados e rodar novamente 10.000 trajetórias para Ariquemes, Franca e Varginha. A seleção de talhão no mapa foi deixada fora. Regenere a página com `python -m field_shift.visualize --output docs/visualizacao.html --seed 2026`.
 
 ## Ideia em uma figura
 
@@ -35,6 +37,6 @@ O estado Markov descreve o talhão. O Monte Carlo cria futuros plausíveis de cl
 
 ## Escopo proposto
 
-O MVP cobre todo o Brasil e simula cinco anos de manejo por talhão. O produtor pode selecionar qualquer município brasileiro. As opções de manejo dependem do calendário, do solo e dos dados disponíveis para a região. O catálogo prevê soja, milho, cana-de-açúcar, café e dez culturas candidatas para rotação, consórcio ou cobertura.
+O escopo nacional continua como objetivo do produto. Esta entrega contém três exemplos municipais com dados ambientais remotos e não representa fazendas nem recomenda manejo. Os 55 arquivos originais citados para o Oeste do Paraná continuam fora do checkout; não foram usados nem substituídos por exemplos sintéticos.
 
-O produtor ajusta os dados iniciais e compara retorno, risco, água e solo. Preços e custos fazem parte da simulação. O motor usa perfis regionais de dados, regras e parâmetros para permitir expansão a outros mercados.
+O caminho de dados para meteorologia, solo, estados Markov, contagens de transição e Monte Carlo está descrito em [data/README.md](data/README.md) e nos esquemas em `data/contracts/`. O inventário extraído do relatório e da planilha está em `data/catalog/` e `data/reference/`, com ausências e limites registrados.

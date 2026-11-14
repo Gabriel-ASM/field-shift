@@ -4,10 +4,10 @@ from collections import Counter
 from dataclasses import dataclass
 from math import ceil, isfinite
 from random import Random
-from statistics import fmean, median
+from statistics import median
 from typing import Callable, Iterable, Mapping, Sequence
 
-from .markov import FieldState, MarkovModel, MissingTransition, TransitionKernel
+from .markov import Distribution, FieldState, MarkovModel, MissingTransition, TransitionKernel
 
 
 class SeasonalHistory:
@@ -68,6 +68,28 @@ class Decision:
 Policy = Callable[[Decision], str]
 Eligibility = Callable[[int, FieldState, str], bool]
 CashFlow = Callable[[Decision, str, str, FieldState], float]
+PestRisk = Callable[[Decision, str, str], float]
+PestLoss = Callable[[Decision, str, str, FieldState], float]
+
+
+@dataclass(frozen=True)
+class TransitionEvent:
+    trajectory: int
+    policy: str
+    decision: Decision
+    action: str
+    environment: str
+    distribution: Distribution
+    uniform: float
+    next_state: FieldState
+    pest_probability: float = 0.0
+    pest_uniform: float | None = None
+    pest_occurred: bool = False
+    cash_flow: float | None = None
+    cumulative_npv: float | None = None
+
+
+Observer = Callable[[TransitionEvent], None]
 
 
 @dataclass(frozen=True)
@@ -120,6 +142,9 @@ class MonteCarlo:
         eligible: Eligibility | None = None,
         cash_flow: CashFlow | None = None,
         annual_discount: float | None = None,
+        on_transition: Observer | None = None,
+        pest_risk: PestRisk | None = None,
+        pest_loss: PestLoss | None = None,
     ) -> dict[str, PolicySummary]:
         if not policies:
             raise ValueError("At least one policy is required")
@@ -127,6 +152,8 @@ class MonteCarlo:
             raise ValueError(f"Unknown reference policy: {reference!r}")
         if (cash_flow is None) != (annual_discount is None):
             raise ValueError("Provide cash_flow and annual_discount together")
+        if pest_loss is not None and (cash_flow is None or pest_risk is None):
+            raise ValueError("Pest losses require cash flows and pest risk")
         if annual_discount is not None and (
             not isfinite(annual_discount) or annual_discount <= -1
         ):
@@ -138,10 +165,11 @@ class MonteCarlo:
             for step in range(config.steps)
         ) if annual_discount is not None else ()
         rng = Random(config.seed)
+        pest_rng = Random(f"{config.seed}:pest")
         terminal = {name: Counter() for name in policies}
         values: dict[str, list[float]] = {name: [] for name in policies}
 
-        for _ in range(config.trajectories):
+        for trajectory in range(config.trajectories):
             environment = self.history.sample(
                 config.steps, config.start_period, config.block_periods, rng
             )
@@ -151,10 +179,16 @@ class MonteCarlo:
                 if config.sample_parameters else self.model.mean_kernel()
             )
             uniforms = tuple(rng.random() for _ in range(config.steps))
+            pest_uniforms = (
+                tuple(pest_rng.random() for _ in range(config.steps))
+                if pest_risk is not None else (None,) * config.steps
+            )
             for name, policy in policies.items():
                 try:
                     state, value = self._run(
-                        start, policy, eligible, cash_flow, discounts, kernel, environment, uniforms
+                        start, policy, eligible, cash_flow, discounts, kernel, environment, uniforms,
+                        trajectory, name, on_transition,
+                        pest_uniforms, pest_risk, pest_loss,
                     )
                 except MissingTransition as exc:
                     raise MissingTransition(f"Policy {name!r}: {exc}") from exc
@@ -189,6 +223,12 @@ class MonteCarlo:
         kernel: TransitionKernel,
         environments: Sequence[str],
         uniforms: Sequence[float],
+        trajectory: int,
+        policy_name: str,
+        on_transition: Observer | None,
+        pest_uniforms: Sequence[float | None],
+        pest_risk: PestRisk | None,
+        pest_loss: PestLoss | None,
     ) -> tuple[str, float]:
         value = 0.0
         for step, (environment, uniform) in enumerate(zip(environments, uniforms)):
@@ -200,11 +240,30 @@ class MonteCarlo:
             action = policy(decision)
             if action not in actions:
                 raise ValueError(f"Ineligible action {action!r} at step {step} for {state.id!r}")
-            next_state = self.model.state(kernel.next_state(state.id, action, environment, uniform))
+            distribution = kernel.distribution(state.id, action, environment)
+            next_state = self.model.state(distribution.draw(uniform))
+            probability = pest_risk(decision, action, environment) if pest_risk else 0.0
+            if not 0 <= probability <= 1:
+                raise ValueError(f"Invalid pest probability at step {step}")
+            pest_draw = pest_uniforms[step] if probability else None
+            pest_occurred = pest_draw is not None and pest_draw < probability
+            flow = None
             if cash_flow is not None:
                 flow = cash_flow(decision, action, environment, next_state)
+                if pest_occurred and pest_loss is not None:
+                    loss = pest_loss(decision, action, environment, next_state)
+                    if not isfinite(loss) or loss < 0:
+                        raise ValueError(f"Invalid pest loss at step {step}")
+                    flow -= loss
                 if not isfinite(flow):
                     raise ValueError(f"Non-finite cash flow at step {step}")
                 value += flow * discounts[step]
+            if on_transition is not None:
+                on_transition(TransitionEvent(
+                    trajectory, policy_name, decision, action, environment,
+                    distribution, uniform, next_state,
+                    probability, pest_draw, pest_occurred, flow,
+                    value if cash_flow is not None else None,
+                ))
             state = next_state
         return state.id, value

@@ -1,0 +1,61 @@
+{
+  "purpose": "Perfis carregados para a demonstração real; pontos municipais ilustrativos, sem seleção de talhão.",
+  "selection_seed": 2026,
+  "selection_rule": "A visualização sorteia uma localidade disponível por UF; existe uma localidade disponível em cada UF nesta entrega.",
+  "profiles": [
+    {
+      "profile": "ariquemes-ro",
+      "municipality": "Ariquemes",
+      "uf": "RO",
+      "ibge_code": "1100023",
+      "longitude": -62.95718430987797,
+      "latitude": -9.951874329838226,
+      "training_period": [
+        "1981-01-01",
+        "2025-12-31"
+      ],
+      "daily_rows": 16746,
+      "mean_annual_precipitation_mm": 1848.9482222222223,
+      "mean_annual_eto_mm": 1399.5872762091572,
+      "awc_0_100_cm_mm": 121.31633778767618
+    },
+    {
+      "profile": "franca-sp",
+      "municipality": "Franca",
+      "uf": "SP",
+      "ibge_code": "3516200",
+      "longitude": -47.38154952722966,
+      "latitude": -20.555247365031413,
+      "training_period": [
+        "1981-01-01",
+        "2025-12-31"
+      ],
+      "daily_rows": 16746,
+      "mean_annual_precipitation_mm": 1455.4682222222223,
+      "mean_annual_eto_mm": 1635.106411824974,
+      "awc_0_100_cm_mm": 108.34393873270184
+    },
+    {
+      "profile": "varginha-mg",
+      "municipality": "Varginha",
+      "uf": "MG",
+      "ibge_code": "3170701",
+      "longitude": -45.40893209948429,
+      "latitude": -21.55749502356044,
+      "training_period": [
+        "1981-01-01",
+        "2025-12-31"
+      ],
+      "daily_rows": 16746,
+      "mean_annual_precipitation_mm": 1341.5326666666667,
+      "mean_annual_eto_mm": 1462.9666724836027,
+      "awc_0_100_cm_mm": 123.83280410689858
+    }
+  ],
+  "limitations": [
+    "Ponto de referência é centroide municipal e não representa talhão.",
+    "Chuva usa POWER PRECTOTCORR, sem IMERG local; pesquisa no Oeste do PR observou viés do POWER menor que IMERG.",
+    "Markov representa apenas estado hídrico do balanço de referência; não tem ação/cultura nem transições observadas de campo.",
+    "Sem ZARC, PAM, produção, custos ou preços, não há recomendação de rotação nem VPL."
+  ]
+}
