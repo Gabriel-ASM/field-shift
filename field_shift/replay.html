@@ -89,13 +89,22 @@
   .sample-paths { display:grid; gap:7px; margin-top:11px; }
   .sample-path { padding:8px 10px; border-radius:8px; background:var(--soft); font-size:.7rem; line-height:1.5; }
   .sample-path strong { margin-right:5px; }
+  .route-timeline { min-width:460px; text-align:left !important; white-space:normal; }
+  .route-timeline>strong { display:block; margin-bottom:4px; }
+  .route-events { margin:7px 0 3px 18px; padding-left:15px; font-size:.68rem; line-height:1.45; }
+  .route-events li { padding:3px 0; border-top:1px solid #e7ece7; }
+  .route-events li:first-child { border-top:0; }
+  .route-detail-summary { color:#34473a; font-weight:700; cursor:pointer; }
   .status,.small-muted { margin-top:9px; color:var(--muted); font-size:.76rem; line-height:1.45; }
   .status.warn { color:#765724; }
   .change-table { width:100%; margin-top:10px; border-collapse:collapse; font-size:.72rem; }
   .change-table th,.change-table td { padding:6px 5px; border-top:1px solid #edf0ed; text-align:right; font-variant-numeric:tabular-nums; }
   .change-table th:first-child,.change-table td:first-child { text-align:left; }
-  #rotation-path-ranking { min-width:1040px; }
+  #rotation-path-ranking { min-width:1420px; }
   #all-rotation-path-ranking { min-width:1040px; }
+  .route-details { margin:5px 0 0; padding:5px 0 0; border-top:1px solid #e7ece7; color:var(--muted); }
+  .route-details summary { width:auto; font-size:.7rem; }
+  .route-details .route-events { font-weight:400; }
   #economic-input-table { min-width:1260px; }
   #economic-input-table input[type="number"] { width:128px; min-height:36px; padding:5px 7px; text-align:right; font-size:.72rem; }
   #economic-input-table input[type="checkbox"] { min-height:auto; width:18px; height:18px; accent-color:var(--green); }
@@ -164,9 +173,9 @@
     <p id="crop-data-note" class="data-note"></p>
     <div id="crop-lifecycle-note" class="perennial-note"></div>
     <h3 class="graph-heading">Grafo da cadeia completa</h3>
-    <p class="small-muted">Cada nó é a cultura principal do talhão. O Monte Carlo colore os nós pela ocupação ao fim de cada ano; as setas mostram probabilidades após água e carbono. Café e cana preservam sua identidade perene; o café também tem uma cadeia separada de coberturas de entrelinha.</p>
+    <p class="small-muted">Cada nó é a cultura principal do talhão. O seletor permite ver o Monte Carlo em um fechamento anual ou agregado nos cinco anos; as setas mostram probabilidades após água e carbono. Café e cana preservam sua identidade perene; o café também tem uma cadeia separada de coberturas de entrelinha.</p>
     <div class="graph-controls">
-      <label for="graph-year-select">Frequência Monte Carlo nos nós · ano
+      <label for="graph-year-select">Recorte das transições Monte Carlo
         <select id="graph-year-select"></select>
       </label>
       <span id="graph-environment" class="small-muted"></span>
@@ -190,7 +199,7 @@
         <ol id="graph-edge-list" class="graph-edge-list"></ol>
       </aside>
     </div>
-    <div class="graph-legend"><span>Seta mais larga = maior P Markov.</span><span>Brilho do nó = mais trajetórias Monte Carlo naquele estado/ano.</span><span>Seta tracejada ferrugem = transição bloqueada pelo ciclo da cultura.</span><span>Contagem PAM k/n não é sequência do mesmo talhão.</span></div>
+    <div class="graph-legend"><span>Seta mais larga = maior P Markov.</span><span>Brilho do nó = maior ocupação do estado.</span><span>“Ciclo completo” agrega todas as transições nos 60 meses.</span><span>Contagem PAM k/n não é sequência do mesmo talhão.</span></div>
     <div class="matrix-caption">
       <span>Origem nas linhas · próxima cultura nas colunas · cada estado contém uma cultura.</span>
       <span>Célula: probabilidade ajustada pelo ambiente · transições PAM observadas k/n.</span>
@@ -240,7 +249,7 @@
       </div>
       <div class="simulation-card">
         <h3>Trajetórias amostradas</h3>
-        <p>O valor P em cada seta é a probabilidade usada depois de atualizar água e solo naquele ano.</p>
+        <p>São exibidas cinco trajetórias amostradas; cada uma mostra todas as transições do ciclo de 60 meses, com mês, P usada, ambiente e fluxos econômicos.</p>
         <div id="sample-paths" class="sample-paths"></div>
       </div>
     </div>
@@ -257,7 +266,7 @@
     <p class="small-muted">Fluxo: cultura inicial → Monte Carlo gera clima, água e carbono → o ambiente altera a cadeia completa → cada trajetória percorre os nós Markov → as rotações simuladas são ordenadas pelo VPL. Premissas de rendimento, preço e custo são editáveis abaixo.</p>
     <p class="small-muted" id="economic-method"></p>
     <h3>Rotações ordenadas por VPL condicional</h3>
-    <p class="small-muted">Cada linha resume a cultura principal observada ao fim de cada ano; os eventos e coberturas dentro dos anos seguem ciclos variáveis no cálculo do VPL. Frequência e probabilidade Markov indicam o suporte; rotas raras não são descartadas, mas têm amostra menor.</p>
+    <p class="small-muted">Cada rota mantém o resumo dos estados no fechamento anual e abre, por padrão, a trilha completa de transições de uma trajetória representativa do grupo, do mês 0 ao 60. A trilha lista permanências, mudanças, coberturas, probabilidades, água, solo e fluxos. A média do VPL continua calculada com todas as trajetórias daquele grupo.</p>
     <div class="matrix-wrap"><table id="rotation-path-ranking" class="change-table" aria-label="Sequências completas de rotação classificadas por VPL"></table></div>
     <details>
       <summary>Ver todas as rotações avaliadas</summary>
@@ -422,7 +431,7 @@ function blendColor(from,to,fraction){
 function renderCropGraph(waterId,soc,nodeCountsByYear={},edgeCountsByYear={},completedTrajectories=0){
   if(!active)return;
   const states=cropStates(),countNodes=byId("crop-graph-nodes"),countEdges=byId("crop-graph-edges"),countLabels=byId("crop-graph-edge-labels"),yearSelect=byId("graph-year-select");
-  const year=Math.max(0,Number(yearSelect.value)||0),nodeCounts=nodeCountsByYear[year]||{},edgeCounts=edgeCountsByYear[year]||{},maxCount=Math.max(1,...Object.values(nodeCounts).map(Number));
+  const fullCycle=yearSelect.value==="all",year=Math.max(0,Number(yearSelect.value)||0),sumYears=source=>{const result={};for(let index=1;index<=horizon;index++)for(const [key,value] of Object.entries(source[index]||{}))result[key]=(result[key]||0)+Number(value);return result;},nodeCounts=fullCycle?sumYears(nodeCountsByYear):(nodeCountsByYear[year]||{}),edgeCounts=fullCycle?sumYears(edgeCountsByYear):(edgeCountsByYear[year]||{}),graphScope=fullCycle?"ciclo completo · 5 anos":year===0?"estado inicial":"ano "+year,nodeDenominator=completedTrajectories*(fullCycle?horizon:1),maxCount=Math.max(1,...Object.values(nodeCounts).map(Number));
   selectedGraphCropId=states.some(state=>state.id===selectedGraphCropId)?selectedGraphCropId:states.find(state=>state.initial_selectable)?.id||states[0]?.id;
   const selected=states.find(state=>state.id===selectedGraphCropId),positions=new Map();
   const probabilitySummaries=cropProbabilitySummary(selectedGraphCropId,waterId,soc);
@@ -447,24 +456,24 @@ function renderCropGraph(waterId,soc,nodeCountsByYear={},edgeCountsByYear={},com
     }
     const path=svgNode("path",{d,class:"graph-edge"+(isOutgoing?" is-outgoing":"")+(edge.lifecycleOverride?" lifecycle-blocked":""),"stroke-width":isOutgoing?1.2+8*Math.sqrt(edge.probability):.7+2*Math.sqrt(edge.probability),"marker-end":"url(#crop-arrow)"});
     const sourceCount=Number(nodeCounts[edge.source.id]||0),edgeCount=Number(edgeCounts[edge.source.id+"|"+edge.destination.id]||0),outgoingEvents=Object.entries(edgeCounts).filter(([key])=>key.startsWith(edge.source.id+"|")).reduce((sum,[,value])=>sum+Number(value),0),edgeFrequency=outgoingEvents?edgeCount/outgoingEvents:0;
-    const interval=edge.interval||{lower:edge.probability,upper:edge.probability},title=svgNode("title");title.textContent=edge.source.name+" → "+edge.destination.name+": P média contextual "+fmt(100*edge.probability,2)+"%; intervalo Dirichlet 90% "+fmt(100*interval.lower,2)+"–"+fmt(100*interval.upper,2)+"%; P₀=(k+α)/(n+14α)="+fmt(100*edge.baseProbability,2)+"%, k/n PAM "+edge.observed+"/"+edge.sourceTotal+", α="+fmt(alpha(),1)+", fatores água/solo "+fmt(edge.waterFactor,3)+"/"+fmt(edge.soilFactor,3)+(edge.lifecycleOverride?"; destino bloqueado pela regra de ciclo: "+edge.lifecycle.rationale:"")+"; Monte Carlo ano "+year+": "+edgeCount+" transições ("+fmt(100*edgeFrequency,1)+"% das saídas deste nó).";path.append(title);countEdges.append(path);
+    const interval=edge.interval||{lower:edge.probability,upper:edge.probability},title=svgNode("title");title.textContent=edge.source.name+" → "+edge.destination.name+": P média contextual "+fmt(100*edge.probability,2)+"%; intervalo Dirichlet 90% "+fmt(100*interval.lower,2)+"–"+fmt(100*interval.upper,2)+"%; P₀=(k+α)/(n+14α)="+fmt(100*edge.baseProbability,2)+"%, k/n PAM "+edge.observed+"/"+edge.sourceTotal+", α="+fmt(alpha(),1)+", fatores água/solo "+fmt(edge.waterFactor,3)+"/"+fmt(edge.soilFactor,3)+(edge.lifecycleOverride?"; destino bloqueado pela regra de ciclo: "+edge.lifecycle.rationale:"")+"; Monte Carlo no "+graphScope+": "+edgeCount+" transições ("+fmt(100*edgeFrequency,1)+"% das saídas deste nó).";path.append(title);countEdges.append(path);
     if(isOutgoing){const label=svgNode("text",{x:labelX,y:labelY,class:"graph-edge-label"});label.textContent=fmt(100*edge.probability,2)+"%";countLabels.append(label);}
   }
   for(const state of states){
-    const point=positions.get(state.id),count=Number(nodeCounts[state.id]||0),frequency=completedTrajectories?count/completedTrajectories:0,relative=count/maxCount,group=svgNode("g",{class:"graph-node"+(state.id===selectedGraphCropId?" is-selected":""),transform:"translate("+point.x+" "+point.y+")",role:"button",tabindex:"0","aria-label":state.name+", frequência Monte Carlo no ano "+year+" de "+pct(frequency)+(state.id===selectedGraphCropId?", nó selecionado":"")});
+    const point=positions.get(state.id),count=Number(nodeCounts[state.id]||0),frequency=nodeDenominator?count/nodeDenominator:0,relative=count/maxCount,group=svgNode("g",{class:"graph-node"+(state.id===selectedGraphCropId?" is-selected":""),transform:"translate("+point.x+" "+point.y+")",role:"button",tabindex:"0","aria-label":state.name+", frequência Monte Carlo no "+graphScope+" de "+pct(frequency)+(state.id===selectedGraphCropId?", nó selecionado":"")});
     const rect=svgNode("rect",{x:-63,y:-30,width:126,height:60,rx:13,fill:blendColor("#edf2ed","#377a4e",relative*.85)}),name=svgNode("text",{x:0,y:-4,class:"graph-node-name",fill:relative>.58?"#fff":"#26382b"}),frequencyText=svgNode("text",{x:0,y:15,class:"graph-node-frequency",fill:relative>.58?"#f2f8f3":"#58695d"});
     name.textContent=state.name;frequencyText.textContent="MC "+pct(frequency)+" · n="+count.toLocaleString("pt-BR");
-    const title=svgNode("title");title.textContent=state.name+" · P(MC ano "+year+")="+pct(frequency)+(state.initial_selectable?" · cultura inicial permitida":" · destino de transição");group.append(rect,name,frequencyText,title);
+    const title=svgNode("title");title.textContent=state.name+" · P(MC "+graphScope+")="+pct(frequency)+(state.initial_selectable?" · cultura inicial permitida":" · destino de transição");group.append(rect,name,frequencyText,title);
     group.addEventListener("click",()=>{selectedGraphCropId=state.id;renderCropGraph(waterId,soc,nodeCountsByYear,edgeCountsByYear,completedTrajectories);renderCoverChain(latestRun?.coverNodeCountsByYear||{},latestRun?.coverEdgeCountsByYear||{},completedTrajectories);});
     group.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();selectedGraphCropId=state.id;renderCropGraph(waterId,soc,nodeCountsByYear,edgeCountsByYear,completedTrajectories);renderCoverChain(latestRun?.coverNodeCountsByYear||{},latestRun?.coverEdgeCountsByYear||{},completedTrajectories);}});
     countNodes.append(group);
   }
   const outgoing=transitions.filter(edge=>edge.source.id===selectedGraphCropId).sort((a,b)=>b.probability-a.probability),totalAtNode=Number(nodeCounts[selectedGraphCropId]||0),sideTitle=byId("graph-selected-title"),sideContext=byId("graph-selected-context"),sideList=byId("graph-edge-list");
   sideTitle.textContent="Saídas de "+(selected?.name||"—");
-  const lifecycle=cropLifecycleRule(selectedGraphCropId),denominator=Math.max(1,completedTrajectories),mcState=(completedTrajectories?"amostra parcial "+completedTrajectories.toLocaleString("pt-BR")+"/"+trajectories.toLocaleString("pt-BR"):"simulação ainda não iniciada");
-  sideContext.textContent="Ano "+year+": "+mcState+" · "+pct(totalAtNode/denominator)+" das trajetórias concluídas ocupam este nó no fechamento do ano (n="+totalAtNode.toLocaleString("pt-BR")+"). P nas setas é a posterior sob água "+waterLabels[waterId].toLowerCase()+" / carbono "+fmt(soc,1)+" g/kg; intervalo de 90% sorteia linhas Dirichlet. A probabilidade anual PAM é aplicada ao fim de cada ciclo (hipótese temporal, sem frequência intra-anual observada)."+(lifecycle?" Regra de ciclo: "+lifecycle.rationale:"" );
+  const lifecycle=cropLifecycleRule(selectedGraphCropId),mcState=(completedTrajectories?"amostra parcial "+completedTrajectories.toLocaleString("pt-BR")+"/"+trajectories.toLocaleString("pt-BR"):"simulação ainda não iniciada");
+  sideContext.textContent=graphScope+": "+mcState+" · "+pct(nodeDenominator?totalAtNode/nodeDenominator:0)+" das posições observadas ocupam este nó (n="+totalAtNode.toLocaleString("pt-BR")+" de "+nodeDenominator.toLocaleString("pt-BR")+" posições). P nas setas é a posterior sob água "+waterLabels[waterId].toLowerCase()+" / carbono "+fmt(soc,1)+" g/kg; intervalo de 90% sorteia linhas Dirichlet. O grafo agrega as contagens dos eventos ocorridos nos ciclos completos; a ocupação dos nós é contada nos fechamentos anuais."+(lifecycle?" Regra de ciclo: "+lifecycle.rationale:"");
   sideList.replaceChildren();
-  for(const edge of outgoing){const edgeCount=Number(edgeCounts[edge.source.id+"|"+edge.destination.id]||0),outgoingEvents=Object.entries(edgeCounts).filter(([key])=>key.startsWith(edge.source.id+"|")).reduce((sum,[,value])=>sum+Number(value),0),mcShare=outgoingEvents?edgeCount/outgoingEvents:0,interval=edge.interval||{lower:edge.probability,upper:edge.probability},li=document.createElement("li"),strong=el("strong","→ "+edge.destination.name+" · P média "+fmt(100*edge.probability,2)+"%"),ruleNote=edge.lifecycleOverride?" · bloqueada pela regra de ciclo":"",small=el("small","Dirichlet 90%: "+fmt(100*interval.lower,2)+"–"+fmt(100*interval.upper,2)+"% · P₀ "+fmt(100*edge.baseProbability,2)+"% (α="+fmt(alpha(),1)+") · fatores água/solo "+fmt(edge.waterFactor,3)+"/"+fmt(edge.soilFactor,3)+" · PAM k/n "+edge.observed+"/"+edge.sourceTotal+ruleNote+" · MC: "+edgeCount+"/"+outgoingEvents+" saídas ("+pct(mcShare)+")");li.append(strong,document.createElement("br"),small);sideList.append(li);}
+  for(const edge of outgoing){const edgeCount=Number(edgeCounts[edge.source.id+"|"+edge.destination.id]||0),outgoingEvents=Object.entries(edgeCounts).filter(([key])=>key.startsWith(edge.source.id+"|")).reduce((sum,[,value])=>sum+Number(value),0),mcShare=outgoingEvents?edgeCount/outgoingEvents:0,interval=edge.interval||{lower:edge.probability,upper:edge.probability},li=document.createElement("li"),strong=el("strong","→ "+edge.destination.name+" · P média "+fmt(100*edge.probability,2)+"%"),ruleNote=edge.lifecycleOverride?" · bloqueada pela regra de ciclo":"",small=el("small","Dirichlet 90%: "+fmt(100*interval.lower,2)+"–"+fmt(100*interval.upper,2)+"% · P₀ "+fmt(100*edge.baseProbability,2)+"% (α="+fmt(alpha(),1)+") · fatores água/solo "+fmt(edge.waterFactor,3)+"/"+fmt(edge.soilFactor,3)+" · PAM k/n "+edge.observed+"/"+edge.sourceTotal+ruleNote+" · MC no "+graphScope+": "+edgeCount+"/"+outgoingEvents+" saídas ("+pct(mcShare)+")");li.append(strong,document.createElement("br"),small);sideList.append(li);}
   byId("graph-environment").textContent="Ambiente das setas: água "+waterLabels[waterId].toLowerCase()+" · carbono "+fmt(soc,1)+" g/kg · origem selecionada: "+(selected?.name||"—");
 }
 
@@ -500,10 +509,10 @@ function renderCropMatrix(){
 function renderCoverChain(nodeCountsByYear={},edgeCountsByYear={},completed=0){
   const panel=byId("cover-chain-panel"),root=byId("cover-chain-graph"),hasSimulatedCover=[nodeCountsByYear,edgeCountsByYear].some(years=>Object.values(years).some(row=>Object.values(row||{}).some(value=>Number(value)>0))),activeCoffee=byId("initial-crop-select").value==="coffee"||selectedGraphCropId==="coffee"||hasSimulatedCover;
   panel.hidden=!activeCoffee;root.replaceChildren();if(!activeCoffee)return;
-  const ids=coverIds(),year=Math.max(0,Number(byId("graph-year-select").value)||0),counts=nodeCountsByYear[year]||{};
-  for(const id of ids){const node=el("div",undefined,"year-chip"),destinations=ids.map(destination=>"Café + "+coverLabel(destination)+" "+fmt(100/ids.length,1)+"%").join(" · ");node.append(el("strong","Café + "+coverLabel(id)),el("span","→ "+destinations+" · MC n="+Number(counts[id]||0).toLocaleString("pt-BR")));root.append(node);}
-  const edges=edgeCountsByYear[year]||{},edgeTotal=Object.values(edges).reduce((sum,value)=>sum+Number(value),0);
-  byId("cover-chain-note").textContent="Cadeia de cobertura: "+ids.map(id=>"Café + "+coverLabel(id)).join(" · ")+". Cada nó tem "+ids.length+" destinos com α="+fmt(coverPriorAlpha(),1)+" e 0 observações (prior-only). No ano "+year+", Monte Carlo sorteou "+edgeTotal.toLocaleString("pt-BR")+" trocas de cobertura em "+Number(completed).toLocaleString("pt-BR")+" trajetórias concluídas. A cobertura ocupa "+fmt(100*Number(cropCycles.associated_cover_chain.covered_area_fraction),0)+"% da área no Kc/COS e o custo usa "+fmt(100*Number(cropCycles.associated_cover_chain.covered_area_fraction)*Number(cropCycles.associated_cover_chain.cost_proxy_fraction),1)+"% do custo CONAB proxy por operação. Mistura, frações e ciclo são hipóteses editáveis em data/reference/crop-cycle-assumptions.json.";
+  const ids=coverIds(),selection=byId("graph-year-select").value,fullCycle=selection==="all",year=Math.max(0,Number(selection)||0),sumYears=source=>{const result={};for(let index=1;index<=horizon;index++)for(const [key,value] of Object.entries(source[index]||{}))result[key]=(result[key]||0)+Number(value);return result;},counts=fullCycle?sumYears(nodeCountsByYear):(nodeCountsByYear[year]||{}),nodeDenominator=completed*(fullCycle?horizon:1);
+  for(const id of ids){const node=el("div",undefined,"year-chip"),destinations=ids.map(destination=>"Café + "+coverLabel(destination)+" "+fmt(100/ids.length,1)+"%").join(" · "),count=Number(counts[id]||0);node.append(el("strong","Café + "+coverLabel(id)),el("span","→ "+destinations+" · MC n="+count.toLocaleString("pt-BR")+" · "+pct(nodeDenominator?count/nodeDenominator:0)));root.append(node);}
+  const edges=fullCycle?sumYears(edgeCountsByYear):(edgeCountsByYear[year]||{}),edgeTotal=Object.values(edges).reduce((sum,value)=>sum+Number(value),0),scope=fullCycle?"no ciclo completo de cinco anos":"no ano "+year;
+  byId("cover-chain-note").textContent="Cadeia de cobertura: "+ids.map(id=>"Café + "+coverLabel(id)).join(" · ")+". Cada nó tem "+ids.length+" destinos com α="+fmt(coverPriorAlpha(),1)+" e 0 observações (prior-only). Monte Carlo sorteou "+edgeTotal.toLocaleString("pt-BR")+" trocas de cobertura "+scope+" em "+Number(completed).toLocaleString("pt-BR")+" trajetórias concluídas; frequência dos nós usa os fechamentos anuais agregados (n="+nodeDenominator.toLocaleString("pt-BR")+" posições). A cobertura ocupa "+fmt(100*Number(cropCycles.associated_cover_chain.covered_area_fraction),0)+"% da área no Kc/COS e o custo usa "+fmt(100*Number(cropCycles.associated_cover_chain.covered_area_fraction)*Number(cropCycles.associated_cover_chain.cost_proxy_fraction),1)+"% do custo CONAB proxy por operação. Mistura, frações e ciclo são hipóteses editáveis em data/reference/crop-cycle-assumptions.json.";
 }
 
 function renderWaterMatrix(){
@@ -660,6 +669,33 @@ function economicCashflow(step,inputs){
   }
   return 0;
 }
+function trajectoryTimeline(path,inputs){
+  const events=document.createElement("ol");events.className="route-events";
+  const initial=path[0]||{},startLine=el("li","Mês 0 — "+cropLabel(initial.crop)+" já estabelecida"+(initial.cover?"; cobertura inicial: "+coverLabel(initial.cover):"")+"; água "+waterLabels[initial.water]+", solo "+fmt(initial.soc,1)+" g/kg.");events.append(startLine);
+  for(const step of path.slice(1)){
+    const month=fmt(Number(step.day||0)/30.4375,1),water=waterLabels[step.water]||"não informada",soil=Number.isFinite(Number(step.soc))?fmt(step.soc,1)+" g/kg":"não informado";let description="";
+    if(step.eventKind==="main_transition"){
+      const transition=step.fromCrop===step.crop?cropLabel(step.crop)+" permanece":cropLabel(step.fromCrop)+" → "+cropLabel(step.crop),flow=economicCashflow(step,inputs),parts=[transition,"P Markov "+pct(step.transitionProbability),"colheita de "+cropLabel(step.flowCrop)+": "+brl(flow)+"/ha","água "+water.toLowerCase(),"solo "+soil];
+      if(step.coverInstalled){const coverCost=economicCashflow({...step,flowKind:"cover_cost",flowCrop:step.cover},inputs);parts.push("instala Café + "+coverLabel(step.cover)+" entrelinhas ("+brl(coverCost)+"/ha)");}
+      description="Mês "+month+" — "+parts.join(" · ");
+    }else if(step.eventKind==="formation_cost"){
+      description="Mês "+month+" — formação de "+cropLabel(step.flowCrop)+": "+brl(economicCashflow(step,inputs))+"/ha por "+fmt(Number(step.cycleDays||0),0)+" dias; sem receita antes da maturação. Água "+water.toLowerCase()+", solo "+soil+".";
+    }else if(step.eventKind==="cover_transition"){
+      description="Mês "+month+" — Café + "+coverLabel(step.fromCover)+" → Café + "+coverLabel(step.cover)+" · P prior "+pct(step.transitionProbability)+" · custo proxy "+brl(economicCashflow(step,inputs))+"/ha · água "+water.toLowerCase()+", solo "+soil+".";
+    }else if(step.eventKind==="cover_start"){
+      description="Mês 0 — início da cobertura Café + "+coverLabel(step.cover)+" · custo proxy "+brl(economicCashflow(step,inputs))+"/ha.";
+    }else if(step.flowKind){
+      description="Mês "+month+" — "+step.eventKind+" · fluxo "+brl(economicCashflow(step,inputs))+"/ha.";
+    }
+    if(description)events.append(el("li",description));
+  }
+  return events;
+}
+function trajectoryDetails(path,inputs,representativeVpl=null,open=true){
+  const details=document.createElement("details");details.className="route-details";details.open=open;
+  const eventCount=path.slice(1).filter(step=>["main_transition","cover_transition","formation_cost","cover_start"].includes(step.eventKind)).length,summary=el("summary","Trilha completa · 0–60 meses · "+eventCount+" eventos"+(representativeVpl===null?"":" · trajetória do grupo mais próxima da média · VPL "+brl(representativeVpl)+"/ha"));summary.className="route-detail-summary";
+  details.append(summary,trajectoryTimeline(path,inputs));return details;
+}
 function renderCycleAssumptions(){
   byId("cycle-assumptions-detail").textContent="Calendário do modelo (60 meses; 365 dias/ano): cultura inicial estabelecida, sem atraso de implantação; novas culturas aguardam maturação. Ciclos/maturação por cultura: "+Object.entries(cropCycles.crops).map(([id,item])=>cropLabel(id)+" "+item.cycle_days+"/"+item.maturation_days+" dias ["+item.support+": "+item.basis+"]").join(" · ")+". As durações operacionais são arredondadas para cima até o próximo passo quinzenal ambiental. Embrapa situa o retorno financeiro do café no 3º/4º ano; o modelo usa 36 meses até receita comercial significativa. Na troca para uma perene, o custo anual proxy começa no plantio e se repete por ano de formação; o período final é proporcional à maturação restante. Frações atuais editáveis: "+fmt(100*cropCycles.new_perennial_formation.coffee_annual_formation_cost_fraction,0)+"% do custo anual no café e "+fmt(100*cropCycles.new_perennial_formation.sugarcane_annual_formation_cost_fraction,0)+"% na cana; não são custos medidos de implantação. Na primeira colheita elegível, a produtividade usa a mediana PAM de culturas adultas, pois não há curva de rendimento por idade. Para coberturas, os dias até florescimento servem como intervalo de manejo. Como as janelas ZARC ainda não entram na simulação, repetições sucessivas da mesma cultura podem ocorrer e não são recomendação de calendário.";
 }
@@ -754,7 +790,7 @@ function renderEconomicOptimization(start,rotationSamples){
     const route=key.split("|").slice(1),n=paths.length;
     const mainRoute=route.map(token=>token.split("@")[0]);
     if(!n||!selected.some(item=>item.id===start)||mainRoute.some(crop=>!selected.some(item=>item.id===crop)))continue;
-    const values=[],markovValues=[];
+    const values=[],markovValues=[],scoredPaths=[];
     for(const path of paths){
       let vpl=0,pathProbability=0,pathProbabilityCount=0,valid=!path.some(step=>["main_harvest","perennial_formation_cost"].includes(step.flowKind)&&!selected.some(item=>item.id===step.flowCrop));
       for(const step of path.slice(1)){
@@ -765,23 +801,24 @@ function renderEconomicOptimization(start,rotationSamples){
         vpl+=net/Math.pow(1+rReal,Number(step.day||0)/Number(cropCycles.time_basis.days_per_year));
         if(step.coverInstalled){const coverStep={...step,flowKind:"cover_cost",flowCrop:step.cover},coverNet=economicCashflow(coverStep,inputs);if(!Number.isFinite(coverNet)){valid=false;break;}vpl+=coverNet/Math.pow(1+rReal,Number(step.day||0)/Number(cropCycles.time_basis.days_per_year));}
       }
-      if(valid&&Number.isFinite(vpl)){values.push(vpl);markovValues.push(pathProbabilityCount?pathProbability/pathProbabilityCount:0);}
+      if(valid&&Number.isFinite(vpl)){const meanPathProbability=pathProbabilityCount?pathProbability/pathProbabilityCount:0;values.push(vpl);markovValues.push(meanPathProbability);scoredPaths.push({path,vpl,meanPathProbability});}
     }
     if(!values.length)continue;
     const sorted=[...values].sort((a,b)=>a-b),tail=sorted.slice(0,Math.max(1,Math.ceil(sorted.length*.05))),worst=tail.reduce((sum,value)=>sum+value,0)/tail.length;
-    routeResults.push({key,route,values,mean:values.reduce((sum,value)=>sum+value,0)/values.length,median:quantile(values,.5),p5:quantile(values,.05),p95:quantile(values,.95),loss:values.filter(value=>value<0).length/values.length,cvar5:worst,markovProbability:markovValues.reduce((sum,value)=>sum+value,0)/markovValues.length,count:values.length});
+    const mean=values.reduce((sum,value)=>sum+value,0)/values.length,representative=scoredPaths.reduce((best,item)=>Math.abs(item.vpl-mean)<Math.abs(best.vpl-mean)?item:best,scoredPaths[0]);
+    routeResults.push({key,route,values,mean,median:quantile(values,.5),p5:quantile(values,.05),p95:quantile(values,.95),loss:values.filter(value=>value<0).length/values.length,cvar5:worst,markovProbability:markovValues.reduce((sum,value)=>sum+value,0)/markovValues.length,count:values.length,representativePath:representative.path,representativeVpl:representative.vpl});
   }
   routeResults.sort((a,b)=>b.mean-a.mean);
   const routeLabel=token=>{const [crop,cover]=token.split("@");return cropLabel(crop)+(cover?" + "+coverLabel(cover)+" entrelinhas":"");};
   const startToken=key=>key.split("|")[0];
-  const columns=["Pos.","Cultura/cobertura no fechamento de cada ano","Frequência Monte Carlo","P Markov média das setas","VPL médio condicional","Mediana","P5–P95","P(VPL<0)","VPL médio dos 5% piores"];
-  const fillTable=(table,rows)=>{
-    const head=document.createElement("thead"),header=document.createElement("tr"),body=document.createElement("tbody");for(const label of columns)header.append(el("th",label));head.append(header);table.replaceChildren(head,body);
+  const columns=["Pos.","Estados no fechamento anual","Frequência Monte Carlo","P Markov média das setas","VPL médio condicional","Mediana","P5–P95","P(VPL<0)","VPL médio dos 5% piores"];
+  const fillTable=(table,rows,showFullTimeline=false)=>{
+    const head=document.createElement("thead"),header=document.createElement("tr"),body=document.createElement("tbody"),tableColumns=columns.map((label,index)=>index===1&&showFullTimeline?"Resumo anual + trilha completa (trajetória representativa)":label);for(const label of tableColumns)header.append(el("th",label));head.append(header);table.replaceChildren(head,body);
     if(!rows.length){const row=document.createElement("tr"),cell=el("td","Nenhuma rotação com premissas econômicas completas apareceu nesta amostra.");cell.colSpan=columns.length;row.append(cell);body.append(row);return;}
-    rows.forEach((route,index)=>{const row=document.createElement("tr");if(index===0)row.className="winner-row";const sequence=[startToken(route.key),...route.route].map(routeLabel).join(" → ");row.append(el("td",String(index+1)),el("td",sequence),el("td",route.count.toLocaleString("pt-BR")+" / "+trajectories.toLocaleString("pt-BR")+" · "+pct(route.count/trajectories)),el("td",fmt(100*route.markovProbability,3)+"%"),el("td",brl(route.mean)+"/ha"),el("td",brl(route.median)+"/ha"),el("td",brl(route.p5)+" a "+brl(route.p95)),el("td",pct(route.loss)),el("td",brl(route.cvar5)+"/ha"));body.append(row);});
+    rows.forEach((route,index)=>{const row=document.createElement("tr");if(index===0)row.className="winner-row";const sequence=[startToken(route.key),...route.route].map(routeLabel).join(" → "),routeCell=el("td",undefined,"route-timeline");routeCell.append(el("strong","Resumo dos fechamentos anuais: "+sequence));if(showFullTimeline&&route.representativePath)routeCell.append(trajectoryDetails(route.representativePath,inputs,route.representativeVpl,true));row.append(el("td",String(index+1)),routeCell,el("td",route.count.toLocaleString("pt-BR")+" / "+trajectories.toLocaleString("pt-BR")+" · "+pct(route.count/trajectories)),el("td",fmt(100*route.markovProbability,3)+"%"),el("td",brl(route.mean)+"/ha"),el("td",brl(route.median)+"/ha"),el("td",brl(route.p5)+" a "+brl(route.p95)),el("td",pct(route.loss)),el("td",brl(route.cvar5)+"/ha"));body.append(row);});
   };
   const top=routeResults.slice(0,10);
-  fillTable(pathTable,top);fillTable(allPathTable,routeResults);
+  fillTable(pathTable,top,true);fillTable(allPathTable,routeResults);
   if(!routeResults.length){byId("vpl-status").textContent="Nenhuma rotação com pelo menos uma trajetória Monte Carlo e premissas econômicas completas está incluída. Marque culturas com valores numéricos e aplique as premissas.";return;}
   const best=top[0]||routeResults[0],runnerUp=top[1],difference=runnerUp?best.mean-runnerUp.mean:null,sequence=[startToken(best.key),...best.route].map(routeLabel).join(" → ");
   byId("vpl-status").textContent="Maior VPL condicional observado na amostra"+(best.count<20?" · suporte baixo (n<20)":"")+": "+sequence+" · "+brl(best.mean)+"/ha"+(difference===null?".":" · diferença para a segunda rota: "+brl(difference)+"/ha.")+" Frequência: "+best.count+" de "+trajectories.toLocaleString("pt-BR")+" trajetórias; a probabilidade não multiplica o VPL, então rotas raras continuam elegíveis e ficam sinalizadas por n. Cenários com proxies e hipóteses editáveis; não prova superioridade causal.";
@@ -846,14 +883,7 @@ async function renderSimulation(seed){
 
   pathRoot.replaceChildren();
   for(let index=0;index<paths.length;index++){
-    const path=paths[index],line=el("div",undefined,"sample-path");
-    const startState=path[0],parts=["mês 0: "+cropLabel(startState.crop)+(startState.cover?" + cobertura "+coverLabel(startState.cover):"")+" (cultura inicial já estabelecida)"];
-    for(const step of path.slice(1).filter(item=>item.eventKind==="main_transition"||item.eventKind==="cover_transition").slice(0,16)){
-      if(step.eventKind==="main_transition")parts.push("mês "+fmt(step.day/30.4375,1)+": "+cropLabel(step.fromCrop)+" → "+cropLabel(step.crop)+" (P="+pct(step.transitionProbability)+"; ambiente: água "+waterLabels[step.water].toLowerCase()+", solo "+fmt(step.soc,1)+" g/kg)");
-      else parts.push("mês "+fmt(step.day/30.4375,1)+": Café + "+coverLabel(step.fromCover)+" → Café + "+coverLabel(step.cover)+" (P prior="+pct(step.transitionProbability)+")");
-    }
-    if(path.filter(item=>item.eventKind==="main_transition"||item.eventKind==="cover_transition").length>16)parts.push("… eventos seguintes omitidos na amostra visual");
-    line.append(el("strong","Trajetória "+(index+1)+" ·"),document.createTextNode(parts.join(" → ")));pathRoot.append(line);
+    const path=paths[index],line=el("div",undefined,"sample-path");line.append(el("strong","Trajetória completa "+(index+1)+" · ciclo de 60 meses"),trajectoryTimeline(path,active.economics.crop_inputs));pathRoot.append(line);
   }
   renderEconomicOptimization(start,rotationSamples);
   progress.value=trajectories;progressText.textContent=trajectories.toLocaleString("pt-BR")+" / "+trajectories.toLocaleString("pt-BR")+" · concluído";status.textContent="Simulação concluída · "+trajectories.toLocaleString("pt-BR")+" trajetórias · "+horizonMonths+" meses · água e solo evoluíram por quinzena; Markov sorteado ao fim dos ciclos de cultura.";
@@ -888,7 +918,7 @@ function renderProfile(){
   waterSelect.value="water_medium";
   const graphYearSelect=byId("graph-year-select");graphYearSelect.replaceChildren();
   for(let year=0;year<=horizon;year++)graphYearSelect.add(new Option(year===0?"0 · estado inicial":""+year+" · ano "+year,String(year)));
-  graphYearSelect.value=String(horizon);selectedGraphCropId=cropSelect.value;
+  graphYearSelect.add(new Option("Ciclo completo · 5 anos","all"));graphYearSelect.value="all";selectedGraphCropId=cropSelect.value;
   byId("matrix-carbon-input").value=active.soil.organic_carbon_top_0_30_g_kg.toFixed(1);
   renderCropTimeline();renderCropMatrix();renderWaterMatrix();byId("simulation-progress").value=0;byId("simulation-progress-text").textContent="Aguardando simulação";byId("run-status").textContent="Cadeia pronta; o Monte Carlo começará após a página aparecer.";
   requestAnimationFrame(()=>{if(profileRenderId===simulationRunId)startSimulation(currentSeed());});
