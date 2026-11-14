@@ -1,0 +1,277 @@
+{
+  "field_shift_contracts_v2": {
+    "how_to_read": "Each '-> file.json' key is a $ref, inlined here. '*' marks required fields. 'id_links' and 'pointer_links' are connections JSON Schema cannot express.",
+    "entry_points": {
+      "action.json": {
+        "id *": "string",
+        "label": "string",
+        "duration *": "integer 0..",
+        "allowed_stages": {
+          "[ ] each item": {
+            "-> crop.json#/definitions/stage_name": "enum: skip_stages | preparation | sowing | germination | growth | flowering | ... (10)"
+          }
+        },
+        "effects *": {
+          "[ ] each item": {
+            "-> effect.json": {
+              "target *": "string",
+              "operation *": "enum: add | multiply | set | rate",
+              "value *": {
+                "-> effect.json#/definitions/quantity": "number or distribution"
+              },
+              "unit": "string",
+              "at": "enum: entry | exit",
+              "when": {
+                "[ ] each item": {
+                  "-> effect.json#/definitions/condition": {
+                    "path *": "string",
+                    "op *": "enum: < | <= | == | != | >= | > | ... (7)",
+                    "value *": "any"
+                  }
+                }
+              },
+              "bounds": {
+                "min": "number",
+                "max": "number"
+              },
+              "support *": {
+                "-> effect.json#/definitions/support": "enum: observed | derived | pooled | prior"
+              },
+              "provenance": "string"
+            }
+          }
+        }
+      },
+      "crop.json": {
+        "name *": "string",
+        "description": "string",
+        "stage *": {
+          "{ any key }": {
+            "-> crop.json#/definitions/stage_name": "enum: skip_stages | preparation | sowing | germination | growth | flowering | ... (10)"
+          },
+          "{ value }": {
+            "-> crop.json#/definitions/stage_props": {
+              "duration_days *": {
+                "-> effect.json#/definitions/quantity": "number or distribution"
+              },
+              "effects": {
+                "[ ] each item": {
+                  "-> effect.json": {
+                    "target *": "string",
+                    "operation *": "enum: add | multiply | set | rate",
+                    "value *": {
+                      "-> effect.json#/definitions/quantity": "number or distribution"
+                    },
+                    "unit": "string",
+                    "at": "enum: entry | exit",
+                    "when": {
+                      "[ ] each item": {
+                        "-> effect.json#/definitions/condition": {
+                          "path *": "string",
+                          "op *": "enum: < | <= | == | != | >= | > | ... (7)",
+                          "value *": "any"
+                        }
+                      }
+                    },
+                    "bounds": {
+                      "min": "number",
+                      "max": "number"
+                    },
+                    "support *": {
+                      "-> effect.json#/definitions/support": "enum: observed | derived | pooled | prior"
+                    },
+                    "provenance": "string"
+                  }
+                }
+              },
+              "kc": "number 0.."
+            }
+          }
+        },
+        "kc_annual_effective": "number 0..",
+        "planting_windows": {
+          "[ ] each item": {
+            "-> crop.json#/definitions/planting_window": {
+              "location_id *": "string",
+              "decendio_start *": "integer 1..36",
+              "decendio_end *": "integer 1..36",
+              "max_risk_pct *": "enum: 20 | 30 | 40",
+              "soil_group": "string",
+              "cultivar_group": "string",
+              "source *": "string"
+            }
+          }
+        }
+      },
+      "markov.json": {
+        "description": "string",
+        "initial_state *": "string",
+        "states *": {
+          "[ ] each item": {
+            "-> markov.json#/definitions/state": {
+              "id *": "string",
+              "crop *": "string",
+              "stage *": {
+                "-> crop.json#/definitions/stage_name": "enum: skip_stages | preparation | sowing | germination | growth | flowering | ... (10)"
+              },
+              "duration_days": {
+                "-> effect.json#/definitions/quantity": "number or distribution"
+              },
+              "effects": {
+                "[ ] each item": {
+                  "-> effect.json": {
+                    "target *": "string",
+                    "operation *": "enum: add | multiply | set | rate",
+                    "value *": {
+                      "-> effect.json#/definitions/quantity": "number or distribution"
+                    },
+                    "unit": "string",
+                    "at": "enum: entry | exit",
+                    "when": {
+                      "[ ] each item": {
+                        "-> effect.json#/definitions/condition": {
+                          "path *": "string",
+                          "op *": "enum: < | <= | == | != | >= | > | ... (7)",
+                          "value *": "any"
+                        }
+                      }
+                    },
+                    "bounds": {
+                      "min": "number",
+                      "max": "number"
+                    },
+                    "support *": {
+                      "-> effect.json#/definitions/support": "enum: observed | derived | pooled | prior"
+                    },
+                    "provenance": "string"
+                  }
+                }
+              },
+              "allowed_actions": {
+                "[ ] each item": "string"
+              }
+            }
+          }
+        },
+        "transitions *": {
+          "[ ] each item": {
+            "-> markov.json#/definitions/transition": {
+              "from *": "string",
+              "to *": "string",
+              "action": "string or null",
+              "probability *": "number 0..1",
+              "count": "integer 0..",
+              "outgoing_count": "integer 0..",
+              "when": {
+                "[ ] each item": {
+                  "-> effect.json#/definitions/condition": {
+                    "path *": "string",
+                    "op *": "enum: < | <= | == | != | >= | > | ... (7)",
+                    "value *": "any"
+                  }
+                }
+              },
+              "effects": {
+                "[ ] each item": {
+                  "-> effect.json": {
+                    "target *": "string",
+                    "operation *": "enum: add | multiply | set | rate",
+                    "value *": {
+                      "-> effect.json#/definitions/quantity": "number or distribution"
+                    },
+                    "unit": "string",
+                    "at": "enum: entry | exit",
+                    "when": {
+                      "[ ] each item": {
+                        "-> effect.json#/definitions/condition": {
+                          "path *": "string",
+                          "op *": "enum: < | <= | == | != | >= | > | ... (7)",
+                          "value *": "any"
+                        }
+                      }
+                    },
+                    "bounds": {
+                      "min": "number",
+                      "max": "number"
+                    },
+                    "support *": {
+                      "-> effect.json#/definitions/support": "enum: observed | derived | pooled | prior"
+                    },
+                    "provenance": "string"
+                  }
+                }
+              },
+              "support *": {
+                "-> effect.json#/definitions/support": "enum: observed | derived | pooled | prior"
+              },
+              "provenance": "string"
+            }
+          }
+        }
+      },
+      "monte_carlo.json": {
+        "seed": "integer",
+        "climate": {
+          "-> climate.json": {
+            "lat": "number [deg] -90..90",
+            "long": "number [deg] -180..180",
+            "alt": "number [m]",
+            "month": "enum: january | february | march | april | may | june | ... (12)",
+            "season": "enum: summer | autumn | winter | spring",
+            "solar_incidence": "number [W/m^2] 0..",
+            "weather": {
+              "pluviosity": "number [mm] 0..",
+              "temperature": "number [ºC]",
+              "relative_humidity": "number [%] 0..100",
+              "et0": "number [mm/day] 0.."
+            }
+          }
+        },
+        "weather": "object",
+        "markov": "object"
+      }
+    },
+    "id_links": [
+      "markov.initial_state  ==  markov.state.id",
+      "markov.state.crop  ==  crop.name",
+      "markov.state.allowed_actions[]  ==  action.id",
+      "markov.transition.from  ==  markov.state.id",
+      "markov.transition.to  ==  markov.state.id",
+      "markov.transition.action  ==  action.id",
+      "markov.node.state  ==  markov.state.id"
+    ],
+    "pointer_links": [
+      "effect.target  ->  markov#node (written by effects)",
+      "effect.condition.path  ->  markov#node (read by conditions (when))"
+    ],
+    "missing_links": [
+      "monte_carlo.markov  -x-  markov: declared as a free object, not a $ref"
+    ],
+    "node_fields_effects_can_target": {
+      "/state": "string  (simulation)",
+      "/day": "integer 0..  (simulation)",
+      "/soil/order": "enum: Latosol | Argisol | Neosol | Cambisol | Gleysol | Plinthosol | ... (14)  (partial)",
+      "/soil/N2": "number 0..  (none)",
+      "/soil/pH": "number [log10] 0..14  (available)",
+      "/soil/organic_carbon": "number [g/kg] 0..  (used)",
+      "/soil/available_water_capacity": "number [mm] 0..  (used)",
+      "/soil/available_water_fraction": "number [fraction] 0..1  (used)",
+      "/soil/temperature_per_depth": "array of object  (none)",
+      "/climate/lat": "number [deg] -90..90  (available)",
+      "/climate/long": "number [deg] -180..180  (available)",
+      "/climate/alt": "number [m]  (none)",
+      "/climate/month": "enum: january | february | march | april | may | june | ... (12)  (upstream)",
+      "/climate/season": "enum: summer | autumn | winter | spring  (none)",
+      "/climate/solar_incidence": "number [W/m^2] 0..  (partial)",
+      "/climate/weather/pluviosity": "number [mm] 0..  (upstream)",
+      "/climate/weather/temperature": "number [ºC]  (upstream)",
+      "/climate/weather/relative_humidity": "number [%] 0..100  (upstream)",
+      "/climate/weather/et0": "number [mm/day] 0..  (upstream)",
+      "/financial/cash": "number [BRL/ha]  (simulation)",
+      "/financial/cost": "number [BRL/ha]  (used)",
+      "/financial/revenue": "number [BRL/ha]  (used)",
+      "/financial/yield": "number [kg/ha] 0..  (used)",
+      "/financial/price": "number [BRL/kg] 0..  (used)"
+    }
+  }
+}

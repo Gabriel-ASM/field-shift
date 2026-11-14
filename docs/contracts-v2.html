@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Field Shift Contracts v2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=Public+Sans:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a single reading column; the map is a field survey sheet, tables below read like a soil lab report. */
+:root {
+  --bg: #f4f7f3; --surface: #ffffff; --ink: #1c2420; --muted: #56645b; --line: #d6ded7;
+  --accent: #2c6a4c; --ref: #2c6a4c; --id: #345d9d; --pointer: #9a630d; --missing: #b23b2b; --internal: #8d9a91;
+  --ok-bg: #dcefe3; --ok-fg: #1f5a3c; --up-bg: #e3eef0; --up-fg: #255a63; --av-bg: #e2e9f6; --av-fg: #2f528c;
+  --pa-bg: #f6ead2; --pa-fg: #7a4f06; --no-bg: #f6dfdb; --no-fg: #922f22; --sim-bg: #e8ebe8; --sim-fg: #4e5952;
+  --display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111613; --surface: #19201b; --ink: #e2eae4; --muted: #9aa9a0; --line: #2b352e;
+  --accent: #6cc093; --ref: #6cc093; --id: #8fb1ec; --pointer: #e2a94b; --missing: #ef7d6b; --internal: #66746b;
+  --ok-bg: #1e3a2a; --ok-fg: #9fdcb8; --up-bg: #1d3539; --up-fg: #9dd3dc; --av-bg: #1f2c44; --av-fg: #a9c3f1;
+  --pa-bg: #3a2c12; --pa-fg: #edc277; --no-bg: #3d211d; --no-fg: #f3a497; --sim-bg: #252c27; --sim-fg: #aab5ae;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #111613; --surface: #19201b; --ink: #e2eae4; --muted: #9aa9a0; --line: #2b352e;
+  --accent: #6cc093; --ref: #6cc093; --id: #8fb1ec; --pointer: #e2a94b; --missing: #ef7d6b; --internal: #66746b;
+  --ok-bg: #1e3a2a; --ok-fg: #9fdcb8; --up-bg: #1d3539; --up-fg: #9dd3dc; --av-bg: #1f2c44; --av-fg: #a9c3f1;
+  --pa-bg: #3a2c12; --pa-fg: #edc277; --no-bg: #3d211d; --no-fg: #f3a497; --sim-bg: #252c27; --sim-fg: #aab5ae;
+  color-scheme: dark; }
+
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--body); }
+main { max-width: 1080px; margin: 0 auto; padding-block: 32px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 48px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(28px, 5vw, 40px); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 22px; font-weight: 700; }
+h3 { font-size: 18px; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+code, .mono { font-family: var(--mono); font-size: 0.86em; }
+.eyebrow { font: 600 12px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+header { display: grid; gap: 12px; }
+header p { color: var(--muted); }
+section { display: grid; gap: 16px; min-width: 0; }
+.section-head { display: grid; gap: 6px; }
+.section-head p { color: var(--muted); }
+
+.map-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+.map-wrap svg { display: block; width: 100%; min-width: 720px; height: auto; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.legend svg { flex: none; }
+
+.box rect { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+.box.pseudo rect { stroke-dasharray: 5 4; }
+.box .name { font: 700 17px var(--display); fill: var(--ink); }
+.box .file { font: 12px var(--mono); fill: var(--muted); }
+.box .count { font: 12px var(--body); fill: var(--muted); }
+.box { cursor: pointer; }
+.box:hover rect, .box:focus rect, .box.active rect { stroke: var(--accent); stroke-width: 2.5; }
+.box:focus { outline: none; }
+.edge path { fill: none; stroke-width: 2; }
+.edge text { font: 11px var(--mono); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+.edge.ref path { stroke: var(--ref); } .edge.ref text { fill: var(--ref); }
+.edge.id path { stroke: var(--id); stroke-dasharray: 7 4; } .edge.id text { fill: var(--id); }
+.edge.pointer path { stroke: var(--pointer); stroke-dasharray: 2 4; stroke-linecap: round; } .edge.pointer text { fill: var(--pointer); }
+.edge.missing path { stroke: var(--missing); stroke-dasharray: 10 5; } .edge.missing text { fill: var(--missing); }
+.edge.internal path { stroke: var(--internal); stroke-width: 1.5; } .edge.internal text { fill: var(--internal); }
+svg.focus .edge { opacity: 0.12; } svg.focus .edge.hit { opacity: 1; }
+svg.focus .box { opacity: 0.45; } svg.focus .box.hit { opacity: 1; }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { font: 600 11.5px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+td.mono { white-space: nowrap; }
+td .sub { color: var(--muted); font-size: 12.5px; }
+.chip { display: inline-block; font: 600 11.5px/1 var(--mono); padding: 5px 8px; border-radius: 999px; white-space: nowrap; }
+.chip.used { background: var(--ok-bg); color: var(--ok-fg); }
+.chip.upstream { background: var(--up-bg); color: var(--up-fg); }
+.chip.available { background: var(--av-bg); color: var(--av-fg); }
+.chip.partial { background: var(--pa-bg); color: var(--pa-fg); }
+.chip.none { background: var(--no-bg); color: var(--no-fg); }
+.chip.simulation { background: var(--sim-bg); color: var(--sim-fg); }
+.status-key { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 20px; font-size: 13px; color: var(--muted); }
+.status-key div { display: flex; gap: 10px; align-items: baseline; }
+.tally { display: flex; flex-wrap: wrap; gap: 8px; }
+.steps { margin: 0; padding-left: 1.4em; display: grid; gap: 8px; max-width: 72ch; }
+.steps li::marker { font: 600 13px var(--mono); color: var(--accent); }
+
+.contracts { display: grid; gap: 40px; }
+.contract { display: grid; gap: 12px; scroll-margin-top: 16px; }
+.contract-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.contract-head .mono { color: var(--muted); }
+.contract .comment { color: var(--muted); }
+.links { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px 24px; font-size: 13.5px; }
+.links h4 { margin: 0 0 6px; font: 600 11.5px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.links ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.links li { display: flex; gap: 8px; align-items: baseline; min-width: 0; overflow-wrap: anywhere; }
+.kind { flex: none; font: 600 10.5px var(--mono); text-transform: uppercase; letter-spacing: 0.05em; }
+.kind.ref { color: var(--ref); } .kind.id { color: var(--id); } .kind.pointer { color: var(--pointer); } .kind.missing { color: var(--missing); } .kind.internal { color: var(--internal); }
+a { color: var(--accent); }
+a:focus-visible, .box:focus-visible rect { outline: 2px solid var(--accent); outline-offset: 2px; }
+footer { color: var(--muted); font-size: 13px; display: grid; gap: 6px; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } .edge, .box { transition: opacity 0.15s; } }
+</style>
+
+<main>
+  <header>
+    <span class="eyebrow">data/contracts/v2</span>
+    <h1>Field Shift Contracts v2</h1>
+    <p>How the v2 schemas connect, what each value of a simulation trajectory holds, and which of those values the current app already reads. Use it to decide what to request from the data team and which soil or climate fields the model actually needs.</p>
+  </header>
+
+  <section aria-labelledby="map-title">
+    <div class="section-head">
+      <h2 id="map-title">Contract map</h2>
+      <p>Monte Carlo runs trajectories over the Markov chain. Every trajectory carries one <em>node</em> (soil, climate, finances). States and transitions change the node only through effects, and effects find their variable by a JSON Pointer such as <code>/soil/pH</code>. Tap a box to highlight its connections.</p>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="map-wrap"><svg id="map" viewBox="0 0 1000 600" role="img" aria-label="Diagram of contracts and their connections"></svg></div>
+  </section>
+
+  <section aria-labelledby="life-title">
+    <div class="section-head">
+      <h2 id="life-title">How a trajectory node behaves</h2>
+      <p id="node-why"></p>
+    </div>
+    <ol class="steps" id="node-steps"></ol>
+  </section>
+
+  <section aria-labelledby="node-title">
+    <div class="section-head">
+      <h2 id="node-title">What a trajectory carries</h2>
+      <p>Every value an effect can target or a condition can read. The status column says where the value comes from today and whether anything in <code>field_shift/</code> reads it.</p>
+    </div>
+    <div class="status-key" id="status-key"></div>
+    <div class="tally" id="tally"></div>
+    <div class="table-wrap"><table id="node-table"></table></div>
+  </section>
+
+  <section aria-labelledby="gap-title">
+    <div class="section-head">
+      <h2 id="gap-title">Carried over from the current model</h2>
+      <p>Inputs the current model (v1 profiles + <code>field_shift/</code>) depends on, and the v2 field that now holds each one.</p>
+    </div>
+    <div class="table-wrap"><table id="gap-table"></table></div>
+  </section>
+
+  <section aria-labelledby="contracts-title">
+    <div class="section-head">
+      <h2 id="contracts-title">Contracts</h2>
+      <p>Fields of each schema with their type, unit and bounds, followed by every connection in and out.</p>
+    </div>
+    <div class="contracts" id="contracts"></div>
+  </section>
+
+  <footer>
+    <span>Generated from <span id="sources"></span>.</span>
+    <span>Regenerate with <code>python data/pipeline/build_contract_views.py</code>. The same data feeds <code>data/contracts/v2/views/contracts-tree.json</code> for jsoncrack.com.</span>
+  </footer>
+</main>
+
+<script>const GRAPH={"generated_from": ["action.json", "climate.json", "crop.json", "effect.json", "markov.json", "monte_carlo.json", "soil.json"], "nodes": [{"id": "action", "file": "action.json", "title": "Management action", "comment": "E.g. liming, nitrogen fertilization, irrigation, greenhouse. Cost is an effect on /financial/cost, not a separate field.", "definitions": [], "fields": [{"path": "id", "type": "string", "required": true, "description": ""}, {"path": "label", "type": "string", "required": false, "description": ""}, {"path": "duration", "type": "integer 0..", "required": true, "description": "Duration of the action in days"}, {"path": "allowed_stages", "type": "array of -> crop.json#/definitions/stage_name", "required": false, "description": "Stages where the action can be applied. Absent = any stage."}, {"path": "effects", "type": "array of -> effect.json", "required": true, "description": ""}]}, {"id": "climate", "file": "climate.json", "title": "Climate", "comment": "Values for one simulation period at the profile location. Monte Carlo fills them per trajectory from the historical NASA POWER series (and later from extreme-event draws).", "definitions": [], "fields": [{"path": "lat", "type": "number [deg] -90..90", "required": false, "description": ""}, {"path": "long", "type": "number [deg] -180..180", "required": false, "description": ""}, {"path": "alt", "type": "number [m]", "required": false, "description": "Altitude at the level of the farm. Source pending: task CL1 in docs/tasks/data-usage.md (assigned to huatso)."}, {"path": "month", "type": "enum: january | february | march | april | may | june | ... (12)", "required": false, "description": ""}, {"path": "season", "type": "enum: summer | autumn | winter | spring", "required": false, "description": "Southern-hemisphere season for Brazilian profiles"}, {"path": "solar_incidence", "type": "number [W/m^2] 0..", "required": false, "description": "Solar incidence at the field level, it might be altered by a greenhouse"}, {"path": "weather.pluviosity", "type": "number [mm] 0..", "required": false, "description": "Precipitation over the period (1 mm = 1 L/m^2)"}, {"path": "weather.temperature", "type": "number [ºC]", "required": false, "description": ""}, {"path": "weather.relative_humidity", "type": "number [%] 0..100", "required": false, "description": "Pre-process step: derive the actual vapor pressure from temperature and pressure (task CL2 in docs/tasks/data-usage.md). NASA POWER RH2M is the direct source."}, {"path": "weather.et0", "type": "number [mm/day] 0..", "required": false, "description": "Reference evapotranspiration. Computed in data/pipeline from NASA POWER (Penman-Monteith FAO-56; Hargreaves-Samani when solar radiation is missing). Drives the water balance with the crop Kc."}]}, {"id": "crop", "file": "crop.json", "title": "", "comment": "", "definitions": ["stage_name", "stage_props", "planting_window"], "fields": [{"path": "name", "type": "string", "required": true, "description": ""}, {"path": "description", "type": "string", "required": false, "description": ""}, {"path": "stage", "type": "object", "required": true, "description": "Use skip_stages only when there is no per-stage information; it is then the crop's only stage."}, {"path": "kc_annual_effective", "type": "number 0..", "required": false, "description": "Crop coefficient averaged over the whole cycle (used with skip_stages). ETc = Kc x ET0. Source: FAO-56 tables, data/reference/crop-water-parameters.json."}, {"path": "planting_windows", "type": "array of -> #/definitions/planting_window", "required": false, "description": "When the crop may be sown at each profile. A Markov edge into this crop waits (fallow) until the next allowed window. Source: MAPA ZARC, data/profiles/*/zarc-planting-windows.json."}, {"path": "stage_props.duration_days", "type": "-> effect.json#/definitions/quantity", "required": true, "description": "Time spent in the stage. Effects with operation=rate are multiplied by it."}, {"path": "stage_props.effects", "type": "array of -> effect.json", "required": false, "description": "Crop effects in this stage. Soil (/soil/...), microclimate (/climate/...) and finances (/financial/...) all go here; the target says what is affected."}, {"path": "stage_props.kc", "type": "number 0..", "required": false, "description": "Crop coefficient for this stage (FAO-56 Kc ini / mid / end). Only with per-stage data."}, {"path": "planting_window.location_id", "type": "string", "required": true, "description": "Profile id, e.g. franca-sp"}, {"path": "planting_window.decendio_start", "type": "integer 1..36", "required": true, "description": "First 10-day period of the year (1 = Jan 1-10)"}, {"path": "planting_window.decendio_end", "type": "integer 1..36", "required": true, "description": "Last 10-day period; may be smaller than start when the window crosses the new year"}, {"path": "planting_window.max_risk_pct", "type": "enum: 20 | 30 | 40", "required": true, "description": "ZARC climate-risk level of the window"}, {"path": "planting_window.soil_group", "type": "string", "required": false, "description": "ZARC soil group (water retention class)"}, {"path": "planting_window.cultivar_group", "type": "string", "required": false, "description": "ZARC cultivar cycle group"}, {"path": "planting_window.source", "type": "string", "required": true, "description": ""}]}, {"id": "effect", "file": "effect.json", "title": "Effect on the simulation state", "comment": "An effect is NOT a state: it is a change applied to ONE variable of the state. Soil, climate and finances share this format; only 'target' changes. Monte Carlo applies effects, using the trajectory seed.", "definitions": ["quantity", "condition", "support"], "fields": [{"path": "target", "type": "string", "required": true, "description": "JSON Pointer to the changed variable, relative to the chain node (markov.json#/definitions/node)."}, {"path": "operation", "type": "enum: add | multiply | set | rate", "required": true, "description": "add: adds 'value' once. multiply: multiplies by 'value'. set: overwrites. rate: 'value' per day, multiplied by the days spent in the state/action."}, {"path": "value", "type": "-> #/definitions/quantity", "required": true, "description": ""}, {"path": "unit", "type": "string", "required": false, "description": "Unit of 'value'. For add/set it is the target unit; for rate it is target unit per day; multiply is dimensionless."}, {"path": "at", "type": "enum: entry | exit", "required": false, "description": "When a one-off effect (add/multiply/set) fires inside a state: on entry (e.g. sowing cost) or on exit (e.g. harvest revenue). Ignored for operation=rate, which accumulates over the whole stay, and for effects on transitions, which fire when the edge is crossed."}, {"path": "when", "type": "array of -> #/definitions/condition", "required": false, "description": "Conditions on the node (all must hold). Empty/absent = always applies."}, {"path": "bounds", "type": "object", "required": false, "description": "Clamp applied to the target after the effect (e.g. N2 >= 0, 3 <= pH <= 9)."}, {"path": "bounds.min", "type": "number", "required": false, "description": ""}, {"path": "bounds.max", "type": "number", "required": false, "description": ""}, {"path": "support", "type": "-> #/definitions/support", "required": true, "description": ""}, {"path": "provenance", "type": "string", "required": false, "description": "Where the number comes from, specific enough to check it: a file and field, a dataset and query, a paper or a rule. Example: 'PAM municipal, year pair 2005-2006'."}, {"path": "condition.path", "type": "string", "required": true, "description": "JSON Pointer into the node, like 'target'."}, {"path": "condition.op", "type": "enum: < | <= | == | != | >= | > | ... (7)", "required": true, "description": ""}, {"path": "condition.value", "type": "any", "required": true, "description": ""}]}, {"id": "markov", "file": "markov.json", "title": "Markov chain graph", "comment": "The chain walks over DISCRETE states (crop x stage). CONTINUOUS variables (soil, climate, finances) live in the node and change only through effects: what the chain can alter is whatever appears as an effect target. The chain has no seed: Monte Carlo owns the seed (monte_carlo.json) and draws every transition and effect value with it.", "definitions": ["node", "state", "transition"], "fields": [{"path": "description", "type": "string", "required": false, "description": ""}, {"path": "initial_state", "type": "string", "required": true, "description": "id of an item in 'states'"}, {"path": "states", "type": "array of -> #/definitions/state", "required": true, "description": ""}, {"path": "transitions", "type": "array of -> #/definitions/transition", "required": true, "description": ""}, {"path": "node.state", "type": "string", "required": true, "description": "id of the current discrete state"}, {"path": "node.day", "type": "integer 0..", "required": false, "description": "Days since the trajectory started"}, {"path": "node.soil", "type": "-> soil.json", "required": true, "description": ""}, {"path": "node.climate", "type": "-> climate.json", "required": false, "description": ""}, {"path": "node.financial.cash", "type": "number [BRL/ha]", "required": false, "description": ""}, {"path": "node.financial.cost", "type": "number [BRL/ha]", "required": false, "description": "Accumulated cost"}, {"path": "node.financial.revenue", "type": "number [BRL/ha]", "required": false, "description": "Accumulated revenue"}, {"path": "node.financial.yield", "type": "number [kg/ha] 0..", "required": false, "description": "Expected yield of the current crop. Starts from PAM yield; effects such as water stress or pests multiply it. Revenue at exit = yield x price."}, {"path": "node.financial.price", "type": "number [BRL/kg] 0..", "required": false, "description": "Sale price for the current crop. Source: PAM real price (IPCA-adjusted); Yahoo futures as reference."}, {"path": "state.id", "type": "string", "required": true, "description": "Convention: '<crop>:<stage>'. Generated from the crop list of a profile (v1 crop-transition-markov.json states) x the stages with data; today every crop has only skip_stages."}, {"path": "state.crop", "type": "string", "required": true, "description": "Crop id, same ids as v1 (soybean, maize_grain, sugarcane, coffee, brachiaria, ...)"}, {"path": "state.stage", "type": "-> crop.json#/definitions/stage_name", "required": true, "description": ""}, {"path": "state.duration_days", "type": "-> effect.json#/definitions/quantity", "required": false, "description": "Time spent in this state. Effects with operation=rate are multiplied by it."}, {"path": "state.effects", "type": "array of -> effect.json", "required": false, "description": "Applied while the trajectory stays in this state"}, {"path": "state.allowed_actions", "type": "array of string", "required": false, "description": "ids from action.json"}, {"path": "transition.from", "type": "string", "required": true, "description": ""}, {"path": "transition.to", "type": "string", "required": true, "description": ""}, {"path": "transition.action", "type": "string or null", "required": false, "description": "id of the action that enables this edge; null = natural transition"}, {"path": "transition.probability", "type": "number 0..1", "required": true, "description": "Markov chain parameter: chance of taking this edge once the trajectory leaves 'from'. Estimated from data (e.g. PAM counts / outgoing_count) or set as a prior. Monte Carlo does not set it: it only draws with its seed which edge each trajectory takes."}, {"path": "transition.count", "type": "integer 0..", "required": false, "description": "Observed count behind the probability, when there is one"}, {"path": "transition.outgoing_count", "type": "integer 0..", "required": false, "description": "Total observed transitions leaving 'from'"}, {"path": "transition.when", "type": "array of -> effect.json#/definitions/condition", "required": false, "description": "Edge exists only if the node meets every condition (e.g. pH < 5.5 blocks planting)"}, {"path": "transition.effects", "type": "array of -> effect.json", "required": false, "description": "Applied once, when the edge is crossed (e.g. harvest revenue)"}, {"path": "transition.support", "type": "-> effect.json#/definitions/support", "required": true, "description": ""}, {"path": "transition.provenance", "type": "string", "required": false, "description": "Where the probability comes from, specific enough to check it (dataset, year pairs, rule or prior reference)."}]}, {"id": "monte_carlo", "file": "monte_carlo.json", "title": "", "comment": "", "definitions": [], "fields": [{"path": "seed", "type": "integer", "required": false, "description": ""}, {"path": "climate", "type": "-> climate.json", "required": false, "description": ""}, {"path": "weather", "type": "object", "required": false, "description": ""}, {"path": "markov", "type": "object", "required": false, "description": ""}]}, {"id": "soil", "file": "soil.json", "title": "Soil", "comment": "Static fields describe the profile and come from data/profiles; dynamic fields start from the profile and are changed by effects during a trajectory.", "definitions": [], "fields": [{"path": "order", "type": "enum: Latosol | Argisol | Neosol | Cambisol | Gleysol | Plinthosol | ... (14)", "required": false, "description": "Static. Dominant SiBCS soil order (English names; Latosol = Latossolo, etc.). Source: IBGE soil map 1:250,000 (R045). Filling it per profile is task S1 in docs/tasks/data-usage.md."}, {"path": "N2", "type": "number 0..", "required": false, "description": "Dynamic. Amount of nitrogen in the soil. Unit and source pending: task S2 in docs/tasks/data-usage.md."}, {"path": "pH", "type": "number [log10] 0..14", "required": false, "description": "Dynamic. pH in water, 0-30 cm weighted. Source: SoilGrids phh2o (ph_water in data/profiles). Changed by liming."}, {"path": "organic_carbon", "type": "number [g/kg] 0..", "required": false, "description": "Dynamic. Soil organic carbon, 0-30 cm weighted. Source: SoilGrids soc (organic_carbon_g_kg). The current model varies it per trajectory and uses it in transition weights and yield."}, {"path": "available_water_capacity", "type": "number [mm] 0..", "required": false, "description": "Static. Water the soil can hold for plants down to 1 m (AWC). Source: SoilGrids texture + Saxton & Rawls pedotransfer (available_water_capacity_mm)."}, {"path": "available_water_fraction", "type": "number [fraction] 0..1", "required": false, "description": "Dynamic. Share of the AWC currently filled. Updated by the water balance (rain - ETc). Replaces the v1 discrete water state: low <= 1/3 < medium <= 2/3 < high, so a transition can test it with 'when'."}, {"path": "temperature_per_depth", "type": "array of object", "required": false, "description": "Static or climatology. One item per depth, so depth and temperature always have the same length. Source pending: task S4 in docs/tasks/data-usage.md."}, {"path": "temperature_per_depth[].depth", "type": "number [cm] 0..", "required": true, "description": ""}, {"path": "temperature_per_depth[].temperature", "type": "number [ºC]", "required": true, "description": ""}]}], "edges": [{"kind": "ref", "from": "action", "field": "allowed_stages[]", "to": "crop", "target": "/definitions/stage_name"}, {"kind": "ref", "from": "action", "field": "effects[]", "to": "effect", "target": "(whole contract)"}, {"kind": "internal", "from": "crop", "field": "stage.{key}", "to": "crop", "target": "/definitions/stage_props"}, {"kind": "internal", "from": "crop", "field": "planting_windows[]", "to": "crop", "target": "/definitions/planting_window"}, {"kind": "ref", "from": "crop", "field": "stage_props.duration_days", "to": "effect", "target": "/definitions/quantity"}, {"kind": "ref", "from": "crop", "field": "stage_props.effects[]", "to": "effect", "target": "(whole contract)"}, {"kind": "internal", "from": "effect", "field": "value", "to": "effect", "target": "/definitions/quantity"}, {"kind": "internal", "from": "effect", "field": "when[]", "to": "effect", "target": "/definitions/condition"}, {"kind": "internal", "from": "effect", "field": "support", "to": "effect", "target": "/definitions/support"}, {"kind": "internal", "from": "markov", "field": "states[]", "to": "markov", "target": "/definitions/state"}, {"kind": "internal", "from": "markov", "field": "transitions[]", "to": "markov", "target": "/definitions/transition"}, {"kind": "ref", "from": "markov", "field": "node.soil", "to": "soil", "target": "(whole contract)"}, {"kind": "ref", "from": "markov", "field": "node.climate", "to": "climate", "target": "(whole contract)"}, {"kind": "ref", "from": "markov", "field": "state.stage", "to": "crop", "target": "/definitions/stage_name"}, {"kind": "ref", "from": "markov", "field": "state.duration_days", "to": "effect", "target": "/definitions/quantity"}, {"kind": "ref", "from": "markov", "field": "state.effects[]", "to": "effect", "target": "(whole contract)"}, {"kind": "ref", "from": "markov", "field": "transition.when[]", "to": "effect", "target": "/definitions/condition"}, {"kind": "ref", "from": "markov", "field": "transition.effects[]", "to": "effect", "target": "(whole contract)"}, {"kind": "ref", "from": "markov", "field": "transition.support", "to": "effect", "target": "/definitions/support"}, {"kind": "ref", "from": "monte_carlo", "field": "climate", "to": "climate", "target": "(whole contract)"}, {"kind": "id", "from": "markov", "field": "initial_state", "to": "markov", "target": "state.id"}, {"kind": "id", "from": "markov", "field": "state.crop", "to": "crop", "target": "name"}, {"kind": "id", "from": "markov", "field": "state.allowed_actions[]", "to": "action", "target": "id"}, {"kind": "id", "from": "markov", "field": "transition.from", "to": "markov", "target": "state.id"}, {"kind": "id", "from": "markov", "field": "transition.to", "to": "markov", "target": "state.id"}, {"kind": "id", "from": "markov", "field": "transition.action", "to": "action", "target": "id"}, {"kind": "id", "from": "markov", "field": "node.state", "to": "markov", "target": "state.id"}, {"kind": "pointer", "from": "effect", "field": "target", "to": "markov#node", "target": "written by effects"}, {"kind": "pointer", "from": "effect", "field": "condition.path", "to": "markov#node", "target": "read by conditions (when)"}, {"kind": "missing", "from": "monte_carlo", "field": "markov", "to": "markov", "target": "declared as a free object, not a $ref"}], "node_fields": [{"pointer": "/state", "key": "markov.node.state", "type": "string", "status": "simulation", "source": "Current Markov state", "read_by_app": "", "written_in_examples": [], "read_in_examples": []}, {"pointer": "/day", "key": "markov.node.day", "type": "integer 0..", "status": "simulation", "source": "Trajectory clock", "read_by_app": "", "written_in_examples": [], "read_in_examples": []}, {"pointer": "/soil/order", "key": "soil.order", "type": "enum: Latosol | Argisol | Neosol | Cambisol | Gleysol | Plinthosol | ... (14)", "status": "partial", "source": "IBGE SiBCS (R045) collected; sibcs_order is null in every profile", "read_by_app": "Nothing reads it", "written_in_examples": [], "read_in_examples": []}, {"pointer": "/soil/N2", "key": "soil.N2", "type": "number 0..", "status": "none", "source": "Not downloaded (SoilGrids has a nitrogen layer)", "read_by_app": "Nothing reads it", "written_in_examples": ["markov.s1-soybean-maize-prior.json"], "read_in_examples": []}, {"pointer": "/soil/pH", "key": "soil.pH", "type": "number [log10] 0..14", "status": "available", "source": "SoilGrids phh2o -> ph_water per layer", "read_by_app": "Nothing reads it", "written_in_examples": [], "read_in_examples": ["markov.s1-soybean-maize-prior.json"]}, {"pointer": "/soil/organic_carbon", "key": "soil.organic_carbon", "type": "number [g/kg] 0..", "status": "used", "source": "SoilGrids soc -> organic_carbon_g_kg, 0-30 cm", "read_by_app": "Carbon Monte Carlo, transition weights, yield", "written_in_examples": [], "read_in_examples": []}, {"pointer": "/soil/available_water_capacity", "key": "soil.available_water_capacity", "type": "number [mm] 0..", "status": "used", "source": "SoilGrids texture + Saxton & Rawls -> available_water_capacity_mm", "read_by_app": "Water balance", "written_in_examples": [], "read_in_examples": []}, {"pointer": "/soil/available_water_fraction", "key": "soil.available_water_fraction", "type": "number [fraction] 0..1", "status": "used", "source": "Water balance state (v1 water_low / medium / high)", "read_by_app": "Water states and water factor", "written_in_examples": [], "read_in_examples": []}, {"pointer": "/soil/temperature_per_depth", "key": "soil.temperature_per_depth", "type": "array of object", "status": "none", "source": "Not collected", "read_by_app": "Nothing reads it", "written_in_examples": [], "read_in_examples": []}, {"pointer": "/climate/lat", "key": "climate.lat", "type": "number [deg] -90..90", "status": "available", "source": "Profile centroid (soil-profile.json sample_point)", "read_by_app": "Location only", "written_in_examples": [], "read_in_examples": []}, {"pointer": "/climate/long", "key": "climate.long", "type": "number [deg] -180..180", "status": "available", "source": "Profile centroid (soil-profile.json sample_point)", "read_by_app": "Location only", "written_in_examples": [], "read_in_examples": []}, {"pointer": "/climate/alt", "key": "climate.alt", "type": "number [m]", "status": "none", "source": "Not collected", "read_by_app": "", "written_in_examples": [], "read_in_examples": []}, {"pointer": "/climate/month", "key": "climate.month", "type": "enum: january | february | march | april | may | june | ... (12)", "status": "upstream", "source": "Derived from date_local", "read_by_app": "Fortnight water periods and ZARC calendar", "written_in_examples": [], "read_in_examples": []}, {"pointer": "/climate/season", "key": "climate.season", "type": "enum: summer | autumn | winter | spring", "status": "none", "source": "Derivable from month", "read_by_app": "Nothing reads it", "written_in_examples": [], "read_in_examples": []}, {"pointer": "/climate/solar_incidence", "key": "climate.solar_incidence", "type": "number [W/m^2] 0..", "status": "partial", "source": "NASA POWER ALLSKY_SFC_SW_DWN, MJ/m2/day (gaps flagged)", "read_by_app": "ET0 (Hargreaves fallback when missing)", "written_in_examples": [], "read_in_examples": []}, {"pointer": "/climate/weather/pluviosity", "key": "climate.weather.pluviosity", "type": "number [mm] 0..", "status": "upstream", "source": "NASA POWER PRECTOTCORR, precipitation_mm", "read_by_app": "Fortnight water balance -> water states", "written_in_examples": [], "read_in_examples": []}, {"pointer": "/climate/weather/temperature", "key": "climate.weather.temperature", "type": "number [ºC]", "status": "upstream", "source": "NASA POWER T2M_MAX/T2M_MIN", "read_by_app": "ET0", "written_in_examples": [], "read_in_examples": []}, {"pointer": "/climate/weather/relative_humidity", "key": "climate.weather.relative_humidity", "type": "number [%] 0..100", "status": "upstream", "source": "NASA POWER RH2M", "read_by_app": "ET0", "written_in_examples": [], "read_in_examples": []}, {"pointer": "/climate/weather/et0", "key": "climate.weather.et0", "type": "number [mm/day] 0..", "status": "upstream", "source": "Computed from NASA POWER (eto_mm_day, FAO-56 / Hargreaves)", "read_by_app": "Water balance", "written_in_examples": [], "read_in_examples": []}, {"pointer": "/financial/cash", "key": "markov.node.financial.cash", "type": "number [BRL/ha]", "status": "simulation", "source": "Running balance during the trajectory", "read_by_app": "", "written_in_examples": [], "read_in_examples": []}, {"pointer": "/financial/cost", "key": "markov.node.financial.cost", "type": "number [BRL/ha]", "status": "used", "source": "CONAB production costs (economic-benchmarks.json)", "read_by_app": "NPV", "written_in_examples": ["markov.s1-soybean-maize-prior.json"], "read_in_examples": []}, {"pointer": "/financial/revenue", "key": "markov.node.financial.revenue", "type": "number [BRL/ha]", "status": "used", "source": "PAM yield x PAM real price", "read_by_app": "NPV", "written_in_examples": ["markov.s1-soybean-maize-prior.json"], "read_in_examples": []}, {"pointer": "/financial/yield", "key": "markov.node.financial.yield", "type": "number [kg/ha] 0..", "status": "used", "source": "PAM yield (kg/ha)", "read_by_app": "NPV", "written_in_examples": [], "read_in_examples": []}, {"pointer": "/financial/price", "key": "markov.node.financial.price", "type": "number [BRL/kg] 0..", "status": "used", "source": "PAM real price, IPCA-adjusted", "read_by_app": "NPV", "written_in_examples": [], "read_in_examples": []}], "field_status_extra": {"markov.state.duration_days": ["used", "crop-cycle-assumptions.json", "Crop clock in Monte Carlo"], "markov.transition.probability": ["used", "PAM dominant-crop counts + Dirichlet prior", "Markov draws"]}, "v2_gaps": [{"value": "Soil water capacity (AWC)", "v2_field": "soil.available_water_capacity", "v1_source": "SoilGrids texture + Saxton & Rawls -> available_water_capacity_mm", "read_by_app": "Water balance"}, {"value": "Water state", "v2_field": "soil.available_water_fraction", "v1_source": "states.json water_low / water_medium / water_high", "read_by_app": "v1 Markov state dimension; in v2 a continuous value that edges test with 'when'"}, {"value": "Soil organic carbon", "v2_field": "soil.organic_carbon", "v1_source": "SoilGrids soc -> organic_carbon_g_kg, 0-30 cm", "read_by_app": "Carbon Monte Carlo, transition weights, yield"}, {"value": "Reference evapotranspiration (ET0)", "v2_field": "climate.weather.et0", "v1_source": "Computed from NASA POWER (eto_mm_day)", "read_by_app": "Water balance"}, {"value": "Crop coefficient (Kc)", "v2_field": "crop.kc_annual_effective, crop.stage_props.kc", "v1_source": "crop-water-parameters.json, kc_annual_effective", "read_by_app": "Crop water demand (ETc = Kc x ET0)"}, {"value": "Planting windows (ZARC)", "v2_field": "crop.planting_windows", "v1_source": "MAPA SISZARC per municipality", "read_by_app": "When a destination crop can be sown"}, {"value": "Yield and price", "v2_field": "markov.node.financial.yield, .price", "v1_source": "PAM yield and price, Yahoo futures", "read_by_app": "Revenue = yield x price at harvest"}], "node_description": "The state of one Monte Carlo trajectory at a point in time: what the field looks like now. Behaviour: (1) Monte Carlo creates one node per trajectory from a profile (soil, climate at day 0, finances at 0). (2) Entering a state applies its 'entry' effects. (3) While in the state, 'rate' effects accumulate over duration_days and Monte Carlo refreshes climate each period. (4) Leaving applies 'exit' effects. (5) Outgoing edges are filtered by 'when' against the node, one is drawn, its effects apply, and the loop repeats until the horizon. Why it exists: crops, actions and climate must affect each other (soybean adds N used by maize, liming unlocks soybean, drought cuts yield). They can only do that through one shared place. A field belongs here only if some effect writes it or some condition reads it.", "examples": ["markov.franca-sp-observed.json", "markov.node.json", "markov.s1-soybean-maize-prior.json"]};</script>
+<script>
+(function () {
+  const G = GRAPH;
+  const SVGNS = "http://www.w3.org/2000/svg";
+  const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const KIND_LABEL = { ref: "$ref (schema)", id: "id must match", pointer: "JSON Pointer", missing: "missing link", internal: "inside the same file" };
+  const STATUS = {
+    used: ["used", "Read by the current app"],
+    upstream: ["upstream", "Feeds a value the app reads (via data/pipeline)"],
+    available: ["available", "In data/profiles, nothing reads it"],
+    partial: ["partial", "Source exists, not wired or has gaps"],
+    none: ["no data", "Nothing in the repo"],
+    simulation: ["simulation", "Set by the simulation, not an input"],
+  };
+
+  // ---------- map ----------
+  const W = 200, H = 84;
+  const POS = {
+    monte_carlo: [20, 30], markov: [400, 30], crop: [780, 30],
+    climate: [20, 258], node: [400, 258], effect: [780, 258],
+    soil: [400, 486], action: [780, 486],
+  };
+  const BEND = { "action>crop": 150, "crop>action": -150 };
+  const svg = document.getElementById("map");
+  const el = (tag, attrs, parent) => { const n = document.createElementNS(SVGNS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (parent) parent.appendChild(n); return n; };
+
+  const defs = el("defs", {}, svg);
+  for (const kind of Object.keys(KIND_LABEL)) {
+    const m = el("marker", { id: "arrow-" + kind, viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "7", markerHeight: "7", orient: "auto-start-reverse" }, defs);
+    el("path", { d: "M0,0 L10,5 L0,10 z", style: "fill: var(--" + kind + ")" }, m);
+  }
+
+  // Node-level edges: markov fields under "node." belong to the pseudo node box.
+  const boxOf = (contract, field) => (contract === "markov" && field.startsWith("node.")) ? "node" : (contract === "markov#node" ? "node" : contract);
+  const agg = new Map();
+  for (const e of G.edges) {
+    let from = boxOf(e.from, e.field), to = e.to === "markov#node" ? "node" : e.to;
+    if (e.kind === "internal") {
+      if (!(e.from === "markov" && e.field === "node.state")) continue;
+    }
+    if (from === to) continue;
+    const key = from + ">" + to + ">" + e.kind;
+    if (!agg.has(key)) agg.set(key, { from, to, kind: e.kind, fields: [] });
+    const leaf = e.field.replace(/\[\]/g, "").split(".").pop();
+    if (!agg.get(key).fields.includes(leaf)) agg.get(key).fields.push(leaf);
+  }
+  // markov contains node: draw as an internal edge.
+  agg.set("markov>node>internal", { from: "markov", to: "node", kind: "internal", fields: ["definitions/node"] });
+
+  const pairCount = new Map();
+  for (const a of agg.values()) { const k = [a.from, a.to].sort().join("|"); pairCount.set(k, (pairCount.get(k) || 0) + 1); }
+  const pairSeen = new Map();
+
+  const center = (id) => [POS[id][0] + W / 2, POS[id][1] + H / 2];
+  function clip(id, tx, ty) {
+    const [cx, cy] = center(id); const dx = tx - cx, dy = ty - cy;
+    const s = Math.min(Math.abs((W / 2 + 6) / (dx || 1e-9)), Math.abs((H / 2 + 6) / (dy || 1e-9)));
+    return [cx + dx * s, cy + dy * s];
+  }
+  const edgesLayer = el("g", {}, svg), boxesLayer = el("g", {}, svg);
+  const edgeEls = [];
+  for (const a of agg.values()) {
+    if (!POS[a.from] || !POS[a.to]) continue;
+    const pk = [a.from, a.to].sort().join("|");
+    const idx = pairSeen.get(pk) || 0; pairSeen.set(pk, idx + 1);
+    const n = pairCount.get(pk);
+    const [x1, y1] = center(a.from), [x2, y2] = center(a.to);
+    const len = Math.hypot(x2 - x1, y2 - y1), nx = -(y2 - y1) / len, ny = (x2 - x1) / len;
+    const sign = a.from < a.to ? 1 : -1;
+    let off = (idx - (n - 1) / 2) * 34 * sign;
+    if (BEND[a.from + ">" + a.to] !== undefined) off = BEND[a.from + ">" + a.to];
+    const mx = (x1 + x2) / 2 + nx * off, my = (y1 + y2) / 2 + ny * off;
+    const [sx, sy] = clip(a.from, mx, my), [ex, ey] = clip(a.to, mx, my);
+    const g = el("g", { class: "edge " + a.kind }, edgesLayer);
+    el("path", { d: `M${sx},${sy} Q${mx},${my} ${ex},${ey}`, "marker-end": "url(#arrow-" + a.kind + ")" }, g);
+    const lx = 0.25 * sx + 0.5 * mx + 0.25 * ex, ly = 0.25 * sy + 0.5 * my + 0.25 * ey;
+    const label = a.fields.length > 3 ? a.fields.slice(0, 3).join(", ") + " +" + (a.fields.length - 3) : a.fields.join(", ");
+    const t = el("text", { x: lx, y: ly - 4, "text-anchor": "middle" }, g); t.textContent = label;
+    const tip = el("title", {}, g); tip.textContent = KIND_LABEL[a.kind] + ": " + a.from + " -> " + a.to + " (" + a.fields.join(", ") + ")";
+    edgeEls.push({ g, a });
+  }
+  const nodeById = Object.fromEntries(G.nodes.map((n) => [n.id, n]));
+  const boxEls = {};
+  for (const id of Object.keys(POS)) {
+    const pseudo = id === "node";
+    const info = pseudo
+      ? { file: "markov.json#/definitions/node", count: G.node_fields.length + " values" }
+      : nodeById[id] ? { file: id + ".json", count: nodeById[id].fields.length + " fields" } : null;
+    if (!info) continue;
+    const g = el("g", { class: "box" + (pseudo ? " pseudo" : ""), tabindex: "0", role: "button", "aria-label": (pseudo ? "trajectory node" : id) + ", show connections" }, boxesLayer);
+    boxEls[id] = g;
+    el("rect", { x: POS[id][0], y: POS[id][1], width: W, height: H, rx: 6 }, g);
+    const name = el("text", { x: POS[id][0] + 14, y: POS[id][1] + 30, class: "name" }, g); name.textContent = pseudo ? "trajectory node" : id;
+    const file = el("text", { x: POS[id][0] + 14, y: POS[id][1] + 51, class: "file" }, g); file.textContent = info.file;
+    const count = el("text", { x: POS[id][0] + 14, y: POS[id][1] + 70, class: "count" }, g); count.textContent = info.count;
+    const activate = () => {
+      const on = !g.classList.contains("active");
+      document.querySelectorAll(".box").forEach((b) => b.classList.remove("active", "hit"));
+      edgeEls.forEach(({ g: eg }) => eg.classList.remove("hit"));
+      svg.classList.toggle("focus", on);
+      if (!on) return;
+      g.classList.add("active", "hit");
+      edgeEls.forEach(({ g: eg, a }) => {
+        if (a.from === id || a.to === id) {
+          eg.classList.add("hit");
+          const other = a.from === id ? a.to : a.from;
+          boxEls[other]?.classList.add("hit");
+        }
+      });
+    };
+    g.addEventListener("click", activate);
+    g.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); activate(); } });
+  }
+
+  const legend = document.getElementById("legend");
+  for (const kind of ["ref", "id", "pointer", "missing", "internal"]) {
+    const dash = { ref: "", id: "7 4", pointer: "2 4", missing: "10 5", internal: "" }[kind];
+    legend.insertAdjacentHTML("beforeend",
+      `<span><svg width="34" height="10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" style="stroke: var(--${kind}); stroke-width: 2; stroke-dasharray: ${dash}; stroke-linecap: round"/></svg>${esc(KIND_LABEL[kind])}</span>`);
+  }
+
+  // ---------- node behaviour (from markov.json#/definitions/node description) ----------
+  {
+    const text = G.node_description || "";
+    const start = text.indexOf("(1)"), why = text.indexOf("Why it exists:");
+    const intro = start > 0 ? text.slice(0, start).replace(/Behaviour:\s*$/, "").trim() : "";
+    const steps = (start >= 0 ? text.slice(start, why > start ? why : undefined) : "").split(/\(\d\)\s*/).map((x) => x.trim()).filter(Boolean);
+    document.getElementById("node-why").textContent = intro + (why >= 0 ? " " + text.slice(why).replace("Why it exists:", "It exists because") : "");
+    document.getElementById("node-steps").innerHTML = steps.map((x) => `<li>${esc(x)}</li>`).join("");
+  }
+
+  // ---------- node table ----------
+  const key = document.getElementById("status-key");
+  for (const [s, [label, text]] of Object.entries(STATUS)) key.insertAdjacentHTML("beforeend", `<div><span class="chip ${s}">${esc(label)}</span><span>${esc(text)}</span></div>`);
+  const counts = {};
+  G.node_fields.forEach((r) => { counts[r.status] = (counts[r.status] || 0) + 1; });
+  document.getElementById("tally").innerHTML = Object.entries(STATUS).filter(([s]) => counts[s])
+    .map(([s, [label]]) => `<span class="chip ${s}">${counts[s]} ${esc(label)}</span>`).join("");
+  const examples = (r) => {
+    const out = [];
+    if (r.written_in_examples.length) out.push("written: " + r.written_in_examples.map((x) => x.replace(/^markov\.|\.json$/g, "")).join(", "));
+    if (r.read_in_examples.length) out.push("read: " + r.read_in_examples.map((x) => x.replace(/^markov\.|\.json$/g, "")).join(", "));
+    return out.length ? out.map(esc).join("<br>") : '<span class="sub">not exercised</span>';
+  };
+  document.getElementById("node-table").innerHTML =
+    "<thead><tr><th>Pointer</th><th>Type</th><th>Status</th><th>Source today</th><th>Read by the app for</th><th>In v2 examples</th></tr></thead><tbody>" +
+    G.node_fields.map((r) => `<tr><td class="mono">${esc(r.pointer)}</td><td class="mono">${esc(r.type)}</td><td><span class="chip ${r.status}">${esc(STATUS[r.status][0])}</span></td><td>${esc(r.source) || '<span class="sub">-</span>'}</td><td>${esc(r.read_by_app) || '<span class="sub">-</span>'}</td><td>${examples(r)}</td></tr>`).join("") +
+    "</tbody>";
+
+  document.getElementById("gap-table").innerHTML =
+    "<thead><tr><th>Value</th><th>v2 field</th><th>v1 source</th><th>Used for</th></tr></thead><tbody>" +
+    G.v2_gaps.map((g) => `<tr><td>${esc(g.value)}</td><td class="mono">${esc(g.v2_field)}</td><td>${esc(g.v1_source)}</td><td>${esc(g.read_by_app)}</td></tr>`).join("") +
+    "</tbody>";
+
+  // ---------- contracts ----------
+  const order = ["monte_carlo", "markov", "effect", "crop", "action", "soil", "climate"];
+  const nodes = [...G.nodes].sort((a, b) => (order.indexOf(a.id) + 99 * (order.indexOf(a.id) < 0)) - (order.indexOf(b.id) + 99 * (order.indexOf(b.id) < 0)));
+  const host = document.getElementById("contracts");
+  const linkItem = (e, dir) => {
+    const other = dir === "out" ? e.to : e.from;
+    const otherId = other.split("#")[0];
+    const target = dir === "out" ? `<a href="#c-${esc(otherId)}">${esc(other)}</a>${e.target && e.target !== "(whole contract)" ? " · " + esc(e.target) : ""}` : `<a href="#c-${esc(otherId)}">${esc(other)}</a>.${esc(e.field)}`;
+    const here = dir === "out" ? `<code>${esc(e.field)}</code> → ` : "→ " + (e.target && e.target !== "(whole contract)" ? `<code>${esc(e.target)}</code> ` : "") + "from ";
+    return `<li><span class="kind ${e.kind}">${esc(e.kind)}</span><span>${here}${target}</span></li>`;
+  };
+  for (const n of nodes) {
+    const out = G.edges.filter((e) => e.from === n.id);
+    const inn = G.edges.filter((e) => e.to.split("#")[0] === n.id && e.from !== n.id);
+    const rows = n.fields.map((f) => `<tr><td class="mono">${esc(f.path)}${f.required ? " *" : ""}</td><td class="mono">${esc(f.type)}</td><td>${esc(f.description) || '<span class="sub">-</span>'}</td></tr>`).join("");
+    host.insertAdjacentHTML("beforeend", `
+      <article class="contract" id="c-${esc(n.id)}">
+        <div class="contract-head"><h3>${esc(n.title || n.id)}</h3><span class="mono">${esc(n.file)}</span></div>
+        ${n.comment ? `<p class="comment">${esc(n.comment)}</p>` : ""}
+        <div class="table-wrap"><table><thead><tr><th>Field (* required)</th><th>Type</th><th>Description</th></tr></thead><tbody>${rows}</tbody></table></div>
+        <div class="links">
+          <div><h4>Points to</h4><ul>${out.map((e) => linkItem(e, "out")).join("") || '<li class="sub">nothing</li>'}</ul></div>
+          <div><h4>Pointed to by</h4><ul>${inn.map((e) => linkItem(e, "in")).join("") || '<li class="sub">nothing</li>'}</ul></div>
+        </div>
+      </article>`);
+  }
+  document.getElementById("sources").textContent = G.generated_from.join(", ") + " and examples/" + (G.examples.length ? " (" + G.examples.join(", ") + ")" : "");
+})();
+</script>
+
+</body>
+</html>

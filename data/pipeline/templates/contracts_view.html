@@ -1,0 +1,347 @@
+<title>Field Shift Contracts v2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=Public+Sans:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a single reading column; the map is a field survey sheet, tables below read like a soil lab report. */
+:root {
+  --bg: #f4f7f3; --surface: #ffffff; --ink: #1c2420; --muted: #56645b; --line: #d6ded7;
+  --accent: #2c6a4c; --ref: #2c6a4c; --id: #345d9d; --pointer: #9a630d; --missing: #b23b2b; --internal: #8d9a91;
+  --ok-bg: #dcefe3; --ok-fg: #1f5a3c; --up-bg: #e3eef0; --up-fg: #255a63; --av-bg: #e2e9f6; --av-fg: #2f528c;
+  --pa-bg: #f6ead2; --pa-fg: #7a4f06; --no-bg: #f6dfdb; --no-fg: #922f22; --sim-bg: #e8ebe8; --sim-fg: #4e5952;
+  --display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --body: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #111613; --surface: #19201b; --ink: #e2eae4; --muted: #9aa9a0; --line: #2b352e;
+  --accent: #6cc093; --ref: #6cc093; --id: #8fb1ec; --pointer: #e2a94b; --missing: #ef7d6b; --internal: #66746b;
+  --ok-bg: #1e3a2a; --ok-fg: #9fdcb8; --up-bg: #1d3539; --up-fg: #9dd3dc; --av-bg: #1f2c44; --av-fg: #a9c3f1;
+  --pa-bg: #3a2c12; --pa-fg: #edc277; --no-bg: #3d211d; --no-fg: #f3a497; --sim-bg: #252c27; --sim-fg: #aab5ae;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #111613; --surface: #19201b; --ink: #e2eae4; --muted: #9aa9a0; --line: #2b352e;
+  --accent: #6cc093; --ref: #6cc093; --id: #8fb1ec; --pointer: #e2a94b; --missing: #ef7d6b; --internal: #66746b;
+  --ok-bg: #1e3a2a; --ok-fg: #9fdcb8; --up-bg: #1d3539; --up-fg: #9dd3dc; --av-bg: #1f2c44; --av-fg: #a9c3f1;
+  --pa-bg: #3a2c12; --pa-fg: #edc277; --no-bg: #3d211d; --no-fg: #f3a497; --sim-bg: #252c27; --sim-fg: #aab5ae;
+  color-scheme: dark; }
+
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--body); }
+main { max-width: 1080px; margin: 0 auto; padding-block: 32px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 48px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(28px, 5vw, 40px); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 22px; font-weight: 700; }
+h3 { font-size: 18px; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+code, .mono { font-family: var(--mono); font-size: 0.86em; }
+.eyebrow { font: 600 12px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+header { display: grid; gap: 12px; }
+header p { color: var(--muted); }
+section { display: grid; gap: 16px; min-width: 0; }
+.section-head { display: grid; gap: 6px; }
+.section-head p { color: var(--muted); }
+
+.map-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; }
+.map-wrap svg { display: block; width: 100%; min-width: 720px; height: auto; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.legend svg { flex: none; }
+
+.box rect { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; }
+.box.pseudo rect { stroke-dasharray: 5 4; }
+.box .name { font: 700 17px var(--display); fill: var(--ink); }
+.box .file { font: 12px var(--mono); fill: var(--muted); }
+.box .count { font: 12px var(--body); fill: var(--muted); }
+.box { cursor: pointer; }
+.box:hover rect, .box:focus rect, .box.active rect { stroke: var(--accent); stroke-width: 2.5; }
+.box:focus { outline: none; }
+.edge path { fill: none; stroke-width: 2; }
+.edge text { font: 11px var(--mono); paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; }
+.edge.ref path { stroke: var(--ref); } .edge.ref text { fill: var(--ref); }
+.edge.id path { stroke: var(--id); stroke-dasharray: 7 4; } .edge.id text { fill: var(--id); }
+.edge.pointer path { stroke: var(--pointer); stroke-dasharray: 2 4; stroke-linecap: round; } .edge.pointer text { fill: var(--pointer); }
+.edge.missing path { stroke: var(--missing); stroke-dasharray: 10 5; } .edge.missing text { fill: var(--missing); }
+.edge.internal path { stroke: var(--internal); stroke-width: 1.5; } .edge.internal text { fill: var(--internal); }
+svg.focus .edge { opacity: 0.12; } svg.focus .edge.hit { opacity: 1; }
+svg.focus .box { opacity: 0.45; } svg.focus .box.hit { opacity: 1; }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { font: 600 11.5px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+td.mono { white-space: nowrap; }
+td .sub { color: var(--muted); font-size: 12.5px; }
+.chip { display: inline-block; font: 600 11.5px/1 var(--mono); padding: 5px 8px; border-radius: 999px; white-space: nowrap; }
+.chip.used { background: var(--ok-bg); color: var(--ok-fg); }
+.chip.upstream { background: var(--up-bg); color: var(--up-fg); }
+.chip.available { background: var(--av-bg); color: var(--av-fg); }
+.chip.partial { background: var(--pa-bg); color: var(--pa-fg); }
+.chip.none { background: var(--no-bg); color: var(--no-fg); }
+.chip.simulation { background: var(--sim-bg); color: var(--sim-fg); }
+.status-key { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 20px; font-size: 13px; color: var(--muted); }
+.status-key div { display: flex; gap: 10px; align-items: baseline; }
+.tally { display: flex; flex-wrap: wrap; gap: 8px; }
+.steps { margin: 0; padding-left: 1.4em; display: grid; gap: 8px; max-width: 72ch; }
+.steps li::marker { font: 600 13px var(--mono); color: var(--accent); }
+
+.contracts { display: grid; gap: 40px; }
+.contract { display: grid; gap: 12px; scroll-margin-top: 16px; }
+.contract-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.contract-head .mono { color: var(--muted); }
+.contract .comment { color: var(--muted); }
+.links { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px 24px; font-size: 13.5px; }
+.links h4 { margin: 0 0 6px; font: 600 11.5px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.links ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.links li { display: flex; gap: 8px; align-items: baseline; min-width: 0; overflow-wrap: anywhere; }
+.kind { flex: none; font: 600 10.5px var(--mono); text-transform: uppercase; letter-spacing: 0.05em; }
+.kind.ref { color: var(--ref); } .kind.id { color: var(--id); } .kind.pointer { color: var(--pointer); } .kind.missing { color: var(--missing); } .kind.internal { color: var(--internal); }
+a { color: var(--accent); }
+a:focus-visible, .box:focus-visible rect { outline: 2px solid var(--accent); outline-offset: 2px; }
+footer { color: var(--muted); font-size: 13px; display: grid; gap: 6px; }
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } .edge, .box { transition: opacity 0.15s; } }
+</style>
+
+<main>
+  <header>
+    <span class="eyebrow">data/contracts/v2</span>
+    <h1>Field Shift Contracts v2</h1>
+    <p>How the v2 schemas connect, what each value of a simulation trajectory holds, and which of those values the current app already reads. Use it to decide what to request from the data team and which soil or climate fields the model actually needs.</p>
+  </header>
+
+  <section aria-labelledby="map-title">
+    <div class="section-head">
+      <h2 id="map-title">Contract map</h2>
+      <p>Monte Carlo runs trajectories over the Markov chain. Every trajectory carries one <em>node</em> (soil, climate, finances). States and transitions change the node only through effects, and effects find their variable by a JSON Pointer such as <code>/soil/pH</code>. Tap a box to highlight its connections.</p>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="map-wrap"><svg id="map" viewBox="0 0 1000 600" role="img" aria-label="Diagram of contracts and their connections"></svg></div>
+  </section>
+
+  <section aria-labelledby="life-title">
+    <div class="section-head">
+      <h2 id="life-title">How a trajectory node behaves</h2>
+      <p id="node-why"></p>
+    </div>
+    <ol class="steps" id="node-steps"></ol>
+  </section>
+
+  <section aria-labelledby="node-title">
+    <div class="section-head">
+      <h2 id="node-title">What a trajectory carries</h2>
+      <p>Every value an effect can target or a condition can read. The status column says where the value comes from today and whether anything in <code>field_shift/</code> reads it.</p>
+    </div>
+    <div class="status-key" id="status-key"></div>
+    <div class="tally" id="tally"></div>
+    <div class="table-wrap"><table id="node-table"></table></div>
+  </section>
+
+  <section aria-labelledby="gap-title">
+    <div class="section-head">
+      <h2 id="gap-title">Carried over from the current model</h2>
+      <p>Inputs the current model (v1 profiles + <code>field_shift/</code>) depends on, and the v2 field that now holds each one.</p>
+    </div>
+    <div class="table-wrap"><table id="gap-table"></table></div>
+  </section>
+
+  <section aria-labelledby="contracts-title">
+    <div class="section-head">
+      <h2 id="contracts-title">Contracts</h2>
+      <p>Fields of each schema with their type, unit and bounds, followed by every connection in and out.</p>
+    </div>
+    <div class="contracts" id="contracts"></div>
+  </section>
+
+  <footer>
+    <span>Generated from <span id="sources"></span>.</span>
+    <span>Regenerate with <code>python data/pipeline/build_contract_views.py</code>. The same data feeds <code>data/contracts/v2/views/contracts-tree.json</code> for jsoncrack.com.</span>
+  </footer>
+</main>
+
+<script>const GRAPH=/*GRAPH_DATA*/null;</script>
+<script>
+(function () {
+  const G = GRAPH;
+  const SVGNS = "http://www.w3.org/2000/svg";
+  const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const KIND_LABEL = { ref: "$ref (schema)", id: "id must match", pointer: "JSON Pointer", missing: "missing link", internal: "inside the same file" };
+  const STATUS = {
+    used: ["used", "Read by the current app"],
+    upstream: ["upstream", "Feeds a value the app reads (via data/pipeline)"],
+    available: ["available", "In data/profiles, nothing reads it"],
+    partial: ["partial", "Source exists, not wired or has gaps"],
+    none: ["no data", "Nothing in the repo"],
+    simulation: ["simulation", "Set by the simulation, not an input"],
+  };
+
+  // ---------- map ----------
+  const W = 200, H = 84;
+  const POS = {
+    monte_carlo: [20, 30], markov: [400, 30], crop: [780, 30],
+    climate: [20, 258], node: [400, 258], effect: [780, 258],
+    soil: [400, 486], action: [780, 486],
+  };
+  const BEND = { "action>crop": 150, "crop>action": -150 };
+  const svg = document.getElementById("map");
+  const el = (tag, attrs, parent) => { const n = document.createElementNS(SVGNS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (parent) parent.appendChild(n); return n; };
+
+  const defs = el("defs", {}, svg);
+  for (const kind of Object.keys(KIND_LABEL)) {
+    const m = el("marker", { id: "arrow-" + kind, viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "7", markerHeight: "7", orient: "auto-start-reverse" }, defs);
+    el("path", { d: "M0,0 L10,5 L0,10 z", style: "fill: var(--" + kind + ")" }, m);
+  }
+
+  // Node-level edges: markov fields under "node." belong to the pseudo node box.
+  const boxOf = (contract, field) => (contract === "markov" && field.startsWith("node.")) ? "node" : (contract === "markov#node" ? "node" : contract);
+  const agg = new Map();
+  for (const e of G.edges) {
+    let from = boxOf(e.from, e.field), to = e.to === "markov#node" ? "node" : e.to;
+    if (e.kind === "internal") {
+      if (!(e.from === "markov" && e.field === "node.state")) continue;
+    }
+    if (from === to) continue;
+    const key = from + ">" + to + ">" + e.kind;
+    if (!agg.has(key)) agg.set(key, { from, to, kind: e.kind, fields: [] });
+    const leaf = e.field.replace(/\[\]/g, "").split(".").pop();
+    if (!agg.get(key).fields.includes(leaf)) agg.get(key).fields.push(leaf);
+  }
+  // markov contains node: draw as an internal edge.
+  agg.set("markov>node>internal", { from: "markov", to: "node", kind: "internal", fields: ["definitions/node"] });
+
+  const pairCount = new Map();
+  for (const a of agg.values()) { const k = [a.from, a.to].sort().join("|"); pairCount.set(k, (pairCount.get(k) || 0) + 1); }
+  const pairSeen = new Map();
+
+  const center = (id) => [POS[id][0] + W / 2, POS[id][1] + H / 2];
+  function clip(id, tx, ty) {
+    const [cx, cy] = center(id); const dx = tx - cx, dy = ty - cy;
+    const s = Math.min(Math.abs((W / 2 + 6) / (dx || 1e-9)), Math.abs((H / 2 + 6) / (dy || 1e-9)));
+    return [cx + dx * s, cy + dy * s];
+  }
+  const edgesLayer = el("g", {}, svg), boxesLayer = el("g", {}, svg);
+  const edgeEls = [];
+  for (const a of agg.values()) {
+    if (!POS[a.from] || !POS[a.to]) continue;
+    const pk = [a.from, a.to].sort().join("|");
+    const idx = pairSeen.get(pk) || 0; pairSeen.set(pk, idx + 1);
+    const n = pairCount.get(pk);
+    const [x1, y1] = center(a.from), [x2, y2] = center(a.to);
+    const len = Math.hypot(x2 - x1, y2 - y1), nx = -(y2 - y1) / len, ny = (x2 - x1) / len;
+    const sign = a.from < a.to ? 1 : -1;
+    let off = (idx - (n - 1) / 2) * 34 * sign;
+    if (BEND[a.from + ">" + a.to] !== undefined) off = BEND[a.from + ">" + a.to];
+    const mx = (x1 + x2) / 2 + nx * off, my = (y1 + y2) / 2 + ny * off;
+    const [sx, sy] = clip(a.from, mx, my), [ex, ey] = clip(a.to, mx, my);
+    const g = el("g", { class: "edge " + a.kind }, edgesLayer);
+    el("path", { d: `M${sx},${sy} Q${mx},${my} ${ex},${ey}`, "marker-end": "url(#arrow-" + a.kind + ")" }, g);
+    const lx = 0.25 * sx + 0.5 * mx + 0.25 * ex, ly = 0.25 * sy + 0.5 * my + 0.25 * ey;
+    const label = a.fields.length > 3 ? a.fields.slice(0, 3).join(", ") + " +" + (a.fields.length - 3) : a.fields.join(", ");
+    const t = el("text", { x: lx, y: ly - 4, "text-anchor": "middle" }, g); t.textContent = label;
+    const tip = el("title", {}, g); tip.textContent = KIND_LABEL[a.kind] + ": " + a.from + " -> " + a.to + " (" + a.fields.join(", ") + ")";
+    edgeEls.push({ g, a });
+  }
+  const nodeById = Object.fromEntries(G.nodes.map((n) => [n.id, n]));
+  const boxEls = {};
+  for (const id of Object.keys(POS)) {
+    const pseudo = id === "node";
+    const info = pseudo
+      ? { file: "markov.json#/definitions/node", count: G.node_fields.length + " values" }
+      : nodeById[id] ? { file: id + ".json", count: nodeById[id].fields.length + " fields" } : null;
+    if (!info) continue;
+    const g = el("g", { class: "box" + (pseudo ? " pseudo" : ""), tabindex: "0", role: "button", "aria-label": (pseudo ? "trajectory node" : id) + ", show connections" }, boxesLayer);
+    boxEls[id] = g;
+    el("rect", { x: POS[id][0], y: POS[id][1], width: W, height: H, rx: 6 }, g);
+    const name = el("text", { x: POS[id][0] + 14, y: POS[id][1] + 30, class: "name" }, g); name.textContent = pseudo ? "trajectory node" : id;
+    const file = el("text", { x: POS[id][0] + 14, y: POS[id][1] + 51, class: "file" }, g); file.textContent = info.file;
+    const count = el("text", { x: POS[id][0] + 14, y: POS[id][1] + 70, class: "count" }, g); count.textContent = info.count;
+    const activate = () => {
+      const on = !g.classList.contains("active");
+      document.querySelectorAll(".box").forEach((b) => b.classList.remove("active", "hit"));
+      edgeEls.forEach(({ g: eg }) => eg.classList.remove("hit"));
+      svg.classList.toggle("focus", on);
+      if (!on) return;
+      g.classList.add("active", "hit");
+      edgeEls.forEach(({ g: eg, a }) => {
+        if (a.from === id || a.to === id) {
+          eg.classList.add("hit");
+          const other = a.from === id ? a.to : a.from;
+          boxEls[other]?.classList.add("hit");
+        }
+      });
+    };
+    g.addEventListener("click", activate);
+    g.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); activate(); } });
+  }
+
+  const legend = document.getElementById("legend");
+  for (const kind of ["ref", "id", "pointer", "missing", "internal"]) {
+    const dash = { ref: "", id: "7 4", pointer: "2 4", missing: "10 5", internal: "" }[kind];
+    legend.insertAdjacentHTML("beforeend",
+      `<span><svg width="34" height="10" aria-hidden="true"><line x1="1" y1="5" x2="33" y2="5" style="stroke: var(--${kind}); stroke-width: 2; stroke-dasharray: ${dash}; stroke-linecap: round"/></svg>${esc(KIND_LABEL[kind])}</span>`);
+  }
+
+  // ---------- node behaviour (from markov.json#/definitions/node description) ----------
+  {
+    const text = G.node_description || "";
+    const start = text.indexOf("(1)"), why = text.indexOf("Why it exists:");
+    const intro = start > 0 ? text.slice(0, start).replace(/Behaviour:\s*$/, "").trim() : "";
+    const steps = (start >= 0 ? text.slice(start, why > start ? why : undefined) : "").split(/\(\d\)\s*/).map((x) => x.trim()).filter(Boolean);
+    document.getElementById("node-why").textContent = intro + (why >= 0 ? " " + text.slice(why).replace("Why it exists:", "It exists because") : "");
+    document.getElementById("node-steps").innerHTML = steps.map((x) => `<li>${esc(x)}</li>`).join("");
+  }
+
+  // ---------- node table ----------
+  const key = document.getElementById("status-key");
+  for (const [s, [label, text]] of Object.entries(STATUS)) key.insertAdjacentHTML("beforeend", `<div><span class="chip ${s}">${esc(label)}</span><span>${esc(text)}</span></div>`);
+  const counts = {};
+  G.node_fields.forEach((r) => { counts[r.status] = (counts[r.status] || 0) + 1; });
+  document.getElementById("tally").innerHTML = Object.entries(STATUS).filter(([s]) => counts[s])
+    .map(([s, [label]]) => `<span class="chip ${s}">${counts[s]} ${esc(label)}</span>`).join("");
+  const examples = (r) => {
+    const out = [];
+    if (r.written_in_examples.length) out.push("written: " + r.written_in_examples.map((x) => x.replace(/^markov\.|\.json$/g, "")).join(", "));
+    if (r.read_in_examples.length) out.push("read: " + r.read_in_examples.map((x) => x.replace(/^markov\.|\.json$/g, "")).join(", "));
+    return out.length ? out.map(esc).join("<br>") : '<span class="sub">not exercised</span>';
+  };
+  document.getElementById("node-table").innerHTML =
+    "<thead><tr><th>Pointer</th><th>Type</th><th>Status</th><th>Source today</th><th>Read by the app for</th><th>In v2 examples</th></tr></thead><tbody>" +
+    G.node_fields.map((r) => `<tr><td class="mono">${esc(r.pointer)}</td><td class="mono">${esc(r.type)}</td><td><span class="chip ${r.status}">${esc(STATUS[r.status][0])}</span></td><td>${esc(r.source) || '<span class="sub">-</span>'}</td><td>${esc(r.read_by_app) || '<span class="sub">-</span>'}</td><td>${examples(r)}</td></tr>`).join("") +
+    "</tbody>";
+
+  document.getElementById("gap-table").innerHTML =
+    "<thead><tr><th>Value</th><th>v2 field</th><th>v1 source</th><th>Used for</th></tr></thead><tbody>" +
+    G.v2_gaps.map((g) => `<tr><td>${esc(g.value)}</td><td class="mono">${esc(g.v2_field)}</td><td>${esc(g.v1_source)}</td><td>${esc(g.read_by_app)}</td></tr>`).join("") +
+    "</tbody>";
+
+  // ---------- contracts ----------
+  const order = ["monte_carlo", "markov", "effect", "crop", "action", "soil", "climate"];
+  const nodes = [...G.nodes].sort((a, b) => (order.indexOf(a.id) + 99 * (order.indexOf(a.id) < 0)) - (order.indexOf(b.id) + 99 * (order.indexOf(b.id) < 0)));
+  const host = document.getElementById("contracts");
+  const linkItem = (e, dir) => {
+    const other = dir === "out" ? e.to : e.from;
+    const otherId = other.split("#")[0];
+    const target = dir === "out" ? `<a href="#c-${esc(otherId)}">${esc(other)}</a>${e.target && e.target !== "(whole contract)" ? " · " + esc(e.target) : ""}` : `<a href="#c-${esc(otherId)}">${esc(other)}</a>.${esc(e.field)}`;
+    const here = dir === "out" ? `<code>${esc(e.field)}</code> → ` : "→ " + (e.target && e.target !== "(whole contract)" ? `<code>${esc(e.target)}</code> ` : "") + "from ";
+    return `<li><span class="kind ${e.kind}">${esc(e.kind)}</span><span>${here}${target}</span></li>`;
+  };
+  for (const n of nodes) {
+    const out = G.edges.filter((e) => e.from === n.id);
+    const inn = G.edges.filter((e) => e.to.split("#")[0] === n.id && e.from !== n.id);
+    const rows = n.fields.map((f) => `<tr><td class="mono">${esc(f.path)}${f.required ? " *" : ""}</td><td class="mono">${esc(f.type)}</td><td>${esc(f.description) || '<span class="sub">-</span>'}</td></tr>`).join("");
+    host.insertAdjacentHTML("beforeend", `
+      <article class="contract" id="c-${esc(n.id)}">
+        <div class="contract-head"><h3>${esc(n.title || n.id)}</h3><span class="mono">${esc(n.file)}</span></div>
+        ${n.comment ? `<p class="comment">${esc(n.comment)}</p>` : ""}
+        <div class="table-wrap"><table><thead><tr><th>Field (* required)</th><th>Type</th><th>Description</th></tr></thead><tbody>${rows}</tbody></table></div>
+        <div class="links">
+          <div><h4>Points to</h4><ul>${out.map((e) => linkItem(e, "out")).join("") || '<li class="sub">nothing</li>'}</ul></div>
+          <div><h4>Pointed to by</h4><ul>${inn.map((e) => linkItem(e, "in")).join("") || '<li class="sub">nothing</li>'}</ul></div>
+        </div>
+      </article>`);
+  }
+  document.getElementById("sources").textContent = G.generated_from.join(", ") + " and examples/" + (G.examples.length ? " (" + G.examples.join(", ") + ")" : "");
+})();
+</script>
