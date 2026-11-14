@@ -1,0 +1,128 @@
+{
+  "chart": {
+    "result": [
+      {
+        "meta": {
+          "currency": "USX",
+          "symbol": "ZSK27.CBT",
+          "exchangeName": "CBT",
+          "fullExchangeName": "CBOT",
+          "instrumentType": "FUTURE",
+          "firstTradeDate": 1731560400,
+          "regularMarketTime": 1794597598,
+          "hasPrePostMarketData": false,
+          "gmtoffset": -18000,
+          "timezone": "EST",
+          "exchangeTimezoneName": "America/New_York",
+          "regularMarketPrice": 1245.5,
+          "regularMarketChangePercent": 1.055,
+          "fulldayPrice": 1245.5,
+          "fulldayChange": 13.0,
+          "fulldayChangePercent": 1.055,
+          "fiftyTwoWeekHigh": 1361.0,
+          "fiftyTwoWeekLow": 1073.0,
+          "regularMarketDayHigh": 1252.75,
+          "regularMarketDayLow": 1232.5,
+          "regularMarketVolume": 33457,
+          "longName": "Soybean Futures,May-2027",
+          "shortName": "Soybean Futures,May-2027",
+          "chartPreviousClose": 1204.5,
+          "priceHint": 2,
+          "currentTradingPeriod": {
+            "pre": {
+              "timezone": "EST",
+              "start": 1794546000,
+              "end": 1794546000,
+              "gmtoffset": -18000
+            },
+            "regular": {
+              "timezone": "EST",
+              "start": 1794546000,
+              "end": 1794632340,
+              "gmtoffset": -18000
+            },
+            "post": {
+              "timezone": "EST",
+              "start": 1794632340,
+              "end": 1794632340,
+              "gmtoffset": -18000
+            }
+          },
+          "dataGranularity": "1d",
+          "range": "",
+          "validRanges": [
+            "1d",
+            "5d",
+            "1mo",
+            "3mo",
+            "6mo",
+            "1y",
+            "2y",
+            "ytd",
+            "max"
+          ]
+        },
+        "timestamp": [
+          1794200400,
+          1794286800,
+          1794373200,
+          1794459600,
+          1794546000
+        ],
+        "indicators": {
+          "quote": [
+            {
+              "volume": [
+                44585,
+                66585,
+                42127,
+                35470,
+                33457
+              ],
+              "high": [
+                1215.75,
+                1245.75,
+                1250.75,
+                1247.0,
+                1252.75
+              ],
+              "open": [
+                1208.25,
+                1204.75,
+                1242.5,
+                1245.5,
+                1232.5
+              ],
+              "close": [
+                1204.5,
+                1243.0,
+                1246.75,
+                1232.5,
+                1245.5
+              ],
+              "low": [
+                1203.0,
+                1202.0,
+                1235.5,
+                1231.75,
+                1232.5
+              ]
+            }
+          ],
+          "adjclose": [
+            {
+              "adjclose": [
+                1204.5,
+                1243.0,
+                1246.75,
+                1232.5,
+                1245.5
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "error": null
+  }
+}

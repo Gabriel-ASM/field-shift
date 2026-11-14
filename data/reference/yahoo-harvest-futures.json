@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Frozen harvest price references for the interactive crop rotation demonstration.",
+  "as_of_date": "2026-11-13",
+  "retrieved_at_utc": "2026-11-14T03:24:52+00:00",
+  "price_semantics": "Yahoo Finance daily close for a May 2027 CBOT futures contract, converted to BRL per metric tonne using the same date's BCB PTAX selling rate. This is an exchange reference, not a local cash price or farm-gate offer.",
+  "conversion": {
+    "futures_quote_unit": "US cents per bushel",
+    "formula": "(Yahoo close / 100) * (2204.62262185 lb per metric tonne / commodity lb per bushel) * BCB PTAX BRL/USD selling rate",
+    "pounds_per_bushel_source": "USDA NASS 2024 Oklahoma Agricultural Statistics, Conversion Factors"
+  },
+  "fx": {
+    "currency_pair": "USD/BRL",
+    "rate": 5.6518,
+    "kind": "PTAX selling rate",
+    "quote_time": "2026-11-13 13:03:27.375047",
+    "source_url": "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao='11-13-2026'&%24format=json",
+    "raw_response": "data/raw/bacen/PTAX-USD-BRL-2026-11-13.json"
+  },
+  "quotes": [
+    {
+      "crop": "soybean",
+      "symbol": "ZSK27.CBT",
+      "contract_name": "Soybean Futures,May-2027",
+      "exchange": "CBOT",
+      "currency_code_yahoo": "USX",
+      "quote_date": "2026-11-13",
+      "close_yahoo": 1245.5,
+      "quote_unit": "US cents per bushel",
+      "pounds_per_bushel": 60,
+      "price_usd_per_metric_ton": 457.64291258569585,
+      "source_url": "https://finance.yahoo.com/quote/ZSK27.CBT/history/",
+      "raw_response": "data/raw/yahoo-finance/ZSK27.CBT-2026-11-13.json",
+      "exchange_rate_brl_per_usd": 5.6518,
+      "price_brl_per_metric_ton": 2586.506213351836,
+      "bcb_quote_time": "2026-11-13 13:03:27.375047",
+      "bcb_source_url": "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao='11-13-2026'&%24format=json"
+    },
+    {
+      "crop": "maize",
+      "symbol": "ZCK27.CBT",
+      "contract_name": "Corn Futures,May-2027",
+      "exchange": "CBOT",
+      "currency_code_yahoo": "USX",
+      "quote_date": "2026-11-13",
+      "close_yahoo": 464.5,
+      "quote_unit": "US cents per bushel",
+      "pounds_per_bushel": 56,
+      "price_usd_per_metric_ton": 182.86557283023657,
+      "source_url": "https://finance.yahoo.com/quote/ZCK27.CBT/history/",
+      "raw_response": "data/raw/yahoo-finance/ZCK27.CBT-2026-11-13.json",
+      "exchange_rate_brl_per_usd": 5.6518,
+      "price_brl_per_metric_ton": 1033.519644521931,
+      "bcb_quote_time": "2026-11-13 13:03:27.375047",
+      "bcb_source_url": "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao='11-13-2026'&%24format=json"
+    }
+  ],
+  "limitations": [
+    "May 2027 CBOT contracts are price references for 2027 harvest scenarios; they do not establish a Brazilian local basis, quality premium, freight, tax, hedge result, or net revenue.",
+    "Yahoo Finance is the market-data display source; unit conversion follows CME contract specifications and USDA bushel weights.",
+    "No comparable Yahoo peanut or sorghum futures quote is included."
+  ]
+}

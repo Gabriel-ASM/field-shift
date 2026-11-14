@@ -27,6 +27,24 @@
       "content": "Kc inicial/médio/final e durações de fases da Tabela 11–12, com contexto da tabela e lacunas explícitas.",
       "status": "extraído para data/reference/crop-water-parameters.json; valores são referências globais, não calibradas para cultivares brasileiras",
       "role": "curva de demanda ETc = Kc×ET0 onde o ciclo é consistente e a ação tem janela ZARC"
+    },
+    {
+      "name": "Yahoo Finance — CBOT futures",
+      "url": "https://finance.yahoo.com/markets/commodities/",
+      "contracts": ["ZSK27.CBT", "ZCK27.CBT"],
+      "period": "fechamento de 2026-11-13; vencimentos maio/2027",
+      "content": "Fechamento diário de soja e milho, convertido de centavos de dólar/bushel para BRL/tonelada.",
+      "status": "snapshot histórico preservado em data/raw/yahoo-finance/ e normalizado em data/reference/yahoo-harvest-futures.json",
+      "role": "referência internacional de preço para uma safra de 2027; não é cotação de balcão brasileira nem curva dinâmica"
+    },
+    {
+      "name": "Banco Central — PTAX",
+      "research_reference": "R094",
+      "url": "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/aplicacao#!/recursos",
+      "period": "cotação de venda de 2026-11-13",
+      "content": "Câmbio USD/BRL oficial para converter os futuros internacionais.",
+      "status": "cotação do dia preservada em data/raw/bacen/ e usada no snapshot congelado de preços",
+      "role": "conversão pontual; não há projeção nem série de câmbio no Monte Carlo"
     }
   ],
   "excluded_or_unavailable": [
@@ -58,13 +76,6 @@
       "url": "https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/up2data/dados-disponiveis/",
       "content": "Ajustes de contratos futuros que poderiam compor preço esperado por safra.",
       "status": "fonte do relatório de pesquisa; cotações e curvas não foram baixadas para a demonstração."
-    },
-    {
-      "name": "Banco Central — PTAX",
-      "research_reference": "R094",
-      "url": "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/aplicacao#!/recursos",
-      "content": "Cotações cambiais oficiais para converter referências internacionais quando necessário.",
-      "status": "fonte do relatório de pesquisa; câmbio não entra nos cenários atuais."
     }
   ]
 }

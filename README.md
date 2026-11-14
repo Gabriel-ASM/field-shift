@@ -4,29 +4,29 @@ Proposta de apoio à decisão para comparar rotações de culturas usando observ
 
 O projeto responde ao desafio [Field Shift: Adapting Farms with NASA Data](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/) do NASA Space Apps Challenge 2026.
 
-> **Status:** NASA POWER/SoilGrids, PAM/IBGE e ZARC/MAPA ingeridos para Ariquemes‑RO, Franca‑SP e Varginha‑MG; matrizes Markov derivadas por cultura/fase para ações com Kc FAO‑56 e decêndio ZARC compatíveis. O Monte Carlo compara demanda de água com a referência Kc=1. Sem transições de campo e resposta de rendimento calibrada, a execução não recomenda rotação nem calcula VPL.
+> **Status:** NASA POWER/SoilGrids, PAM/IBGE e ZARC/MAPA ingeridos para Ariquemes‑RO, Franca‑SP e Varginha‑MG. A página interativa agora põe a cultura seguinte e o carbono orgânico do solo no centro de uma cadeia de Markov e compara 10.000 trajetórias de solo por rotação; as probabilidades de mudança do solo estão marcadas como hipóteses não calibradas. Há preços de referência congelados do Yahoo para soja e milho, vencimento maio/2027. A demonstração não é recomendação, preço local nem cálculo de margem.
 
 ## Executar o motor
 
 Para executar a simulação de referência nos três perfis, rode `python -m field_shift.demo`. Para um perfil isolado, use `python -m field_shift --profile data/profiles/ariquemes-ro --policy data/policies/balanco-hidrico-referencia.json --initial-state water_medium`. Os dados brutos estão em `data/raw/`, os normalizados e as contagens Markov em `data/profiles/`, e as fontes/gaps estão em `data/README.md`.
 
-Abra a [demonstração interativa](docs/visualizacao.html) para conferir os dados, escolher cultura/grupo/solo/risco/decêndio e comparar 10.000 trajetórias pareadas para os três municípios. A seleção de talhão no mapa foi deixada fora. Regenere o pacote offline com `python -m field_shift.visualize --output docs/visualizacao.html --seed 2026`.
+Abra a [demonstração interativa](docs/visualizacao.html) para escolher a próxima cultura ZARC, avançar o estado cultura×solo e comparar 10.000 futuras cadeias em Ariquemes, Franca e Varginha. A página também mostra os fechamentos Yahoo de 13/11/2026 e um valor bruto indicativo por hectare, calculado com rendimentos municipais PAM/IBGE. Regenere a página com `python -m field_shift.visualize --output docs/visualizacao.html --seed 2026`.
 
 ## Ideia em uma figura
 
 ```mermaid
 flowchart LR
     A[Campo, solo e histórico] --> S[Estado do talhão]
-    B[Clima NASA + dados locais] --> M[Cenários Monte Carlo]
-    S --> D[Ações de cultivo viáveis]
-    D --> R[Resposta da cultura e do solo]
-    M --> R
-    R --> T[Transição de Markov]
+    S --> D[Ação: próxima cultura ZARC]
+    D --> R[Estado após a safra: cultura + carbono do solo]
+    S --> R
+    R --> T[Transição Markov hipotética]
+    T --> M[10 mil trajetórias de solo]
     T --> O[Distribuição de resultados]
     O --> C[Comparar rotações e riscos]
 ```
 
-O estado Markov descreve o talhão. O Monte Carlo cria futuros plausíveis de clima e incerteza dos parâmetros. Em cada cenário, uma ação de manejo e o ambiente determinam a distribuição de transição para o próximo estado.
+Na página interativa, o estado junta a última cultura e uma faixa demonstrativa de carbono orgânico do solo. O produtor escolhe a próxima cultura elegível no ZARC; uma hipótese explícita determina a probabilidade da classe de solo após a safra. O Monte Carlo compara repetição da cultura com uma rotação local por cinco safras. O motor de balanço hídrico e suas matrizes água×fase permanecem nos dados e no CLI, fora do foco desta página.
 
 ## Documentação
 
