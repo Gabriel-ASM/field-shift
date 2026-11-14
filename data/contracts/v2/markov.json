@@ -1,0 +1,12 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "markov",
+    "title": "Schema do Grafo da Cadeia de Markov",
+    "$comment": "Aqui definimos quais parâmetros são passíveis de alteração da cadeia de markov",
+
+    "properties": {
+        "seed":    {"type":"integer", "description": "Should be given by monte carlo, and should not be edited on the markov chain"},
+        "crop":    {"type":"crop", "description": "current crop"},
+        "soil":    {"type":"soil"}
+    }
+}
