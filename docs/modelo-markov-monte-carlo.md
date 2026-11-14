@@ -1,58 +1,103 @@
-# Modelo Markov + Monte Carlo
+# Markov de culturas + Monte Carlo
 
-## Modelo mostrado na visualização
+## Estados e sequência de culturas
 
-Em [`visualizacao.html`](visualizacao.html), a cultura conduz a ação e o carbono orgânico conduz o estado que a cadeia acompanha. A página não usa água como resultado principal.
+A demonstração trabalha com **uma cultura por talhão em cada passo anual**. O estado Markov é uma cultura individual. O catálogo tem as quatro culturas iniciais do research (soja, milho, cana e café) e as dez culturas candidatas de rotação ou cobertura do plano do MVP. A matriz expõe todos os 14 estados como possíveis destinos.
 
-| Parte | Definição na demonstração |
+O pipeline `data/pipeline/build_crop_transition_markov.py` deriva `data/profiles/<perfil>/crop-transition-markov.json` de `pam-history.json`:
+
+1. Soma as áreas PAM por cultura em cada município-ano. Café arábica e canephora são combinados; aveia em grão é usada como proxy de aveia-preta.
+2. Seleciona uma única cultura por ano: a de maior área colhida entre os produtos do catálogo. Produtos PAM fora do catálogo, como arroz, não competem por essa posição.
+3. Conta transições entre anos civis consecutivos. Anos com lacuna não formam uma aresta.
+4. Mantém as contagens e os anos de cada aresta separados da prior.
+
+| Item | Definição |
 |---|---|
-| Estado | Cultura anterior + faixa demonstrativa de carbono orgânico do solo em 0–30 cm |
-| Ação | Próxima cultura anual com janela ZARC municipal de risco de 20% |
-| Destino | Cultura escolhida + faixa de carbono orgânico depois da safra |
-| Passo | Uma safra |
-| Horizonte Monte Carlo | Cinco safras, 10.000 trajetórias pareadas por política |
+| Estado | Uma das 14 culturas individuais do catálogo |
+| Início selecionável | Soja, milho, cana-de-açúcar ou café |
+| Observação histórica | Cultura de maior área PAM entre os produtos do catálogo naquele ano |
+| Aresta observada | Mudança da cultura dominante entre dois anos consecutivos |
+| Evidência disponível | 38 anos e até 37 pares consecutivos por município |
+| Escala | Município-ano; não o mesmo talhão |
 
-O carbono inicial é a média ponderada das camadas SoilGrids de 0–5, 5–15 e 15–30 cm. As faixas `<12`, `12–20` e `>20 g/kg` existem apenas para tornar a cadeia visível; não são limites de diagnóstico de fertilidade. O ponto SoilGrids representa uma célula mapeada próxima ao centroide municipal, não uma amostra de talhão.
+A PAM não mostra qual cultura foi plantada no mesmo campo no ano seguinte. Por isso, as contagens são um proxy regional para a demo, e a página não as apresenta como frequências de rotação parcelar. As candidatas sem produto PAM correspondente (braquiária, milheto, nabo forrageiro, crotalária e mucuna) ficam visíveis na matriz, mas têm `n=0` e nenhuma contagem empírica.
 
-## Probabilidades de transição do solo
+## Probabilidade Markov condicionada pelo ambiente
 
-Não há medições pareadas de solo e rotação nestes municípios. Por isso, `data/reference/rotation-soil-prior.json` registra uma hipótese de demonstração sem calibração:
+Para não eliminar destinos por falta de amostras, cada linha recebe uma prior Dirichlet uniforme com `α = 0,5` em cada um dos 14 destinos:
 
-| Relação entre grupos | Piora uma faixa | Estável | Melhora uma faixa |
-|---|---:|---:|---:|
-| Repete o grupo botânico | 25% | 60% | 15% |
-| Alterna gramínea e leguminosa | 10% | 55% | 35% |
+```text
+base(source → destination) = (count + 0,5) / (saídas_observadas + 14 × 0,5)
+```
 
-Soja e amendoim contam como leguminosas; milho, sorgo e o consórcio de milho com braquiária contam como gramíneas. A transição fica no limite quando o solo já está na faixa baixa ou alta. Para sustentar apenas a direção da hipótese, o arquivo cita uma referência da Embrapa sobre resíduos, cobertura e rotação; os percentuais não vêm dessa publicação. Os números são premissas arbitrárias, devem aparecer como hipótese em toda saída e precisam ser substituídos por observações de campo antes de orientar manejo.
+Essa pseudocontagem não é dado. Quando uma cultura de destino não aparece no histórico, sua probabilidade deriva da prior e deve ser lida como hipótese. A matriz deixa `count/n` observável ao lado de cada probabilidade.
 
-Em cada passo, a página desenha as probabilidades da linha `(estado atual, cultura seguinte)` e sorteia uma faixa de solo ao avançar. A história exibe a sequência de culturas e as faixas sorteadas.
+Em cada trajetória, o Monte Carlo sorteia uma linha Dirichlet por estado com parâmetros `count + 0,5`. Depois de simular um ano do ambiente, repondera cada destino e normaliza a linha:
 
-## Monte Carlo
+```text
+Pₜ(j | i, ambiente) ∝ baseₜ(i → j)
+                    × exp[βágua × alinhamento_água × (Kc_efetivoⱼ − Kc_efetivo_médio)]
+                    × exp[βsolo × déficit_COS × (ΔCOSⱼ / 0,2)]
+```
 
-Para cada localidade, a simulação compara duas políticas começando da mesma cultura e faixa de solo:
+`Kc` vem de `data/reference/crop-water-parameters.json`; quando a referência Kc de uma cultura falta, o fator hídrico dela é neutro e isso aparece em `water_parameter_support`. Os coeficientes, limites do carbono, pseudocontagem e faixas por cultura estão em `data/reference/soil-crop-response-hypotheses.json`.
 
-1. **Cultura fixa:** repete a cultura escolhida para a próxima safra por cinco passos.
-2. **Rotação local:** alterna grupos botânicos quando existe opção ZARC; se não existir outro grupo, alterna culturas distintas disponíveis.
+## Monte Carlo: ordem em cada ano
 
-As 10.000 trajetórias compartilham os mesmos uniformes sorteados entre as políticas. O gráfico mostra a fração final nas faixas baixa, intermediária e alta e a probabilidade de terminar na faixa baixa. A incerteza mostrada é somente a aleatoriedade da cadeia sob os percentuais fixos. O Monte Carlo não sorteia os próprios percentuais, clima, rendimento, preço ou custo; ele não valida a hipótese.
+Cada uma das 10.000 trajetórias começa na cultura escolhida, água média (50% da CAD de referência) e carbono inicial de SoilGrids. Em cada ano:
 
-As culturas elegíveis vêm das linhas ZARC de cada município. Em Franca, soja e amendoim pertencem ao mesmo grupo funcional; dentro desta hipótese a troca entre elas não recebe o efeito de alternância entre gramínea e leguminosa.
+1. Sorteia um bloco de chuva quinzenal observado da NASA POWER, com reposição, dentre os anos completos locais.
+2. Percorre 24 quinzenas pela matriz de água, condicionando a água seguinte à classe de chuva seca, normal ou úmida. Em cada quinzena ajusta a classe hídrica sorteada pelo `Kc` anual efetivo da cultura atual, ETo média da quinzena e CAD do perfil.
+3. Sorteia a variação anual de carbono da faixa hipotética associada à cultura que estava no talhão naquele ano.
+4. Atualiza a probabilidade Markov usando a água final e o carbono atualizado.
+5. Sorteia uma única próxima cultura; ela vira o estado de origem do próximo ano.
 
-## Preço congelado e referência de safra
+O resultado mostra distribuição da cultura após cinco anos, água e carbono finais, mudança nas probabilidades para a cultura inicial e cinco caminhos amostrados. Cada seta do caminho mostra a probabilidade usada após o ambiente daquele ano.
 
-[`data/reference/yahoo-harvest-futures.json`](../data/reference/yahoo-harvest-futures.json) congela os fechamentos Yahoo de 13/11/2026 para os contratos CBOT de maio/2027. Os valores normalizados são:
+## Grafo da cadeia e leitura do Monte Carlo
 
-| Cultura | Contrato | Fechamento Yahoo | Referência convertida |
-|---|---|---:|---:|
-| Soja | `ZSK27.CBT` | 1.245,5 US¢/bu | R$ 2.586,51/t |
-| Milho | `ZCK27.CBT` | 464,5 US¢/bu | R$ 1.033,52/t |
+O HTML mostra os 14 estados como nós e todas as 196 transições possíveis como setas, incluindo laços da cultura para si mesma. Selecione um nó para destacar suas 14 saídas. A espessura da seta representa P média no contexto de água e carbono selecionado; o rótulo mostra essa probabilidade com duas casas decimais. A lista lateral discrimina cada destino:
 
-A conversão usa os pesos de bushel de 60 lb para soja e 56 lb para milho e a cotação de venda PTAX de R$ 5,6518/US$ em 13/11/2026. O valor bruto indicativo por hectare na página multiplica o preço convertido pelo rendimento médio municipal PAM/IBGE de 2021–2025. Ele não é preço de balcão nem receita prevista: exclui base local, qualidade, frete, custo, imposto, hedge e mudança de rendimento. A cotação é uma referência para a safra de 2027 e não é estendida como curva de preços de cinco anos. Amendoim e sorgo não têm contrato Yahoo comparável neste pacote.
+- `k/n PAM`: contagem observada na cadeia municipal e número de saídas históricas da cultura de origem.
+- `P₀`: `(k + α)/(n + 14α)`, antes de reponderar ambiente.
+- fatores de água e solo: multiplicadores de destino aplicados antes de normalizar a linha.
+- `Dirichlet 90%`: intervalo empírico de 5º a 95º percentil calculado com 1.200 sorteios da linha posterior, mantendo o contexto ambiental fixo. Não é intervalo de confiança das rotações reais do talhão.
+- `MC`: quantas trajetórias passaram pela origem e quantas escolheram aquela seta no ano exibido. As cores dos nós mostram a frequência de ocupação por ano.
 
-O gerador salva as respostas originais em `data/raw/yahoo-finance/` e `data/raw/bacen/`. Para repetir a captura histórica, use `python -m field_shift.freeze_harvest_prices --date 2026-11-13`. A página gerada não faz chamadas externas.
+Assim ficam distintos o suporte observado na PAM, a massa da prior, a probabilidade média contextualizada e as frequências realmente sorteadas. As linhas de posterior usadas pelo Monte Carlo são sorteadas novamente em cada trajetória; água e carbono também variam no tempo. Por isso, a frequência de uma seta no Monte Carlo pode diferir da P média fixa exibida no grafo.
 
-## Outras matrizes mantidas no repositório
+### Água
 
-O pipeline `data/pipeline/build_crop_markov.py` continua a gerar matrizes água×fase de demanda hídrica por cultura, usando NASA POWER, SoilGrids, FAO-56 e janelas ZARC. `field_shift.crop_demo` e o CLI usam essa trilha derivada de balanço hídrico. Ela não representa transições observadas de cultura ou resposta de solo; a visualização foi reorientada para demonstrar a cadeia cultura×solo explicitamente hipotética.
+Os dados `states.json`, `transitions.json` e `environment.json` guardam os estados hídricos. A chuva e ETo da NASA POWER alimentam o balanço de referência Kc=1; a CAD é derivada do SoilGrids por Saxton–Rawls. Para cada cultura, o `Kc` anual efetivo combina as fases FAO‑56 com a demanda Kc=1 fora do ciclo. Após cada classe hídrica sorteada, o armazenamento representativo muda por `(Kc_efetivo − 1) × ETo_quinzenal / CAD` e a classe é reavaliada nos cortes publicados. Culturas sem uma curva válida usam Kc=1. Esse ajuste é um balanço resumido, não medição do talhão.
 
-O resumo mais recente de coleta está em [`research/field_shift_cerne_dos_dados_2026-11-14.md`](../research/field_shift_cerne_dos_dados_2026-11-14.md). O relatório lista arquivos da máquina de origem; nem todos estão neste checkout. O inventário efetivamente ingerido está descrito em [`data/README.md`](../data/README.md).
+### Solo
+
+O valor inicial é a média SoilGrids de carbono orgânico em 0–30 cm, ponderada pelas camadas de 0–5, 5–15 e 15–30 cm. A série local não tem medições de carbono pareadas com sequência de culturas; assim, a evolução anual e o efeito do carbono nas probabilidades são hipóteses editáveis, deliberadamente identificadas como não calibradas. Não são estimativas de efeito causal.
+
+## Dados ausentes e limites
+
+O relatório de research lista MapBiomas Coleção 11 e tabelas de transição agrícola, mas os rasters/tabelas correspondentes não estão neste checkout. A página oficial informa que o produto agrícola 1ª safra é uma série anual baseada em pixels e publica os assets pelo GEE; seu produto de 2ª safra é complementar. Sem a sequência local do mesmo pixel, a PAM municipal não pode ser convertida em rotação do talhão. Os destinos sem PAM são mantidos como possibilidades via prior explícita, nunca como contagem inventada.
+
+A cadeia é uma demonstração regional, não recomendação agronômica, previsão de produtividade ou efeito econômico. Para calibrar rotação e carbono do talhão são necessários histórico espacial do mesmo talhão, cultura por safra, análise local de solo e validação agronômica.
+
+## Objetivo econômico: maximizar VPL
+
+O objetivo econômico é **maximizar o VPL esperado por hectare em cinco safras futuras** entre as sequências completas que a cadeia gerou nas 10.000 trajetórias Monte Carlo. A interface agrupa as trajetórias pela sequência de cinco transições e calcula média, mediana, P5–P95, probabilidade de VPL negativo e média dos 5% piores a partir dos ambientes simulados associados à rota. Frequência Monte Carlo e probabilidade Markov média aparecem separadamente. Só sequências com ao menos 20 ocorrências entram no quadro principal; a tabela expandida mostra também as rotas raras para transparência, com baixa precisão. O método otimiza entre rotas amostradas, não prova que encontrou a melhor entre as 14⁵ sequências possíveis, não modela política dinâmica anual e não é evidência causal.
+
+```text
+VPL = Σₜ [(rendimentoₜ × preçoₜ × fator ambientalₜ) − custo totalₜ] / (1 + r_real)ᵗ
+```
+
+As 14 linhas econômicas são editáveis. Soja/milho usam preços futuros Yahoo congelados; rendimentos e demais valores unitários comerciais vêm da PAM em escala municipal, estadual ou nacional identificada. Custos usam painéis totais CONAB diretos quando disponíveis; sem painel direto, usam a cultura proxy identificada na tabela. Feijão usa proxy de custo da soja, milheto usa sorgo como proxy de colheita/custo, aveia-preta usa aveia em grão, e nabo, braquiária, crotalária e mucuna começam com receita comercial zero e custo de cultura análoga. O usuário pode editar rendimento, preço, custo e inclusão no ranking. Essas entradas deixam o VPL calculável para cada estado, mas hipóteses/proxies não são dados observados das culturas cobertas. Custos e PAM são convertidos para reais do último mês IPCA; a taxa real aproxima a curva prefixada ANBIMA de cinco anos e o IPCA dos últimos 12 meses.
+
+O multiplicador de rendimento combina classe hídrica e carbono do solo: água baixa/média/alta usa 0,90/1,00/1,05; carbono baixo/médio/alto usa 0,80/1,00/1,20. Essas são hipóteses de sensibilidade, não funções de produção medidas. Preços e custos ficam constantes em termos reais no ciclo. PAM municipal não é rendimento do talhão, preços PAM não são contratos futuros, contratos Yahoo não são preço à vista e custos CONAB de outra localidade não são custo observado no perfil. Café e cana são perenes: idade, implantação e reforma do talhão não entram no estado Markov anual. Portanto, o ranking é uma comparação econômica de cenário, não uma prova causal nem recomendação agronômica.
+
+## Reproduzir os artefatos
+
+```powershell
+python data/pipeline/build_crop_transition_markov.py
+python data/pipeline/build_economic_benchmarks.py
+python -m field_shift.visualize --output docs/visualizacao.html --seed 2026
+```
+
+O motor de água×fase×decêndio em `data/pipeline/build_crop_markov.py` segue disponível para cenários de balanço hídrico no CLI; não é confundido com a cadeia de transição entre culturas desta página.

@@ -1,4 +1,4 @@
-"""Generate the offline crop-rotation, soil Markov and Monte Carlo demonstration."""
+"""Generate the offline crop Markov and Monte Carlo demonstration."""
 
 from argparse import ArgumentParser
 import json
@@ -9,28 +9,6 @@ from random import Random
 ROOT = Path(__file__).resolve().parent.parent
 TEMPLATE = Path(__file__).with_name("replay.html")
 STATE_NAMES = {"RO": "Rondônia", "SP": "São Paulo", "MG": "Minas Gerais"}
-PAM_CROPS = {
-    "soybean": "soja_em_grao",
-    "peanut": "amendoim_em_casca",
-    "maize_grain": "milho_em_grao",
-    "sorghum_grain": "sorgo_em_grao",
-}
-CROP_GROUPS = {
-    "soybean": "legume",
-    "peanut": "legume",
-    "dry_bean": "legume",
-    "maize_grain": "grass",
-    "maize_brachiaria": "grass",
-    "sorghum_grain": "grass",
-}
-CROP_NAMES = {
-    "soybean": "Soja",
-    "peanut": "Amendoim",
-    "maize_grain": "Milho-grão",
-    "maize_brachiaria": "Milho 2ª safra + braquiária",
-    "sorghum_grain": "Sorgo-grão",
-}
-PRICE_CROPS = {"soybean": "soybean", "maize_grain": "maize", "maize_brachiaria": "maize"}
 
 
 def read_json(path: Path) -> dict:
@@ -39,16 +17,6 @@ def read_json(path: Path) -> dict:
 
 def payload_json(value: object) -> str:
     return json.dumps(value, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
-
-
-def zarc_crop_id(row: dict) -> str | None:
-    crop_id = row.get("crop_parameter_id")
-    if crop_id in CROP_GROUPS:
-        return crop_id
-    label = str(row.get("crop", "")).casefold()
-    if "milho" in label and "braqui" in label:
-        return "maize_brachiaria"
-    return None
 
 
 def topsoil_carbon_g_kg(soil: dict) -> float:
@@ -64,63 +32,50 @@ def topsoil_carbon_g_kg(soil: dict) -> float:
     return weighted / depth
 
 
-def soil_class(carbon: float, prior: dict) -> str:
-    thresholds = prior["soil_proxy"]["classes"]
-    if carbon < thresholds[0]["maximum_exclusive_g_kg"]:
-        return "low"
-    if carbon <= thresholds[1]["maximum_inclusive_g_kg"]:
-        return "medium"
-    return "high"
-
-
-def crop_options(profile_dir: Path, pam: dict, prices_by_crop: dict) -> list[dict]:
-    zarc = read_json(profile_dir / "zarc-planting-windows.json")
-    options = {}
-    for row in zarc["rows"]:
-        crop_id = zarc_crop_id(row)
-        if not crop_id:
-            continue
-        planting_decendios = row.get("planting_decendios_by_risk_percent", {}).get("20", [])
-        if not planting_decendios:
-            continue
-        item = options.setdefault(
-            crop_id,
+def water_markov(profile_dir: Path) -> dict:
+    states = read_json(profile_dir / "states.json")
+    transitions = read_json(profile_dir / "transitions.json")
+    environment_history = read_json(profile_dir / "environment.json")
+    labels = {"water_low": "Baixa", "water_medium": "Média", "water_high": "Alta"}
+    return {
+        "states": [
+            {"id": state["id"], "water_class": state["water"], "label": labels[state["id"]]}
+            for state in states
+        ],
+        "transitions": [
             {
-                "id": crop_id,
-                "name": CROP_NAMES[crop_id],
-                "group": CROP_GROUPS[crop_id],
-                "planting_decendios": set(),
-                "risk_percent": 20,
-            },
-        )
-        item["planting_decendios"].update(planting_decendios)
-
-    result = []
-    for crop_id, item in options.items():
-        pam_id = PAM_CROPS.get(crop_id)
-        pam_summary = pam.get("crop_summaries", {}).get(pam_id, {}) if pam_id else {}
-        yield_kg_ha = pam_summary.get("yield_mean_2021_2025_kg_ha")
-        price_crop = PRICE_CROPS.get(crop_id)
-        quote = prices_by_crop.get(price_crop)
-        item["planting_decendios"] = sorted(item["planting_decendios"])
-        item["pam_yield_mean_2021_2025_kg_ha"] = yield_kg_ha
-        item["pam_valid_yield_years"] = pam_summary.get("valid_yield_years", 0)
-        item["pam_crop_id"] = pam_id
-        item["price"] = quote
-        item["gross_value_brl_per_ha"] = (
-            yield_kg_ha / 1000 * quote["price_brl_per_metric_ton"]
-            if yield_kg_ha is not None and quote
-            else None
-        )
-        result.append(item)
-    return sorted(result, key=lambda item: (item["name"], item["id"]))
+                "from_state": row["state"],
+                "environment": row["environment"],
+                "counts": row["counts"],
+                "sample_size": int(row["sample_size"]),
+                "effective_sample_size": int(row.get("effective_sample_size", sum(row["counts"].values()))),
+                "support": row["support"],
+                "pooling": row.get("pooling"),
+                "provenance": row["provenance"],
+            }
+            for row in transitions
+        ],
+        "environment_years": {
+            year: labels
+            for year, labels in sorted(environment_history.items())
+            if 1983 <= int(year) <= 2025
+        },
+        "years": [1983, 2025],
+        "periods_per_year": 24,
+        "initial_state_id": "water_medium",
+        "initial_storage_fraction": 0.5,
+        "provenance": (
+            "Transições derivadas de balanço hídrico quinzenal com chuva e ETo da NASA POWER, "
+            "AWC SoilGrids/Saxton–Rawls e demanda de referência Kc=1. Não são medições de água no talhão."
+        ),
+    }
 
 
 def export_page(output: Path, seed: int) -> None:
     catalog = read_json(ROOT / "data" / "catalog" / "perfis-exemplo.json")
-    rotation_prior = read_json(ROOT / "data" / "reference" / "rotation-soil-prior.json")
-    prices = read_json(ROOT / "data" / "reference" / "yahoo-harvest-futures.json")
-    prices_by_crop = {item["crop"]: item for item in prices["quotes"]}
+    soil_hypotheses = read_json(ROOT / "data" / "reference" / "soil-crop-response-hypotheses.json")
+    economic_prices = read_json(ROOT / "data" / "reference" / "yahoo-harvest-futures.json")
+    economic_benchmarks = read_json(ROOT / "data" / "reference" / "economic-benchmarks.json")
     rng = Random(seed)
     by_uf = {}
     for profile in catalog["profiles"]:
@@ -134,15 +89,8 @@ def export_page(output: Path, seed: int) -> None:
         profile_dir = ROOT / "data" / "profiles" / profile_id
         manifest = read_json(profile_dir / "manifest.json")
         soil = read_json(profile_dir / "soil-profile.json")
-        pam = read_json(profile_dir / "pam-history.json")
-        crop_results = sorted((ROOT / "data" / "processed").glob(f"crop-scenario-{profile_id}-*-d*.json"))
-        if not crop_results:
-            raise FileNotFoundError(f"No registered crop scenario for {profile_id}")
-        registered = read_json(crop_results[0])
-        initial_crop_id = registered["scenario"]["crop_parameter_id"]
-        options = crop_options(profile_dir, pam, prices_by_crop)
-        if initial_crop_id not in {item["id"] for item in options}:
-            raise ValueError(f"Initial crop {initial_crop_id} is not an eligible rotation option for {profile_id}")
+        climate_summary = read_json(profile_dir / "climate-summary.json")
+        crop_markov = read_json(profile_dir / "crop-transition-markov.json")
         carbon = topsoil_carbon_g_kg(soil)
 
         profile_data[profile_id] = {
@@ -153,18 +101,15 @@ def export_page(output: Path, seed: int) -> None:
             },
             "soil": {
                 "organic_carbon_top_0_30_g_kg": carbon,
-                "initial_class": soil_class(carbon, rotation_prior),
+                "available_water_capacity_mm": soil["available_water_capacity_mm"],
                 "source": soil["source"],
                 "scope": soil["scope"],
                 "sample_point_basis": soil["sample_point"]["basis"],
             },
-            "initial_crop_id": initial_crop_id,
-            "crop_options": options,
-            "price_snapshot": {
-                "as_of_date": prices["as_of_date"],
-                "usd_brl_ptax_sell": prices["fx"]["rate"],
-            },
-            "pam_yield_period": "2021-2025 municipal mean; not a parcel estimate",
+            "crop_markov": crop_markov,
+            "water_markov": water_markov(profile_dir),
+            "climate_summary": climate_summary,
+            "economics": economic_benchmarks["profiles"][profile_id],
         }
         cases.append(
             {
@@ -179,8 +124,12 @@ def export_page(output: Path, seed: int) -> None:
     replacements = {
         "<!-- CASE_DATA -->": payload_json({"seed": seed, "cases": cases}),
         "<!-- PROFILE_DATA -->": payload_json(profile_data),
-        "<!-- ROTATION_SOIL_PRIOR -->": payload_json(rotation_prior),
-        "<!-- HARVEST_PRICES -->": payload_json(prices),
+        "<!-- SOIL_HYPOTHESES -->": payload_json(soil_hypotheses),
+        "<!-- ECONOMIC_DATA -->": payload_json({
+            "price_snapshot": economic_prices,
+            "discount_rate": economic_benchmarks["discount_rate"],
+            "reference_currency_month": economic_benchmarks["reference_currency_month"],
+        }),
     }
     for marker, value in replacements.items():
         html = html.replace(marker, value, 1)

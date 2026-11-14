@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://fieldshift.example/contracts/crop-transition-markov.schema.json",
+  "title": "Markov da cultura PAM de maior área entre os produtos do catálogo",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "model",
+    "unit_of_analysis",
+    "source",
+    "state_definition",
+    "probability_definition",
+    "alpha_per_destination",
+    "period",
+    "annual_observation_count",
+    "adjacent_year_transition_count",
+    "states",
+    "initial_crop_ids",
+    "transitions",
+    "annual_sequence",
+    "limitations"
+  ],
+  "properties": {
+    "schema_version": {"type": "string"},
+    "model": {"const": "municipal_catalog_dominant_crop_markov_proxy"},
+    "unit_of_analysis": {"type": "string"},
+    "source": {"type": "object"},
+    "state_definition": {"type": "string"},
+    "probability_definition": {"type": "string"},
+    "alpha_per_destination": {"type": "number", "minimum": 0},
+    "period": {"type": "array", "prefixItems": [{"type": "integer"}, {"type": "integer"}], "minItems": 2, "maxItems": 2},
+    "annual_observation_count": {"type": "integer", "minimum": 0},
+    "adjacent_year_transition_count": {"type": "integer", "minimum": 0},
+    "states": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "initial_selectable", "water_parameter_id", "kc_mid", "water_parameter_support", "kc_annual_effective", "kc_annual_support"],
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "initial_selectable": {"type": "boolean"},
+          "water_parameter_id": {"type": "string"},
+          "kc_mid": {"type": ["number", "null"]},
+          "water_parameter_support": {"type": "string"},
+          "kc_annual_effective": {"type": ["number", "null"]},
+          "kc_annual_support": {"type": "string"}
+        }
+      }
+    },
+    "initial_crop_ids": {"type": "array", "items": {"type": "string"}},
+    "transitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from_state", "to_state", "count", "outgoing_count", "observed_year_pairs"],
+        "properties": {
+          "from_state": {"type": "string"},
+          "to_state": {"type": "string"},
+          "count": {"type": "integer", "minimum": 0},
+          "outgoing_count": {"type": "integer", "minimum": 0},
+          "observed_year_pairs": {"type": "array", "items": {"type": "array", "prefixItems": [{"type": "integer"}, {"type": "integer"}], "minItems": 2, "maxItems": 2}}
+        }
+      }
+    },
+    "annual_sequence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["year", "state_id", "crop_name", "harvested_area_ha", "reported_crop_areas_ha"],
+        "properties": {
+          "year": {"type": "integer"},
+          "state_id": {"type": "string"},
+          "crop_name": {"type": "string"},
+          "harvested_area_ha": {"type": "number", "minimum": 0},
+          "reported_crop_areas_ha": {"type": "object", "additionalProperties": {"type": "number", "minimum": 0}}
+        }
+      }
+    },
+    "limitations": {"type": "array", "items": {"type": "string"}}
+  }
+}

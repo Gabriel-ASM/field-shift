@@ -28,7 +28,7 @@ VARIABLE_FIELDS = {
     "216": "harvested_area_ha",
 }
 PAM_CROP_LABELS = {
-    "40101": "amendoim_em_casca", "40103": "aveia_em_grao", "40106": "cana_de_acucar",
+    "40101": "amendoim_em_casca", "40102": "arroz_em_casca", "40103": "aveia_em_grao", "40106": "cana_de_acucar",
     "40112": "feijao_em_grao", "40122": "milho_em_grao", "40124": "soja_em_grao",
     "40125": "sorgo_em_grao", "40127": "trigo_em_grao", "40140": "cafe_arabica",
     "40141": "cafe_canephora",

@@ -6,12 +6,12 @@ A síntese mais recente da coleta está em [`research/field_shift_cerne_dos_dado
 
 | Diretório | Conteúdo |
 |---|---|
-| `raw/` | Respostas sem alteração de NASA POWER, SoilGrids, GeoJSON IBGE, exportações XLS SISZARC, consulta PAM/SIDRA, Yahoo Finance e PTAX/BCB |
+| `raw/` | Respostas sem alteração de NASA POWER, SoilGrids, GeoJSON IBGE, exportações XLS SISZARC, PAM/SIDRA, Yahoo Finance/PTAX, planilhas de custos CONAB e IPCA/SIDRA |
 | `profiles/<id>/` | Clima/solo normalizados; PAM e ZARC; estado hídrico de referência; transições de referência e por cultura/fase/decêndio; história ambiental, premissas e manifesto |
 | `processed/` | Execução registrada de referência e resultados de Monte Carlo por ação agrícola quando gerados |
 | `catalog/` | Inventário do PR, fontes recomendadas no desafio e perfis dos exemplos |
-| `contracts/` | JSON Schemas para clima, solo, estado, transição, observação de campo e manifesto |
-| `reference/` | FAO‑56 Kc/fases, hipótese de rotação/solo, preços futuros congelados, cobertura de dados, contratos e desenhos de pesquisa |
+| `contracts/` | JSON Schemas para clima, solo, estado, transição de cultura Markov, observação de campo e manifesto |
+| `reference/` | FAO‑56 Kc/fases, preços futuros congelados, custos econômicos extraídos, cobertura de dados, contratos e desenhos de pesquisa |
 
 Cada perfil tem 16.746 dias NASA POWER de 1981-01-01 a 2026-11-06. O Monte Carlo usa os 45 anos completos, 1981–2025. O ponto meteorológico e a célula SoilGrids são os centroides de área calculados a partir da malha municipal IBGE. São pontos regionais para demonstração, não localização de fazenda, talhão ou média municipal.
 
@@ -64,17 +64,21 @@ Os arquivos de modelo são:
 
 ### Cultura, ZARC e PAM
 
-`raw/mapa-siszarc/` preserva os XLS oficiais consultados no SISZARC para cada cultura/UF; `profiles/<id>/zarc-planting-windows.json` mantém somente as linhas do município de exemplo, ainda desdobradas por safra, cultura oficial, grupo, código oficial de solo e todos os 36 decêndios de risco. Os códigos podem variar por norma e não são cruzados com a AWC de SoilGrids. A interface lista as culturas anuais locais com janela ZARC de risco de 20% e permite escolher a próxima safra.
+`raw/mapa-siszarc/` preserva os XLS oficiais consultados no SISZARC para cada cultura/UF; `profiles/<id>/zarc-planting-windows.json` mantém somente as linhas do município de exemplo, ainda desdobradas por safra, cultura oficial, grupo, código oficial de solo e todos os 36 decêndios de risco. Os códigos podem variar por norma e não são cruzados com a AWC de SoilGrids. A interface mantém as culturas ZARC para consultar a referência de preço; o ZARC não fornece as transições da cadeia PAM.
 
-`raw/ibge/pam-municipal-5457-1988-2025.json` preserva os dados SIDRA da tabela PAM 5457. Cada perfil separa produto×ano e inclui produtividade (kg/ha), área, quantidade e valor nominal. O resumo tem mediana correta, faixa observada, anos válidos e a razão nominal valor da produção/área para 2021–2025. PAM é agregado municipal e não vira resposta causal de produtividade, preço atual ou série em reais constantes.
+`raw/ibge/pam-municipal-5457-1988-2025.json` preserva os dados SIDRA da tabela PAM 5457 para os três municípios; `raw/ibge/pam-state-5457-1988-2025.json` guarda a consulta estadual por UF para fallback de preço/rendimento quando um produto não tem série municipal. A consulta inclui arroz, amendoim, aveia, cana, feijão, milho, soja, sorgo, trigo e dois tipos de café. Cada perfil separa produto×ano e inclui produtividade (kg/ha), área, quantidade e valor nominal. O resumo tem mediana correta, faixa observada, anos válidos e a razão nominal valor da produção/área para 2021–2025. PAM é agregado regional e não vira resposta causal de produtividade, preço atual ou série em reais constantes.
 
 `raw/yahoo-finance/` guarda as respostas históricas de fechamento para soja CBOT `ZSK27.CBT` e milho CBOT `ZCK27.CBT` em 13/11/2026; `raw/bacen/` preserva a PTAX de venda da mesma data. `reference/yahoo-harvest-futures.json` normaliza os preços por tonelada, com moeda, unidade, vencimento e conversão. Recrie o snapshot com `python -m field_shift.freeze_harvest_prices --date 2026-11-13`. As cotações ficam congeladas na data da simulação e não são chamadas durante a página.
 
-A página usa o preço futuro de maio/2027 como referência internacional e multiplica pelo rendimento médio municipal da PAM/IBGE em 2021–2025 para calcular um valor bruto indicativo por hectare. Essa conta não considera base local, qualidade, frete, custos, impostos nem produtividade do talhão. Yahoo não tem contrato comparável para amendoim e sorgo nesta demonstração; nesses casos o valor/ha não é calculado. Os custos Conab e outras fontes R091/R092/R097 continuam fora do fluxo; PTAX (R094) entra somente na conversão pontual.
+`raw/conab/costs/` preserva planilhas oficiais de custo por cultura, sistema e município levantado. `raw/ibge/ipca-table-1737-2017-202610.json` preserva o índice usado para converter valores nominais a uma referência monetária comum. Execute `python data/pipeline/build_economic_benchmarks.py` para extrair 1.809 painéis CONAB e gerar `reference/economic-benchmarks.json`, que liga preço, rendimento e custo quando há cobertura.
+
+A página agrupa sequências completas de cinco transições vistas nas 10.000 trajetórias Monte Carlo e as compara pelo VPL calculado nos ambientes em que ocorreram. Frequência Monte Carlo, probabilidade Markov e estatísticas de VPL aparecem separadamente; sequências com poucas ocorrências têm baixa precisão. Todas as 14 culturas têm uma linha econômica editável por perfil: PAM/Yahoo/CONAB quando disponível, proxy identificado quando necessário, e receita inicial zero para as coberturas sem colheita comercial. Feijão, milheto e aveia-preta também usam proxies de custo ou colheita explicitados. A resposta do rendimento a água e carbono usa multiplicadores hipotéticos em `reference/soil-crop-response-hypotheses.json`. Esses valores iniciais podem ser alterados na interface; o resultado continua sendo uma comparação exploratória, não prova de superioridade real. Fontes, localidade, ano, valores e limitações constam em `reference/economic-benchmarks.json`.
 
 `reference/crop-water-parameters.json` registra Kc e duração de fases da FAO‑56, com a referência e a adequação de cada curva. `pipeline/build_crop_markov.py` gera `profiles/<id>/crop-markov-scenarios.json` para culturas que tenham janela ZARC local e ciclo anual FAO‑56 internamente consistente. Essa matriz de processo usada pelo CLI continua com unidade água×fase e ação cultura×decêndio; ela não mede o efeito de rotação ou manejo.
 
-`reference/rotation-soil-prior.json` alimenta a cadeia mostrada na página: estado `(última cultura, classe demonstrativa de carbono orgânico 0–30 cm)`, ação `próxima cultura elegível no ZARC` e destino `(nova cultura, nova classe de carbono)`. O carbono inicial é média ponderada das camadas SoilGrids 0–30 cm. Os limites de 12/20 g/kg e as probabilidades de transição estão explicitamente marcados como hipótese sem calibração. A referência Embrapa dá contexto direcional sobre cobertura vegetal, palhada e diversificação; não é fonte dos percentuais configurados. O modelo da página não usa a água como estado ou resultado central.
+`pipeline/build_crop_transition_markov.py` gera `profiles/<id>/crop-transition-markov.json` a partir da PAM. Cada estado é uma cultura. Para cada município-ano, seleciona a cultura de maior área colhida no catálogo e conta as mudanças entre anos consecutivos. Café arábica e canephora são agregados; aveia em grão é proxy para aveia-preta. O resultado descreve dominância municipal, não a cultura do mesmo talhão.
+
+`reference/soil-crop-response-hypotheses.json` registra a pseudocontagem Dirichlet uniforme de 0,5 para cada um dos 14 destinos, os coeficientes de reponderação ambiental e as faixas hipotéticas anuais de mudança do carbono orgânico. Assim todas as culturas permanecem possíveis, mas destinos sem histórico têm suporte apenas da prior, não de observações. As hipóteses estão separadas dos dados e não são efeitos causais.
 
 O contrato ponta a ponta está em `reference/model-data-flow.json`; `field_shift.data.load_crop_scenario()` carrega a matriz condicionada à cultura e ao decêndio para o mesmo motor Markov/Monte Carlo.
 
@@ -84,7 +88,7 @@ O motor adiciona Dirichlet `α=0,5` por destino viável a cada linha de contagem
 
 `python -m field_shift.demo` roda uma execução registrada por perfil com 10.000 trajetórias, 120 quinzenas (cinco anos), semente 2026 e blocos de duas quinzenas. Cada trajetória sorteia blocos de clima de anos históricos completos, uma realização das linhas Dirichlet e o estado hídrico seguinte por passo. As métricas em `processed/demo-simulation-results.json` mostram frequência de quinzenas em água baixa, duração de sequências baixas e a distribuição do estado final. Esse motor continua disponível como trilha de balanço hídrico.
 
-Na página, o Monte Carlo compara 10.000 trajetórias pareadas de cinco safras entre uma cultura repetida e a rotação local, propagando as probabilidades de solo explicitamente hipotéticas. A saída mostra a distribuição final de classes de carbono; não simula clima, resposta de produtividade, custos ou lucro. O valor bruto indicativo usa somente rendimento municipal observado na PAM e uma cotação de bolsa congelada. O relatório cita arquivos processados do PR, mas eles não são entradas ocultas.
+Na página, cada trajetória sorteia linhas Dirichlet a partir das transições da cultura de maior área entre os produtos do catálogo PAM e avança até cinco anos. Em cada ano reamostra 24 quinzenas da chuva NASA POWER, atualiza água e carbono do solo e só então repondera e amostra a cultura do ano seguinte. Produtos PAM fora do catálogo não entram na escolha anual. A matriz hídrica completa continua disponível para inspeção.
 
 ## Reconstruir e abrir
 
@@ -92,6 +96,7 @@ Na página, o Monte Carlo compara 10.000 trajetórias pareadas de cinco safras e
 python data/pipeline/build_profiles.py
 python data/pipeline/prepare_crop_data.py
 python data/pipeline/build_crop_markov.py
+python data/pipeline/build_crop_transition_markov.py
 python -m field_shift.demo
 python -m field_shift.crop_demo --profile data/profiles/franca-sp --crop peanut --planting-decendio 1 --risk 20
 python -m field_shift --profile data/profiles/ariquemes-ro --policy data/policies/balanco-hidrico-referencia.json --initial-state water_medium

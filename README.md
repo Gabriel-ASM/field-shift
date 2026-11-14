@@ -4,29 +4,37 @@ Proposta de apoio à decisão para comparar rotações de culturas usando observ
 
 O projeto responde ao desafio [Field Shift: Adapting Farms with NASA Data](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/) do NASA Space Apps Challenge 2026.
 
-> **Status:** NASA POWER/SoilGrids, PAM/IBGE e ZARC/MAPA ingeridos para Ariquemes‑RO, Franca‑SP e Varginha‑MG. A página interativa agora põe a cultura seguinte e o carbono orgânico do solo no centro de uma cadeia de Markov e compara 10.000 trajetórias de solo por rotação; as probabilidades de mudança do solo estão marcadas como hipóteses não calibradas. Há preços de referência congelados do Yahoo para soja e milho, vencimento maio/2027. A demonstração não é recomendação, preço local nem cálculo de margem.
+> **Status:** NASA POWER/SoilGrids, PAM/IBGE, ZARC/MAPA e custos CONAB ingeridos para Ariquemes‑RO, Franca‑SP e Varginha‑MG. A página mostra a cadeia Markov completa de 14 culturas como grafo de nós e setas; o Monte Carlo colore a frequência de visita aos nós e atualiza as transições após sortear água e carbono do solo. O otimizador ranqueia por VPL as sequências de cinco transições que apareceram nas 10.000 trajetórias. As 14 culturas têm valores iniciais rastreáveis ou hipóteses/proxies editáveis; coberturas começam com receita comercial zero e custo proxy. Probabilidade Markov, incerteza Dirichlet e frequência Monte Carlo são expostas separadamente. Resultados exploratórios, não prova causal nem recomendação agronômica.
 
 ## Executar o motor
 
 Para executar a simulação de referência nos três perfis, rode `python -m field_shift.demo`. Para um perfil isolado, use `python -m field_shift --profile data/profiles/ariquemes-ro --policy data/policies/balanco-hidrico-referencia.json --initial-state water_medium`. Os dados brutos estão em `data/raw/`, os normalizados e as contagens Markov em `data/profiles/`, e as fontes/gaps estão em `data/README.md`.
 
-Abra a [demonstração interativa](docs/visualizacao.html) para escolher a próxima cultura ZARC, avançar o estado cultura×solo e comparar 10.000 futuras cadeias em Ariquemes, Franca e Varginha. A página também mostra os fechamentos Yahoo de 13/11/2026 e um valor bruto indicativo por hectare, calculado com rendimentos municipais PAM/IBGE. Regenere a página com `python -m field_shift.visualize --output docs/visualizacao.html --seed 2026`.
+Abra a [demonstração interativa](docs/visualizacao.html) para escolher o município, definir uma cultura inicial, inspecionar a matriz Markov completa e comparar rotações de cinco safras pelo VPL esperado. Regenere custos/entradas econômicas com `python data/pipeline/build_economic_benchmarks.py`, a cadeia com `python data/pipeline/build_crop_transition_markov.py` e a página com `python -m field_shift.visualize --output docs/visualizacao.html --seed 2026`.
 
 ## Ideia em uma figura
 
 ```mermaid
 flowchart LR
-    A[Campo, solo e histórico] --> S[Estado do talhão]
-    S --> D[Ação: próxima cultura ZARC]
-    D --> R[Estado após a safra: cultura + carbono do solo]
-    S --> R
-    R --> T[Transição Markov hipotética]
-    T --> M[10 mil trajetórias de solo]
-    T --> O[Distribuição de resultados]
-    O --> C[Comparar rotações e riscos]
+    P[PAM municipal] --> D[Maior área entre produtos do catálogo por ano]
+    D --> T[Contagens entre anos consecutivos]
+    T --> M[Prior Markov explícita para 14 culturas]
+    N[NASA POWER + AWC SoilGrids] --> W[Monte Carlo de água quinzenal]
+    S[Carbono SoilGrids + hipótese COS] --> C[Monte Carlo de carbono]
+    W --> E[Ambiente por ano]
+    C --> E
+    E --> M
+    M --> R[Uma próxima cultura por ano]
+    R --> E
+    R --> V[VPL esperado em cinco anos]
+    C --> V
+    I[Conab custos + PAM rendimentos/preços + Yahoo futuros + IPCA] --> V
+    V --> O[Comparar rotas amostradas pelo VPL esperado]
 ```
 
-Na página interativa, o estado junta a última cultura e uma faixa demonstrativa de carbono orgânico do solo. O produtor escolhe a próxima cultura elegível no ZARC; uma hipótese explícita determina a probabilidade da classe de solo após a safra. O Monte Carlo compara repetição da cultura com uma rotação local por cinco safras. O motor de balanço hídrico e suas matrizes água×fase permanecem nos dados e no CLI, fora do foco desta página.
+Na página interativa, cada nó é uma cultura individual e uma trajetória ocupa exatamente um nó por ano. As contagens são derivadas da cultura de maior área colhida entre os produtos deste catálogo PAM em cada município-ano; produtos fora dele não competem e os dados não acompanham um talhão real. A cadeia tem pseudocontagem uniforme de 0,5 por destino. O grafo mostra todas as setas; ao selecionar um nó, exibe P média contextual, intervalo Dirichlet de 90%, contagem PAM, fatores ambientais e frequência de transições Monte Carlo. A água é derivada de NASA POWER; carbono inicial vem do solo mapeado e sua mudança anual é hipótese explícita, não dado medido.
+
+O VPL parte de rendimentos e valores unitários PAM, preços futuros Yahoo congelados para soja/milho, custos totais CONAB e taxa real aproximada por ANBIMA/IPCA. As 14 linhas econômicas têm fonte e premissas editáveis; proxies de colheita/custo e receita comercial inicial zero para coberturas são identificados. A interface agrupa sequências completas vistas nas 10.000 trajetórias, calcula estatísticas de VPL nos ambientes em que cada sequência ocorreu e mostra a frequência Monte Carlo e a probabilidade Markov separadamente. Rotas raras têm baixa precisão; este ranking não avalia sequências nunca amostradas e não é política reotimizada anualmente. Consulte [a cobertura e as limitações](data/reference/economic-input-coverage.json) e [as entradas rastreáveis](data/reference/economic-benchmarks.json).
 
 ## Documentação
 

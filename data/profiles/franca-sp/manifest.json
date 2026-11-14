@@ -100,7 +100,7 @@
       "periodo": "1988–2025",
       "resolucao": "município; não é observação de talhão",
       "qualidade": "estatística municipal oficial; cada variável pode ter lacunas e o valor monetário não está deflacionado",
-      "sha256": "877118a3ee5d1624e8e39209908dd6f817af38b1f309527eacf05af895b935ca"
+      "sha256": "d24f17ce0256cddf7272291632d3ac7dbabecd2b30384ddae5b74a38fcb8421f"
     },
     "zarc-planting-windows.json": {
       "origem": "MAPA SISZARC / Tábua de Risco ZARC",
@@ -131,6 +131,16 @@
       "resolucao": "espécie/grupo de cultivo; nem todo sistema tem curva anual compatível",
       "qualidade": "referência bibliográfica; cada proxy e inconsistência estão registrados no arquivo",
       "sha256": "8545b8fd8110b427e697794eb521b28fcf0afc26f60b34ace2d0f37aeecb3197"
+    },
+    "crop-transition-markov.json": {
+      "origem": "IBGE PAM/SIDRA tabela 5457; derivado de pam-history.json",
+      "responsavel": "Field Shift derivação; build_crop_transition_markov.py",
+      "frequencia": "anual; uma cultura dominante por município-ano",
+      "unidade": "transições da cultura de maior área entre produtos do catálogo em anos consecutivos; pseudocontagem alpha=0.5 separada das observações",
+      "periodo": "1988–2025",
+      "resolucao": "município IBGE; não identifica pixel ou talhão",
+      "qualidade": "contagens empíricas PAM; a prior uniforme habilita destinos sem contagem e está marcada no payload",
+      "sha256": "5b697e3ec02a317d6259948fc3155699497ec082a4e522a302d01e3e0bf5a291"
     }
   },
   "raw_sources": {
@@ -165,9 +175,9 @@
     },
     "pam_municipal_json": {
       "path": "data/raw/ibge/pam-municipal-5457-1988-2025.json",
-      "sha256": "0697fdb9a0240074ae493d8a77ae6e8a34a5478f693033d6b3d91df3a15bc64f",
-      "query": "https://apisidra.ibge.gov.br/values/t/5457/n6/1100023,3516200,3170701/v/112,214,215,216/p/1988-2025/c782/40101,40103,40106,40112,40122,40124,40125,40127,40140,40141?formato=json",
-      "retrieved_at_http": "Sat, 14 Nov 2026 00:27:42 GMT"
+      "sha256": "8eb117163468fdd8bc99e11ff49d87ff03f288afd217150649eaabd01fc62baf",
+      "query": "https://apisidra.ibge.gov.br/values/t/5457/n6/1100023,3516200,3170701/v/112,214,215,216/p/1988-2025/c782/40101,40102,40103,40106,40112,40122,40124,40125,40127,40140,40141?formato=json",
+      "retrieved_at_http": "Sat, 14 Nov 2026 05:37:34 GMT"
     },
     "zarc_siszarc_reports": [
       {

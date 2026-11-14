@@ -1,0 +1,71 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Hipóteses explícitas, editáveis e não calibradas para deixar o carbono do solo variar no Monte Carlo, afetar os pesos de transição e sensibilizar a produtividade usada no VPL.",
+  "status": "uncalibrated_hypothesis",
+  "warning": "As faixas abaixo não são observações, efeitos causais nem recomendações. Não há série local de rotação pareada com carbono do solo. Foram escolhidas como uma faixa de sensibilidade demonstrativa e devem ser substituídas por dados de campo ou fonte validada.",
+  "soil_carbon": {
+    "initial_source": "SoilGrids; média ponderada das camadas de 0–5, 5–15 e 15–30 cm",
+    "unit": "g/kg",
+    "annual_delta_unit": "g/kg/year",
+    "water_state_bin_thresholds_fraction": {
+      "water_low_max_inclusive": 0.3333333333,
+      "water_medium_max_inclusive": 0.6666666667
+    },
+    "state_thresholds_g_kg": {
+      "low_max_exclusive": 10,
+      "medium_max_exclusive": 20,
+      "high_min_inclusive": 20
+    },
+    "delta_by_crop": {
+      "soybean": [-0.25, 0.25],
+      "maize_grain": [-0.35, 0.2],
+      "sugarcane": [-0.2, 0.35],
+      "coffee": [-0.15, 0.25],
+      "sorghum_grain": [-0.3, 0.25],
+      "wheat": [-0.3, 0.2],
+      "dry_bean": [-0.25, 0.25],
+      "peanut": [-0.25, 0.3],
+      "oat": [-0.3, 0.25],
+      "forage_radish": [-0.2, 0.35],
+      "brachiaria": [-0.15, 0.4],
+      "millet": [-0.25, 0.35],
+      "crotalaria": [-0.2, 0.4],
+      "mucuna": [-0.2, 0.4]
+    }
+  },
+  "probability_modifiers": {
+    "water_state_representative_fraction": {
+      "water_low": 0.1666666667,
+      "water_medium": 0.5,
+      "water_high": 0.8333333333
+    },
+    "water_reference_kc": 1,
+    "water_crop_demand_adjustment": "After each sampled Kc=1 water transition, subtract (Kc annual effective − 1) × mean annual ETo / 24 / available water capacity, then reclassify at the explicit water-state thresholds. Kc annual effective is FAO-56 phase weighted with off-crop Kc=1; missing/inconsistent crop curves use Kc=1.",
+    "water_reference_fraction": 0.5,
+    "water_span_fraction": 0.3,
+    "water_stress_reference_fraction": 0.5,
+    "water_log_weight_coefficient": 1.5,
+    "soil_carbon_reference_g_kg": 20,
+    "soil_carbon_deficit_span_g_kg": 10,
+    "soil_log_weight_coefficient": 0.8,
+    "rotation_prior_alpha_per_destination": 0.5,
+    "rotation_prior_distribution": "Uniforme sobre as 14 culturas do catálogo; aplicada a todos os destinos, além das contagens PAM observadas. A probabilidade posterior representa um prior explícito onde falta histórico, não uma frequência observada."
+  },
+  "economic_yield_response": {
+    "status": "uncalibrated_hypothesis",
+    "warning": "Multiplicadores exploratórios de rendimento, não estimados com experimento local. São aplicados à mediana municipal PAM apenas para visualizar como água e carbono alterariam o VPL.",
+    "water_multiplier_by_class": {
+      "water_low": 0.9,
+      "water_medium": 1.0,
+      "water_high": 1.05
+    },
+    "soil_carbon_multiplier_by_class": {
+      "low": 0.8,
+      "medium": 1.0,
+      "high": 1.2
+    },
+    "soil_carbon_class_source": "state_thresholds_g_kg: low < 10; medium 10–<20; high >=20",
+    "combined_multiplier": "water_multiplier × soil_carbon_multiplier",
+    "interpretation": "O efeito atribuído ao carbono é maior que o efeito hídrico; ambos permanecem visíveis e sujeitos a análise de sensibilidade."
+  }
+}

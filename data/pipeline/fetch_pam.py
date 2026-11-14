@@ -9,8 +9,10 @@ from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[2]
 MUNICIPALITIES = ("1100023", "3516200", "3170701")
+STATE_LEVEL = "all"
 PRODUCTS = {
     "40101": "amendoim_em_casca",
+    "40102": "arroz_em_casca",
     "40103": "aveia_em_grao",
     "40106": "cana_de_acucar",
     "40112": "feijao_em_grao",
@@ -25,6 +27,15 @@ VARIABLES = {"112": "rendimento_medio_kg_ha", "214": "quantidade_produzida_t", "
 URL = (
     "https://apisidra.ibge.gov.br/values/t/5457/n6/"
     + ",".join(MUNICIPALITIES)
+    + "/v/"
+    + ",".join(VARIABLES)
+    + "/p/1988-2025/c782/"
+    + ",".join(PRODUCTS)
+    + "?formato=json"
+)
+STATE_URL = (
+    "https://apisidra.ibge.gov.br/values/t/5457/n3/"
+    + STATE_LEVEL
     + "/v/"
     + ",".join(VARIABLES)
     + "/p/1988-2025/c782/"
@@ -69,6 +80,42 @@ def main() -> None:
         encoding="utf-8",
     )
     print(f"{len(raw) - 1:,} PAM records written to {destination.relative_to(ROOT)}")
+
+    state_request = Request(STATE_URL, headers={"User-Agent": "FieldShift-OpenData/1.0"})
+    with urlopen(state_request, timeout=120) as response:
+        state_raw = json.load(response)
+        state_retrieved_at = response.headers.get("Date")
+    state_destination = ROOT / "data" / "raw" / "ibge" / "pam-state-5457-1988-2025.json"
+    state_destination.write_text(
+        json.dumps(
+            {
+                "source": {
+                    "publisher": "IBGE",
+                    "survey": "Produção Agrícola Municipal (PAM)",
+                    "table": 5457,
+                    "url": STATE_URL,
+                    "classification": {"id": 782, "name": "Produto das lavouras temporárias e permanentes", "categories": PRODUCTS},
+                    "territorial_level": "Unidades da Federação",
+                    "period": "1988–2025",
+                    "variables": VARIABLES,
+                    "retrieved_at_http": state_retrieved_at,
+                    "units": {
+                        "112": "kg/ha",
+                        "214": "t",
+                        "215": "mil R$; nominal, not inflation-adjusted",
+                        "216": "ha",
+                    },
+                    "usage": "Preencher faltas de série municipal com rendimento e valor unitário observados no estado; não é estimativa do município ou talhão.",
+                },
+                "records": state_raw[1:],
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    print(f"{len(state_raw) - 1:,} state-level PAM records written to {state_destination.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

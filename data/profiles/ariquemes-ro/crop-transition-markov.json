@@ -1,0 +1,826 @@
+{
+  "schema_version": "1.0.0",
+  "model": "municipal_catalog_dominant_crop_markov_proxy",
+  "unit_of_analysis": "município-ano; uma cultura de maior área entre os produtos do catálogo, não o mesmo talhão",
+  "source": {
+    "publisher": "IBGE",
+    "survey": "Produção Agrícola Municipal (PAM)",
+    "table": 5457,
+    "url": "https://apisidra.ibge.gov.br/values/t/5457/n6/1100023,3516200,3170701/v/112,214,215,216/p/1988-2025/c782/40101,40102,40103,40106,40112,40122,40124,40125,40127,40140,40141?formato=json",
+    "municipality_ibge_code": "1100023",
+    "municipality": "Ariquemes",
+    "period": [
+      1988,
+      2025
+    ]
+  },
+  "state_definition": "A cultura do catálogo com maior área colhida PAM no município-ano; produtos fora do catálogo não competem pelo estado dominante. Café arábica e canephora são agregados no estado Café.",
+  "probability_definition": "Contagem PAM + prior Dirichlet uniforme alpha=0.5 por destino, reponderada pela água e hipótese explícita de carbono do solo durante o Monte Carlo.",
+  "alpha_per_destination": 0.5,
+  "period": [
+    1988,
+    2025
+  ],
+  "annual_observation_count": 38,
+  "adjacent_year_transition_count": 37,
+  "states": [
+    {
+      "id": "soybean",
+      "name": "Soja",
+      "initial_selectable": true,
+      "water_parameter_id": "soybean",
+      "kc_mid": 1.15,
+      "kc_annual_effective": 0.9753424657534246,
+      "kc_annual_support": "derived from FAO-56 phase Kc/duration; off-crop reference Kc=1",
+      "water_parameter_support": "published_reference"
+    },
+    {
+      "id": "maize_grain",
+      "name": "Milho",
+      "initial_selectable": true,
+      "water_parameter_id": "maize_grain",
+      "kc_mid": 1.2,
+      "kc_annual_effective": 0.9410958904109589,
+      "kc_annual_support": "derived from FAO-56 phase Kc/duration; off-crop reference Kc=1",
+      "water_parameter_support": "published_reference"
+    },
+    {
+      "id": "sugarcane",
+      "name": "Cana-de-açúcar",
+      "initial_selectable": true,
+      "water_parameter_id": "sugarcane",
+      "kc_mid": 1.25,
+      "kc_annual_effective": 1.039506172839506,
+      "kc_annual_support": "derived from FAO-56 phase Kc/duration; off-crop reference Kc=1",
+      "water_parameter_support": "published_reference"
+    },
+    {
+      "id": "coffee",
+      "name": "Café",
+      "initial_selectable": true,
+      "water_parameter_id": "coffee_bare",
+      "kc_mid": 0.95,
+      "kc_annual_effective": 0.95,
+      "kc_annual_support": "published Kc_mid used across the year; annual phases unavailable",
+      "water_parameter_support": "published_reference"
+    },
+    {
+      "id": "sorghum_grain",
+      "name": "Sorgo",
+      "initial_selectable": false,
+      "water_parameter_id": "sorghum_grain",
+      "kc_mid": 1.05,
+      "kc_annual_effective": null,
+      "kc_annual_support": "FAO-56 phase duration is internally inconsistent; reference Kc=1 used in water evolution",
+      "water_parameter_support": "published_reference_internal_discrepancy"
+    },
+    {
+      "id": "wheat",
+      "name": "Trigo",
+      "initial_selectable": false,
+      "water_parameter_id": "wheat",
+      "kc_mid": 1.15,
+      "kc_annual_effective": 0.9424657534246575,
+      "kc_annual_support": "derived from FAO-56 phase Kc/duration; off-crop reference Kc=1",
+      "water_parameter_support": "group_proxy"
+    },
+    {
+      "id": "dry_bean",
+      "name": "Feijão",
+      "initial_selectable": false,
+      "water_parameter_id": "dry_bean",
+      "kc_mid": 1.15,
+      "kc_annual_effective": 0.9513698630136986,
+      "kc_annual_support": "derived from FAO-56 phase Kc/duration; off-crop reference Kc=1",
+      "water_parameter_support": "published_reference"
+    },
+    {
+      "id": "peanut",
+      "name": "Amendoim",
+      "initial_selectable": false,
+      "water_parameter_id": "peanut",
+      "kc_mid": 1.15,
+      "kc_annual_effective": 0.9472602739726027,
+      "kc_annual_support": "derived from FAO-56 phase Kc/duration; off-crop reference Kc=1",
+      "water_parameter_support": "published_reference"
+    },
+    {
+      "id": "oat",
+      "name": "Aveia-preta",
+      "initial_selectable": false,
+      "water_parameter_id": "oat",
+      "kc_mid": 1.15,
+      "kc_annual_effective": 0.9424657534246575,
+      "kc_annual_support": "derived from FAO-56 phase Kc/duration; off-crop reference Kc=1",
+      "water_parameter_support": "group_proxy"
+    },
+    {
+      "id": "forage_radish",
+      "name": "Nabo forrageiro",
+      "initial_selectable": false,
+      "water_parameter_id": "forage_radish",
+      "kc_mid": null,
+      "kc_annual_effective": null,
+      "kc_annual_support": "missing_crop_specific_parameter; reference Kc=1 used in water evolution",
+      "water_parameter_support": "missing_crop_specific_parameter"
+    },
+    {
+      "id": "brachiaria",
+      "name": "Braquiária",
+      "initial_selectable": false,
+      "water_parameter_id": "brachiaria",
+      "kc_mid": null,
+      "kc_annual_effective": null,
+      "kc_annual_support": "missing_crop_specific_parameter; reference Kc=1 used in water evolution",
+      "water_parameter_support": "missing_crop_specific_parameter"
+    },
+    {
+      "id": "millet",
+      "name": "Milheto",
+      "initial_selectable": false,
+      "water_parameter_id": "millet",
+      "kc_mid": 1.0,
+      "kc_annual_effective": 0.9232876712328767,
+      "kc_annual_support": "derived from FAO-56 phase Kc/duration; off-crop reference Kc=1",
+      "water_parameter_support": "published_reference"
+    },
+    {
+      "id": "crotalaria",
+      "name": "Crotalária",
+      "initial_selectable": false,
+      "water_parameter_id": "crotalaria",
+      "kc_mid": null,
+      "kc_annual_effective": null,
+      "kc_annual_support": "missing_crop_specific_parameter; reference Kc=1 used in water evolution",
+      "water_parameter_support": "missing_crop_specific_parameter"
+    },
+    {
+      "id": "mucuna",
+      "name": "Mucuna",
+      "initial_selectable": false,
+      "water_parameter_id": "mucuna",
+      "kc_mid": null,
+      "kc_annual_effective": null,
+      "kc_annual_support": "missing_crop_specific_parameter; reference Kc=1 used in water evolution",
+      "water_parameter_support": "missing_crop_specific_parameter"
+    }
+  ],
+  "initial_crop_ids": [
+    "soybean",
+    "maize_grain",
+    "sugarcane",
+    "coffee"
+  ],
+  "transitions": [
+    {
+      "from_state": "coffee",
+      "to_state": "soybean",
+      "count": 1,
+      "outgoing_count": 1,
+      "observed_year_pairs": [
+        [
+          2012,
+          2013
+        ]
+      ]
+    },
+    {
+      "from_state": "dry_bean",
+      "to_state": "coffee",
+      "count": 1,
+      "outgoing_count": 1,
+      "observed_year_pairs": [
+        [
+          2011,
+          2012
+        ]
+      ]
+    },
+    {
+      "from_state": "maize_grain",
+      "to_state": "dry_bean",
+      "count": 1,
+      "outgoing_count": 23,
+      "observed_year_pairs": [
+        [
+          2010,
+          2011
+        ]
+      ]
+    },
+    {
+      "from_state": "maize_grain",
+      "to_state": "maize_grain",
+      "count": 22,
+      "outgoing_count": 23,
+      "observed_year_pairs": [
+        [
+          1988,
+          1989
+        ],
+        [
+          1989,
+          1990
+        ],
+        [
+          1990,
+          1991
+        ],
+        [
+          1991,
+          1992
+        ],
+        [
+          1992,
+          1993
+        ],
+        [
+          1993,
+          1994
+        ],
+        [
+          1994,
+          1995
+        ],
+        [
+          1995,
+          1996
+        ],
+        [
+          1996,
+          1997
+        ],
+        [
+          1997,
+          1998
+        ],
+        [
+          1998,
+          1999
+        ],
+        [
+          1999,
+          2000
+        ],
+        [
+          2000,
+          2001
+        ],
+        [
+          2001,
+          2002
+        ],
+        [
+          2002,
+          2003
+        ],
+        [
+          2003,
+          2004
+        ],
+        [
+          2004,
+          2005
+        ],
+        [
+          2005,
+          2006
+        ],
+        [
+          2006,
+          2007
+        ],
+        [
+          2007,
+          2008
+        ],
+        [
+          2008,
+          2009
+        ],
+        [
+          2009,
+          2010
+        ]
+      ]
+    },
+    {
+      "from_state": "soybean",
+      "to_state": "soybean",
+      "count": 12,
+      "outgoing_count": 12,
+      "observed_year_pairs": [
+        [
+          2013,
+          2014
+        ],
+        [
+          2014,
+          2015
+        ],
+        [
+          2015,
+          2016
+        ],
+        [
+          2016,
+          2017
+        ],
+        [
+          2017,
+          2018
+        ],
+        [
+          2018,
+          2019
+        ],
+        [
+          2019,
+          2020
+        ],
+        [
+          2020,
+          2021
+        ],
+        [
+          2021,
+          2022
+        ],
+        [
+          2022,
+          2023
+        ],
+        [
+          2023,
+          2024
+        ],
+        [
+          2024,
+          2025
+        ]
+      ]
+    }
+  ],
+  "annual_sequence": [
+    {
+      "year": 1988,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 5917.0,
+      "reported_crop_areas_ha": {
+        "sugarcane": 131.0,
+        "dry_bean": 3434.0,
+        "maize_grain": 5917.0
+      }
+    },
+    {
+      "year": 1989,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 8000.0,
+      "reported_crop_areas_ha": {
+        "sugarcane": 200.0,
+        "dry_bean": 3800.0,
+        "maize_grain": 8000.0
+      }
+    },
+    {
+      "year": 1990,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 6800.0,
+      "reported_crop_areas_ha": {
+        "sugarcane": 200.0,
+        "dry_bean": 4000.0,
+        "maize_grain": 6800.0
+      }
+    },
+    {
+      "year": 1991,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 6800.0,
+      "reported_crop_areas_ha": {
+        "sugarcane": 200.0,
+        "dry_bean": 1100.0,
+        "maize_grain": 6800.0
+      }
+    },
+    {
+      "year": 1992,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 6800.0,
+      "reported_crop_areas_ha": {
+        "sugarcane": 210.0,
+        "dry_bean": 1500.0,
+        "maize_grain": 6800.0
+      }
+    },
+    {
+      "year": 1993,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 1658.0,
+      "reported_crop_areas_ha": {
+        "sugarcane": 52.0,
+        "dry_bean": 1039.0,
+        "maize_grain": 1658.0
+      }
+    },
+    {
+      "year": 1994,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 1990.0,
+      "reported_crop_areas_ha": {
+        "sugarcane": 47.0,
+        "dry_bean": 1143.0,
+        "maize_grain": 1990.0
+      }
+    },
+    {
+      "year": 1995,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 1990.0,
+      "reported_crop_areas_ha": {
+        "sugarcane": 48.0,
+        "dry_bean": 1200.0,
+        "maize_grain": 1990.0
+      }
+    },
+    {
+      "year": 1996,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 2978.0,
+      "reported_crop_areas_ha": {
+        "sugarcane": 3.0,
+        "dry_bean": 594.0,
+        "maize_grain": 2978.0
+      }
+    },
+    {
+      "year": 1997,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 3113.0,
+      "reported_crop_areas_ha": {
+        "sugarcane": 3.0,
+        "dry_bean": 621.0,
+        "maize_grain": 3113.0
+      }
+    },
+    {
+      "year": 1998,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 2660.0,
+      "reported_crop_areas_ha": {
+        "sugarcane": 4.0,
+        "dry_bean": 914.0,
+        "maize_grain": 2660.0
+      }
+    },
+    {
+      "year": 1999,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 1400.0,
+      "reported_crop_areas_ha": {
+        "sugarcane": 5.0,
+        "dry_bean": 580.0,
+        "maize_grain": 1400.0
+      }
+    },
+    {
+      "year": 2000,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 1250.0,
+      "reported_crop_areas_ha": {
+        "sugarcane": 5.0,
+        "dry_bean": 290.0,
+        "maize_grain": 1250.0
+      }
+    },
+    {
+      "year": 2001,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 1050.0,
+      "reported_crop_areas_ha": {
+        "sugarcane": 5.0,
+        "dry_bean": 260.0,
+        "maize_grain": 1050.0
+      }
+    },
+    {
+      "year": 2002,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 1000.0,
+      "reported_crop_areas_ha": {
+        "sugarcane": 8.0,
+        "dry_bean": 183.0,
+        "maize_grain": 1000.0,
+        "soybean": 450.0
+      }
+    },
+    {
+      "year": 2003,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 1000.0,
+      "reported_crop_areas_ha": {
+        "sugarcane": 8.0,
+        "dry_bean": 208.0,
+        "maize_grain": 1000.0
+      }
+    },
+    {
+      "year": 2004,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 1600.0,
+      "reported_crop_areas_ha": {
+        "sugarcane": 5.0,
+        "dry_bean": 477.0,
+        "maize_grain": 1600.0
+      }
+    },
+    {
+      "year": 2005,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 2130.0,
+      "reported_crop_areas_ha": {
+        "sugarcane": 5.0,
+        "dry_bean": 550.0,
+        "maize_grain": 2130.0
+      }
+    },
+    {
+      "year": 2006,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 2343.0,
+      "reported_crop_areas_ha": {
+        "peanut": 2.0,
+        "sugarcane": 5.0,
+        "dry_bean": 550.0,
+        "maize_grain": 2343.0,
+        "soybean": 50.0
+      }
+    },
+    {
+      "year": 2007,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 2577.0,
+      "reported_crop_areas_ha": {
+        "peanut": 3.0,
+        "sugarcane": 10.0,
+        "dry_bean": 810.0,
+        "maize_grain": 2577.0
+      }
+    },
+    {
+      "year": 2008,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 2577.0,
+      "reported_crop_areas_ha": {
+        "peanut": 3.0,
+        "sugarcane": 10.0,
+        "dry_bean": 1157.0,
+        "maize_grain": 2577.0
+      }
+    },
+    {
+      "year": 2009,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 3566.0,
+      "reported_crop_areas_ha": {
+        "peanut": 3.0,
+        "sugarcane": 10.0,
+        "dry_bean": 1430.0,
+        "maize_grain": 3566.0,
+        "soybean": 400.0
+      }
+    },
+    {
+      "year": 2010,
+      "state_id": "maize_grain",
+      "crop_name": "Milho",
+      "harvested_area_ha": 4279.0,
+      "reported_crop_areas_ha": {
+        "dry_bean": 1430.0,
+        "maize_grain": 4279.0,
+        "soybean": 1100.0
+      }
+    },
+    {
+      "year": 2011,
+      "state_id": "dry_bean",
+      "crop_name": "Feijão",
+      "harvested_area_ha": 1430.0,
+      "reported_crop_areas_ha": {
+        "sugarcane": 6.0,
+        "dry_bean": 1430.0,
+        "maize_grain": 1350.0,
+        "soybean": 1350.0
+      }
+    },
+    {
+      "year": 2012,
+      "state_id": "coffee",
+      "crop_name": "Café",
+      "harvested_area_ha": 4764.0,
+      "reported_crop_areas_ha": {
+        "coffee": 4764.0,
+        "dry_bean": 418.0,
+        "maize_grain": 750.0,
+        "soybean": 1642.0
+      }
+    },
+    {
+      "year": 2013,
+      "state_id": "soybean",
+      "crop_name": "Soja",
+      "harvested_area_ha": 1642.0,
+      "reported_crop_areas_ha": {
+        "coffee": 630.0,
+        "sugarcane": 6.0,
+        "dry_bean": 20.0,
+        "maize_grain": 675.0,
+        "soybean": 1642.0
+      }
+    },
+    {
+      "year": 2014,
+      "state_id": "soybean",
+      "crop_name": "Soja",
+      "harvested_area_ha": 1685.0,
+      "reported_crop_areas_ha": {
+        "coffee": 600.0,
+        "sugarcane": 6.0,
+        "dry_bean": 20.0,
+        "maize_grain": 777.0,
+        "soybean": 1685.0
+      }
+    },
+    {
+      "year": 2015,
+      "state_id": "soybean",
+      "crop_name": "Soja",
+      "harvested_area_ha": 2243.0,
+      "reported_crop_areas_ha": {
+        "coffee": 605.0,
+        "sugarcane": 10.0,
+        "dry_bean": 30.0,
+        "maize_grain": 695.0,
+        "soybean": 2243.0
+      }
+    },
+    {
+      "year": 2016,
+      "state_id": "soybean",
+      "crop_name": "Soja",
+      "harvested_area_ha": 2078.0,
+      "reported_crop_areas_ha": {
+        "coffee": 430.0,
+        "sugarcane": 11.0,
+        "dry_bean": 30.0,
+        "maize_grain": 697.0,
+        "soybean": 2078.0
+      }
+    },
+    {
+      "year": 2017,
+      "state_id": "soybean",
+      "crop_name": "Soja",
+      "harvested_area_ha": 3321.0,
+      "reported_crop_areas_ha": {
+        "coffee": 360.0,
+        "sugarcane": 10.0,
+        "dry_bean": 25.0,
+        "maize_grain": 975.0,
+        "soybean": 3321.0
+      }
+    },
+    {
+      "year": 2018,
+      "state_id": "soybean",
+      "crop_name": "Soja",
+      "harvested_area_ha": 5600.0,
+      "reported_crop_areas_ha": {
+        "coffee": 270.0,
+        "sugarcane": 20.0,
+        "dry_bean": 10.0,
+        "maize_grain": 1000.0,
+        "soybean": 5600.0
+      }
+    },
+    {
+      "year": 2019,
+      "state_id": "soybean",
+      "crop_name": "Soja",
+      "harvested_area_ha": 7893.0,
+      "reported_crop_areas_ha": {
+        "coffee": 231.0,
+        "sugarcane": 20.0,
+        "dry_bean": 10.0,
+        "maize_grain": 1400.0,
+        "soybean": 7893.0
+      }
+    },
+    {
+      "year": 2020,
+      "state_id": "soybean",
+      "crop_name": "Soja",
+      "harvested_area_ha": 7782.0,
+      "reported_crop_areas_ha": {
+        "coffee": 261.0,
+        "sugarcane": 20.0,
+        "dry_bean": 10.0,
+        "maize_grain": 1600.0,
+        "soybean": 7782.0
+      }
+    },
+    {
+      "year": 2021,
+      "state_id": "soybean",
+      "crop_name": "Soja",
+      "harvested_area_ha": 6979.0,
+      "reported_crop_areas_ha": {
+        "coffee": 185.0,
+        "sugarcane": 20.0,
+        "dry_bean": 10.0,
+        "maize_grain": 1900.0,
+        "soybean": 6979.0
+      }
+    },
+    {
+      "year": 2022,
+      "state_id": "soybean",
+      "crop_name": "Soja",
+      "harvested_area_ha": 9191.0,
+      "reported_crop_areas_ha": {
+        "coffee": 165.0,
+        "sugarcane": 20.0,
+        "dry_bean": 4.0,
+        "maize_grain": 2400.0,
+        "soybean": 9191.0
+      }
+    },
+    {
+      "year": 2023,
+      "state_id": "soybean",
+      "crop_name": "Soja",
+      "harvested_area_ha": 13106.0,
+      "reported_crop_areas_ha": {
+        "coffee": 250.0,
+        "sugarcane": 25.0,
+        "dry_bean": 3.0,
+        "maize_grain": 2370.0,
+        "soybean": 13106.0
+      }
+    },
+    {
+      "year": 2024,
+      "state_id": "soybean",
+      "crop_name": "Soja",
+      "harvested_area_ha": 15980.0,
+      "reported_crop_areas_ha": {
+        "coffee": 370.0,
+        "sugarcane": 25.0,
+        "dry_bean": 3.0,
+        "maize_grain": 7875.0,
+        "soybean": 15980.0
+      }
+    },
+    {
+      "year": 2025,
+      "state_id": "soybean",
+      "crop_name": "Soja",
+      "harvested_area_ha": 14933.0,
+      "reported_crop_areas_ha": {
+        "coffee": 370.0,
+        "sugarcane": 20.0,
+        "dry_bean": 3.0,
+        "maize_grain": 11150.0,
+        "soybean": 14933.0,
+        "sorghum_grain": 70.0
+      }
+    }
+  ],
+  "limitations": [
+    "O estado é dominante apenas entre os produtos incluídos no catálogo; produtos PAM fora dele, como arroz, não competem pelo estado dominante.",
+    "A cultura de maior área entre os produtos do catálogo não identifica o cultivo ou a rotação do mesmo talhão.",
+    "A prior uniforme torna todas as culturas destinos possíveis; quando count=0, a probabilidade não é frequência observada.",
+    "PAM não cobre todas as culturas de cobertura do catálogo; essas linhas dependem integralmente da prior."
+  ]
+}

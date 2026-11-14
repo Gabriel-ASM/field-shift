@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.1.0",
+  "status": "all_states_editable_exploratory_vpl_available",
+  "source_of_truth": "data/reference/economic-benchmarks.json",
+  "objective": "maximizar o VPL esperado por hectare em cinco safras futuras entre sequências completas observadas nas trajetórias Monte Carlo iniciadas pela cultura escolhida",
+  "sequence_ranking": "agrupar por sequência completa de cinco transições as rotas amostradas em 10.000 trajetórias; calcular média, mediana, faixa, probabilidade de prejuízo e cauda do VPL a partir dos ambientes simulados em que a sequência ocorreu; exibir frequência Monte Carlo e probabilidade Markov média separadamente; sinalizar que rotas raras têm baixa precisão",
+  "profile_coverage": {
+    "ariquemes-ro": {
+      "included_crop_ids": [
+        "soybean",
+        "maize_grain",
+        "sugarcane",
+        "coffee",
+        "sorghum_grain",
+        "wheat",
+        "dry_bean",
+        "peanut",
+        "oat",
+        "forage_radish",
+        "brachiaria",
+        "millet",
+        "crotalaria",
+        "mucuna"
+      ],
+      "excluded_crop_ids": []
+    },
+    "franca-sp": {
+      "included_crop_ids": [
+        "soybean",
+        "maize_grain",
+        "sugarcane",
+        "coffee",
+        "sorghum_grain",
+        "wheat",
+        "dry_bean",
+        "peanut",
+        "oat",
+        "forage_radish",
+        "brachiaria",
+        "millet",
+        "crotalaria",
+        "mucuna"
+      ],
+      "excluded_crop_ids": []
+    },
+    "varginha-mg": {
+      "included_crop_ids": [
+        "soybean",
+        "maize_grain",
+        "sugarcane",
+        "coffee",
+        "sorghum_grain",
+        "wheat",
+        "dry_bean",
+        "peanut",
+        "oat",
+        "forage_radish",
+        "brachiaria",
+        "millet",
+        "crotalaria",
+        "mucuna"
+      ],
+      "excluded_crop_ids": []
+    }
+  },
+  "markov_states": "Todas as 14 culturas são destinos Markov e têm uma linha econômica inicial editável nos três perfis. Valores observados, proxies e hipóteses de receita zero para coberturas estão diferenciados nos campos de fonte; a inclusão de cada cultura no ranking pode ser alterada na página.",
+  "price_sources": {
+    "soybean_and_maize": "Yahoo CBOT May-2027, snapshot 2026-11-13, convertido por PTAX; referência de bolsa, sem base local",
+    "sugarcane_and_coffee": "valor unitário municipal da PAM no último ano válido, convertido a moeda-base por IPCA"
+  },
+  "cost_source": "Custo total CONAB por hectare quando há painel direto; para culturas sem painel, proxy de custo por cultura indicada, localidade, ano, sistema produtivo e fator IPCA constam em economic-benchmarks.json. Todos os valores podem ser editados na interface.",
+  "known_limits": [
+    "O IPCA geral equaliza datas monetárias, mas não mede inflação de insumos agropecuários.",
+    "Painéis CONAB não são sempre do mesmo município, safra, sistema tecnológico ou tipo de empreendimento dos exemplos; a localidade e o nível de correspondência ficam visíveis.",
+    "O VPL inclui as 14 culturas do catálogo com valores iniciais rastreáveis ou hipóteses/proxies explicitamente marcados e editáveis. Nabo, braquiária, crotalária e mucuna começam sem receita comercial e com custo proxy; feijão, milheto e aveia-preta também usam proxies identificados. Esses valores não são observações dessas culturas.",
+    "Preço e custo permanecem constantes em termos reais no horizonte; preços futuros Yahoo de maio/2027 são referências de bolsa, não oferta local nem curva de cinco anos.",
+    "Café e cana são perenes/semi-perenes; o painel de custo pode representar etapa de produção, e a cadeia anual não modela idade, implantação ou reforma do canavial/cafezal.",
+    "A resposta de produtividade a água e carbono é hipótese explícita não calibrada; resultados VPL são exploratórios e não provam superioridade agronômica nem causal.",
+    "A página ranqueia sequências completas de cinco transições que apareceram nas 10.000 trajetórias Monte Carlo; VPL e frequência dependem da amostra, e sequências raras têm alta incerteza. A probabilidade Markov indica plausibilidade sob a cadeia municipal, não validação agronômica nem restrição de manejo."
+  ]
+}

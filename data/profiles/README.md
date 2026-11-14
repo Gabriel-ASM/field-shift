@@ -6,9 +6,9 @@
 - `franca-sp/`
 - `varginha-mg/`
 
-Cada perfil tem `manifest.json`, clima/solo, `pam-history.json`, `zarc-planting-windows.json` e duas matrizes Markov: referência Kc=1 (`states.json`/`transitions.json`) e cultura×fase×decêndio (`crop-markov-scenarios.json`), cujas curvas Kc estão em `../reference/crop-water-parameters.json`. `environment.json` guarda blocos sazonais; `markov-derivation.json` e `assumptions.json` documentam premissas e limites. Os hashes no manifesto ligam arquivos normalizados às fontes em `data/raw/` e `data/reference/`.
+Cada perfil tem `manifest.json`, clima/solo, `pam-history.json`, `zarc-planting-windows.json` e cadeias Markov distintas: cultura de maior área PAM entre produtos do catálogo (`crop-transition-markov.json`), água de referência Kc=1 (`states.json`/`transitions.json`) e água×fase×decêndio (`crop-markov-scenarios.json`), cujas curvas Kc estão em `../reference/crop-water-parameters.json`. `environment.json` guarda blocos sazonais; `markov-derivation.json` e `assumptions.json` documentam premissas e limites. Os hashes no manifesto ligam arquivos normalizados às fontes em `data/raw/` e `data/reference/`.
 
-Os pontos são centroides municipais e não observações de talhão. A matriz base descreve demanda de referência; as matrizes por cultura aplicam Kc de literatura durante o ciclo e demanda Kc=1 fora dele. As duas são derivadas de balanço hídrico, não observações de água/manejo. ZARC é filtro de elegibilidade; PAM dá contexto municipal e não calibra resposta do talhão. Veja [`data/README.md`](../README.md) para método, incerteza e interpretação.
+Os pontos são centroides municipais e não observações de talhão. As matrizes hídricas são derivadas de balanço, não observações de água/manejo. A cadeia de culturas conta mudanças na cultura PAM de maior área entre produtos do catálogo, não transições do mesmo campo; produtos fora do catálogo não competem por essa posição. A prior habilita destinos sem contagens, e as faixas de carbono são hipóteses explícitas não calibradas. ZARC dá referência de janela; PAM não calibra resposta do talhão. Veja [`data/README.md`](../README.md) para método, incerteza e interpretação.
 
 ## Adicionar perfil
 

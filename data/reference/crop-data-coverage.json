@@ -3,12 +3,13 @@
     "publisher": "IBGE",
     "survey": "Produção Agrícola Municipal (PAM)",
     "table": 5457,
-    "url": "https://apisidra.ibge.gov.br/values/t/5457/n6/1100023,3516200,3170701/v/112,214,215,216/p/1988-2025/c782/40101,40103,40106,40112,40122,40124,40125,40127,40140,40141?formato=json",
+    "url": "https://apisidra.ibge.gov.br/values/t/5457/n6/1100023,3516200,3170701/v/112,214,215,216/p/1988-2025/c782/40101,40102,40103,40106,40112,40122,40124,40125,40127,40140,40141?formato=json",
     "classification": {
       "id": 782,
       "name": "Produto das lavouras temporárias e permanentes",
       "categories": {
         "40101": "amendoim_em_casca",
+        "40102": "arroz_em_casca",
         "40103": "aveia_em_grao",
         "40106": "cana_de_acucar",
         "40112": "feijao_em_grao",
@@ -32,7 +33,7 @@
       "215": "valor_producao_mil_reais",
       "216": "area_colhida_ha"
     },
-    "retrieved_at_http": "Sat, 14 Nov 2026 00:27:42 GMT",
+    "retrieved_at_http": "Sat, 14 Nov 2026 05:37:34 GMT",
     "units": {
       "112": "kg/ha",
       "214": "t",
@@ -43,7 +44,7 @@
   "profiles": {
     "ariquemes-ro": {
       "ibge_code": "1100023",
-      "pam_records": 380,
+      "pam_records": 418,
       "pam_crops": {
         "amendoim_em_casca": {
           "valid_yield_years": 4,
@@ -54,6 +55,17 @@
           "gross_value_mean_2021_2025_brl_per_ha_nominal": null,
           "first_valid_year": 2006,
           "last_valid_year": 2009,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "arroz_em_casca": {
+          "valid_yield_years": 38,
+          "yield_min_kg_ha": 979.0,
+          "yield_median_kg_ha": 2550.0,
+          "yield_max_kg_ha": 4440.0,
+          "yield_mean_2021_2025_kg_ha": 3967.6,
+          "gross_value_mean_2021_2025_brl_per_ha_nominal": 5630.22320441989,
+          "first_valid_year": 1988,
+          "last_valid_year": 2025,
           "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
         },
         "aveia_em_grao": {
@@ -170,7 +182,7 @@
     },
     "franca-sp": {
       "ibge_code": "3516200",
-      "pam_records": 380,
+      "pam_records": 418,
       "pam_crops": {
         "amendoim_em_casca": {
           "valid_yield_years": 0,
@@ -181,6 +193,17 @@
           "gross_value_mean_2021_2025_brl_per_ha_nominal": null,
           "first_valid_year": null,
           "last_valid_year": null,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "arroz_em_casca": {
+          "valid_yield_years": 14,
+          "yield_min_kg_ha": 1380.0,
+          "yield_median_kg_ha": 1800.0,
+          "yield_max_kg_ha": 1800.0,
+          "yield_mean_2021_2025_kg_ha": null,
+          "gross_value_mean_2021_2025_brl_per_ha_nominal": null,
+          "first_valid_year": 1988,
+          "last_valid_year": 2001,
           "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
         },
         "aveia_em_grao": {
@@ -297,7 +320,7 @@
     },
     "varginha-mg": {
       "ibge_code": "3170701",
-      "pam_records": 380,
+      "pam_records": 418,
       "pam_crops": {
         "amendoim_em_casca": {
           "valid_yield_years": 21,
@@ -308,6 +331,17 @@
           "gross_value_mean_2021_2025_brl_per_ha_nominal": null,
           "first_valid_year": 1988,
           "last_valid_year": 2019,
+          "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
+        },
+        "arroz_em_casca": {
+          "valid_yield_years": 15,
+          "yield_min_kg_ha": 1000.0,
+          "yield_median_kg_ha": 1440.0,
+          "yield_max_kg_ha": 1906.0,
+          "yield_mean_2021_2025_kg_ha": null,
+          "gross_value_mean_2021_2025_brl_per_ha_nominal": null,
+          "first_valid_year": 1988,
+          "last_valid_year": 2018,
           "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
         },
         "aveia_em_grao": {
