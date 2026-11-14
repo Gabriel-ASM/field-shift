@@ -46,6 +46,24 @@ def markov_graph_errors(chain: dict) -> list[str]:
     return errors
 
 
+def monte_carlo_errors(run: dict) -> list[str]:
+    chain = run["chain"]
+    errors = [f"chain: {message}" for message in markov_graph_errors(chain)]
+    ids = {state["id"] for state in chain["states"]}
+    crops = {state["crop"] for state in chain["states"]}
+    for scenario in run["scenarios"]:
+        policy, name = scenario["policy"], scenario["id"]
+        if scenario.get("initial_state") and scenario["initial_state"] not in ids:
+            errors.append(f"scenario {name}: initial_state {scenario['initial_state']!r} is not a chain state")
+        if policy["kind"] == "rotation":
+            errors += [f"scenario {name}: crop {crop!r} has no state in the chain" for crop in policy["sequence"] if crop not in crops]
+            if policy["fallback"] not in ids:
+                errors.append(f"scenario {name}: fallback {policy['fallback']!r} is not a chain state")
+    for event in run.get("events", []):
+        errors += [f"event {event['id']}: crop {crop!r} has no state in the chain" for crop in event.get("crops", []) if crop not in crops]
+    return errors
+
+
 def main() -> int:
     # A schema is an object with "$schema"; bundles such as allcontracts.json are skipped.
     schemas = {}
@@ -81,6 +99,8 @@ def main() -> int:
         ]
         if not messages and schema_name == "markov.json" and not fragment:
             messages = markov_graph_errors(payload)
+        if not messages and schema_name == "monte_carlo.json":
+            messages = monte_carlo_errors(payload)
         if messages:
             failures += 1
             for message in messages:

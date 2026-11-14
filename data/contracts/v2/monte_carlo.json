@@ -1,10 +1,58 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "monte_carlo",
+    "$id": "https://fieldshift.local/contracts/v2/monte_carlo.json",
+    "title": "Monte Carlo run",
+    "$comment": "A run separates three things. (1) ENVIRONMENT is random: climate periods, events and uncertain effect values are drawn from streams derived from 'seed' and the trajectory index only, so every scenario sees the same environment (common random numbers). (2) CHOICE belongs to the scenario: a 'rotation' policy is deterministic; a 'markov' policy draws edges from the chain probabilities with its own choice stream, which never shifts the environment streams. (3) OUTCOMES are deterministic given (1) and (2): effects are applied in a fixed order.",
+    "type": "object",
+    "required": ["seed", "trajectories", "horizon_days", "profile", "chain", "scenarios"],
     "properties": {
-        "seed":     {"type":"integer"},
-        "climate":  {"$ref": "climate.json"},
-        "weather":  {"type":"object"},
-        "markov":   {"type":"object"}
+        "seed": {"type": "integer", "minimum": 0, "description": "Master seed. Same seed + same trajectory index = same environment in every scenario."},
+        "trajectories": {"type": "integer", "minimum": 1, "description": "Trajectories per scenario."},
+        "horizon_days": {"type": "integer", "minimum": 1, "examples": [1825]},
+        "period_days": {"type": "integer", "minimum": 1, "default": 15, "description": "Length of one climate period (v1 uses fortnights)."},
+        "profile": {"type": "string", "description": "Profile id (data/profiles/<id>), e.g. franca-sp. Gives the initial node and the climate history."},
+        "climate_source": {
+            "enum": ["historical_year_resample", "historical_period_resample"],
+            "default": "historical_year_resample",
+            "description": "How the environment stream builds each trajectory's climate from the profile history (NASA POWER daily series)."
+        },
+        "events": {"type": "array", "items": {"$ref": "event.json"}, "description": "Random events that may hit any scenario."},
+        "chain": {"$ref": "markov.json", "description": "States, edges, gates and effects. Shared by every scenario."},
+        "scenarios": {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/scenario"}}
+    },
+    "additionalProperties": false,
+
+    "definitions": {
+        "scenario": {
+            "type": "object",
+            "required": ["id", "policy"],
+            "properties": {
+                "id": {"type": "string"},
+                "label": {"type": "string"},
+                "initial_state": {"type": "string", "description": "Overrides chain.initial_state."},
+                "policy": {"oneOf": [{"$ref": "#/definitions/rotation_policy"}, {"$ref": "#/definitions/markov_policy"}]}
+            },
+            "additionalProperties": false
+        },
+        "rotation_policy": {
+            "description": "Deterministic choice. After each crop the trajectory takes the edge to the next crop in 'sequence' (wrapping around). If that edge does not exist or its 'when' gate fails (ZARC window, pH, water), it takes 'fallback' and retries at the next decision point.",
+            "type": "object",
+            "required": ["kind", "sequence", "fallback"],
+            "properties": {
+                "kind": {"const": "rotation"},
+                "sequence": {"type": "array", "minItems": 1, "items": {"type": "string"}, "description": "Crop ids in planting order, e.g. [soybean, maize_grain, brachiaria]."},
+                "fallback": {"type": "string", "description": "State id used when the next crop is blocked, e.g. fallow:skip_stages or brachiaria:skip_stages."}
+            },
+            "additionalProperties": false
+        },
+        "markov_policy": {
+            "description": "Reference scenario: 'what the region usually does'. Edges are drawn from the chain probabilities with the choice stream.",
+            "type": "object",
+            "required": ["kind"],
+            "properties": {
+                "kind": {"const": "markov"}
+            },
+            "additionalProperties": false
+        }
     }
 }

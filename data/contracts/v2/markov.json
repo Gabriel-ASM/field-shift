@@ -2,7 +2,7 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "https://fieldshift.local/contracts/v2/markov.json",
     "title": "Markov chain graph",
-    "$comment": "The chain walks over DISCRETE states (crop x stage). CONTINUOUS variables (soil, climate, finances) live in the node and change only through effects: what the chain can alter is whatever appears as an effect target. The chain has no seed: Monte Carlo owns the seed (monte_carlo.json) and draws every transition and effect value with it.",
+    "$comment": "The chain walks over DISCRETE states (crop x stage). CONTINUOUS variables (soil, climate, finances) live in the node and change only through effects: what the chain can alter is whatever appears as an effect target. The chain holds no seed and makes no choice by itself: a scenario policy (monte_carlo.json) decides which edge to take, deterministically (rotation) or by drawing from 'probability' (markov).",
     "type": "object",
     "required": [
         "initial_state",

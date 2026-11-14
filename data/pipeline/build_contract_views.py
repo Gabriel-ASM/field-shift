@@ -40,16 +40,20 @@ ID_LINKS = [
     ("markov", "transition.to", "markov", "state.id"),
     ("markov", "transition.action", "action", "id"),
     ("markov", "node.state", "markov", "state.id"),
+    ("monte_carlo", "scenario.initial_state", "markov", "state.id"),
+    ("monte_carlo", "rotation_policy.sequence[]", "crop", "name"),
+    ("monte_carlo", "rotation_policy.fallback", "markov", "state.id"),
+    ("monte_carlo", "profile", "profile", "data/profiles/<id>"),
+    ("event", "crops[]", "crop", "name"),
 ]
 # JSON Pointer strings resolved against the trajectory node.
 POINTER_LINKS = [
     ("effect", "target", "markov#node", "written by effects"),
     ("effect", "condition.path", "markov#node", "read by conditions (when)"),
+    ("event", "when", "markov#node", "event can start only while conditions hold"),
 ]
 # Links that should exist but do not yet.
-MISSING_LINKS = [
-    ("monte_carlo", "markov", "markov", "declared as a free object, not a $ref"),
-]
+MISSING_LINKS: list[tuple[str, str, str, str]] = []
 
 # Where each node value comes from today and whether the current app reads it.
 # status: used | upstream | available | partial | none
