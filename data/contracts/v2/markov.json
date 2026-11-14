@@ -1,12 +1,74 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "markov",
+    "$id": "https://fieldshift.local/contracts/v2/markov.json",
     "title": "Schema do Grafo da Cadeia de Markov",
-    "$comment": "Aqui definimos quais parâmetros são passíveis de alteração da cadeia de markov",
+    "$comment": "Separação: a cadeia anda por estados DISCRETOS (cultura x estágio); as variáveis CONTÍNUAS (solo, clima, finanças) ficam no nó e só mudam por efeitos. O que a cadeia altera = o que aparece como target de algum efeito.",
 
+    "type": "object",
+    "required": ["states", "transitions", "initial_state"],
     "properties": {
-        "seed":    {"type":"integer", "description": "Should be given by monte carlo, and should not be edited on the markov chain"},
-        "crop":    {"type":"crop", "description": "current crop"},
-        "soil":    {"type":"soil"}
+        "seed": {"type": "integer", "description": "Should be given by monte carlo, and should not be edited on the markov chain"},
+        "initial_state": {"type": "string", "description": "id de um item de 'states'"},
+        "states": {"type": "array", "minItems": 1, "items": {"$ref": "#/definitions/state"}},
+        "transitions": {"type": "array", "items": {"$ref": "#/definitions/transition"}}
+    },
+
+    "definitions": {
+        "node": {
+            "description": "Valores atuais de uma trajetória. É sobre isto que os 'target' dos efeitos apontam.",
+            "type": "object",
+            "required": ["state", "soil"],
+            "properties": {
+                "state":     {"type": "string", "description": "id do estado discreto atual"},
+                "day":       {"type": "integer", "minimum": 0, "description": "Dias desde o início da trajetória"},
+                "soil":      {"$ref": "soil.json"},
+                "climate":   {"$ref": "climate.json"},
+                "financial": {
+                    "type": "object",
+                    "properties": {
+                        "cash":    {"type": "number", "unit": "BRL/ha"},
+                        "cost":    {"type": "number", "unit": "BRL/ha", "description": "Custo acumulado"},
+                        "revenue": {"type": "number", "unit": "BRL/ha", "description": "Receita acumulada"}
+                    }
+                }
+            }
+        },
+
+        "state": {
+            "description": "Estado discreto: uma cultura em um estágio. A duração e os efeitos vêm do crop.json; aqui só se sobrescreve quando necessário.",
+            "type": "object",
+            "required": ["id", "crop", "stage"],
+            "properties": {
+                "id":    {"type": "string", "examples": ["soja:flowering", "pousio:skip_stages"]},
+                "crop":  {"type": "string", "description": "crop.json#/properties/name"},
+                "stage": {"$ref": "crop.json#/definitions/stage_name"},
+                "duration_days": {"$ref": "effect.json#/definitions/quantity", "description": "Sobrescreve a duração do estágio do crop.json"},
+                "effects": {
+                    "type": "array",
+                    "items": {"$ref": "effect.json"},
+                    "description": "Efeitos extras durante a permanência (somados aos do estágio do crop.json)"
+                },
+                "allowed_actions": {"type": "array", "items": {"type": "string"}, "description": "ids de action.json"}
+            },
+            "additionalProperties": false
+        },
+
+        "transition": {
+            "description": "Aresta do grafo. As probabilidades que saem de um estado (com o mesmo 'action') somam 1 depois de aplicar 'when'; o consumidor renormaliza.",
+            "type": "object",
+            "required": ["from", "to", "probability", "support"],
+            "properties": {
+                "from":   {"type": "string"},
+                "to":     {"type": "string"},
+                "action": {"type": ["string", "null"], "description": "id da ação que habilita esta aresta; null = transição natural"},
+                "probability": {"type": "number", "minimum": 0, "maximum": 1},
+                "count":  {"type": "integer", "minimum": 0, "description": "Contagem que originou a probabilidade, quando houver"},
+                "when":   {"type": "array", "items": {"$ref": "effect.json#/definitions/condition"}, "description": "Aresta só existe se o nó satisfizer as condições (ex.: pH < 5 bloqueia o plantio)"},
+                "effects": {"type": "array", "items": {"$ref": "effect.json"}, "description": "Aplicados uma vez, ao cruzar a aresta (ex.: receita da colheita)"},
+                "support": {"enum": ["observed", "derived", "pooled", "prior"]},
+                "provenance": {"type": "string"}
+            },
+            "additionalProperties": false
+        }
     }
 }

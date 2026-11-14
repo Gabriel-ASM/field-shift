@@ -1,0 +1,76 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://fieldshift.local/contracts/v2/effect.json",
+    "title": "Efeito sobre o estado da simulação",
+    "$comment": "Um efeito NÃO é um estado: é uma mudança aplicada a UMA variável do estado. Solo, clima e finanças usam o mesmo formato; só muda o 'target'. Quem aplica é o Monte Carlo, com a seed da trajetória.",
+
+    "type": "object",
+    "required": ["target", "operation", "value", "support"],
+    "properties": {
+        "target": {
+            "type": "string",
+            "description": "JSON Pointer para a variável alterada, relativo ao nó da cadeia (markov.json#/definitions/node).",
+            "examples": ["/soil/N2", "/soil/pH", "/climate/solar_incidence", "/financial/cash"]
+        },
+        "operation": {
+            "enum": ["add", "multiply", "set", "rate"],
+            "description": "add: soma 'value' uma vez. multiply: multiplica por 'value'. set: sobrescreve. rate: 'value' por dia, multiplicado pelos dias de permanência no estágio/ação."
+        },
+        "value": {"$ref": "#/definitions/quantity"},
+        "unit": {
+            "type": "string",
+            "description": "Unidade de 'value'. Para add/set é a unidade do target; para rate é unidade do target por dia; para multiply é adimensional."
+        },
+        "when": {
+            "type": "array",
+            "items": {"$ref": "#/definitions/condition"},
+            "description": "Condições sobre o estado (todas precisam valer). Vazio/ausente = sempre aplica."
+        },
+        "bounds": {
+            "type": "object",
+            "properties": {
+                "min": {"type": "number"},
+                "max": {"type": "number"}
+            },
+            "description": "Limites aplicados ao target depois do efeito (ex.: N2 >= 0, 3 <= pH <= 9)."
+        },
+        "support": {
+            "enum": ["observed", "derived", "pooled", "prior"],
+            "description": "Mesma escala de suporte da v1: um prior não vira observação."
+        },
+        "provenance": {"type": "string", "description": "Fonte, regra de derivação ou referência do prior."}
+    },
+    "additionalProperties": false,
+
+    "definitions": {
+        "quantity": {
+            "description": "Número fixo ou distribuição. Se for distribuição, o Monte Carlo sorteia um valor por trajetória a partir da seed.",
+            "oneOf": [
+                {"type": "number"},
+                {
+                    "type": "object",
+                    "required": ["distribution", "params"],
+                    "properties": {
+                        "distribution": {"enum": ["normal", "lognormal", "uniform", "triangular", "beta"]},
+                        "params": {
+                            "type": "object",
+                            "additionalProperties": {"type": "number"},
+                            "description": "normal/lognormal: mean, sd | uniform: min, max | triangular: min, mode, max | beta: alpha, beta"
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            ]
+        },
+        "condition": {
+            "type": "object",
+            "required": ["path", "op", "value"],
+            "properties": {
+                "path": {"type": "string", "description": "JSON Pointer no nó, como em 'target'."},
+                "op": {"enum": ["<", "<=", "==", "!=", ">=", ">", "in"]},
+                "value": {}
+            },
+            "additionalProperties": false
+        }
+    }
+}

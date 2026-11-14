@@ -1,32 +1,51 @@
 {
-    "$schema": "http://json-schema.org/draft-07/schema",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://fieldshift.local/contracts/v2/crop.json",
+    "type": "object",
+    "required": ["name", "stage"],
     "properties": {
-        "name": {"type":"string"},
-        "description": {"type":"string"},
+        "name": {"type": "string"},
+        "description": {"type": "string"},
 
-        "stage_props":{
-            "type":"object",
-            "properties": {
-                "soil_effect":   {"type":"soil"},
-                "weather_effect":{"type":"weather"},
-                "financial_effect": {"type":"financial"}
-            }
-        },
-        "stage":{
-            "type":"object",
-            "properties": {
-                "skip_stages":     {"type":"stage_props", "description": "This state should only be used if we don't have all information about the stages"},
-                "preparation":     {"type":"stage_props"},
-                "sowing":          {"type":"stage_props"},
-                "germination":     {"type":"stage_props"},
-                "growth":          {"type":"stage_props"},
-                "flowering":       {"type":"stage_props"},
-                "fruiting":        {"type":"stage_props"},
-                "ripening":        {"type":"stage_props"},
-                "harvesting":      {"type":"stage_props"},
-                "post_harvesting": {"type":"stage_props"}
-            }
+        "stage": {
+            "type": "object",
+            "$comment": "Use skip_stages só se não houver informação por estágio; nesse caso ele é o único estágio da cultura.",
+            "propertyNames": {"$ref": "#/definitions/stage_name"},
+            "additionalProperties": {"$ref": "#/definitions/stage_props"},
+            "minProperties": 1
         }
+    },
 
+    "definitions": {
+        "stage_name": {
+            "enum": [
+                "skip_stages",
+                "preparation",
+                "sowing",
+                "germination",
+                "growth",
+                "flowering",
+                "fruiting",
+                "ripening",
+                "harvesting",
+                "post_harvesting"
+            ]
+        },
+        "stage_props": {
+            "type": "object",
+            "required": ["duration_days"],
+            "properties": {
+                "duration_days": {
+                    "$ref": "effect.json#/definitions/quantity",
+                    "description": "Permanência no estágio. Efeitos com operation=rate são multiplicados por este valor."
+                },
+                "effects": {
+                    "type": "array",
+                    "items": {"$ref": "effect.json"},
+                    "description": "Efeitos da cultura neste estágio. Solo (/soil/...), microclima (/climate/...) e finanças (/financial/...) vão juntos aqui; o target diz o que é afetado."
+                }
+            },
+            "additionalProperties": false
+        }
     }
-}   
+}

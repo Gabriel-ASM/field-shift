@@ -1,8 +1,20 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "type":"object",
+    "$id": "https://fieldshift.local/contracts/v2/action.json",
+    "title": "Ação de manejo",
+    "$comment": "Ex.: calagem, adubação nitrogenada, irrigação, estufa. O custo é um efeito em /financial/cash, não um campo separado.",
+    "type": "object",
+    "required": ["id", "duration", "effects"],
     "properties": {
-        "duration":{"type":"integer", "description": "It the time in days of the action"},
-        "effect":{"type":"soil" }
-    }
+        "id": {"type": "string"},
+        "label": {"type": "string"},
+        "duration": {"type": "integer", "minimum": 0, "description": "Duração da ação em dias"},
+        "allowed_stages": {
+            "type": "array",
+            "items": {"$ref": "crop.json#/definitions/stage_name"},
+            "description": "Estágios em que a ação pode ser aplicada. Ausente = qualquer estágio."
+        },
+        "effects": {"type": "array", "items": {"$ref": "effect.json"}}
+    },
+    "additionalProperties": false
 }

@@ -4,7 +4,9 @@
         "lat":  {"type":"number", "unit":"m"},
         "long": {"type":"number", "unit":"m"},
         "alt":  {"type":"number", "unit":"m", "description": "Altitude at the level of the farm"},
-        
+        "month": {"enum": ["january", "february", "march", "april", ""]},
+        "season": {"enum": []},
+
         "solar_incidence":{"type":"number","unit":"W/m^2", "description": "Solar incidence at the field level, it might be altered by a greenhouse"},
         
         "weather":{
@@ -12,6 +14,5 @@
             "temperature":       {"type":"number", "unit":"ºC"},
             "relative_humidity": {"type":"number", "unit":"%", "comment":"It might need to be calculated from temperature"}
         }
-        
     }
 }
