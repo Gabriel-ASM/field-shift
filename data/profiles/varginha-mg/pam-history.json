@@ -4610,6 +4610,7 @@
       "yield_median_kg_ha": 1500.0,
       "yield_max_kg_ha": 2000.0,
       "yield_mean_2021_2025_kg_ha": null,
+      "gross_value_mean_2021_2025_brl_per_ha_nominal": null,
       "first_valid_year": 1988,
       "last_valid_year": 2019,
       "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
@@ -4620,6 +4621,7 @@
       "yield_median_kg_ha": null,
       "yield_max_kg_ha": null,
       "yield_mean_2021_2025_kg_ha": null,
+      "gross_value_mean_2021_2025_brl_per_ha_nominal": null,
       "first_valid_year": null,
       "last_valid_year": null,
       "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
@@ -4627,9 +4629,10 @@
     "cafe_arabica": {
       "valid_yield_years": 14,
       "yield_min_kg_ha": 1020.0,
-      "yield_median_kg_ha": 1500.0,
+      "yield_median_kg_ha": 1440.0,
       "yield_max_kg_ha": 2124.0,
       "yield_mean_2021_2025_kg_ha": 1320.0,
+      "gross_value_mean_2021_2025_brl_per_ha_nominal": 26558.293380765128,
       "first_valid_year": 2012,
       "last_valid_year": 2025,
       "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
@@ -4640,6 +4643,7 @@
       "yield_median_kg_ha": null,
       "yield_max_kg_ha": null,
       "yield_mean_2021_2025_kg_ha": null,
+      "gross_value_mean_2021_2025_brl_per_ha_nominal": null,
       "first_valid_year": null,
       "last_valid_year": null,
       "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
@@ -4650,6 +4654,7 @@
       "yield_median_kg_ha": 40000.0,
       "yield_max_kg_ha": 50000.0,
       "yield_mean_2021_2025_kg_ha": 39200.0,
+      "gross_value_mean_2021_2025_brl_per_ha_nominal": 7190.0,
       "first_valid_year": 1988,
       "last_valid_year": 2025,
       "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
@@ -4660,6 +4665,7 @@
       "yield_median_kg_ha": 800.0,
       "yield_max_kg_ha": 1371.0,
       "yield_mean_2021_2025_kg_ha": 1278.6,
+      "gross_value_mean_2021_2025_brl_per_ha_nominal": 5739.5669515669515,
       "first_valid_year": 1988,
       "last_valid_year": 2025,
       "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
@@ -4670,6 +4676,7 @@
       "yield_median_kg_ha": 4500.0,
       "yield_max_kg_ha": 8700.0,
       "yield_mean_2021_2025_kg_ha": 7853.4,
+      "gross_value_mean_2021_2025_brl_per_ha_nominal": 9493.755555555555,
       "first_valid_year": 1988,
       "last_valid_year": 2025,
       "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
@@ -4680,6 +4687,7 @@
       "yield_median_kg_ha": 3720.0,
       "yield_max_kg_ha": 4375.0,
       "yield_mean_2021_2025_kg_ha": 3707.4,
+      "gross_value_mean_2021_2025_brl_per_ha_nominal": 8714.666666666668,
       "first_valid_year": 2017,
       "last_valid_year": 2025,
       "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
@@ -4690,6 +4698,7 @@
       "yield_median_kg_ha": 3000.0,
       "yield_max_kg_ha": 3000.0,
       "yield_mean_2021_2025_kg_ha": null,
+      "gross_value_mean_2021_2025_brl_per_ha_nominal": null,
       "first_valid_year": 1991,
       "last_valid_year": 1993,
       "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"
@@ -4700,6 +4709,7 @@
       "yield_median_kg_ha": 1200.0,
       "yield_max_kg_ha": 1200.0,
       "yield_mean_2021_2025_kg_ha": null,
+      "gross_value_mean_2021_2025_brl_per_ha_nominal": null,
       "first_valid_year": 2014,
       "last_valid_year": 2014,
       "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function"

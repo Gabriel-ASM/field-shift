@@ -1,0 +1,302 @@
+{
+  "profiles": {
+    "ariquemes-ro": {
+      "file": "data/profiles/ariquemes-ro/crop-markov-scenarios.json",
+      "scenario_count": 12,
+      "scenarios": [
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 1,
+          "transition_rows": 36
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 26,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 27,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 28,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 29,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 30,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 31,
+          "transition_rows": 42
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 32,
+          "transition_rows": 42
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 33,
+          "transition_rows": 42
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 34,
+          "transition_rows": 42
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 35,
+          "transition_rows": 36
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 36,
+          "transition_rows": 33
+        }
+      ],
+      "not_simulated_zarc_crops": {
+        "Milho 2ª Safra consorciado com Braquiária": "no consistent annual FAO-56 phase-duration curve, or ZARC crop is a mixture",
+        "Sorgo Granífero 2ª Safra": "no consistent annual FAO-56 phase-duration curve, or ZARC crop is a mixture"
+      }
+    },
+    "franca-sp": {
+      "file": "data/profiles/franca-sp/crop-markov-scenarios.json",
+      "scenario_count": 27,
+      "scenarios": [
+        {
+          "crop_parameter_id": "peanut",
+          "planting_decendio": 1,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "peanut",
+          "planting_decendio": 2,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "peanut",
+          "planting_decendio": 3,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "peanut",
+          "planting_decendio": 4,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "peanut",
+          "planting_decendio": 5,
+          "transition_rows": 42
+        },
+        {
+          "crop_parameter_id": "peanut",
+          "planting_decendio": 6,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "peanut",
+          "planting_decendio": 27,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "peanut",
+          "planting_decendio": 28,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "peanut",
+          "planting_decendio": 29,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "peanut",
+          "planting_decendio": 30,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "peanut",
+          "planting_decendio": 31,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "peanut",
+          "planting_decendio": 32,
+          "transition_rows": 39
+        },
+        {
+          "crop_parameter_id": "peanut",
+          "planting_decendio": 33,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "peanut",
+          "planting_decendio": 34,
+          "transition_rows": 42
+        },
+        {
+          "crop_parameter_id": "peanut",
+          "planting_decendio": 35,
+          "transition_rows": 42
+        },
+        {
+          "crop_parameter_id": "peanut",
+          "planting_decendio": 36,
+          "transition_rows": 42
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 1,
+          "transition_rows": 42
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 27,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 28,
+          "transition_rows": 42
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 29,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 30,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 31,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 32,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 33,
+          "transition_rows": 42
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 34,
+          "transition_rows": 42
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 35,
+          "transition_rows": 42
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 36,
+          "transition_rows": 39
+        }
+      ],
+      "not_simulated_zarc_crops": {
+        "Cana-de-Açúcar (açúcar e álcool)": "no consistent annual FAO-56 phase-duration curve, or ZARC crop is a mixture"
+      }
+    },
+    "varginha-mg": {
+      "file": "data/profiles/varginha-mg/crop-markov-scenarios.json",
+      "scenario_count": 15,
+      "scenarios": [
+        {
+          "crop_parameter_id": "maize_grain",
+          "planting_decendio": 1,
+          "transition_rows": 42
+        },
+        {
+          "crop_parameter_id": "maize_grain",
+          "planting_decendio": 2,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "maize_grain",
+          "planting_decendio": 3,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "maize_grain",
+          "planting_decendio": 4,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "maize_grain",
+          "planting_decendio": 36,
+          "transition_rows": 39
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 1,
+          "transition_rows": 42
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 28,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 29,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 30,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 31,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 32,
+          "transition_rows": 45
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 33,
+          "transition_rows": 42
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 34,
+          "transition_rows": 42
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 35,
+          "transition_rows": 42
+        },
+        {
+          "crop_parameter_id": "soybean",
+          "planting_decendio": 36,
+          "transition_rows": 39
+        }
+      ],
+      "not_simulated_zarc_crops": {
+        "Café Arábica Implantação": "no consistent annual FAO-56 phase-duration curve, or ZARC crop is a mixture"
+      }
+    }
+  }
+}

@@ -2,16 +2,16 @@
 
 ## O que está disponível
 
-O relatório de pesquisa descreve 22 conjuntos e 55 arquivos processados do Oeste do Paraná. Os 55 arquivos brutos originais continuam ausentes deste checkout. Para preencher a falta de dados nos exemplos pedidos, foram baixados diretamente dados de Ariquemes (RO), Franca (SP) e Varginha (MG): NASA POWER Daily, ISRIC SoilGrids e malhas municipais do IBGE.
+O relatório de pesquisa descreve 22 conjuntos e 55 arquivos processados do Oeste do Paraná; esses arquivos originais continuam ausentes deste checkout. Para os exemplos pedidos, foram baixados dados NASA POWER Daily e SoilGrids, malhas municipais IBGE, relatórios SISZARC do MAPA e a série municipal PAM/SIDRA do IBGE para Ariquemes (RO), Franca (SP) e Varginha (MG). Os parâmetros de água FAO‑56 foram extraídos para as culturas listadas e mantêm as incompatibilidades/ausências da fonte.
 
 | Diretório | Conteúdo |
 |---|---|
-| `raw/` | Respostas sem alteração das APIs NASA POWER e SoilGrids e GeoJSON municipal do IBGE |
-| `profiles/<id>/` | Clima diário normalizado, perfil do solo por camada, estados, contagens Markov, história ambiental, premissas e manifesto |
-| `processed/` | Saída registrada da simulação Python de cinco anos |
+| `raw/` | Respostas sem alteração de NASA POWER, SoilGrids, GeoJSON IBGE, exportações XLS SISZARC e consulta PAM/SIDRA |
+| `profiles/<id>/` | Clima/solo normalizados; PAM e ZARC; estado hídrico de referência; transições de referência e por cultura/fase/decêndio; história ambiental, premissas e manifesto |
+| `processed/` | Execução registrada de referência e resultados de Monte Carlo por ação agrícola quando gerados |
 | `catalog/` | Inventário do PR, fontes recomendadas no desafio e perfis dos exemplos |
 | `contracts/` | JSON Schemas para clima, solo, estado, transição, observação de campo e manifesto |
-| `reference/` | Dados extraídos do relatório e da planilha arquitetural |
+| `reference/` | FAO‑56 Kc/fases, cobertura de dados, contrato de ingestão e desenhos extraídos do relatório/planilha |
 
 Cada perfil tem 16.746 dias NASA POWER de 1981-01-01 a 2026-11-06. O Monte Carlo usa os 45 anos completos, 1981–2025. O ponto meteorológico e a célula SoilGrids são os centroides de área calculados a partir da malha municipal IBGE. São pontos regionais para demonstração, não localização de fazenda, talhão ou média municipal.
 
@@ -23,7 +23,7 @@ Cada perfil tem 16.746 dias NASA POWER de 1981-01-01 a 2026-11-06. O Monte Carlo
 
 ¹ Média dos anos completos de 1981 a 2025, no ponto do perfil. Estatísticas descritivas de estimativas remotas, não médias de estações ou observações agrícolas.
 
-O [catálogo de recursos do desafio](catalog/fontes-desafio-nasa.json) registra a lista NASA Space Apps e distingue os produtos baixados dos que ainda não foram ingeridos. O desafio recomenda combinar observações da Terra com informação local; esta demonstração usa NASA POWER para meteorologia, SoilGrids como prior de solo e IBGE somente para gerar coordenadas representativas. Não usa seleção de talhão por mapa.
+O [catálogo de recursos do desafio](catalog/fontes-desafio-nasa.json) distingue produtos NASA baixados e pendentes; [model-data-flow.json](reference/model-data-flow.json) mostra o caminho das fontes até Markov e Monte Carlo. Para o MVP, NASA POWER é o recurso NASA efetivamente ingerido. SoilGrids é um prior de solo, ZARC/PAM são fontes públicas brasileiras de agricultura e IBGE é usado somente para gerar coordenadas representativas. Não há seleção de talhão por mapa.
 
 `reference/desenho-markov-monte-carlo.json` preserva as 42 variáveis, 42 ligações da matriz de impacto e 12 famílias de distribuição extraídas da planilha. São uma referência de arquitetura, não parâmetros calibrados nem efeitos causais. A extração pode ser refeita com `python research/extrair_referencia_monte_carlo.py` (requer `openpyxl`).
 
@@ -62,21 +62,36 @@ Os arquivos de modelo são:
 - `markov-derivation.json`: balanço quinzenal e trilha dos estados, chuva e fração armazenada para auditoria.
 - `assumptions.json`: classe, inicialização, prior, regra de pooling e limitações.
 
+### Cultura, ZARC e PAM
+
+`raw/mapa-siszarc/` preserva os XLS oficiais consultados no SISZARC para cada cultura/UF; `profiles/<id>/zarc-planting-windows.json` mantém somente as linhas do município de exemplo, ainda desdobradas por safra, cultura oficial, grupo, código oficial de solo e todos os 36 decêndios de risco. Os códigos podem variar por norma e não são cruzados com a AWC de SoilGrids. Uma ação só fica habilitada na interface se o decêndio estiver publicado no risco e na combinação de grupo/solo escolhida.
+
+`raw/ibge/pam-municipal-5457-1988-2025.json` preserva os dados SIDRA da tabela PAM 5457. Cada perfil separa produto×ano e inclui produtividade (kg/ha), área, quantidade e valor nominal. O resumo tem mediana correta, faixa observada, anos válidos e a razão nominal valor da produção/área para 2021–2025. PAM é agregado municipal e não vira resposta causal de produtividade, preço atual ou série em reais constantes.
+
+As fontes econômicas que o relatório de pesquisa chama de R091, R092, R094 e R097 estão catalogadas em `catalog/fontes-agronomicas.json`, mas não alimentam os cenários. Não foi obtida planilha de custos Conab comparável para as culturas e municípios mostrados, nem uma curva de preço por safra harmonizada à praça e à unidade. A interface expõe somente valor bruto municipal nominal da PAM como contexto; não calcula margem, VPL ou recomendação econômica.
+
+`reference/crop-water-parameters.json` registra Kc e duração de fases da FAO‑56, com a referência e a adequação de cada curva. `pipeline/build_crop_markov.py` gera `profiles/<id>/crop-markov-scenarios.json` para culturas que tenham janela ZARC local e ciclo anual FAO‑56 internamente consistente. A unidade Markov é água×fase fenológica; a ação identifica cultura×decêndio ZARC. Durante o ciclo, `ETc = Kc × ET0`; na entressafra o MVP conserva demanda de referência Kc=1. As contagens vêm do balanço diário NASA/solo nos anos de treinamento, não de talhões pareados. Perenes, consórcios sem Kc de todas as espécies e sorgo (inconsistência entre total e soma das fases FAO‑56) ficam visíveis como cultura ZARC sem simulação.
+
+O contrato ponta a ponta está em `reference/model-data-flow.json`; `field_shift.data.load_crop_scenario()` carrega a matriz condicionada à cultura e ao decêndio para o mesmo motor Markov/Monte Carlo.
+
 O motor adiciona Dirichlet `α=0,5` por destino viável a cada linha de contagem. Essa pseudocontagem representa incerteza da matriz, não dados. Como as linhas são derivadas do mesmo balanço, o modelo não tem evidência de efeito de ação agrícola. O esquema `contracts/field-observation.schema.json` permanece separado para dados pareados reais de manejo quando existirem.
 
 ## Simulação Monte Carlo
 
 `python -m field_shift.demo` roda uma execução registrada por perfil com 10.000 trajetórias, 120 quinzenas (cinco anos), semente 2026 e blocos de duas quinzenas. Cada trajetória sorteia blocos de clima de anos históricos completos, uma realização das linhas Dirichlet e o estado hídrico seguinte por passo. As métricas em `processed/demo-simulation-results.json` mostram frequência de quinzenas em água baixa, duração de sequências baixas e a distribuição do estado final.
 
-Essa saída quantifica somente o balanço de referência. Ela não é probabilidade de quebra de safra, rendimento, VPL ou uma comparação de rotação. Não foram criadas transições sintéticas de cultura, produtividade, preços ou custos. O relatório cita os arquivos processados do PR, mas eles não são entradas ocultas desta simulação.
+Essa saída quantifica somente o balanço de referência. A interface também pode comparar essa matriz com um cenário Kc×ZARC, usando caminhos climáticos e uniforms comuns; a nova matriz ainda é um balanço de processo, não tratamento observado. Nenhuma transição sintética de cultura, produtividade, preço ou custo foi criada. As estatísticas PAM são observações municipais reais e não substituem dados de campo. O relatório cita arquivos processados do PR, mas eles não são entradas ocultas.
 
 ## Reconstruir e abrir
 
 ```powershell
 python data/pipeline/build_profiles.py
+python data/pipeline/prepare_crop_data.py
+python data/pipeline/build_crop_markov.py
 python -m field_shift.demo
+python -m field_shift.crop_demo --profile data/profiles/franca-sp --crop peanut --planting-decendio 1 --risk 20
 python -m field_shift --profile data/profiles/ariquemes-ro --policy data/policies/balanco-hidrico-referencia.json --initial-state water_medium
 python -m field_shift.visualize --output docs/visualizacao.html --seed 2026
 ```
 
-O pipeline de transformação lê os arquivos de `raw/`; não baixa dados por conta própria. A página gerada empacota estados, transições, história ambiental e resultados no HTML para abrir localmente sem API externa. A origem, o período, as unidades, a resolução e a qualidade de cada conjunto estão no manifesto de cada perfil.
+Os pipelines de transformação leem `raw/`; não baixam dados por conta própria. `fetch_pam.py` e `fetch_zarc_examples.py` fazem as consultas públicas usadas nesta entrega. A página gerada empacota ZARC, PAM, Kc, modelos e história ambiental para abrir localmente sem API externa. A origem, o período, as unidades, a resolução, o hash e a qualidade de cada conjunto estão no manifesto de cada perfil.

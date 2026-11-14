@@ -1,0 +1,80 @@
+{
+  "profile": "franca-sp",
+  "scenario": {
+    "crop_parameter_id": "peanut",
+    "crop_name_pt": "Amendoim",
+    "official_zarc_crop_label": "Amendoim",
+    "zarc_group": "GRUPO I",
+    "zarc_soil_class": "1",
+    "risk_percent": 20,
+    "planting_decendio": 1,
+    "portaria": "93",
+    "portaria_date": "17/04/2026",
+    "action": "crop:peanut:planting_decendio:1",
+    "support": "derived_process_model"
+  },
+  "config": {
+    "steps": 120,
+    "horizon_years": 5,
+    "trajectories": 10000,
+    "seed": 2026,
+    "block_periods": 2,
+    "pseudocount_per_viable_destination": 0.5,
+    "common_random_numbers": "same seed, seasonal environment blocks and transition uniforms for the reference and crop-model runs; row parameters sampled from each model's own counts"
+  },
+  "reference_kc1": {
+    "trajectories": 10000,
+    "mean_low_water_periods": 58.8047,
+    "median_low_water_periods": 59.0,
+    "p5_low_water_periods": 33.0,
+    "p95_low_water_periods": 84.0,
+    "mean_fraction_of_horizon_low_water": 0.49003916666666664,
+    "probability_low_water_at_least_24_periods": 0.9886,
+    "median_longest_low_run_periods": 17.0,
+    "p95_longest_low_run_periods": 33.0,
+    "terminal_probabilities": {
+      "water_low": 0.5039,
+      "water_medium": 0.1533,
+      "water_high": 0.3428
+    },
+    "state_terminal_probabilities": {
+      "water_high": 0.3428,
+      "water_low": 0.5039,
+      "water_medium": 0.1533
+    }
+  },
+  "crop_water_scenario": {
+    "trajectories": 10000,
+    "mean_low_water_periods": 52.3364,
+    "median_low_water_periods": 52.0,
+    "p5_low_water_periods": 27.0,
+    "p95_low_water_periods": 78.0,
+    "mean_fraction_of_horizon_low_water": 0.4361366666666667,
+    "probability_low_water_at_least_24_periods": 0.9745,
+    "median_longest_low_run_periods": 16.0,
+    "p95_longest_low_run_periods": 32.0,
+    "terminal_probabilities": {
+      "water_low": 0.46499999999999997,
+      "water_medium": 0.15839999999999999,
+      "water_high": 0.3766
+    },
+    "state_terminal_probabilities": {
+      "water_high__development": 0.1134,
+      "water_high__initial": 0.0786,
+      "water_high__late": 0.0269,
+      "water_high__mid": 0.0683,
+      "water_high__off_crop_reference": 0.0894,
+      "water_low__development": 0.0026,
+      "water_low__initial": 0.001,
+      "water_low__late": 0.0289,
+      "water_low__mid": 0.0124,
+      "water_low__off_crop_reference": 0.4201,
+      "water_medium__development": 0.0071,
+      "water_medium__initial": 0.0096,
+      "water_medium__late": 0.0305,
+      "water_medium__mid": 0.0209,
+      "water_medium__off_crop_reference": 0.0903
+    }
+  },
+  "interpretation": "Water-state sensitivity scenario only; not observed management effect, yield forecast, crop recommendation, or VPL."
+}

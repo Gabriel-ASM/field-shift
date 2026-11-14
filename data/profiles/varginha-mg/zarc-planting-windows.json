@@ -15,12 +15,13 @@
     "dictionary_url": "https://dados.agricultura.gov.br/dataset/6d3d141c-885e-41a4-ab7f-dc8ff323b96f/resource/bebb0ebb-bc75-460c-b900-a7a1ebd87bee/download/dicionario-de-dados-tabua-de-risco-2026.pdf"
   },
   "row_count": 33,
-  "risk_semantics": "Each decendio entry preserves the MAPA report value 0/20/30/40. Non-zero values are published risk levels; zero means no planting indication for that row/decendio. Group and AD soil class must match the producer's cultivar and soil classification.",
-  "soil_matching": "The AD1–AD6 ZARC categories are not inferred from the mapped SoilGrids AWC. The interface must ask for the applicable ZARC class or show all strata without claiming a match.",
+  "risk_semantics": "Each decendio entry preserves the MAPA report value 0/20/30/40. Non-zero values are published risk levels; zero means no planting indication for that row/decendio. The displayed group and official ZARC soil code must match the producer's cultivar and soil classification.",
+  "soil_matching": "Official ZARC soil codes are not inferred from mapped SoilGrids AWC. Codes remain verbatim from the report (including older numeric classes and AD classes); interface asks the user to select the applicable code.",
   "rows": [
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra",
+      "crop_parameter_id": "maize_grain",
       "uf": "MG",
       "portaria": "324",
       "portaria_date": "30/07/2026",
@@ -79,6 +80,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra",
+      "crop_parameter_id": "maize_grain",
       "uf": "MG",
       "portaria": "324",
       "portaria_date": "30/07/2026",
@@ -139,6 +141,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra",
+      "crop_parameter_id": "maize_grain",
       "uf": "MG",
       "portaria": "324",
       "portaria_date": "30/07/2026",
@@ -199,6 +202,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra",
+      "crop_parameter_id": "maize_grain",
       "uf": "MG",
       "portaria": "324",
       "portaria_date": "30/07/2026",
@@ -260,6 +264,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra",
+      "crop_parameter_id": "maize_grain",
       "uf": "MG",
       "portaria": "324",
       "portaria_date": "30/07/2026",
@@ -321,6 +326,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra",
+      "crop_parameter_id": "maize_grain",
       "uf": "MG",
       "portaria": "324",
       "portaria_date": "30/07/2026",
@@ -383,6 +389,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra",
+      "crop_parameter_id": "maize_grain",
       "uf": "MG",
       "portaria": "324",
       "portaria_date": "30/07/2026",
@@ -440,6 +447,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra",
+      "crop_parameter_id": "maize_grain",
       "uf": "MG",
       "portaria": "324",
       "portaria_date": "30/07/2026",
@@ -499,6 +507,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra",
+      "crop_parameter_id": "maize_grain",
       "uf": "MG",
       "portaria": "324",
       "portaria_date": "30/07/2026",
@@ -557,6 +566,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra",
+      "crop_parameter_id": "maize_grain",
       "uf": "MG",
       "portaria": "324",
       "portaria_date": "30/07/2026",
@@ -615,6 +625,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra",
+      "crop_parameter_id": "maize_grain",
       "uf": "MG",
       "portaria": "324",
       "portaria_date": "30/07/2026",
@@ -675,6 +686,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra",
+      "crop_parameter_id": "maize_grain",
       "uf": "MG",
       "portaria": "324",
       "portaria_date": "30/07/2026",
@@ -736,6 +748,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "MG",
       "portaria": "200",
       "portaria_date": "03/07/2026",
@@ -803,6 +816,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "MG",
       "portaria": "200",
       "portaria_date": "03/07/2026",
@@ -869,6 +883,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "MG",
       "portaria": "200",
       "portaria_date": "03/07/2026",
@@ -935,6 +950,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "MG",
       "portaria": "200",
       "portaria_date": "03/07/2026",
@@ -1001,6 +1017,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "MG",
       "portaria": "200",
       "portaria_date": "03/07/2026",
@@ -1067,6 +1084,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "MG",
       "portaria": "200",
       "portaria_date": "03/07/2026",
@@ -1133,6 +1151,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "MG",
       "portaria": "200",
       "portaria_date": "03/07/2026",
@@ -1200,6 +1219,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "MG",
       "portaria": "200",
       "portaria_date": "03/07/2026",
@@ -1266,6 +1286,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "MG",
       "portaria": "200",
       "portaria_date": "03/07/2026",
@@ -1332,6 +1353,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "MG",
       "portaria": "200",
       "portaria_date": "03/07/2026",
@@ -1398,6 +1420,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "MG",
       "portaria": "200",
       "portaria_date": "03/07/2026",
@@ -1464,6 +1487,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "MG",
       "portaria": "200",
       "portaria_date": "03/07/2026",
@@ -1530,6 +1554,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "MG",
       "portaria": "200",
       "portaria_date": "03/07/2026",
@@ -1598,6 +1623,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "MG",
       "portaria": "200",
       "portaria_date": "03/07/2026",
@@ -1665,6 +1691,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "MG",
       "portaria": "200",
       "portaria_date": "03/07/2026",
@@ -1731,6 +1758,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "MG",
       "portaria": "200",
       "portaria_date": "03/07/2026",
@@ -1797,6 +1825,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "MG",
       "portaria": "200",
       "portaria_date": "03/07/2026",
@@ -1863,6 +1892,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "MG",
       "portaria": "200",
       "portaria_date": "03/07/2026",
@@ -1929,6 +1959,7 @@
     {
       "season": "Perenes",
       "crop": "Café Arábica Implantação",
+      "crop_parameter_id": "coffee_bare",
       "uf": "MG",
       "portaria": "580",
       "portaria_date": "16/12/2021",
@@ -1987,12 +2018,13 @@
         ],
         "40": []
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-mg-caf-.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-mg-cafe-arabica-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "Perenes",
       "crop": "Café Arábica Implantação",
+      "crop_parameter_id": "coffee_bare",
       "uf": "MG",
       "portaria": "580",
       "portaria_date": "16/12/2021",
@@ -2052,12 +2084,13 @@
         ],
         "40": []
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-mg-caf-.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-mg-cafe-arabica-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "Perenes",
       "crop": "Café Arábica Implantação",
+      "crop_parameter_id": "coffee_bare",
       "uf": "MG",
       "portaria": "580",
       "portaria_date": "16/12/2021",
@@ -2117,7 +2150,7 @@
         ],
         "40": []
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-mg-caf-.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-mg-cafe-arabica-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     }
   ]

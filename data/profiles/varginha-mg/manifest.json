@@ -70,7 +70,7 @@
       "periodo": "aplicado à série 1981-2025",
       "resolucao": "perfil de referência municipal",
       "qualidade": "suposições explícitas; não substituir dados de talhão",
-      "sha256": "6e70b0449430e847e97b74630f9736a997a9a2c2235e21dca409c2c56d517edb"
+      "sha256": "d81b93708d4ca2e657c3a7a9828c47f28dc6565ff61e45ac0f89ed89b60d4f73"
     },
     "climate-summary.json": {
       "origem": "agregação de climate-daily.csv",
@@ -91,6 +91,46 @@
       "resolucao": "ponto municipal",
       "qualidade": "balanço de referência sem cultura; limitações descritas no arquivo",
       "sha256": "d7f3ad134688244cb0d0b7ba2a22759f794088a678eb1071bc5b6914de2fb9d2"
+    },
+    "pam-history.json": {
+      "origem": "IBGE PAM / SIDRA tabela 5457",
+      "responsavel": "IBGE",
+      "frequencia": "anual; valores municipais por produto",
+      "unidade": "rendimento kg/ha; produção t; valor mil R$ nominal; área ha",
+      "periodo": "1988–2025",
+      "resolucao": "município; não é observação de talhão",
+      "qualidade": "estatística municipal oficial; cada variável pode ter lacunas e o valor monetário não está deflacionado",
+      "sha256": "2710474d1485282adbb98f05e3a6d92bea45193a4b1d2aae0bc1e2d71beaf9d6"
+    },
+    "zarc-planting-windows.json": {
+      "origem": "MAPA SISZARC / Tábua de Risco ZARC",
+      "responsavel": "MAPA, SPA/DEGER/CGRA",
+      "frequencia": "por safra; catálogo atualiza semanalmente",
+      "unidade": "decêndios; classe de risco; grupo de cultivar; classe de solo",
+      "periodo": "safra 2026/2027 nas culturas efetivamente consultadas para a UF",
+      "resolucao": "município × cultura × grupo × solo × decêndio",
+      "qualidade": "portaria oficial; elegibilidade depende de confirmar grupo e código oficial de solo do produtor; nenhum código ZARC é inferido do SoilGrids",
+      "sha256": "77ba44faae7c19954e8b6975ec23182629d17b77f455d6edee3a122090bb6517"
+    },
+    "crop-markov-scenarios.json": {
+      "origem": "NASA POWER + SoilGrids/Saxton–Rawls + FAO-56 + janelas MAPA ZARC",
+      "responsavel": "Field Shift derivação; sem transição de campo observada",
+      "frequencia": "quinzenal, indexada por água×fase×ambiente e ação×decêndio ZARC",
+      "unidade": "contagens por destino de água×fase; CAD em mm; Kc adimensional",
+      "periodo": "1983–2025; spin-up 1981–1982",
+      "resolucao": "perfil municipal × cultura com Kc validado × decêndio de plantio elegível no ZARC",
+      "qualidade": "balanço derivado; off-season usa Kc=1 de referência; Kc FAO-56 não calibrado regionalmente; não prevê produtividade ou VPL",
+      "sha256": "e2139b5d55c455591c699281cb8f34101d3c9afce35beefb1132989006991760"
+    },
+    "crop-water-parameters.json": {
+      "origem": "FAO-56 Irrigation and Drainage Paper 56, Tabelas 11–12",
+      "responsavel": "FAO; extração de referência Field Shift",
+      "frequencia": "por cultura e fase",
+      "unidade": "Kc adimensional; duração em dias",
+      "periodo": "parâmetros tabulados sem ajuste climático local",
+      "resolucao": "espécie/grupo de cultivo; nem todo sistema tem curva anual compatível",
+      "qualidade": "referência bibliográfica; cada proxy e inconsistência estão registrados no arquivo",
+      "sha256": "8545b8fd8110b427e697794eb521b28fcf0afc26f60b34ace2d0f37aeecb3197"
     }
   },
   "raw_sources": {
@@ -122,6 +162,74 @@
       "sha256": "dd0ab93f552ee6a7175b89c757a51242a9a3d6f727945a0033a7c28f6c4e7425",
       "query": "https://servicodados.ibge.gov.br/api/v3/malhas/municipios/3170701?formato=application/vnd.geo%2Bjson&qualidade=intermediaria",
       "retrieved_at": "2026-11-13"
-    }
+    },
+    "pam_municipal_json": {
+      "path": "data/raw/ibge/pam-municipal-5457-1988-2025.json",
+      "sha256": "0697fdb9a0240074ae493d8a77ae6e8a34a5478f693033d6b3d91df3a15bc64f",
+      "query": "https://apisidra.ibge.gov.br/values/t/5457/n6/1100023,3516200,3170701/v/112,214,215,216/p/1988-2025/c782/40101,40103,40106,40112,40122,40124,40125,40127,40140,40141?formato=json",
+      "retrieved_at_http": "Sat, 14 Nov 2026 00:27:42 GMT"
+    },
+    "zarc_siszarc_reports": [
+      {
+        "path": "data/raw/mapa-siszarc/zarc-mg-cafe-arabica-2026-2027.xls",
+        "sha256": "f837d256f8b7ed3d39540ee69ac7dc44b7e669b1cd50c57b9859b5d76f2bdf77",
+        "query": {
+          "report_url": "https://sistemasweb.agricultura.gov.br/siszarc/gerarRelatorioPublicacoesDoZarc!gerarRelatorioXLS.action",
+          "season": [
+            "Perenes"
+          ],
+          "uf": "MG",
+          "crop_official_labels": [
+            "Café Arábica Implantação"
+          ],
+          "cultivar_group": "all strata (blank SISZARC filter)",
+          "soil_class": "all strata (blank SISZARC filter)",
+          "municipality_normalization_filter": "Varginha"
+        },
+        "sidecar": null,
+        "sidecar_sha256": null,
+        "normalized_municipality_rows": 3
+      },
+      {
+        "path": "data/raw/mapa-siszarc/zarc-mg-milho-2-safra-2026-2027.xls",
+        "sha256": "e3f56703d6232bd3f7f6c311726c3774f8c042bc23938532b59255403a07fad7",
+        "query": {
+          "report_url": "https://sistemasweb.agricultura.gov.br/siszarc/gerarRelatorioPublicacoesDoZarc!gerarRelatorioXLS.action",
+          "season": [
+            "2026 / 2027"
+          ],
+          "uf": "MG",
+          "crop_official_labels": [
+            "Milho 2ª Safra"
+          ],
+          "cultivar_group": "all strata (blank SISZARC filter)",
+          "soil_class": "all strata (blank SISZARC filter)",
+          "municipality_normalization_filter": "Varginha"
+        },
+        "sidecar": null,
+        "sidecar_sha256": null,
+        "normalized_municipality_rows": 12
+      },
+      {
+        "path": "data/raw/mapa-siszarc/zarc-mg-soja-2026-2027.xls",
+        "sha256": "7416ded865e2c88b2293e11f49f83e321c58475274a216e12a8a0cda1e3f60db",
+        "query": {
+          "report_url": "https://sistemasweb.agricultura.gov.br/siszarc/gerarRelatorioPublicacoesDoZarc!gerarRelatorioXLS.action",
+          "season": [
+            "2026 / 2027"
+          ],
+          "uf": "MG",
+          "crop_official_labels": [
+            "Soja"
+          ],
+          "cultivar_group": "all strata (blank SISZARC filter)",
+          "soil_class": "all strata (blank SISZARC filter)",
+          "municipality_normalization_filter": "Varginha"
+        },
+        "sidecar": null,
+        "sidecar_sha256": null,
+        "normalized_municipality_rows": 18
+      }
+    ]
   }
 }

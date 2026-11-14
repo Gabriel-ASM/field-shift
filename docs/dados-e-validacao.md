@@ -2,9 +2,9 @@
 
 ## Estado dos arquivos neste repositório
 
-O relatório da coleta descreve 22 conjuntos e 55 arquivos processados para Cascavel, Toledo e Assis Chateaubriand (PR). Os originais do PR, ZARC, PAM, MapBiomas e QC continuam ausentes deste checkout. Para os exemplos solicitados, baixamos NASA POWER Daily, SoilGrids e malhas IBGE para Ariquemes (RO), Franca (SP) e Varginha (MG); veja os manifestos em `data/profiles/` e os arquivos fonte em `data/raw/`. Esses pontos municipais não são medições de talhão. O [inventário do PR](../data/catalog/coleta-oeste-pr.json) e as [métricas transcritas](../data/reference/coleta-oeste-pr-validacao.json) registram a cobertura citada sem afirmar que seus arquivos estejam carregados.
+O relatório da coleta descreve 22 conjuntos e 55 arquivos processados para Cascavel, Toledo e Assis Chateaubriand (PR); os originais do PR, MapBiomas e observações pareadas QC continuam ausentes deste checkout. Para os exemplos solicitados, baixamos NASA POWER Daily, SoilGrids, malhas IBGE, PAM/SIDRA 1988–2025 e relatórios oficiais MAPA SISZARC da safra 2026/27 para Ariquemes (RO), Franca (SP) e Varginha (MG). Os valores FAO‑56 e a cobertura local estão em `data/reference/`. Veja os manifestos em `data/profiles/` e as respostas fonte em `data/raw/`. Esses pontos municipais não são medições de talhão. O [inventário do PR](../data/catalog/coleta-oeste-pr.json) e as [métricas transcritas](../data/reference/coleta-oeste-pr-validacao.json) registram a cobertura citada sem afirmar que seus arquivos estejam carregados.
 
-Os contratos em `data/contracts/` definem clima diário, solo em camadas, estado, observação pareada e transição. O HTML executa uma simulação de água no solo para os três perfis; não faz seleção de talhão no mapa, recomendação de cultura nem cálculo econômico. As fontes recomendadas na aba NASA Space Apps estão registradas em `data/catalog/fontes-desafio-nasa.json`.
+Os contratos em `data/contracts/` definem clima diário, solo em camadas, estado, observação pareada e transição. O HTML executa a matriz de referência e uma matriz de água×fase de cultura condicionada a janela ZARC e Kc FAO‑56; a seleção de talhão no mapa foi omitida. A comparação não recomenda uma rotação nem calcula rendimento ou VPL. As fontes NASA do desafio e seu status estão em `data/catalog/fontes-desafio-nasa.json`; o fluxo completo de cada dado é `data/reference/model-data-flow.json`.
 
 ## Dados previstos
 
@@ -13,14 +13,15 @@ A cobertura alvo é nacional. Usar a malha municipal do IBGE para localizar as �
 | Fonte | Uso no projeto | Limite principal |
 |---|---|---|
 | [NASA POWER Daily](https://power.larc.nasa.gov/docs/services/api/temporal/daily/) | Temperatura, radiação, vento e variáveis meteorológicas | Resolução e incerteza podem não representar um talhão |
-| [NASA GPM IMERG](https://gpm.nasa.gov/data/imerg) | Chuva e períodos secos | Estimativa por satélite; comparar com pluviômetros locais quando possível |
-| [SMAP L4 v8 / NSIDC](https://nsidc.org/data/spl4smgp/versions/8) | Comparação regional de umidade da superfície e zona de raízes | Conferir o aviso de reprocessamento de 14 de maio a 28 de julho de 2026 antes de usar o trecho |
+| [NASA GPM IMERG](https://gpm.nasa.gov/data/imerg) | Chuva e períodos secos | Catalogado, ainda não baixado para os exemplos; comparar com pluviômetros locais e POWER |
+| [SMAP L4 v8 / NSIDC](https://nsidc.org/data/spl4smgp/versions/8) | Comparação regional de umidade da superfície e zona de raízes | Catalogado, ainda não baixado; conferir o aviso de reprocessamento antes de usar o trecho |
 | [SoilGrids / ISRIC](https://isric.org/explore/soilgrids) | Prior de textura, carbono, pH e propriedades do solo | Mapa estimado; usar análise local para calibrar |
 | [Embrapa](https://www.embrapa.br/web/agencia-de-informacao-tecnologica/cultivos/milho/producao/rotacao-de-culturas) | Regras de rotação e respostas agronômicas | A recomendação depende da região, cultura e manejo |
-| [ZARC / MAPA](https://www.gov.br/agricultura/pt-br/assuntos/riscos-seguro/programa-nacional-de-zoneamento-agricola-de-risco-climatico/zoneamento-agricola) | Janelas e risco de plantio por local, solo e cultivar | Consultar a indicação vigente para cada área |
+| [ZARC / MAPA](https://www.gov.br/agricultura/pt-br/assuntos/riscos-seguro/programa-nacional-de-zoneamento-agricola-de-risco-climatico/zoneamento-agricola) | Janelas e risco de plantio por município, solo e grupo | Baixado via relatórios SISZARC para culturas disponíveis em cada exemplo; safra 2026/27 |
 | [Conab — preços de mercado](https://consultaprecosdemercado.conab.gov.br/) | Preços para estimar margem, se necessário | Preço regional e custo da fazenda podem divergir |
-| [IBGE PAM / SIDRA](https://sidra.ibge.gov.br/pesquisa/pam/tabelas) | Área e produtividade de referência | Agregação municipal |
-| [FAO-56](https://www.fao.org/4/X0490E/x0490e0b.htm) | Coeficiente de cultivo e duração por fase | Conferir extrato e adequação regional antes de parametrizar |
+| [Conab — custos de produção](https://portaldeinformacoes.conab.gov.br/precos-agropecuarios-serie-) | Custos por produto, safra e empreendimento levantado | Fonte R091 do relatório; registros comparáveis por hectare não foram obtidos para as demonstrações |
+| [IBGE PAM / SIDRA](https://sidra.ibge.gov.br/pesquisa/pam/tabelas) | Área, produção, valor nominal e produtividade de referência | Baixado 1988–2025; agregação municipal, não é resposta causal nem preço real |
+| [FAO-56](https://www.fao.org/4/X0490E/x0490e0b.htm) | Kc e duração de fases por cultura | Extraído para referência; alguns cultivos/perenes sem ciclo compatível e parâmetros não são calibrados no Brasil |
 
 ## Frequência e responsabilidade
 
@@ -51,7 +52,7 @@ O manifesto registra também versão, data de referência, cobertura, unidade, r
 
 ## Conferência das fontes
 
-A conferência usa o texto da aba **NASA Data & Resources** fornecido pela equipe. O acesso direto à [aba Resources](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/?tab=resources) permaneceu indisponível. A lista abaixo registra a aderência ao MVP e distingue a família citada no desafio do produto descrito no relatório.
+A [aba oficial NASA Data & Resources](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/?tab=resources) orienta a seleção das famílias de dados. O catálogo local registra o produto usado e as fontes ainda pendentes; a tabela distingue famílias NASA da informação agronômica local descrita no relatório de pesquisa.
 
 | Prioridade | Recursos do desafio | Uso previsto |
 |---|---|---|
@@ -63,7 +64,7 @@ A conferência usa o texto da aba **NASA Data & Resources** fornecido pela equip
 
 Os complementos entram quando respondem a uma lacuna concreta. Documentação técnica: [MODIS MOD13Q1](https://lpdaac.usgs.gov/products/mod13q1v061/), [NASADEM](https://www.earthdata.nasa.gov/data/catalog/lpcloud-nasadem-hgt-001), [ERA5-Land](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-land), [Sentinel-2](https://dataspace.copernicus.eu/data-collections/copernicus-sentinel-missions/sentinel-2) e [FAO GAEZ](https://www.fao.org/gaez/en).
 
-O [relatório da coleta](../research/relatorio_coleta_final_2026-11-10-v3.md) registra cobertura, comparações e lacunas no Oeste do Paraná e serve como referência para aplicar o método de coleta no restante do país. O manifesto e as séries processadas citadas no relatório não estão neste repositório. Antes do ajuste, verificar arquivos, unidades, qualidade e disponibilidade por região e cultura. O relatório registra custos Conab como pendentes na coleta. O módulo econômico pode partir de valores informados pelo produtor ou de premissas identificadas.
+O [relatório da coleta](../research/relatorio_coleta_final_2026-11-10-v3.md) registra cobertura, comparações e lacunas no Oeste do Paraná e serve como referência para aplicar o método de coleta no restante do país. O manifesto e as séries processadas citadas no relatório não estão neste repositório. Antes do ajuste, verificar arquivos, unidades, qualidade e disponibilidade por região e cultura. O relatório registra preços futuros, PTAX e custos Conab como pendentes (R091, R092, R094 e R097); o estado de cada fonte está em `data/catalog/fontes-agronomicas.json`. A única estatística monetária exibida é valor bruto municipal nominal da PAM como contexto, sem convertê-la em preço ou margem. O módulo econômico pode partir de valores informados pelo produtor ou de premissas identificadas.
 
 ## Dados mínimos para começar
 

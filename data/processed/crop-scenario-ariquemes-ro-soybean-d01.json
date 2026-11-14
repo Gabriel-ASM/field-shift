@@ -1,0 +1,77 @@
+{
+  "profile": "ariquemes-ro",
+  "scenario": {
+    "crop_parameter_id": "soybean",
+    "crop_name_pt": "Soja",
+    "official_zarc_crop_label": "Soja",
+    "zarc_group": "GRUPO I",
+    "zarc_soil_class": "AD1",
+    "risk_percent": 20,
+    "planting_decendio": 1,
+    "portaria": "207",
+    "portaria_date": "03/07/2026",
+    "action": "crop:soybean:planting_decendio:1",
+    "support": "derived_process_model"
+  },
+  "config": {
+    "steps": 120,
+    "horizon_years": 5,
+    "trajectories": 10000,
+    "seed": 2026,
+    "block_periods": 2,
+    "pseudocount_per_viable_destination": 0.5,
+    "common_random_numbers": "same seed, seasonal environment blocks and transition uniforms for the reference and crop-model runs; row parameters sampled from each model's own counts"
+  },
+  "reference_kc1": {
+    "trajectories": 10000,
+    "mean_low_water_periods": 44.5135,
+    "median_low_water_periods": 44.0,
+    "p5_low_water_periods": 16.950000000000045,
+    "p95_low_water_periods": 75.0,
+    "mean_fraction_of_horizon_low_water": 0.37094583333333336,
+    "probability_low_water_at_least_24_periods": 0.8823,
+    "median_longest_low_run_periods": 15.0,
+    "p95_longest_low_run_periods": 30.0,
+    "terminal_probabilities": {
+      "water_low": 0.3641,
+      "water_medium": 0.1131,
+      "water_high": 0.5228
+    },
+    "state_terminal_probabilities": {
+      "water_high": 0.5228,
+      "water_low": 0.3641,
+      "water_medium": 0.1131
+    }
+  },
+  "crop_water_scenario": {
+    "trajectories": 10000,
+    "mean_low_water_periods": 39.5232,
+    "median_low_water_periods": 39.0,
+    "p5_low_water_periods": 13.0,
+    "p95_low_water_periods": 68.0,
+    "mean_fraction_of_horizon_low_water": 0.32936000000000004,
+    "probability_low_water_at_least_24_periods": 0.822,
+    "median_longest_low_run_periods": 14.0,
+    "p95_longest_low_run_periods": 29.0,
+    "terminal_probabilities": {
+      "water_low": 0.3687,
+      "water_medium": 0.1152,
+      "water_high": 0.5161
+    },
+    "state_terminal_probabilities": {
+      "water_high__development": 0.0428,
+      "water_high__initial": 0.037,
+      "water_high__late": 0.0384,
+      "water_high__mid": 0.1241,
+      "water_high__off_crop_reference": 0.2738,
+      "water_low__initial": 0.003,
+      "water_low__mid": 0.0018,
+      "water_low__off_crop_reference": 0.3639,
+      "water_medium__initial": 0.0024,
+      "water_medium__late": 0.0012,
+      "water_medium__mid": 0.0025,
+      "water_medium__off_crop_reference": 0.1091
+    }
+  },
+  "interpretation": "Water-state sensitivity scenario only; not observed management effect, yield forecast, crop recommendation, or VPL."
+}

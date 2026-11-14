@@ -2,7 +2,7 @@
 
 ## Unidade do modelo
 
-A unidade final do produto é o talhão ou uma área de manejo homogênea. O horizonte do MVP é de cinco anos em 120 passos quinzenais; o balanço diário alimenta cada passo. **No código executável atual**, três perfis municipais têm clima NASA POWER diário, solo SoilGrids e balanço hídrico diário de referência ligados às transições Markov. Essa execução não contém talhão, cultura ou manejo: demonstra o fluxo água-clima e não deve ser interpretada como recomendação.
+A unidade final do produto é o talhão ou uma área de manejo homogênea. O horizonte do MVP é de cinco anos em 120 passos quinzenais; o balanço diário alimenta cada passo. **No código executável atual**, três perfis municipais têm clima NASA POWER diário, solo SoilGrids, calendário ZARC, histórico municipal PAM e parâmetros hídricos FAO‑56. Além da matriz de referência Kc=1, o pipeline gera matrizes derivadas condicionadas à cultura e à fase para ciclos anuais consistentes com Kc e com decêndio elegível ZARC. A ação agrícola ainda não é um efeito medido em talhão; a simulação não é recomendação.
 
 ## Estado, ação e ambiente
 
@@ -49,9 +49,9 @@ $$
 
 Probabilidades precisam somar 1 em cada linha. Com poucos dados, usar suavização ou uma distribuição a priori explícita; marcar os valores como provisórios e atualizá-los com dados observados e referências agronômicas. Não apresentar probabilidades inventadas como evidência.
 
-O formato executado usa `states.json`, `transitions.json` e `environment.json` dentro de um perfil. Cada linha é indexada por `(state, action, environment)` e guarda contagens inteiras por destino, `support`, tamanho amostral e `provenance`. `support=observed` é observação pareada de campo; `derived` é uma transição calculada por processo físico; `pooled` identifica contextos agrupados; `prior` identifica regra sem observações. A média posterior usa `alpha_j = count_j + 0,5` e `P_j = alpha_j / soma(alpha)`. O carregador rejeita rótulos ambientais sem história e linhas sem origem.
+O formato de referência usa `states.json`, `transitions.json` e `environment.json`. `crop-markov-scenarios.json` mantém, para cada cultura×decêndio, os estados água×fase e as linhas de transição. Cada linha é indexada por `(state, action, environment)` e guarda contagens inteiras por destino, `support`, tamanho amostral e `provenance`. `support=observed` é observação pareada de campo; `derived` é transição calculada por processo físico; `pooled` identifica contextos agrupados; `prior` identifica regra sem observações. A média posterior usa `alpha_j = count_j + 0,5` somente nos destinos que têm contagem positiva na linha e `P_j = alpha_j / soma(alpha)`. O carregador rejeita rótulos ambientais sem história e linhas sem origem.
 
-As contagens `observed` exigem observações pareadas da mesma unidade de manejo: estado atual, manejo aplicado, contexto climático e próximo estado. PAM, ZARC e MapBiomas apoiam o contexto e a elegibilidade, mas seus agregados não equivalem a transições observadas de água/solo de um talhão. Os três perfis atuais têm transições `derived` do balanço de água NASA POWER + SoilGrids/Saxton–Rawls; a ação é somente demanda de referência ET₀, e não muda cultura. Nenhuma contagem de transição de cultura ou manejo foi criada.
+As contagens `observed` exigem observações pareadas da mesma unidade de manejo: estado atual, manejo aplicado, contexto climático e próximo estado. PAM, ZARC e MapBiomas apoiam contexto/elegibilidade, mas seus agregados não equivalem a transições observadas de água/solo de um talhão. A matriz de referência deriva da demanda ET₀. A matriz de cultura deriva a demanda ETc=Kc×ET₀ ao longo das fases FAO‑56 e inclui a fase no estado; fora do ciclo, usa Kc=1 de referência. Seu decêndio precisa ocorrer em pelo menos uma combinação municipal de grupo, código de solo ZARC e risco de 20/30/40%. Esse código oficial é escolhido no registro do MAPA; não é inferido de SoilGrids. Nenhuma contagem de efeito de manejo, transição de cultura ou resposta de produtividade foi criada.
 
 ```mermaid
 flowchart LR
@@ -75,7 +75,7 @@ Cada trajetória Monte Carlo representa um futuro plausível. No MVP, a configur
 
 Para cada trajetória, o núcleo executável amostra blocos sazonais da história categórica, sorteia uma realização das linhas Dirichlet uma vez para a trajetória, e usa um uniforme por quinzena para escolher o próximo estado. Se a economia for fornecida, desconta os fluxos no fim de cada quinzena e calcula mediana, P5, P95 e média dos 5% piores. As mesmas séries de ambientes, uniformes de transição, matrizes e sorteios de pragas são compartilhados entre políticas dentro da trajetória, reduzindo ruído na comparação.
 
-O fluxo de caixa continua sem preço/custo e não conecta curva B3/ANBIMA ou função de produtividade. `python -m field_shift.demo` executa os três perfis e calcula apenas a distribuição de estados hídricos, sem VPL. Para uma recomendação quantitativa de rotação ainda faltam ZARC carregado, Kc/calendário e resposta por cultura, estado inicial observado, manejo pareado e produtividade local.
+O fluxo de caixa continua sem preço/custo e não conecta curva B3/ANBIMA ou função de produtividade. `python -m field_shift.demo` executa os três perfis de referência; `field_shift.crop_demo` consome a matriz água×fase e compara a ação Kc×ZARC com a referência, compartilhando os mesmos blocos de clima e os mesmos uniforms por passo. O HTML repete essa comparação no navegador. A saída mede apenas estados de água: ainda faltam estado inicial de campo, transições observadas de manejo, Kc regional, função calibrada de resposta do rendimento, custos e preços para produtividade prevista, VPL ou ranking.
 
 ```mermaid
 sequenceDiagram

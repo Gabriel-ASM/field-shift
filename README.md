@@ -4,13 +4,13 @@ Proposta de apoio à decisão para comparar rotações de culturas usando observ
 
 O projeto responde ao desafio [Field Shift: Adapting Farms with NASA Data](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/) do NASA Space Apps Challenge 2026.
 
-> **Status:** NASA POWER Daily e SoilGrids baixados para três exemplos brasileiros; balanço hídrico de referência ligado a Markov + Monte Carlo. Sem transições de campo, cultura ou manejo, a execução não calcula recomendação de rotação nem VPL.
+> **Status:** NASA POWER/SoilGrids, PAM/IBGE e ZARC/MAPA ingeridos para Ariquemes‑RO, Franca‑SP e Varginha‑MG; matrizes Markov derivadas por cultura/fase para ações com Kc FAO‑56 e decêndio ZARC compatíveis. O Monte Carlo compara demanda de água com a referência Kc=1. Sem transições de campo e resposta de rendimento calibrada, a execução não recomenda rotação nem calcula VPL.
 
 ## Executar o motor
 
 Para executar a simulação de referência nos três perfis, rode `python -m field_shift.demo`. Para um perfil isolado, use `python -m field_shift --profile data/profiles/ariquemes-ro --policy data/policies/balanco-hidrico-referencia.json --initial-state water_medium`. Os dados brutos estão em `data/raw/`, os normalizados e as contagens Markov em `data/profiles/`, e as fontes/gaps estão em `data/README.md`.
 
-Abra a [demonstração interativa](docs/visualizacao.html) para conferir os dados e rodar novamente 10.000 trajetórias para Ariquemes, Franca e Varginha. A seleção de talhão no mapa foi deixada fora. Regenere a página com `python -m field_shift.visualize --output docs/visualizacao.html --seed 2026`.
+Abra a [demonstração interativa](docs/visualizacao.html) para conferir os dados, escolher cultura/grupo/solo/risco/decêndio e comparar 10.000 trajetórias pareadas para os três municípios. A seleção de talhão no mapa foi deixada fora. Regenere o pacote offline com `python -m field_shift.visualize --output docs/visualizacao.html --seed 2026`.
 
 ## Ideia em uma figura
 
@@ -37,6 +37,6 @@ O estado Markov descreve o talhão. O Monte Carlo cria futuros plausíveis de cl
 
 ## Escopo proposto
 
-O escopo nacional continua como objetivo do produto. Esta entrega contém três exemplos municipais com dados ambientais remotos e não representa fazendas nem recomenda manejo. Os 55 arquivos originais citados para o Oeste do Paraná continuam fora do checkout; não foram usados nem substituídos por exemplos sintéticos.
+O escopo nacional continua como objetivo do produto. Esta entrega contém três exemplos municipais com dados ambientais remotos e agrícolas públicos; não representa fazendas nem recomenda manejo. Os 55 arquivos originais citados para o Oeste do Paraná continuam fora do checkout; não foram usados nem substituídos por arquivos sintéticos.
 
 O caminho de dados para meteorologia, solo, estados Markov, contagens de transição e Monte Carlo está descrito em [data/README.md](data/README.md) e nos esquemas em `data/contracts/`. O inventário extraído do relatório e da planilha está em `data/catalog/` e `data/reference/`, com ausências e limites registrados.

@@ -45,7 +45,7 @@
   th { color: #627064; font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; }
   th:first-child,td:first-child { text-align: left; }
   .note { margin-top: 13px; padding: 12px 14px; border-radius: 10px; background: #f5f7f3; color: #5f6c62; font-size: .86rem; }
-  .flow { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 9px; margin: 15px 0 18px; }
+  .flow { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 9px; margin: 15px 0 18px; }
   .flow-card { padding: 13px; border-radius: 11px; background: #f5f8f3; }
   .flow-card strong { display: block; margin-bottom: 5px; color: #315d42; }
   .flow-card span { color: #657167; font-size: .8rem; line-height: 1.4; }
@@ -66,6 +66,7 @@
   .source-list { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 12px 0; }
   .source-list a { font-size: .88rem; font-weight: 650; }
   code { color: #315d42; font-size: .88em; }
+  @media(max-width:1000px){.flow{grid-template-columns:repeat(3,minmax(0,1fr))}}
   @media(max-width:800px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.flow{grid-template-columns:repeat(2,minmax(0,1fr))}.panel-head{display:block}.panel-head label{margin-top:12px}select{width:100%}}
   @media(max-width:460px){.cards{grid-template-columns:1fr 1fr;gap:7px}.metric{padding:11px;min-height:84px}.metric strong{font-size:1.08rem}.flow{grid-template-columns:1fr 1fr}th,td{padding:8px 6px}}
 </style>
@@ -98,43 +99,77 @@
     <p class="note" id="soil-note"></p>
   </section>
 
+  <section class="panel" aria-labelledby="agronomy-title">
+    <div class="panel-head">
+      <div><h2 id="agronomy-title">Dados agrícolas para uma ação simulável</h2><p class="muted">O ZARC filtra cultura, grupo, solo e decêndio. A simulação usa Kc FAO‑56 apenas quando existe ciclo anual consistente.</p></div>
+      <label for="crop-select">Cultura no ZARC<select id="crop-select"></select></label>
+    </div>
+    <div class="controls" style="margin:14px 0">
+      <label for="zarc-group">Grupo de cultivar<select id="zarc-group"></select></label>
+      <label for="zarc-soil">Solo ZARC<select id="zarc-soil"></select></label>
+      <label for="zarc-risk">Risco publicado<select id="zarc-risk"><option value="20">20%</option><option value="30">30%</option><option value="40">40%</option></select></label>
+      <label for="zarc-decendio">Plantio elegível<select id="zarc-decendio"></select></label>
+    </div>
+    <div class="cards" id="crop-data-cards"></div>
+    <p class="note" id="zarc-note"></p>
+    <h3 class="steps-title">Histórico municipal de rendimento · PAM/IBGE (1988–2025)</h3>
+    <div class="table-wrap"><table><thead><tr><th>Produto</th><th>Anos válidos</th><th>Primeiro–último</th><th>Mínimo kg/ha</th><th>Mediana kg/ha</th><th>Máximo kg/ha</th><th>Média 2021–25 kg/ha</th><th>Valor bruto/ha¹ · R$ nominal</th></tr></thead><tbody id="pam-table"></tbody></table></div>
+    <p class="note">Médias municipais observadas, não produtividade do talhão nem resposta causal ao estresse hídrico. ¹ Razão de valor da produção/área, média municipal nominal de 2021–25; não foi deflacionada e não é preço líquido nem custo. Valores ausentes permanecem ausentes.</p>
+  </section>
+
+  <section class="panel" aria-labelledby="kc-title">
+    <h2 id="kc-title">Parâmetros de água por cultura · FAO‑56</h2>
+    <p class="muted">Kc inicial, médio e final e duração das fases vêm de tabelas de referência da FAO‑56. Só ciclos anuais com fases internamente consistentes são habilitados; culturas perenes, consórcios sem Kc de cada espécie e a inconsistência do sorgo aparecem sem uma curva simulável.</p>
+    <div class="table-wrap"><table><thead><tr><th>Cultura/sistema</th><th>Kc inicial</th><th>Kc médio</th><th>Kc final</th><th>Duração</th><th>Uso no modelo</th></tr></thead><tbody id="kc-table"></tbody></table></div>
+  </section>
+
   <section class="panel" aria-labelledby="markov-title">
     <div class="panel-head">
-      <div><h2 id="markov-title">Como o balanço vira Markov</h2><p class="muted">Estado de água na entrada × classe de chuva da quinzena → estado de água na saída.</p></div>
-      <label for="environment-select">Ambiente<select id="environment-select"><option value="dry">Seco</option><option value="normal">Normal</option><option value="wet">Úmido</option></select></label>
+      <div><h2 id="markov-title">Como os dados viram transições Markov</h2><p class="muted">Referência: água × chuva → água. Cultura: água × fase × chuva, condicionada à ação e ao decêndio de plantio.</p></div>
     </div>
     <div class="flow" aria-label="Pipeline de ingestão">
-      <div class="flow-card"><strong>1 · Clima diário</strong><span>POWER → ETo FAO-56 → agregação em períodos de 15 dias.</span></div>
-      <div class="flow-card"><strong>2 · Água no solo</strong><span>Chuva efetiva e ETo atualizam a CAD mapeada na zona de 0–100 cm.</span></div>
-      <div class="flow-card"><strong>3 · Transição</strong><span>Fração da CAD vira baixa, média ou alta. O ambiente usa percentis locais de chuva.</span></div>
-      <div class="flow-card"><strong>4 · Monte Carlo</strong><span>Reamostra blocos sazonais reais e sorteia parâmetros Dirichlet por trajetória.</span></div>
+      <div class="flow-card"><strong>1 · Clima NASA</strong><span>POWER diário → ET₀ FAO‑56 e chuva PRECTOTCORR; classes sazonais por quinzena.</span></div>
+      <div class="flow-card"><strong>2 · Solo mapeado</strong><span>SoilGrids → CAD Saxton–Rawls em 0–100 cm; ponto no centroide IBGE.</span></div>
+      <div class="flow-card"><strong>3 · Calendário MAPA</strong><span>ZARC restringe cultura, grupo, código oficial de solo, risco e decêndios elegíveis.</span></div>
+      <div class="flow-card"><strong>4 · Ação + fase</strong><span>FAO‑56 Kc atualiza ETc; Markov recebe água × fase × ambiente e ação.</span></div>
+      <div class="flow-card"><strong>5 · Monte Carlo</strong><span>Mesmos blocos climáticos para referência e cultura; Dirichlet por trajetória.</span></div>
     </div>
+    <div class="panel-head"><h3>Referência Kc=1</h3><label for="environment-select">Ambiente<select id="environment-select"><option value="dry">Seco</option><option value="normal">Normal</option><option value="wet">Úmido</option></select></label></div>
     <div class="table-wrap"><table><thead><tr><th>Água atual</th><th>Próxima baixa</th><th>Próxima média</th><th>Próxima alta</th><th>n direto</th><th>Suporte</th></tr></thead><tbody id="markov-table"></tbody></table></div>
     <p class="note" id="markov-note"></p>
+    <h3>Transição da ação selecionada</h3>
+    <div class="controls"><label for="phase-select">Fase do estado<select id="phase-select"></select></label></div>
+    <div class="table-wrap"><table><thead><tr><th>Água atual × fase</th><th>Próxima baixa</th><th>Próxima média</th><th>Próxima alta</th><th>n direto</th><th>Suporte</th></tr></thead><tbody id="crop-markov-table"></tbody></table></div>
+    <p class="note" id="crop-markov-note"></p>
   </section>
 
   <section class="panel" aria-labelledby="simulation-title">
     <div class="panel-head">
-      <div><h2 id="simulation-title">Monte Carlo · cenário hídrico de referência</h2><p class="muted">Horizonte de cinco anos, com demanda ET₀ de referência (Kc=1), sem uma cultura definida.</p></div>
-      <div class="controls"><label for="simulation-seed">Semente<input id="simulation-seed" type="number" min="0" step="1" value="2026"></label><button id="run-simulation" class="primary" type="button">Executar 10.000 trajetórias</button></div>
+      <div><h2 id="simulation-title">Monte Carlo · referência × ação agrícola</h2><p class="muted">Horizonte de cinco anos. Ação do seletor acima; apenas o balanço de água é comparado.</p></div>
+      <div class="controls"><label for="simulation-seed">Semente<input id="simulation-seed" type="number" min="0" step="1" value="2026"></label><button id="run-simulation" class="primary" type="button">Comparar 10.000 trajetórias</button></div>
     </div>
     <div class="run-state" id="run-state" aria-live="polite"><strong>Preparando simulação</strong><span>Carregando transições e anos climáticos completos.</span></div>
     <div class="results" id="simulation-results" hidden></div>
-    <p class="note">A saída expressa frequência simulada do estado de água baixa no balanço de referência. Não é probabilidade de quebra de safra, produtividade ou recomendação de rotação. A transição não inclui cultura, Kc, manejo ou medição pareada de campo.</p>
+    <p class="note">A comparação expressa estados de água sob o balanço de referência e a curva Kc selecionada. A matriz agrícola é derivada do processo físico e a curva Kc é uma referência global. Não representa efeito observado de manejo, produtividade, quebra de safra, recomendação de rotação ou VPL. O código de solo do ZARC é selecionado diretamente; não é inferido do mapa SoilGrids.</p>
   </section>
 
   <section class="panel" aria-labelledby="limits-title">
-    <h2 id="limits-title">O que falta para comparar rotações</h2>
-    <p>O <a href="../research/relatorio_coleta_final_2026-11-10-v3.md">relatório de pesquisa</a> cita 55 arquivos brutos do Oeste do Paraná que não vieram neste checkout. Também não há observações de água/solo pareadas para estes municípios, ZARC carregado, produtividade por talhão, custos nem preços. Por isso esta execução apresenta somente risco do balanço de referência. Ela não calcula ranking de culturas, VPL ou perda de rendimento.</p>
+    <h2 id="limits-title">Dados ingeridos e limites restantes</h2>
+    <p>Esta entrega incorpora os dados NASA POWER e SoilGrids, calendários ZARC oficiais, PAM municipal e parâmetros de água FAO‑56 para as três localidades. O <a href="../research/relatorio_coleta_final_2026-11-10-v3.md">relatório de pesquisa</a> cita arquivos processados do Oeste do Paraná que não vieram neste checkout. Não há observações pareadas de água/solo e manejo nestas localidades, Kc calibrado por cultivar, resposta causal de produtividade, custos locais ou curvas de preço. Por isso culturas sem curva anual consistente e/ou sem janela ZARC não são simuladas; nenhuma recomendação, perda de rendimento ou VPL é calculada.</p>
     <p>O esquema já mantém observações de campo separadas dos valores remotos. Quando houver histórico de manejo, cada transição deverá ligar o mesmo talhão no tempo: estado inicial, ação, ambiente e estado seguinte.</p>
     <div class="source-list">
       <a href="https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/?tab=resources" target="_blank" rel="noreferrer">Recursos do desafio NASA Space Apps</a>
       <a href="../data/catalog/fontes-desafio-nasa.json">Catálogo de fontes e status</a>
+      <a href="../data/catalog/fontes-agronomicas.json">Fontes ZARC, PAM, FAO‑56 e dados econômicos pendentes</a>
+      <a href="https://sistemasweb.agricultura.gov.br/siszarc/base.action" target="_blank" rel="noreferrer">MAPA SISZARC</a>
+      <a href="https://sidra.ibge.gov.br/tabela/5457" target="_blank" rel="noreferrer">IBGE PAM · tabela 5457</a>
+      <a href="https://www.fao.org/4/x0490e/x0490e0b.htm" target="_blank" rel="noreferrer">FAO‑56 · Tabelas 11 e 12</a>
       <a href="https://power.larc.nasa.gov/docs/services/api/temporal/daily/" target="_blank" rel="noreferrer">NASA POWER Daily API</a>
       <a href="https://rest.isric.org/soilgrids/v2.0/docs" target="_blank" rel="noreferrer">SoilGrids v2.0 API</a>
       <a href="https://servicodados.ibge.gov.br/api/docs/malhas?versao=3" target="_blank" rel="noreferrer">Malhas municipais IBGE</a>
       <a href="https://doi.org/10.2136/sssaj2005.0117" target="_blank" rel="noreferrer">Saxton &amp; Rawls (2006)</a>
       <a href="../data/processed/demo-simulation-results.json">Execução Python registrada</a>
+      <a href="../data/reference/model-data-flow.json">Contrato de ingestão Markov/Monte Carlo</a>
     </div>
     <p class="muted steps-title">Contratos de dados: <a href="../data/contracts/climate-daily.schema.json">clima diário</a> · <a href="../data/contracts/soil-profile.schema.json">solo em camadas</a> · <a href="../data/contracts/markov-state.schema.json">estado</a> · <a href="../data/contracts/field-observation.schema.json">observação pareada</a> · <a href="../data/contracts/markov-transition.schema.json">transição</a>.</p>
   </section>
@@ -142,15 +177,22 @@
 </main>
 <script id="cases" type="application/json"><!-- CASE_DATA --></script>
 <script id="profiles" type="application/json"><!-- PROFILE_DATA --></script>
+<script id="crop-parameters" type="application/json"><!-- CROP_PARAMETERS --></script>
 <script>
 "use strict";
 const cases=JSON.parse(document.getElementById("cases").textContent);
 const profiles=JSON.parse(document.getElementById("profiles").textContent);
+const cropParameters=JSON.parse(document.getElementById("crop-parameters").textContent);
+const cropParameterById=Object.fromEntries(cropParameters.crops.map(crop=>[crop.id,crop]));
 const byId=id=>document.getElementById(id);
 const stateLabels={water_low:"Baixa",water_medium:"Média",water_high:"Alta"};
 const stateIds=["water_low","water_medium","water_high"];
 const environmentLabels={dry:"Seco",normal:"Normal",wet:"Úmido"};
-let active=null;
+const waterIds={baixa:"water_low",media:"water_medium",alta:"water_high"};
+const waterOrder=["baixa","media","alta"];
+const pamProductByParameter={soybean:"soja_em_grao",maize_grain:"milho_em_grao",peanut:"amendoim_em_casca",sorghum_grain:"sorgo_em_grao",sugarcane:"cana_de_acucar",coffee_bare:"cafe_arabica"};
+const pamNames={amendoim_em_casca:"Amendoim",aveia_em_grao:"Aveia",cana_de_acucar:"Cana-de-açúcar",feijao_em_grao:"Feijão",milho_em_grao:"Milho-grão",soja_em_grao:"Soja",sorgo_em_grao:"Sorgo",trigo_em_grao:"Trigo",cafe_arabica:"Café arábica",cafe_canephora:"Café canephora"};
+let active=null,activeZarcRow=null;
 
 function fmt(value,digits=1){return new Intl.NumberFormat("pt-BR",{minimumFractionDigits:digits,maximumFractionDigits:digits}).format(value);}
 function pct(value,digits=1){return fmt(value*100,digits)+"%";}
@@ -158,7 +200,7 @@ function node(tag,text,className){const el=document.createElement(tag);if(text!=
 function setRunState(title,detail){const status=byId("run-state");status.replaceChildren(node("strong",title),node("span",detail));}
 function makeCard(label,value,small){const card=node("div",undefined,"metric");card.append(node("span",label),node("strong",value),node("small",small));return card;}
 function findTransition(profile,state,environment){return profile.transitions.find(row=>row.state===state&&row.environment===environment);}
-function posterior(row){const alpha=stateIds.map(id=>(row.counts[id]||0)+0.5);const total=alpha.reduce((a,b)=>a+b,0);return alpha.map(a=>a/total);}
+function posterior(row,destinations=Object.keys(row.counts)){const alpha=destinations.map(id=>(row.counts[id]||0)+0.5);const total=alpha.reduce((a,b)=>a+b,0);return alpha.map(a=>a/total);}
 
 function renderProfile(){
   const profile=profiles[byId("case-select").value];active=profile;
@@ -181,6 +223,10 @@ function renderProfile(){
   }
   byId("soil-cards").replaceChildren(makeCard("CAD estimada · 0–100 cm",fmt(profile.soil.available_water_capacity_mm)+" mm","SoilGrids + Saxton–Rawls 2006"),makeCard("Água inicial","50% da CAD","condição declarada para o spin-up; não medida"));
   byId("soil-note").textContent=profile.soil.quality.uncertainty+" Ordem SiBCS e diagnóstico químico de talhão permanecem vazios.";
+  populateCropOptions();
+  renderPamTable();
+  renderKcTable();
+  syncZarcSelectors();
   renderMarkov();
   renderCachedSimulation();
 }
@@ -197,7 +243,101 @@ function renderMarkov(){
     tr.append(node("td",new Intl.NumberFormat("pt-BR").format(row.sample_size)),node("td",row.support==="pooled"?"agrupado":"derivado"));
     body.append(tr);
   }
-  byId("markov-note").textContent="Ambiente "+environmentLabels[environment]+". Probabilidades mostram a média posterior (contagem + 0,5 por destino viável); n direto é anterior ao pooling. Estados e contagens foram derivados do balanço hídrico NASA POWER + CAD estimada, não de campo.";
+  byId("markov-note").textContent="Ambiente "+environmentLabels[environment]+". Probabilidades posteriores usam contagens + 0,5 apenas nos destinos observados; n direto é anterior ao pooling. Matriz derivada do balanço NASA POWER + CAD estimada, sob demanda de referência Kc=1.";
+}
+
+function scenarioFor(cropId,decendio){return active?.crop_markov.scenarios.find(item=>item.crop_parameter_id===cropId&&item.planting_decendio===Number(decendio))||null;}
+function currentScenario(){return activeZarcRow?scenarioFor(activeZarcRow.crop_parameter_id,byId("zarc-decendio").value):null;}
+function zarcRowsForCrop(){return active?.zarc.rows.filter(row=>row.crop===byId("crop-select").value)||[];}
+function populateCropOptions(){
+  const select=byId("crop-select");select.replaceChildren();
+  const rows=active.zarc.rows;const labels=[...new Set(rows.map(row=>row.crop))].sort((a,b)=>a.localeCompare(b,"pt-BR"));
+  const supported=[];
+  for(const label of labels){
+    const row=rows.find(item=>item.crop===label);const cropId=row.crop_parameter_id;
+    const modelAvailable=cropId&&active.crop_markov.scenarios.some(item=>item.crop_parameter_id===cropId);
+    const option=new Option(label+(modelAvailable?" · Kc + Markov":" · ZARC sem curva simulável"),label);option.disabled=!modelAvailable;select.add(option);
+    if(modelAvailable)supported.push(label);
+  }
+  select.value=supported[0]||labels[0]||"";
+}
+function fillSelect(select,values,formatter=value=>String(value),preferred=null){
+  select.replaceChildren();for(const value of values)select.add(new Option(formatter(value),String(value)));
+  if(preferred!==null&&values.some(value=>String(value)===String(preferred)))select.value=String(preferred);
+  else if(values.length)select.selectedIndex=0;
+}
+function decendioLabel(value){
+  const n=Number(value),month=Math.floor((n-1)/3),within=(n-1)%3,months=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"],ranges=[[1,10],[11,20],[21,31]];
+  return "Decêndio "+n+" · "+months[month]+" "+ranges[within][0]+"–"+ranges[within][1];
+}
+function syncZarcSelectors(){
+  const rows=zarcRowsForCrop();
+  const groupSelect=byId("zarc-group"),soilSelect=byId("zarc-soil"),riskSelect=byId("zarc-risk"),decSelect=byId("zarc-decendio");
+  const previousGroup=groupSelect.value,previousSoil=soilSelect.value,previousRisk=riskSelect.value,previousDec=decSelect.value;
+  const groups=[...new Set(rows.map(row=>row.cultivar_group))].sort((a,b)=>a.localeCompare(b,"pt-BR"));fillSelect(groupSelect,groups,value=>value||"(sem grupo)",previousGroup);
+  const groupRows=rows.filter(row=>row.cultivar_group===groupSelect.value);const soils=[...new Set(groupRows.map(row=>row.zarc_soil_class))].sort((a,b)=>a.localeCompare(b,"pt-BR"));fillSelect(soilSelect,soils,value=>value,previousSoil);
+  activeZarcRow=groupRows.find(row=>row.zarc_soil_class===soilSelect.value)||groupRows[0]||null;
+  const riskValues=activeZarcRow?[20,30,40].filter(risk=>(activeZarcRow.planting_decendios_by_risk_percent[String(risk)]||[]).length):[];
+  fillSelect(riskSelect,riskValues,value=>value+"%",previousRisk);
+  const risk=riskSelect.value;const decendios=activeZarcRow?(activeZarcRow.planting_decendios_by_risk_percent[risk]||[]):[];
+  fillSelect(decSelect,decendios,value=>decendioLabel(value),previousDec);
+  const scenario=currentScenario();byId("run-simulation").disabled=!scenario;
+  const phaseSelect=byId("phase-select");
+  const phases=scenario?scenario.phase_ids:["initial","development","mid","late","off_crop_reference"];
+  const oldPhase=phaseSelect.value;fillSelect(phaseSelect,phases,value=>({off_crop_reference:"Entressafra · referência",initial:"Inicial",development:"Desenvolvimento",mid:"Média estação",late:"Final"}[value]||value),oldPhase);
+  renderCropData(scenario);
+  renderCropMarkov();
+  renderCachedSimulation();
+}
+function renderCropData(scenario){
+  const row=activeZarcRow,parameter=row?cropParameterById[row.crop_parameter_id]:null;
+  const cards=byId("crop-data-cards");cards.replaceChildren();
+  const product=parameter?pamProductByParameter[parameter.id]:null;const summary=product?active.pam.crop_summaries[product]:null;
+  cards.append(
+    makeCard("Grupo ZARC",row?.cultivar_group||"—","MAPA · safra "+(row?.season||"—")),
+    makeCard("Solo ZARC",row?.zarc_soil_class||"—","classe oficial; não inferida do SoilGrids"),
+    makeCard("Risco / plantio",row&&byId("zarc-risk").value?byId("zarc-risk").value+"% · "+(byId("zarc-decendio").value?decendioLabel(byId("zarc-decendio").value):"sem janela"):"—","decêndios oficiais do MAPA"),
+    makeCard("PAM · anos com rendimento",summary?String(summary.valid_yield_years):"sem produto PAM","média municipal, não do talhão")
+  );
+  if(summary&&summary.yield_median_kg_ha!==null)cards.append(makeCard("PAM · mediana de rendimento",fmt(summary.yield_median_kg_ha,0)+" kg/ha",(summary.first_valid_year||"—")+"–"+(summary.last_valid_year||"—")+" · IBGE"));
+  const pieces=[];
+  if(row)pieces.push("Portaria ZARC "+row.portaria+" · "+row.portaria_date+". Decêndios disponíveis para o risco selecionado: "+((row.planting_decendios_by_risk_percent[byId("zarc-risk").value]||[]).map(decendioLabel).join(", ")||"nenhum")+".");
+  if(scenario)pieces.push("A ação simulável usa "+parameter.name_pt+", Kc FAO‑56 "+parameter.kc.initial+" / "+parameter.kc.mid+" / "+parameter.kc.end+" e ciclo de "+parameter.duration_days+" dias. A matriz usa SoilGrids municipal como CAD e Kc=1 fora do ciclo.");
+  else pieces.push("Esta linha ZARC não tem curva Kc anual consistente para gerar uma transição de cultura. Ela continua disponível como calendário oficial, mas não é simulada.");
+  pieces.push("O código oficial de solo do ZARC não possui correspondência automática com SoilGrids. Confirme grupo e classe diretamente com a classificação do produtor.");
+  byId("zarc-note").textContent=pieces.join(" ");
+}
+function renderPamTable(){
+  const body=byId("pam-table");body.replaceChildren();
+  for(const [crop,summary] of Object.entries(active.pam.crop_summaries).sort((a,b)=>a[0].localeCompare(b[0],"pt-BR"))){
+    const tr=document.createElement("tr");const years=summary.first_valid_year===null?"—":summary.first_valid_year+"–"+summary.last_valid_year;
+    [pamNames[crop]||crop,summary.valid_yield_years,years,summary.yield_min_kg_ha===null?"—":fmt(summary.yield_min_kg_ha,0),summary.yield_median_kg_ha===null?"—":fmt(summary.yield_median_kg_ha,0),summary.yield_max_kg_ha===null?"—":fmt(summary.yield_max_kg_ha,0),summary.yield_mean_2021_2025_kg_ha===null?"—":fmt(summary.yield_mean_2021_2025_kg_ha,0),summary.gross_value_mean_2021_2025_brl_per_ha_nominal===null?"—":fmt(summary.gross_value_mean_2021_2025_brl_per_ha_nominal,0)].forEach((value,index)=>tr.append(node(index===0?"th":"td",String(value))));body.append(tr);
+  }
+}
+function renderKcTable(){
+  const body=byId("kc-table");body.replaceChildren();
+  for(const crop of cropParameters.crops){
+    const kc=crop.kc||{};const stages=crop.stage_days;const valid=Boolean(stages&&crop.duration_days&&Object.values(stages).reduce((a,b)=>a+b,0)===crop.duration_days&&crop.duration_days<365);
+    const hasWindow=active.crop_markov.scenarios.some(item=>item.crop_parameter_id===crop.id);const supported=valid&&hasWindow;
+    const tr=document.createElement("tr");
+    [crop.name_pt,kc.initial??"—",kc.mid??"—",kc.end??"—",crop.duration_days?crop.duration_days+" d":"—",supported?"Kc × ZARC · simulável":valid?"sem janela ZARC local":crop.support==="published_reference_internal_discrepancy"?"bloqueada: fases e total divergem":"referência sem ciclo anual compatível"].forEach((value,index)=>tr.append(node(index===0?"th":"td",String(value))));body.append(tr);
+  }
+}
+function renderCropMarkov(){
+  const body=byId("crop-markov-table");body.replaceChildren();const scenario=currentScenario();
+  if(!scenario){byId("crop-markov-note").textContent="Selecione uma cultura com curva anual e uma janela elegível de plantio.";return;}
+  const phase=byId("phase-select").value||scenario.phase_ids[0],environment=byId("environment-select").value;
+  const stateMap=Object.fromEntries(scenario.states.map(item=>[item.id,item]));
+  for(const water of waterOrder){
+    const source=scenario.states.find(item=>item.water===water&&item.phase===phase);if(!source)continue;
+    const row=scenario.transitions.find(item=>item.state===source.id&&item.environment===environment);if(!row)continue;
+    const destinations=Object.keys(row.counts),probabilities=posterior(row,destinations),totals={baixa:0,media:0,alta:0};
+    destinations.forEach((destination,index)=>{const item=stateMap[destination];if(item)totals[item.water]+=probabilities[index];});
+    const tr=document.createElement("tr");tr.append(node("th",stateLabels[waterIds[water]]+" · "+phase));
+    waterOrder.forEach(target=>tr.append(node("td",pct(totals[target]))));
+    tr.append(node("td",new Intl.NumberFormat("pt-BR").format(row.sample_size)),node("td",row.support==="pooled"?"agrupado":"derivado"));body.append(tr);
+  }
+  byId("crop-markov-note").textContent="Ação "+scenario.action+" · fase "+phase+" · ambiente "+environmentLabels[environment]+". Destinos viáveis recebem Dirichlet +0,5; n direto antecede pooling. Os destinos incluem também a fase da próxima quinzena. Contagens são derivadas de balanço NASA/SoilGrids e Kc FAO‑56, não transições observadas em talhão.";
 }
 
 function renderSimulation(result){
@@ -217,58 +357,99 @@ function renderSimulation(result){
   root.append(bars);
 }
 
+function renderComparison(reference,cropResult,cropName){
+  const root=byId("simulation-results");root.hidden=false;root.replaceChildren();
+  root.append(node("p","Mesmas 10.000 trajetórias climáticas e os mesmos uniformes por passo foram aplicados aos dois cenários; cada matriz sorteia seus parâmetros Dirichlet próprios.","muted"));
+  const wrap=node("div",undefined,"table-wrap"),table=document.createElement("table"),thead=document.createElement("thead"),head=document.createElement("tr");
+  ["Cenário","Baixa · mediana","P5–P95 · quinzenas","P(≥24 baixas)","Sequência baixa · P95","Estado final baixa / média / alta"].forEach(label=>head.append(node("th",label)));thead.append(head);table.append(thead);
+  const tbody=document.createElement("tbody");
+  for(const [label,result] of [["Referência · Kc=1",reference],[cropName,cropResult]]){
+    const metrics=result.metrics,tr=document.createElement("tr");
+    [label,fmt(metrics.median_low_water_periods,0)+" / 120",fmt(metrics.p5_low_water_periods,0)+"–"+fmt(metrics.p95_low_water_periods,0),pct(metrics.probability_low_water_at_least_24_periods),fmt(metrics.p95_longest_low_run_periods,0)+" quinz.",pct(metrics.terminal_probabilities.water_low)+" / "+pct(metrics.terminal_probabilities.water_medium)+" / "+pct(metrics.terminal_probabilities.water_high)].forEach(value=>tr.append(node("td",value)));tbody.append(tr);
+  }
+  table.append(tbody);wrap.append(table);root.append(wrap);
+  root.append(node("p","Diferença de demanda hídrica condicionada ao Kc de referência selecionado; não estima produtividade, manejo de cobertura ou retorno econômico.","note"));
+}
+
 function renderCachedSimulation(){
   if(active?.reference_simulation){
+    const cached=active.crop_demo_simulation,scenario=currentScenario(),row=activeZarcRow;
+    if(cached&&scenario&&row&&cached.scenario.crop_parameter_id===scenario.crop_parameter_id&&cached.scenario.planting_decendio===scenario.planting_decendio&&cached.scenario.risk_percent===Number(byId("zarc-risk").value)&&cached.scenario.zarc_group===row.cultivar_group&&cached.scenario.zarc_soil_class===row.zarc_soil_class){
+      const cropName=row.crop+" · "+byId("zarc-risk").value+"% · "+decendioLabel(byId("zarc-decendio").value);
+      renderComparison({metrics:cached.reference_kc1},{metrics:cached.crop_water_scenario},cropName);
+      byId("simulation-seed").value=cached.config.seed;
+      setRunState("Comparação registrada em Python","10.000 pares · semente "+cached.config.seed+" · ZARC "+cached.scenario.zarc_group+" / solo "+cached.scenario.zarc_soil_class+" / risco "+cached.scenario.risk_percent+"%.");
+      return;
+    }
     renderSimulation(active.reference_simulation);
     byId("simulation-seed").value=active.reference_simulation.config.seed;
-    setRunState("Execução registrada em Python","10.000 trajetórias · 120 quinzenas · semente 2026. O botão repete a simulação no navegador; a semente é reprodutível dentro de cada motor, mas os geradores aleatórios produzem sequências diferentes.");
+    setRunState("Referência registrada em Python","10.000 trajetórias · 120 quinzenas · semente 2026. Selecione grupo/solo/risco/decêndio ZARC e execute a comparação com a curva Kc local simulável.");
   }
 }
 
 function seeded(seed){let s=(seed>>>0)||1;return function(){s+=0x6D2B79F5;let t=s;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;};}
 function normalRandom(rng){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
 function gamma(shape,rng){if(shape<1)return gamma(shape+1,rng)*Math.pow(rng(),1/shape);const d=shape-1/3,c=1/Math.sqrt(9*d);for(;;){const x=normalRandom(rng);let v=1+c*x;if(v<=0)continue;v=v*v*v;const u=rng();if(u<1-0.0331*x*x*x*x||Math.log(u)<0.5*x*x+d*(1-v+Math.log(v)))return d*v;}}
-function sampleDirichlet(row,rng){const weights=stateIds.map(id=>gamma((row.counts[id]||0)+0.5,rng));const sum=weights.reduce((a,b)=>a+b,0);return weights.map(v=>v/sum);}
+function sampleDirichlet(row,rng){const destinations=Object.keys(row.counts);const weights=destinations.map(id=>gamma((row.counts[id]||0)+0.5,rng));const sum=weights.reduce((a,b)=>a+b,0);return destinations.map((id,index)=>({id,probability:weights[index]/sum}));}
 function choose(values,rng){return values[Math.floor(rng()*values.length)];}
 function sampleEnvironment(history,steps,blockPeriods,rng){const years=Object.keys(history).sort();const result=[];while(result.length<steps){const period=result.length%24;const size=Math.min(blockPeriods,steps-result.length,24-period);const year=choose(years,rng);result.push(...history[year].slice(period,period+size));}return result;}
 function q(values,p){const a=[...values].sort((x,y)=>x-y);const pos=(a.length-1)*p;const lo=Math.floor(pos),f=pos-lo;return a[lo]*(1-f)+a[Math.min(lo+1,a.length-1)]*f;}
+function policySeed(seed,policy,trajectory){let hash=(seed^Math.imul(trajectory+1,0x9E3779B1))>>>0;for(const char of policy)hash=Math.imul(hash^char.charCodeAt(0),16777619)>>>0;return hash||1;}
+function buildSummary(lowCounts,longestRuns,terminal,steps){const meanLow=lowCounts.reduce((a,b)=>a+b,0)/lowCounts.length;return {metrics:{mean_low_water_periods:meanLow,median_low_water_periods:q(lowCounts,.5),p5_low_water_periods:q(lowCounts,.05),p95_low_water_periods:q(lowCounts,.95),mean_fraction_of_horizon_low_water:meanLow/steps,probability_low_water_at_least_24_periods:lowCounts.filter(v=>v>=24).length/lowCounts.length,median_longest_low_run_periods:q(longestRuns,.5),p95_longest_low_run_periods:q(longestRuns,.95),terminal_probabilities:Object.fromEntries(stateIds.map(id=>[id,terminal[id]/lowCounts.length]))}};}
+function simulatePolicy(model,environmentPath,uniforms,parameterRng){
+  const rowMap=new Map(model.transitions.map(row=>[row.state+"|"+row.environment,row]));
+  const sampledRows=new Map(model.transitions.map(row=>[row.state+"|"+row.environment,sampleDirichlet(row,parameterRng)]));
+  let state=model.initial,low=0,run=0,longest=0;const steps=environmentPath.length;
+  for(let step=0;step<steps;step++){
+    const key=state+"|"+environmentPath[step],row=rowMap.get(key),destinations=sampledRows.get(key);if(!row||!destinations)throw new Error("Transição ausente para "+key);
+    const draw=uniforms[step];let cumulative=0;let destination=destinations[destinations.length-1].id;
+    for(const item of destinations){cumulative+=item.probability;if(draw<cumulative){destination=item.id;break;}}
+    state=destination;const water=model.states[state].water;
+    if(water==="baixa"){low++;run++;longest=Math.max(longest,run);}else run=0;
+  }
+  return {low,longest,terminal:waterIds[model.states[state].water]};
+}
+function runPairedMonteCarlo(seed,scenario){
+  const trajectories=10000,steps=120,reference={transitions:active.transitions,initial:"water_medium",states:{water_low:{water:"baixa"},water_medium:{water:"media"},water_high:{water:"alta"}}};
+  const cropModel={transitions:scenario.transitions,initial:scenario.initial_state_id,states:Object.fromEntries(scenario.states.map(row=>[row.id,row]))};
+  const accumulators=[reference,cropModel].map(()=>({low:[],longest:[],terminal:{water_low:0,water_medium:0,water_high:0}}));
+  const climateRng=seeded(seed);
+  for(let trajectory=0;trajectory<trajectories;trajectory++){
+    const environments=sampleEnvironment(active.environment,steps,2,climateRng),uniforms=Array.from({length:steps},()=>climateRng());
+    for(let policy=0;policy<2;policy++){
+      const name=policy===0?"reference":"crop:"+scenario.action;
+      const result=simulatePolicy(policy===0?reference:cropModel,environments,uniforms,seeded(policySeed(seed,name,trajectory)));
+      const acc=accumulators[policy];acc.low.push(result.low);acc.longest.push(result.longest);acc.terminal[result.terminal]++;
+    }
+  }
+  return accumulators.map(acc=>buildSummary(acc.low,acc.longest,acc.terminal,steps));
+}
 function runBrowserSimulation(){
-  const button=byId("run-simulation");button.disabled=true;
-  setRunState("Executando Monte Carlo no navegador","10.000 trajetórias × 120 quinzenas com blocos climáticos reais.");
+  const button=byId("run-simulation"),scenario=currentScenario();if(!scenario)return;
+  button.disabled=true;
+  setRunState("Executando comparação Monte Carlo","10.000 cenários climáticos compartilhados × 120 quinzenas; estado inclui água e fase FAO‑56.");
   setTimeout(()=>{
     try{
-      const seedValue=Math.max(0,Number(byId("simulation-seed").value)||0);const rng=seeded(seedValue);const trajectories=10000,steps=120;
-      const rowMap=new Map(active.transitions.map(row=>[row.state+"|"+row.environment,row]));
-      const lowCounts=[],longestRuns=[],terminal={water_low:0,water_medium:0,water_high:0};
-      for(let trajectory=0;trajectory<trajectories;trajectory++){
-        const environments=sampleEnvironment(active.environment,steps,2,rng);
-        const sampledRows=new Map();
-        for(const row of active.transitions)sampledRows.set(row.state+"|"+row.environment,sampleDirichlet(row,rng));
-        let state="water_medium",low=0,run=0,longest=0;
-        for(let step=0;step<steps;step++){
-          const key=state+"|"+environments[step];const row=rowMap.get(key);const probs=sampledRows.get(key);
-          if(!row||!probs)throw new Error("Transição ausente para "+key);
-          const draw=rng();let cumulative=0;let destination=stateIds[stateIds.length-1];
-          for(let i=0;i<stateIds.length;i++){cumulative+=probs[i];if(draw<cumulative){destination=stateIds[i];break;}}
-          state=destination;
-          if(state==="water_low"){low++;run++;longest=Math.max(longest,run);}else run=0;
-        }
-        lowCounts.push(low);longestRuns.push(longest);terminal[state]++;
-      }
-      const meanLow=lowCounts.reduce((a,b)=>a+b,0)/trajectories;
-      const result={metrics:{mean_low_water_periods:meanLow,median_low_water_periods:q(lowCounts,.5),p5_low_water_periods:q(lowCounts,.05),p95_low_water_periods:q(lowCounts,.95),mean_fraction_of_horizon_low_water:meanLow/steps,probability_low_water_at_least_24_periods:lowCounts.filter(v=>v>=24).length/trajectories,median_longest_low_run_periods:q(longestRuns,.5),p95_longest_low_run_periods:q(longestRuns,.95),terminal_probabilities:Object.fromEntries(stateIds.map(id=>[id,terminal[id]/trajectories]))}};
-      renderSimulation(result);
-      setRunState("Simulação concluída no navegador","Semente "+seedValue+" · 10.000 trajetórias · Dirichlet por trajetória · blocos de duas quinzenas.");
+      const seedValue=Math.max(0,Number(byId("simulation-seed").value)||0),results=runPairedMonteCarlo(seedValue,scenario);
+      const cropName=activeZarcRow.crop+" · "+byId("zarc-risk").value+"% · "+decendioLabel(byId("zarc-decendio").value);
+      renderComparison(results[0],results[1],cropName);
+      setRunState("Comparação concluída no navegador","Semente "+seedValue+" · 10.000 pares · ambiente e uniforms compartilhados; parâmetros sorteados por matriz. A sequência aleatória do navegador difere da execução Python registrada.");
     }catch(error){setRunState("Falha ao simular",String(error.message||error));}
     finally{button.disabled=false;}
   },40);
 }
 
 for(const item of cases.cases){const profile=profiles[item.profile];byId("case-select").add(new Option(item.municipality+" · "+item.uf,item.profile));}
-byId("coverage-note").textContent="Dados processados e conferidos: NASA POWER diário + SoilGrids em célula representativa nos três municípios. A chuva usa PRECTOTCORR do POWER porque a série IMERG original citada no relatório não está neste checkout. A comparação publicada para o Oeste do Paraná encontrou viés POWER menor que IMERG; não transferimos essa correção para RO, SP ou MG.";
+byId("coverage-note").textContent="Dados locais empacotados: NASA POWER diário, SoilGrids, calendário MAPA ZARC por município/grupo/solo/risco, histórico PAM do IBGE (1988–2025) e parâmetros de referência FAO‑56. GPM/IMERG e SMAP constam no catálogo NASA do desafio, mas não estão baixados para esses pontos; a chuva atual é POWER PRECTOTCORR e não recebe correção transferida do Oeste do Paraná.";
 byId("seed-label").textContent=cases.seed;
 byId("case-select").addEventListener("change",()=>{renderProfile();});
-byId("environment-select").addEventListener("change",renderMarkov);
+byId("crop-select").addEventListener("change",syncZarcSelectors);
+byId("zarc-group").addEventListener("change",syncZarcSelectors);
+byId("zarc-soil").addEventListener("change",syncZarcSelectors);
+byId("zarc-risk").addEventListener("change",syncZarcSelectors);
+byId("zarc-decendio").addEventListener("change",syncZarcSelectors);
+byId("environment-select").addEventListener("change",()=>{renderMarkov();renderCropMarkov();});
+byId("phase-select").addEventListener("change",renderCropMarkov);
 byId("run-simulation").addEventListener("click",runBrowserSimulation);
 byId("case-select").value=cases.cases[0].profile;
 renderProfile();

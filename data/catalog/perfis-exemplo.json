@@ -55,7 +55,7 @@
   "limitations": [
     "Ponto de referência é centroide municipal e não representa talhão.",
     "Chuva usa POWER PRECTOTCORR, sem IMERG local; pesquisa no Oeste do PR observou viés do POWER menor que IMERG.",
-    "Markov representa apenas estado hídrico do balanço de referência; não tem ação/cultura nem transições observadas de campo.",
-    "Sem ZARC, PAM, produção, custos ou preços, não há recomendação de rotação nem VPL."
+    "Matriz agrícola adicional deriva Kc FAO-56 com calendário ZARC; não representa transição observada em talhão ou resposta causal de manejo.",
+    "PAM é média municipal e não rendimento de talhão; sem custos, preços locais e resposta calibrada de produtividade, não há recomendação nem VPL."
   ]
 }

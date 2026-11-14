@@ -36,10 +36,12 @@
       "name_pt": "Sorgo-grão",
       "kind": "annual_grain",
       "kc": {"initial": 0.3, "mid": 1.05, "end": 0.55},
-      "stage_days": {"initial": 20, "development": 35, "mid": 40, "late": 30},
-      "duration_days": 125,
-      "reference_context": "Kc_mid é o ponto médio da faixa 1.00–1.10 na Table 12; duração da linha geral Sorghum da Table 11 (130 dias), ajustada a 125 no MVP? No exact local cultivar duration; use only as prior.",
-      "support": "published_reference_range_midpoint"
+      "stage_days": null,
+      "duration_days": null,
+      "table_reported_total_days": 130,
+      "phase_sum_days": 125,
+      "reference_context": "Kc_mid é o ponto médio da faixa 1.00–1.10 na Table 12. A Table 11 informa 130 dias, mas as fases publicadas somam 125; o ciclo é bloqueado para simulação até resolver a inconsistência na fonte.",
+      "support": "published_reference_internal_discrepancy"
     },
     {
       "id": "millet",

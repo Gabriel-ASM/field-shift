@@ -15,12 +15,13 @@
     "dictionary_url": "https://dados.agricultura.gov.br/dataset/6d3d141c-885e-41a4-ab7f-dc8ff323b96f/resource/bebb0ebb-bc75-460c-b900-a7a1ebd87bee/download/dicionario-de-dados-tabua-de-risco-2026.pdf"
   },
   "row_count": 39,
-  "risk_semantics": "Each decendio entry preserves the MAPA report value 0/20/30/40. Non-zero values are published risk levels; zero means no planting indication for that row/decendio. Group and AD soil class must match the producer's cultivar and soil classification.",
-  "soil_matching": "The AD1–AD6 ZARC categories are not inferred from the mapped SoilGrids AWC. The interface must ask for the applicable ZARC class or show all strata without claiming a match.",
+  "risk_semantics": "Each decendio entry preserves the MAPA report value 0/20/30/40. Non-zero values are published risk levels; zero means no planting indication for that row/decendio. The displayed group and official ZARC soil code must match the producer's cultivar and soil classification.",
+  "soil_matching": "Official ZARC soil codes are not inferred from mapped SoilGrids AWC. Codes remain verbatim from the report (including older numeric classes and AD classes); interface asks the user to select the applicable code.",
   "rows": [
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra consorciado com Braquiária",
+      "crop_parameter_id": null,
       "uf": "RO",
       "portaria": "346",
       "portaria_date": "06/08/2026",
@@ -87,6 +88,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra consorciado com Braquiária",
+      "crop_parameter_id": null,
       "uf": "RO",
       "portaria": "346",
       "portaria_date": "06/08/2026",
@@ -152,6 +154,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra consorciado com Braquiária",
+      "crop_parameter_id": null,
       "uf": "RO",
       "portaria": "346",
       "portaria_date": "06/08/2026",
@@ -216,6 +219,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra consorciado com Braquiária",
+      "crop_parameter_id": null,
       "uf": "RO",
       "portaria": "346",
       "portaria_date": "06/08/2026",
@@ -280,6 +284,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra consorciado com Braquiária",
+      "crop_parameter_id": null,
       "uf": "RO",
       "portaria": "346",
       "portaria_date": "06/08/2026",
@@ -346,6 +351,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra consorciado com Braquiária",
+      "crop_parameter_id": null,
       "uf": "RO",
       "portaria": "346",
       "portaria_date": "06/08/2026",
@@ -411,6 +417,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra consorciado com Braquiária",
+      "crop_parameter_id": null,
       "uf": "RO",
       "portaria": "346",
       "portaria_date": "06/08/2026",
@@ -474,6 +481,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra consorciado com Braquiária",
+      "crop_parameter_id": null,
       "uf": "RO",
       "portaria": "346",
       "portaria_date": "06/08/2026",
@@ -538,6 +546,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra consorciado com Braquiária",
+      "crop_parameter_id": null,
       "uf": "RO",
       "portaria": "346",
       "portaria_date": "06/08/2026",
@@ -602,6 +611,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra consorciado com Braquiária",
+      "crop_parameter_id": null,
       "uf": "RO",
       "portaria": "346",
       "portaria_date": "06/08/2026",
@@ -667,6 +677,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra consorciado com Braquiária",
+      "crop_parameter_id": null,
       "uf": "RO",
       "portaria": "346",
       "portaria_date": "06/08/2026",
@@ -732,6 +743,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Milho 2ª Safra consorciado com Braquiária",
+      "crop_parameter_id": null,
       "uf": "RO",
       "portaria": "346",
       "portaria_date": "06/08/2026",
@@ -796,6 +808,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "RO",
       "portaria": "207",
       "portaria_date": "03/07/2026",
@@ -858,12 +871,13 @@
         ],
         "40": []
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026/2027.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "RO",
       "portaria": "207",
       "portaria_date": "03/07/2026",
@@ -928,12 +942,13 @@
           26
         ]
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026/2027.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "RO",
       "portaria": "207",
       "portaria_date": "03/07/2026",
@@ -997,12 +1012,13 @@
         ],
         "40": []
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026/2027.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "RO",
       "portaria": "207",
       "portaria_date": "03/07/2026",
@@ -1066,12 +1082,13 @@
         ],
         "40": []
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026/2027.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "RO",
       "portaria": "207",
       "portaria_date": "03/07/2026",
@@ -1135,12 +1152,13 @@
         ],
         "40": []
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026/2027.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "RO",
       "portaria": "207",
       "portaria_date": "03/07/2026",
@@ -1204,12 +1222,13 @@
         ],
         "40": []
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026/2027.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "RO",
       "portaria": "207",
       "portaria_date": "03/07/2026",
@@ -1272,12 +1291,13 @@
         ],
         "40": []
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026/2027.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "RO",
       "portaria": "207",
       "portaria_date": "03/07/2026",
@@ -1342,12 +1362,13 @@
           26
         ]
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026/2027.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "RO",
       "portaria": "207",
       "portaria_date": "03/07/2026",
@@ -1411,12 +1432,13 @@
         ],
         "40": []
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026/2027.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "RO",
       "portaria": "207",
       "portaria_date": "03/07/2026",
@@ -1480,12 +1502,13 @@
         ],
         "40": []
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026/2027.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "RO",
       "portaria": "207",
       "portaria_date": "03/07/2026",
@@ -1549,12 +1572,13 @@
         ],
         "40": []
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026/2027.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "RO",
       "portaria": "207",
       "portaria_date": "03/07/2026",
@@ -1618,12 +1642,13 @@
         ],
         "40": []
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026/2027.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "RO",
       "portaria": "207",
       "portaria_date": "03/07/2026",
@@ -1686,12 +1711,13 @@
         ],
         "40": []
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026/2027.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "RO",
       "portaria": "207",
       "portaria_date": "03/07/2026",
@@ -1756,12 +1782,13 @@
           26
         ]
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026/2027.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "RO",
       "portaria": "207",
       "portaria_date": "03/07/2026",
@@ -1825,12 +1852,13 @@
         ],
         "40": []
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026/2027.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "RO",
       "portaria": "207",
       "portaria_date": "03/07/2026",
@@ -1894,12 +1922,13 @@
         ],
         "40": []
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026/2027.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "RO",
       "portaria": "207",
       "portaria_date": "03/07/2026",
@@ -1963,12 +1992,13 @@
         ],
         "40": []
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026/2027.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "2026 / 2027",
       "crop": "Soja",
+      "crop_parameter_id": "soybean",
       "uf": "RO",
       "portaria": "207",
       "portaria_date": "03/07/2026",
@@ -2032,12 +2062,13 @@
         ],
         "40": []
       },
-      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026/2027.xls",
+      "source_file": "data/raw/mapa-siszarc/zarc-ro-soja-2026-2027.xls",
       "source": "MAPA SISZARC public report; report query is filtered by crop/state, this row by municipality name and UF"
     },
     {
       "season": "2026 / 2027",
       "crop": "Sorgo Granífero 2ª Safra",
+      "crop_parameter_id": "sorghum_grain",
       "uf": "RO",
       "portaria": "285",
       "portaria_date": "22/07/2026",
@@ -2104,6 +2135,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Sorgo Granífero 2ª Safra",
+      "crop_parameter_id": "sorghum_grain",
       "uf": "RO",
       "portaria": "285",
       "portaria_date": "22/07/2026",
@@ -2171,6 +2203,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Sorgo Granífero 2ª Safra",
+      "crop_parameter_id": "sorghum_grain",
       "uf": "RO",
       "portaria": "285",
       "portaria_date": "22/07/2026",
@@ -2239,6 +2272,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Sorgo Granífero 2ª Safra",
+      "crop_parameter_id": "sorghum_grain",
       "uf": "RO",
       "portaria": "285",
       "portaria_date": "22/07/2026",
@@ -2304,6 +2338,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Sorgo Granífero 2ª Safra",
+      "crop_parameter_id": "sorghum_grain",
       "uf": "RO",
       "portaria": "285",
       "portaria_date": "22/07/2026",
@@ -2370,6 +2405,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Sorgo Granífero 2ª Safra",
+      "crop_parameter_id": "sorghum_grain",
       "uf": "RO",
       "portaria": "285",
       "portaria_date": "22/07/2026",
@@ -2437,6 +2473,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Sorgo Granífero 2ª Safra",
+      "crop_parameter_id": "sorghum_grain",
       "uf": "RO",
       "portaria": "285",
       "portaria_date": "22/07/2026",
@@ -2501,6 +2538,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Sorgo Granífero 2ª Safra",
+      "crop_parameter_id": "sorghum_grain",
       "uf": "RO",
       "portaria": "285",
       "portaria_date": "22/07/2026",
@@ -2566,6 +2604,7 @@
     {
       "season": "2026 / 2027",
       "crop": "Sorgo Granífero 2ª Safra",
+      "crop_parameter_id": "sorghum_grain",
       "uf": "RO",
       "portaria": "285",
       "portaria_date": "22/07/2026",

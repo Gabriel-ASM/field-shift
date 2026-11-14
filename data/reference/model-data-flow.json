@@ -1,0 +1,91 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Rastrear cada dado da origem até Markov e Monte Carlo, separando observação, regra de elegibilidade, referência agronômica e saída derivada.",
+  "examples": [
+    {"profile": "ariquemes-ro", "municipality_ibge": "1100023", "uf": "RO"},
+    {"profile": "franca-sp", "municipality_ibge": "3516200", "uf": "SP"},
+    {"profile": "varginha-mg", "municipality_ibge": "3170701", "uf": "MG"}
+  ],
+  "sources": {
+    "nasa_challenge_resource_page": {
+      "url": "https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/?tab=resources",
+      "catalog": "data/catalog/fontes-desafio-nasa.json",
+      "implementation_note": "NASA POWER Daily é a família de recurso NASA usada pelo MVP. GPM/IMERG e SMAP continuam explicitamente não ingeridos para os três pontos; não são simulados como se fossem dados disponíveis."
+    },
+    "nasa_power": {
+      "raw": "data/raw/nasa_power/",
+      "normalized": "data/profiles/<profile>/climate-daily.csv",
+      "fields": ["PRECTOTCORR", "T2M_MAX", "T2M_MIN", "ALLSKY_SFC_SW_DWN", "RH2M", "WS2M"],
+      "period": "1981-01-01 a 2026-11-06",
+      "transform": "ET0 FAO-56 Penman–Monteith; fallback Hargreaves–Samani onde faltou radiação; totais e classes de chuva por quinzena do calendário local",
+      "consumed_by": ["environment.json", "Markov water balance", "seasonal climate blocks in Monte Carlo"]
+    },
+    "soilgrids": {
+      "raw": "data/raw/soilgrids/",
+      "normalized": "data/profiles/<profile>/soil-profile.json",
+      "transform": "camadas 0–100 cm; CAD derivada por Saxton–Rawls com SOC×1.724",
+      "consumed_by": ["daily water bucket", "water class thresholds in Markov"],
+      "not_equivalent_to": "classe de solo AD1–AD6 do ZARC"
+    },
+    "ibge": {
+      "raw": "data/raw/ibge/ibge-malha-municipal-<code>.geojson",
+      "transform": "centroide de área municipal para consulta pontual de clima e solo",
+      "not_used_for": "seleção de fazenda ou talhão no mapa"
+    },
+    "mapa_zarc": {
+      "raw": "data/raw/mapa-siszarc/*.xls",
+      "normalized": "data/profiles/<profile>/zarc-planting-windows.json",
+      "dimensions": ["município", "cultura oficial", "safra", "grupo de cultivar", "solo ZARC", "risco", "decêndio"],
+      "consumed_by": ["interface filtra ações de plantio elegíveis", "somente habilita matriz de cultura quando há janela 20/30/40% e ciclo FAO-56 anual compatível"],
+      "not_used_as": "contagem de transição Markov ou classificação extraída de SoilGrids"
+    },
+    "ibge_pam": {
+      "raw": "data/raw/ibge/pam-municipal-5457-1988-2025.json",
+      "normalized": "data/profiles/<profile>/pam-history.json",
+      "dimensions": ["município", "produto", "ano"],
+      "consumed_by": ["contexto e rendimento municipal observado apresentados na interface", "referência futura para calibração regional após harmonização de tecnologias e clima"],
+      "not_used_as": ["rendimento do talhão", "efeito causal de Kc ou manejo", "distribuição IID de produtividade", "preço real; valores de produção são nominais"]
+    },
+    "fao56": {
+      "source_file": "data/reference/crop-water-parameters.json",
+      "source_url": "https://www.fao.org/4/x0490e/x0490e0b.htm",
+      "consumed_by": ["interpola Kc por fase e deriva ETc=Kc×ET0 durante o ciclo anual", "identifica ciclos sem dados coerentes e os bloqueia"],
+      "reference_status": "Kc e duração são parâmetros globais de literatura, não cultivar nem calibração brasileira"
+    }
+  },
+  "markov": {
+    "reference_model": {
+      "files": ["data/profiles/<profile>/states.json", "data/profiles/<profile>/transitions.json"],
+      "state": "classe da água disponível baixa/média/alta",
+      "index": "água atual × demanda ET0 de referência Kc=1 × classe de chuva → água seguinte",
+      "support": "balanço hídrico diário derivado; não observado em talhão"
+    },
+    "crop_conditioned_model": {
+      "file": "data/profiles/<profile>/crop-markov-scenarios.json",
+      "state": "classe da água × fase FAO-56 (inicial, desenvolvimento, média estação, final ou entressafra de referência)",
+      "action": "cultura com Kc anual consistente × decêndio de plantio permitido pelo ZARC",
+      "environment": "seca/normal/úmida; chuva quinzenal classificada por percentis locais P20/P80",
+      "counts": "simulação de água diária em 1981–2025; 1981–1982 usados como spin-up, não como contagens",
+      "sparse_rows": "se n direto <30, agrupa ambiente para a mesma água×fase e registra pooling",
+      "off_crop": "Kc=1 de referência; não afirma que haja solo descoberto ou cobertura observada",
+      "support": "process-model derived; não representa resposta observada da cultura, produtividade, saúde do solo ou economia"
+    }
+  },
+  "monte_carlo": {
+    "horizon_steps": 120,
+    "step_days": "quinzena do calendário",
+    "trajectories": 10000,
+    "environment_resampling": "blocos contíguos de duas quinzenas, mesma época do ano, retirados de anos completos 1981–2025",
+    "paired_comparison": "baseline Kc=1 e ação agrícola selecionada compartilham cada caminho ambiental e o mesmo uniforme por passo; matriz Dirichlet é sorteada separadamente por estratégia",
+    "transition_parameter_uncertainty": "Dirichlet(count + 0.5) apenas nos destinos viáveis contados na linha",
+    "reported_output": "frequência e sequência dos estados de água; não produtividade, quebra de safra, lucro ou ranking"
+  },
+  "not_yet_ingested_or_calibrated": [
+    "GPM IMERG local para comparar/corrigir precipitação POWER",
+    "SMAP para validação regional da água no perfil",
+    "observações pareadas de água, manejo e solo para estimar transições observadas",
+    "curvas Kc e fases calibradas por cultivar e região; raízes e cobertura de entrelinha",
+    "função causal de rendimento PAM em função de estresse hídrico",
+    "custos de implantação/manejo, preços regionais vigentes e curva de desconto verificada para gerar VPL"
+  ]
+}

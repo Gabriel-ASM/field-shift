@@ -7,7 +7,6 @@ from random import Random
 
 
 ROOT = Path(__file__).resolve().parent.parent
-CATALOG = ROOT / "data" / "catalog" / "municipios-exemplo-brasil.json"
 TEMPLATE = Path(__file__).with_name("replay.html")
 STATE_NAMES = {"RO": "Rondônia", "SP": "São Paulo", "MG": "Minas Gerais"}
 
@@ -27,6 +26,7 @@ def export_page(output: Path, seed: int) -> None:
         profile_id = selected["profile"]
         profile_dir = ROOT / "data" / "profiles" / profile_id
         manifest = json.loads((profile_dir / "manifest.json").read_text(encoding="utf-8"))
+        crop_results = sorted((ROOT / "data" / "processed").glob(f"crop-scenario-{profile_id}-*-d*.json"))
         profile_data[profile_id] = {
             "location": manifest["location"],
             "climate_summary": json.loads((profile_dir / "climate-summary.json").read_text(encoding="utf-8")),
@@ -35,6 +35,10 @@ def export_page(output: Path, seed: int) -> None:
             "transitions": json.loads((profile_dir / "transitions.json").read_text(encoding="utf-8")),
             "environment": json.loads((profile_dir / "environment.json").read_text(encoding="utf-8")),
             "reference_simulation": saved_by_id[profile_id],
+            "pam": json.loads((profile_dir / "pam-history.json").read_text(encoding="utf-8")),
+            "zarc": json.loads((profile_dir / "zarc-planting-windows.json").read_text(encoding="utf-8")),
+            "crop_markov": json.loads((profile_dir / "crop-markov-scenarios.json").read_text(encoding="utf-8")),
+            "crop_demo_simulation": json.loads(crop_results[0].read_text(encoding="utf-8")) if crop_results else None,
         }
         cases.append({
             "profile": profile_id,
@@ -48,8 +52,13 @@ def export_page(output: Path, seed: int) -> None:
         "cases": cases,
     }, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
     profiles_payload = json.dumps(profile_data, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
+    crop_parameters_payload = json.dumps(
+        json.loads((ROOT / "data" / "reference" / "crop-water-parameters.json").read_text(encoding="utf-8")),
+        ensure_ascii=False, separators=(",", ":"),
+    ).replace("<", "\\u003c")
     html = TEMPLATE.read_text(encoding="utf-8").replace("<!-- CASE_DATA -->", case_payload, 1)
     html = html.replace("<!-- PROFILE_DATA -->", profiles_payload, 1)
+    html = html.replace("<!-- CROP_PARAMETERS -->", crop_parameters_payload, 1)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(html, encoding="utf-8")
 

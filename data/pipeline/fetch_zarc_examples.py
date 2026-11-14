@@ -8,9 +8,12 @@ for the three examples without mirroring unrelated national rows.
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 import re
 import sys
+from datetime import datetime, timezone
+import unicodedata
 
 import requests
 from bs4 import BeautifulSoup
@@ -64,26 +67,31 @@ def export_report(uf: str, crop: str, season: str, output: Path) -> None:
         "form.versaoPortaria": "Atual",
     }
     response = post(session, "carregarComboCulturas", body)
-    crop_id = choose(options(response.text, "comboCulturas"), crop)
+    crop_options = options(response.text, "comboCulturas")
+    crop_id = choose(crop_options, crop)
+    crop_label = next(label for value, label in crop_options if value == crop_id)
     body["form.filtroConsulta.cultura.codigoCultura"] = crop_id
 
     response = post(session, "carregarComboOutrosManejos", body)
-    body["form.filtroConsulta.tipoSistemaCultivo.cdTipoCultivo"] = choose(
-        options(response.text, "comboTipoSistemaCultivo"), r"sequeiro", required=False
-    )
+    systems = options(response.text, "comboTipoSistemaCultivo")
+    system_id = choose(systems, r"sequeiro", required=False)
+    body["form.filtroConsulta.tipoSistemaCultivo.cdTipoCultivo"] = system_id
+    system_label = next((label for value, label in systems if value == system_id), None)
 
     response = post(session, "carregarComboClima", body)
-    body["form.filtroConsulta.tipoClimaCultivo.idTipoClima"] = choose(
-        options(response.text, "comboTipoDeClima"), r"não se aplica", required=False
-    )
+    climates = options(response.text, "comboTipoDeClima")
+    climate_id = choose(climates, r"não se aplica", required=False)
+    body["form.filtroConsulta.tipoClimaCultivo.idTipoClima"] = climate_id
+    climate_label = next((label for value, label in climates if value == climate_id), None)
 
     response = post(session, "carregarComboUfs", body)
     body["form.filtroConsulta.sgUF"] = choose(options(response.text, "comboUfs"), rf"^{uf}$")
 
     response = post(session, "carregarComboPortarias", body)
-    body["form.filtroConsulta.numeroPortaria"] = choose(
-        options(response.text, "comboPortarias"), r"\d+", required=False
-    )
+    ordinances = options(response.text, "comboPortarias")
+    ordinance_id = choose(ordinances, r"\d+", required=False)
+    body["form.filtroConsulta.numeroPortaria"] = ordinance_id
+    ordinance_label = next((label for value, label in ordinances if value == ordinance_id), None)
 
     response = post(session, "carregarComboGrupos", body)
     # Group and soil are optional. Leaving them blank retrieves every viable
@@ -102,6 +110,27 @@ def export_report(uf: str, crop: str, season: str, output: Path) -> None:
         )
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_bytes(response.content)
+    source = {
+        "publisher": "MAPA — SISZARC public report",
+        "report_url": f"{ACTION}!gerarRelatorioXLS.action",
+        "retrieved_at_utc": datetime.now(timezone.utc).isoformat(),
+        "season_filter": season,
+        "crop_regex_requested": crop,
+        "crop_option_returned": crop_label,
+        "uf_filter": uf,
+        "cultivation_system_filter": system_label,
+        "climate_filter": climate_label,
+        "ordinance_filter": ordinance_label or "Atual",
+        "cultivar_group_filter": None,
+        "soil_filter": None,
+        "filter_note": "Cultivar group and soil filters were left blank so all official strata were included; municipality is retained during normalization.",
+        "file": output.name,
+        "bytes": len(response.content),
+    }
+    output.with_suffix(output.suffix + ".source.json").write_text(
+        json.dumps(source, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
     print(f"{uf} | {crop} | {len(response.content):,} bytes | {output.relative_to(ROOT)}")
 
 
@@ -113,7 +142,11 @@ def main() -> None:
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     season_tag = re.sub(r"[^0-9]+", "-", args.season).strip("-")
-    crop_tag = re.sub(r"[^a-z0-9]+", "-", args.crop.lower()).strip("-")
+    ascii_crop = "".join(
+        char for char in unicodedata.normalize("NFKD", args.crop.lower())
+        if not unicodedata.combining(char)
+    )
+    crop_tag = re.sub(r"[^a-z0-9]+", "-", ascii_crop).strip("-")
     output = args.output or ROOT / "data" / "raw" / "mapa-siszarc" / f"zarc-{args.uf.lower()}-{crop_tag}-{season_tag}.xls"
     export_report(args.uf, args.crop, args.season, output)
 

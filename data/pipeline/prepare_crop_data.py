@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import json
+from hashlib import sha256
 import re
 import unicodedata
 from pathlib import Path
-from statistics import mean
+from statistics import mean, median
 
 import xlrd
 
@@ -46,6 +47,23 @@ def number(value: object) -> float | None:
         return float(str(value).replace(",", "."))
     except ValueError:
         return None
+
+
+def crop_parameter_id(label: object) -> str | None:
+    crop = norm(label)
+    if "soja" in crop:
+        return "soybean"
+    if "amendoim" in crop:
+        return "peanut"
+    if "milho" in crop and "braquiaria" not in crop:
+        return "maize_grain"
+    if "sorgo" in crop:
+        return "sorghum_grain"
+    if "cana" in crop:
+        return "sugarcane"
+    if "cafe" in crop:
+        return "coffee_bare"
+    return None
 
 
 def load_pam() -> tuple[dict[str, dict[str, dict[str, object]]], dict[str, object]]:
@@ -95,12 +113,19 @@ def load_pam() -> tuple[dict[str, dict[str, dict[str, object]]], dict[str, objec
             ]
             observed = [row for row in records if row["crop"] == crop and row.get("yield_kg_ha") is not None]
             recent = [float(row["yield_kg_ha"]) for row in observed if int(row["year"]) >= 2021]
+            recent_gross_value = [
+                float(row["gross_value_brl_per_ha_nominal"])
+                for row in records
+                if row["crop"] == crop and int(row["year"]) >= 2021
+                and row.get("gross_value_brl_per_ha_nominal") is not None
+            ]
             summaries[crop] = {
                 "valid_yield_years": len(yields),
                 "yield_min_kg_ha": min(yields) if yields else None,
-                "yield_median_kg_ha": sorted(yields)[len(yields) // 2] if yields else None,
+                "yield_median_kg_ha": median(yields) if yields else None,
                 "yield_max_kg_ha": max(yields) if yields else None,
                 "yield_mean_2021_2025_kg_ha": mean(recent) if recent else None,
+                "gross_value_mean_2021_2025_brl_per_ha_nominal": mean(recent_gross_value) if recent_gross_value else None,
                 "first_valid_year": min((int(row["year"]) for row in observed), default=None),
                 "last_valid_year": max((int(row["year"]) for row in observed), default=None),
                 "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function",
@@ -154,6 +179,7 @@ def read_zarc() -> dict[str, list[dict[str, object]]]:
             result[profile_id].append({
                 "season": str(row[0]).strip(),
                 "crop": str(row[3]).strip(),
+                "crop_parameter_id": crop_parameter_id(row[3]),
                 "uf": uf,
                 "portaria": str(row[5]).strip(),
                 "portaria_date": str(row[6]).strip(),
@@ -195,11 +221,79 @@ def main() -> None:
                 "dictionary_url": "https://dados.agricultura.gov.br/dataset/6d3d141c-885e-41a4-ab7f-dc8ff323b96f/resource/bebb0ebb-bc75-460c-b900-a7a1ebd87bee/download/dicionario-de-dados-tabua-de-risco-2026.pdf",
             },
             "row_count": len(zarc[profile_id]),
-            "risk_semantics": "Each decendio entry preserves the MAPA report value 0/20/30/40. Non-zero values are published risk levels; zero means no planting indication for that row/decendio. Group and AD soil class must match the producer's cultivar and soil classification.",
-            "soil_matching": "The AD1–AD6 ZARC categories are not inferred from the mapped SoilGrids AWC. The interface must ask for the applicable ZARC class or show all strata without claiming a match.",
+            "risk_semantics": "Each decendio entry preserves the MAPA report value 0/20/30/40. Non-zero values are published risk levels; zero means no planting indication for that row/decendio. The displayed group and official ZARC soil code must match the producer's cultivar and soil classification.",
+            "soil_matching": "Official ZARC soil codes are not inferred from mapped SoilGrids AWC. Codes remain verbatim from the report (including older numeric classes and AD classes); interface asks the user to select the applicable code.",
             "rows": zarc[profile_id],
         }
         zarc_file.write_text(json.dumps(zarc_payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        manifest_path = profile_dir / "manifest.json"
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+        manifest.setdefault("datasets", {})["pam-history.json"] = {
+            "origem": "IBGE PAM / SIDRA tabela 5457",
+            "responsavel": "IBGE",
+            "frequencia": "anual; valores municipais por produto",
+            "unidade": "rendimento kg/ha; produção t; valor mil R$ nominal; área ha",
+            "periodo": "1988–2025",
+            "resolucao": "município; não é observação de talhão",
+            "qualidade": "estatística municipal oficial; cada variável pode ter lacunas e o valor monetário não está deflacionado",
+            "sha256": sha256(pam_file.read_bytes()).hexdigest(),
+        }
+        manifest["datasets"]["zarc-planting-windows.json"] = {
+            "origem": "MAPA SISZARC / Tábua de Risco ZARC",
+            "responsavel": "MAPA, SPA/DEGER/CGRA",
+            "frequencia": "por safra; catálogo atualiza semanalmente",
+            "unidade": "decêndios; classe de risco; grupo de cultivar; classe de solo",
+            "periodo": "safra 2026/2027 nas culturas efetivamente consultadas para a UF",
+            "resolucao": "município × cultura × grupo × solo × decêndio",
+            "qualidade": "portaria oficial; elegibilidade depende de confirmar grupo e código oficial de solo do produtor; nenhum código ZARC é inferido do SoilGrids",
+            "sha256": sha256(zarc_file.read_bytes()).hexdigest(),
+        }
+        raw_reports = []
+        for source_file in sorted({str(row["source_file"]) for row in zarc[profile_id]}):
+            source_path = ROOT / source_file
+            source_rows = [row for row in zarc[profile_id] if row["source_file"] == source_file]
+            sidecar = source_path.with_suffix(source_path.suffix + ".source.json")
+            query = json.loads(sidecar.read_text(encoding="utf-8")) if sidecar.exists() else None
+            raw_reports.append({
+                "path": source_file,
+                "sha256": sha256(source_path.read_bytes()).hexdigest(),
+                "query": query or {
+                    "report_url": "https://sistemasweb.agricultura.gov.br/siszarc/gerarRelatorioPublicacoesDoZarc!gerarRelatorioXLS.action",
+                    "season": sorted({row["season"] for row in source_rows}),
+                    "uf": uf,
+                    "crop_official_labels": sorted({row["crop"] for row in source_rows}),
+                    "cultivar_group": "all strata (blank SISZARC filter)",
+                    "soil_class": "all strata (blank SISZARC filter)",
+                    "municipality_normalization_filter": city_name.title(),
+                },
+                "sidecar": sidecar.relative_to(ROOT).as_posix() if sidecar.exists() else None,
+                "sidecar_sha256": sha256(sidecar.read_bytes()).hexdigest() if sidecar.exists() else None,
+                "normalized_municipality_rows": len(source_rows),
+            })
+        manifest.setdefault("raw_sources", {})["pam_municipal_json"] = {
+            "path": "data/raw/ibge/pam-municipal-5457-1988-2025.json",
+            "sha256": sha256(RAW_PAM.read_bytes()).hexdigest(),
+            "query": pam_source["url"],
+            "retrieved_at_http": pam_source.get("retrieved_at_http"),
+        }
+        manifest["raw_sources"]["zarc_siszarc_reports"] = raw_reports
+        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        assumptions_path = profile_dir / "assumptions.json"
+        assumptions = json.loads(assumptions_path.read_text(encoding="utf-8"))
+        assumptions["crop_data_ingestion"] = {
+            "zarc": "official municipality/crop/soil/group/decendio windows are stored for current-season queried crops; action eligibility filters the annual crop scenarios by cultivar group, ZARC soil class, risk and planting decendio",
+            "pam": "1988-2025 municipality-by-product history is stored as yield/context; it is not used to infer a causal crop stress response or production price forecast",
+            "fao56": "FAO-56 Kc curves and phase durations parameterize separate crop- and planting-window-conditioned derived Markov transitions when both the ZARC window and an internally consistent annual crop cycle exist; Kc=1 remains the off-crop reference demand",
+        }
+        assumptions["not_available"] = [
+            "field_observations",
+            "crop-specific water/soil transition counts under observed management",
+            "field-measured soil and initial water",
+            "crop yield response to water stress for these municipality/crop/technology combinations",
+            "local cost and current price curves needed for net return and VPL",
+            "field-calibrated crop Kc and root depth; the FAO-56 values are reference priors",
+        ]
+        assumptions_path.write_text(json.dumps(assumptions, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         summaries["profiles"][profile_id] = {
             "ibge_code": ibge_code,
             "pam_records": len(pam[profile_id]["records"]),

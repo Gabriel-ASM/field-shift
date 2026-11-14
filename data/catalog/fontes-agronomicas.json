@@ -1,0 +1,70 @@
+{
+  "scope": "Fontes agronômicas públicas usadas para contextualizar e restringir as simulações de água nos perfis de exemplo; não são observações de talhão.",
+  "profiles": ["ariquemes-ro", "franca-sp", "varginha-mg"],
+  "sources": [
+    {
+      "name": "ZARC / SISZARC — MAPA",
+      "url": "https://sistemasweb.agricultura.gov.br/siszarc/base.action",
+      "open_dataset": "https://dados.agricultura.gov.br/dataset/tabua-de-risco-zoneamento-agricola-de-risco-climatico",
+      "download": "relatórios SISZARC XLS filtrados por safra, cultura e UF",
+      "period": "safra 2026/2027",
+      "content": "Cultura oficial, município, grupo de cultivar, código de solo, portaria e 36 decêndios com risco 0/20/30/40.",
+      "status": "baixado e normalizado para culturas consultadas por UF; linhas reduzidas ao município em data/profiles/*/zarc-planting-windows.json",
+      "role": "filtro de elegibilidade e janela de plantio; não gera contagens de transição"
+    },
+    {
+      "name": "Produção Agrícola Municipal (PAM) / IBGE SIDRA",
+      "url": "https://sidra.ibge.gov.br/tabela/5457",
+      "api_query": "https://apisidra.ibge.gov.br/values/t/5457/n6/1100023,3516200,3170701/v/112,214,215,216/p/1988-2025/c782/40101,40103,40106,40112,40122,40124,40125,40127,40140,40141?formato=json",
+      "period": "1988–2025",
+      "content": "Rendimento, produção, valor nominal e área colhida para dez produtos em três municípios.",
+      "status": "baixado; 4.560 registros-fonte (10 produtos × 38 anos × 4 variáveis × 3 municípios), organizados em produto×ano por perfil",
+      "role": "contexto municipal e referência de rendimento; não é previsão de talhão ou resposta causal"
+    },
+    {
+      "name": "FAO-56 Irrigation and Drainage Paper 56",
+      "url": "https://www.fao.org/4/x0490e/x0490e0b.htm",
+      "content": "Kc inicial/médio/final e durações de fases da Tabela 11–12, com contexto da tabela e lacunas explícitas.",
+      "status": "extraído para data/reference/crop-water-parameters.json; valores são referências globais, não calibradas para cultivares brasileiras",
+      "role": "curva de demanda ETc = Kc×ET0 onde o ciclo é consistente e a ação tem janela ZARC"
+    }
+  ],
+  "excluded_or_unavailable": [
+    "ZARC soil class is preserved verbatim and is not inferred from SoilGrids AWC.",
+    "PAM municipal yield does not estimate causal water-stress response or parcel yield.",
+    "Sorghum phase durations are withheld from simulation because the FAO-56 table total conflicts with the sum of its listed stages.",
+    "Perennials, nonannual cycles and intercrops without coefficients for each species are not emitted as crop-specific Markov scenarios."
+  ],
+  "economic_sources_not_ingested": [
+    {
+      "name": "CONAB — Preços Agropecuários",
+      "research_reference": "R092",
+      "url": "https://consultaprecosdemercado.conab.gov.br/",
+      "content": "Séries semanais e mensais de preços por produto, unidade, praça e nível de comercialização.",
+      "status": "fonte pública catalogada; nenhum registro foi incorporado aos cenários. A interface informa disponibilidade desde 2014 e limita cada consulta a quatro semanas.",
+      "reason_not_used": "A camada de preço por safra exige séries extraídas, unidade harmonizada e ajuste para a praça. A razão valor/produção da PAM permanece apenas como contexto nominal e não substitui preço de venda."
+    },
+    {
+      "name": "CONAB — custos de produção e comparativo de rentabilidade",
+      "research_reference": "R091",
+      "url": "https://portaldeinformacoes.conab.gov.br/precos-agropecuarios-serie-",
+      "content": "Custo variável, custo fixo e renda de fatores por produto, safra e empreendimento levantado.",
+      "status": "fonte pública identificada no relatório de pesquisa; dados de custos não foram obtidos nem integrados neste checkout.",
+      "reason_not_used": "Não há planilha comparável por hectare para cada combinação cultura×município da demonstração. O painel consultado apresentou erro de certificado e seus valores não foram usados."
+    },
+    {
+      "name": "B3 — derivativos agrícolas",
+      "research_reference": "R097",
+      "url": "https://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/up2data/dados-disponiveis/",
+      "content": "Ajustes de contratos futuros que poderiam compor preço esperado por safra.",
+      "status": "fonte do relatório de pesquisa; cotações e curvas não foram baixadas para a demonstração."
+    },
+    {
+      "name": "Banco Central — PTAX",
+      "research_reference": "R094",
+      "url": "https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/aplicacao#!/recursos",
+      "content": "Cotações cambiais oficiais para converter referências internacionais quando necessário.",
+      "status": "fonte do relatório de pesquisa; câmbio não entra nos cenários atuais."
+    }
+  ]
+}

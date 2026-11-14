@@ -22,9 +22,22 @@
   },
   "not_available": [
     "field_observations",
-    "crop-specific transition counts",
-    "ZARC planting eligibility",
+    "crop-specific water/soil transition counts under observed management",
     "field-measured soil and initial water",
-    "crop yield, prices, costs, and VPL"
-  ]
+    "crop yield response to water stress for these municipality/crop/technology combinations",
+    "local cost and current price curves needed for net return and VPL",
+    "field-calibrated crop Kc and root depth; the FAO-56 values are reference priors"
+  ],
+  "crop_data_ingestion": {
+    "zarc": "official municipality/crop/soil/group/decendio windows are stored for current-season queried crops; action eligibility filters the annual crop scenarios by cultivar group, ZARC soil class, risk and planting decendio",
+    "pam": "1988-2025 municipality-by-product history is stored as yield/context; it is not used to infer a causal crop stress response or production price forecast",
+    "fao56": "FAO-56 Kc curves and phase durations parameterize separate crop- and planting-window-conditioned derived Markov transitions when both the ZARC window and an internally consistent annual crop cycle exist; Kc=1 remains the off-crop reference demand"
+  },
+  "crop_markov_scenario": {
+    "transition_index": "state water×FAO phase × MAPA risk-context environment × selected crop/planting-decad",
+    "crop_water": "Kc follows FAO-56 phase curve during the crop cycle; off-season uses Kc=1 reference demand",
+    "eligibility": "only decendios with MAPA ZARC risk 20/30/40% for at least one municipality cultivar-group and soil-class row are emitted",
+    "monte_carlo": "shared seasonal environment blocks and per-trajectory Dirichlet row draws; 0.5 pseudocount only on historically viable next states",
+    "interpretation": "process-model sensitivity scenario; not observed effect, yield forecast, crop recommendation, or economic ranking"
+  }
 }
