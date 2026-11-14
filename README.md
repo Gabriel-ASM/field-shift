@@ -2,7 +2,7 @@
 
 Proposta de apoio à decisão para comparar rotações de culturas usando observações da Terra da NASA, informações locais de solo e prioridades do produtor.
 
-O projeto responde ao desafio [Field Shift: Adapting Farms with NASA Data](https://www.spaceappschallenge.org/2026/challenges/field-shift-adapting-farms-with-nasa-data/) do NASA Space Apps Challenge 2026.
+O projeto responde ao desafio [Field Shift: Adapting Farms with NASA Data](https://www.spaceappschallenge.org/2026/challenges/adapting-farms-with-nasa-data/) do NASA Space Apps Challenge 2026.
 
 > **Status:** NASA POWER Daily e SoilGrids baixados para três exemplos brasileiros; balanço hídrico de referência ligado a Markov + Monte Carlo. Sem transições de campo, cultura ou manejo, a execução não calcula recomendação de rotação nem VPL.
 
