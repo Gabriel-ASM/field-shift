@@ -5,7 +5,16 @@
     "horizon_months": 60,
     "days_per_year": 365,
     "environment_periods_per_year": 24,
-    "markov_transition_clock": "A matriz PAM é anual e não contém calendário de talhão. Nesta demonstração ela é usada como prior de decisão ao fim de cada ciclo da cultura; a duração do ciclo determina quando a transição ocorre. A probabilidade intra-anual não é observada e deve ser validada com dados de rotação parcelar.",
+    "markov_transition_clock": "A matriz PAM anual é usada como prior regional, não como calendário de talhão. Para culturas anuais, a decisão Markov ocorre na próxima oportunidade municipal de plantio após a colheita; destinos com janela ZARC municipal standalone nos 365 dias seguintes são elegíveis. Depois do sorteio, o talhão permanece em pousio até a próxima janela própria da cultura escolhida. O calendário 2026/2027 é repetido nos cinco anos como hipótese.",
+    "planting_calendar": {
+      "source": "MAPA SISZARC — publicação municipal da safra 2026/2027, carregada do perfil selecionado",
+      "risk_levels_included_percent": [20, 30, 40],
+      "calendar_anchor": "2026-01-01",
+      "annual_repetition": true,
+      "strata_rule": "União das janelas publicadas em todos os grupos de cultivar e classes ZARC do município; não substitui selecionar o estrato correto para o talhão.",
+      "standalone_crop_rule": "Só são candidatos os registros com crop_parameter_id reconhecido; linhas cujo rótulo informa consórcio/mistura são excluídas da cadeia de cultura principal.",
+      "risk_interpretation": "A cultura é considerada plantável no decêndio se ao menos uma linha municipal selecionada publicar risco 20%, 30% ou 40%; não significa que todos os talhões, solos ou cultivares sejam elegíveis."
+    },
     "initial_crop_rule": "A cultura escolhida no tempo zero é tratada como estabelecida e produtiva: não recebe atraso de implantação/maturação. A primeira receita ocorre ao fim do próximo ciclo de colheita.",
     "new_crop_rule": "Uma cultura destino começa recém-implantada. Os custos de formação são pagos durante o atraso; não há receita antes de atingir a maturação indicada."
   },
@@ -31,6 +40,27 @@
     "payment_timing": "Cobrar uma parcela no plantio e uma no início de cada ano de formação; prorratear a última parcela pelo número de dias restantes até a maturação. A receita começa apenas na primeira colheita após maturar.",
     "interpretation": "Frações editáveis do custo anual de produção cobradas durante a formação. Não são custos CONAB medidos para implantação; custos de plantio/reforma podem estar subestimados."
   },
+  "repeated_crop_effect": {
+    "status": "uncalibrated_editable_hypothesis",
+    "applies_to_classes": ["annual", "cover_or_annual"],
+    "yield_penalty_per_consecutive_replant_fraction": 0.08,
+    "maximum_yield_penalty_fraction": 0.4,
+    "formula": "Multiplicador da receita bruta = max(1 − limite, 1 − penalidade_por_replantio × (número_de_ciclos_consecutivos − 1)); custo por ciclo não muda.",
+    "first_cycle_rule": "O primeiro ciclo da cultura atual no início da simulação não recebe penalidade; cada novo plantio consecutivo da mesma cultura acrescenta a penalidade editável.",
+    "crop_specific": {
+      "soybean": {
+        "yield_penalty_per_consecutive_replant_fraction": 0.08,
+        "maximum_yield_penalty_fraction": 0.2,
+        "basis": "Hipótese inicial ancorada no ganho de 11% a 24% da soja em sequências com milho sobre a monocultura em ensaio pequeno no RS; 8 pp por replantio chega a 16% após duas repetições e limita a perda acumulada a 20%. Evidência dos EUA encontra penalidade média de 10,3% e crescimento até cinco anos contínuos. Não é calibração local."
+      },
+      "maize_grain": {
+        "yield_penalty_per_consecutive_replant_fraction": 0.022,
+        "maximum_yield_penalty_fraction": 0.043,
+        "basis": "Hipótese inicial ancorada na penalidade média de 4,3% para milho contínuo e estabilização após três anos em dados de campo dos EUA; o ensaio de oito safras no PR encontra resposta variável por safra e sistema. Não é calibração local."
+      }
+    },
+    "interpretation": "Os valores específicos de soja e milho são hipóteses exploratórias baseadas em literatura externa/local, não coeficientes causais para estes municípios. A penalidade reduz rendimento bruto e VPL, não custo nem probabilidade Markov. Outras culturas anuais e coberturas usam a hipótese genérica de 8 pp por replantio até 40%, ainda não calibrada."
+  },
   "associated_cover_chain": {
     "applies_to_primary_crop": "coffee",
     "states": ["millet", "brachiaria", "forage_radish", "crotalaria", "mucuna"],
@@ -53,10 +83,14 @@
     {"publisher": "Embrapa", "title": "Plantio da cana-de-açúcar", "url": "https://www.embrapa.br/web/agencia-de-informacao-tecnologica/cultivos/cana-de-acucar/producao/manejo/plantio", "use": "Maturação da cana-planta em 16–18 meses; modelo usa 18 meses."},
     {"publisher": "Embrapa", "title": "Planejamento do plantio do café", "url": "https://www.atermaisdigital.cnptia.embrapa.br/web/cafe/planejamento-do-plantio", "use": "Cafezal perene e retorno financeiro a partir do 3º/4º ano; modelo usa 36 meses até receita comercial significativa."},
     {"publisher": "Embrapa", "title": "Culturas de cobertura — ciclo até florescimento", "url": "https://ainfo.cnptia.embrapa.br/digital/bitstream/item/201211/1/CT-168-22-08-2019-1.pdf", "use": "Referências de ciclo para milheto, nabo forrageiro e crotalária; não são previsão local."},
+    {"publisher": "Guth, Lorenzoni e Mello", "title": "Efeitos das rotações agrícolas no rendimento da soja em sistema plantio direto", "url": "https://www.infoteca.cnptia.embrapa.br/bitstream/doc/459626/1/ResumosdoIICongressoBrasileirodeSojaeMercosoja2002.pdf", "use": "Ensaio de duas safras em Ijuí-RS: soja em soja-soja-milho rendeu 11% mais e em soja-milho-soja 24% mais que a monocultura; suporte regional e duração limitados."},
+    {"publisher": "Seifert, Roberts e Lobell", "title": "Continuous Corn and Soybean Yield Penalties across Hundreds of Thousands of Fields", "url": "https://doi.org/10.2134/agronj2016.03.0134", "use": "Registros de campo dos EUA: penalidade média de 4,3% em milho contínuo e 10,3% em soja; milho estabiliza após três anos e soja cresce até cinco anos. Referência externa, não transferência direta aos perfis brasileiros."},
+    {"publisher": "Garbelini et al.", "title": "Diversified crop rotations increase the yield and economic efficiency of grain production systems", "url": "https://doi.org/10.1016/j.eja.2022.126528", "use": "Ensaio de longa duração em Campo Mourão-PR (avaliação 2009–2017): rotações diversificadas elevam soja e milho primeira safra em vários contrastes, enquanto resposta do milho segunda safra varia por ano."},
     {"publisher": "FAO", "title": "Irrigation and Drainage Paper 56, Tables 11–12", "url": "https://www.fao.org/4/x0490e/x0490e0b.htm", "use": "Curvas Kc/duração usadas como referência hídrica no projeto; duração global não é calendário varietal brasileiro."}
   ],
   "limitations": [
-    "Ciclos são editáveis hipóteses por cultura; a página ainda não seleciona cultivar, época de semeadura ou janela ZARC no Monte Carlo. Repetições sucessivas da mesma cultura podem ocorrer e não são uma recomendação de calendário.",
+    "Ciclos são hipóteses editáveis por cultura; as decisões anuais respeitam a união municipal das janelas ZARC 2026/2027 de risco 20/30/40, repetida em cada ano. A página não seleciona cultivar nem classe oficial de solo, portanto a elegibilidade é exploratória, não recomendação para um talhão.",
+    "A penalidade de rendimento por replantio consecutivo é uma hipótese de sensibilidade explicitamente editável, não um efeito causal quantificado. Deve ser recalibrada com séries de campo ou substituída por resposta local validada.",
     "A cadeia PAM mede dominância anual municipal, não rotação sequencial do mesmo talhão. Usá-la no fim de cada ciclo não equivale a estimar uma probabilidade observada intra-anual.",
     "A produtividade da primeira colheita após maturação usa a mediana PAM de culturas adultas; não há uma curva local de produtividade por idade, então a primeira safra perene pode estar superestimada.",
     "O custo CONAB disponível não separa consistentemente implantação, formação, trato anual e colheita; os custos de formação perene usam frações explícitas de proxy.",

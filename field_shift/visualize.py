@@ -92,6 +92,7 @@ def export_page(output: Path, seed: int) -> None:
         soil = read_json(profile_dir / "soil-profile.json")
         climate_summary = read_json(profile_dir / "climate-summary.json")
         crop_markov = read_json(profile_dir / "crop-transition-markov.json")
+        zarc_planting_windows = read_json(profile_dir / "zarc-planting-windows.json")
         carbon = topsoil_carbon_g_kg(soil)
 
         profile_data[profile_id] = {
@@ -108,6 +109,7 @@ def export_page(output: Path, seed: int) -> None:
                 "sample_point_basis": soil["sample_point"]["basis"],
             },
             "crop_markov": crop_markov,
+            "zarc_planting_windows": zarc_planting_windows,
             "water_markov": water_markov(profile_dir),
             "climate_summary": climate_summary,
             "economics": economic_benchmarks["profiles"][profile_id],
