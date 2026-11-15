@@ -11,6 +11,7 @@ from dataclasses import dataclass, fields, replace
 import numpy as np
 
 from .calendar import DAYS_PER_YEAR, days_until_open, planting_windows
+from .nitrogen import Nitrogen
 
 WATER_STATES = ("water_low", "water_medium", "water_high")
 RAIN_LABELS = ("dry", "normal", "wet")
@@ -73,6 +74,7 @@ class Tables:
     carbon_yield: np.ndarray        # (3,) yield multiplier per soil carbon class
     carbon_class_limits: np.ndarray  # (2,)
     discount_rate: float
+    nitrogen: Nitrogen | None = None    # None: no nitrogen parameters, the repeated-crop penalty applies
 
     @property
     def periods(self) -> int:
@@ -82,7 +84,8 @@ class Tables:
         """Copy with every array moved to the array module `xp` (numpy or cupy)."""
         arrays = {f.name: xp.asarray(getattr(self, f.name)) for f in fields(self)
                   if isinstance(getattr(self, f.name), np.ndarray)}
-        return replace(self, **arrays)
+        nitrogen = self.nitrogen.on(xp) if self.nitrogen else None
+        return replace(self, nitrogen=nitrogen, **arrays)
 
 
 def _number(value, default=math.nan) -> float:

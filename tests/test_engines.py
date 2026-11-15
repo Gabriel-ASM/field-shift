@@ -84,6 +84,35 @@ def test_unsupported_requests_are_refused():
             "soybean:skip_stages", "cpu")
 
 
+def nitrogen_fixture(tables):
+    """Made-up parameters to exercise the mechanism only; real ones come from data/reference."""
+    from field_shift.engines.nitrogen import Nitrogen
+    size, legume = len(tables.crops), tables.crops.index("soybean")
+    credit, demand = np.zeros(size), np.full(size, 120.0)
+    credit[legume], demand[legume] = 40.0, 0.0
+    return Nitrogen(initial=60.0, credit=credit, fertilizer=np.zeros(size), removal=np.full(size, 15.0), demand=demand,
+                    floor=np.full(size, 0.5), loss_fraction=np.array([0.0, 0.01, 0.03]))
+
+
+def test_nitrogen_response_is_linear_up_to_the_demand(tables):
+    from field_shift.engines.nitrogen import after_harvest, yield_multiplier
+    params = nitrogen_fixture(tables)
+    soybean, maize = tables.crops.index("soybean"), tables.crops.index("maize_grain")
+    crop = np.array([maize, maize, maize, soybean])
+    assert yield_multiplier(np, params, crop, np.array([0.0, 60.0, 500.0, 0.0])).tolist() == [0.5, 0.75, 1.0, 1.0]
+    assert after_harvest(np, params, np.array([soybean, maize]), np.array([10.0, 10.0]), np.array([3.0, 6.0])).tolist() == [5.0, 0.0]
+
+
+def test_with_nitrogen_maize_after_soybean_beats_maize_after_maize(tables):
+    from dataclasses import replace
+    with_n = replace(tables, nitrogen=nitrogen_fixture(tables))
+    soybean, maize = tables.crops.index("soybean"), tables.crops.index("maize_grain")
+    rotated = simulate(np, with_n, Policy(soybean, (soybean, maize)), 5, 400)["value"].mean()
+    repeated = simulate(np, with_n, Policy(maize, (maize,)), 5, 400)["value"].mean()
+    penalty_only = simulate(np, tables, Policy(maize, (maize,)), 5, 400)["value"].mean()
+    assert rotated > repeated and repeated != penalty_only
+
+
 def test_route_key_round_trip():
     names = ["a", "b", "c", "fallow"]
     key = 0

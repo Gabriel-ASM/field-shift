@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from . import markov
+from . import markov, nitrogen
 from .calendar import DAYS_PER_YEAR
 from .tables import FALLOW, Tables
 
@@ -43,6 +43,7 @@ class State:
         self.water_fraction = full(tables.initial_water)
         self.water_class = water_class(xp, tables, self.water_fraction)
         self.carbon = full(tables.initial_carbon)
+        self.nitrogen = full(tables.nitrogen.initial if tables.nitrogen else 0.0)
         self.harvest_in = full(float(tables.cycle_days[policy.initial_crop]))
         self.maturing_for = full(0.0)
         self.formation_in = full(xp.inf)
@@ -103,18 +104,39 @@ def repeat_multiplier(xp, tables: Tables, crop, streak):
     return xp.maximum(tables.repeat_floor[crop], 1 - (streak - 1) * tables.repeat_penalty[crop])
 
 
-def harvest_cash(xp, tables: Tables, state: State, crop, day):
+def rotation_multiplier(xp, tables: Tables, state: State, crop):
+    """What the field's history does to yield: the nitrogen left by earlier crops when the profile has
+    nitrogen parameters, otherwise the fixed penalty for replanting the same crop."""
+    if tables.nitrogen:
+        return nitrogen.yield_multiplier(xp, tables.nitrogen, crop, state.nitrogen)
+    return repeat_multiplier(xp, tables, crop, state.streak)
+
+
+def advance_nitrogen(tables: Tables, state: State, rain) -> None:
+    if tables.nitrogen:
+        state.nitrogen = nitrogen.after_losses(tables.nitrogen, state.nitrogen, rain)
+
+
+def harvested_tonnes(xp, tables: Tables, state: State, crop):
+    """Yield of the crop in the field, in t/ha, after water, soil carbon and rotation effects."""
+    response = tables.water_yield[state.water_class] * tables.carbon_yield[carbon_class(xp, tables, state.carbon)]
+    return tables.yield_tonnes[crop] * response * rotation_multiplier(xp, tables, state, crop)
+
+
+def harvest_cash(tables: Tables, crop, tonnes, day):
     """Revenue minus cost of one harvest, in BRL/ha of that day."""
     price = tables.price[crop] * (1 + tables.price_trend[crop]) ** (day / DAYS_PER_YEAR)
-    response = tables.water_yield[state.water_class] * tables.carbon_yield[carbon_class(xp, tables, state.carbon)]
-    return tables.yield_tonnes[crop] * price * response * repeat_multiplier(xp, tables, crop, state.streak) - tables.cost[crop]
+    return tonnes * price - tables.cost[crop]
 
 
 def harvest(xp, tables: Tables, state: State, day: float) -> None:
     """Harvest ripe fields. Perennials start a new cycle; other fields go fallow and wait for a planting window."""
     ripe = (state.crop >= 0) & (state.harvest_in <= EPSILON)
     crop = crop_or_first(xp, state.crop)
-    state.value = state.value + xp.where(ripe, harvest_cash(xp, tables, state, crop, day) / discount(tables, day), 0.0)
+    tonnes = harvested_tonnes(xp, tables, state, crop)
+    state.value = state.value + xp.where(ripe, harvest_cash(tables, crop, tonnes, day) / discount(tables, day), 0.0)
+    if tables.nitrogen:
+        state.nitrogen = xp.where(ripe, nitrogen.after_harvest(xp, tables.nitrogen, crop, state.nitrogen, tonnes), state.nitrogen)
     state.priced = state.priced & ~(ripe & ~tables.harvest_priced[crop])
     cane = ripe & (crop == tables.sugarcane)
     reform = cane & (state.cane_cut == tables.sugarcane_cuts)
@@ -180,6 +202,8 @@ def plant(xp, tables: Tables, state: State, day: float) -> None:
     state.value = state.value + xp.where(perennial, cash / discount(tables, sown_on), 0.0)
     state.priced = state.priced & ~(perennial & ~tables.formation_priced[crop])
     state.crop = xp.where(sowing, crop, state.crop)
+    if tables.nitrogen:
+        state.nitrogen = xp.where(sowing, nitrogen.after_planting(tables.nitrogen, crop, state.nitrogen), state.nitrogen)
     state.streak = xp.where(sowing, state.pending_streak, state.streak)
     state.cane_cut = xp.where(sowing & (crop == tables.sugarcane), 1, state.cane_cut)
     state.harvest_in = xp.where(sowing, xp.maximum(tables.period_days, first_cycle - elapsed), state.harvest_in)
@@ -231,6 +255,7 @@ def simulate(xp, tables: Tables, policy: Policy, seed: int, count: int, keep: in
         day = round((period + 1) * tables.period_days, 9)
         advance_water(xp, tables, state, rain, rng["environment"].random(count))
         advance_soil(xp, tables, state, soil_rate)
+        advance_nitrogen(tables, state, rain)
         advance_clocks(tables, state)
         harvest(xp, tables, state, day)
         decide(xp, tables, state, day, choose)
