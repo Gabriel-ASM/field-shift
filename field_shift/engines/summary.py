@@ -174,3 +174,49 @@ def summarize(result: dict, tables: Tables, support: Support) -> dict:
         "ranking_reference": reference,
         "tracks": tracks(result["track"], result["climate"], tables, names),
     }
+
+
+ROUTE_TRACKS = 40      # trajectories of one route shown as strips
+
+
+def route_key(crops: list[str], names: list[str]) -> int:
+    """Inverse of decode_route."""
+    key = 0
+    for crop in crops:
+        key = key * len(names) + names.index(crop) + 1
+    return key
+
+
+def class_counts(codes: np.ndarray, classes: int = 3) -> list[list[int]]:
+    """Per period (rows of `codes`), how many trajectories are in each class."""
+    return np.stack([(codes == c).sum(axis=1) for c in range(classes)], axis=1).tolist()
+
+
+def route_tracks(paths: dict, members: np.ndarray, names: list[str]) -> list[dict]:
+    """The first trajectories of a route, period by period: crop and cane cut."""
+    shown = members[:ROUTE_TRACKS]
+    crop, cut = paths["crop"][:, shown].astype(int), paths["cane_cut"][:, shown].astype(int)
+    fallow = len(names) - 1
+    return [{"crop": [names[c - 1] if c > 0 else names[fallow] for c in crop[:, i]], "cane_cut": cut[:, i].tolist()}
+            for i in range(shown.size)]
+
+
+def route_detail(raw: dict, tables: Tables, crops: list[str]) -> dict | None:
+    """Everything the result view shows about one route besides its summary: water and soil class counts every
+    period, water shares and carbon quantiles at each year end, and some of its trajectories. None if no trajectory
+    followed it."""
+    names = [*tables.crops, "fallow"]
+    if any(crop not in names for crop in crops):
+        return None
+    members = np.flatnonzero(raw["route"] == route_key(crops, names))
+    if members.size == 0:
+        return None
+    environment = raw["paths"]["environment"][:, members]
+    carbon, water_class = raw["carbon"][:, members], raw["water_class"][:, members]
+    return {
+        "crops": crops, "trajectories": int(members.size),
+        "frames": {"water": class_counts(environment % 3), "soil": class_counts(environment // 3)},
+        "water": [dict(zip(WATER_STATES, shares(year, 3))) for year in water_class],
+        "carbon": [dict(zip(("p5", "p50", "p95"), np.quantile(year, QUANTILES).round(4).tolist())) for year in carbon],
+        "tracks": route_tracks(raw["paths"], members, names),
+    }

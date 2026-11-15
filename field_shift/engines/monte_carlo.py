@@ -272,10 +272,11 @@ def chooser(xp, tables: Tables, state: State, policy: Policy, rows, reform_rows,
         xp, tables, state, allowed, reform, rows, reform_rows, rng.random(state.crop.shape[0]))
 
 
-def simulate(xp, tables: Tables, policy: Policy, seed: int, count: int, keep: int = 0) -> dict:
+def simulate(xp, tables: Tables, policy: Policy, seed: int, count: int, keep: int = 0, paths: bool = False) -> dict:
     """Run `count` trajectories of one scenario. Returns arrays on the device of `xp`.
 
-    `keep` trajectories are also recorded period by period, for animation.
+    `keep` trajectories are also recorded period by period, for animation. With `paths`, every trajectory's crop,
+    environment class and cane cut are recorded period by period too, as small codes (see Recorder.paths).
     """
     from .backend import streams
     rng = streams(xp, seed, STREAMS)
@@ -285,7 +286,7 @@ def simulate(xp, tables: Tables, policy: Policy, seed: int, count: int, keep: in
     soil_rate = low + rng["environment"].random((count, low.shape[1])) * (high - low)
     rows = sample_or_none(xp, rng["parameters"], tables, policy, count)
     choose = chooser(xp, tables, state, policy, *rows, rng["choice"])
-    yearly = Recorder(xp, tables, state, count, keep)
+    yearly = Recorder(xp, tables, state, count, keep, paths)
     for period in range(tables.periods):
         year = min(tables.horizon_years - 1, int(period * tables.period_days // DAYS_PER_YEAR))
         rain = tables.rain_years[climate[:, year], period % tables.periods_per_year]
@@ -309,12 +310,23 @@ def sample_or_none(xp, rng, tables: Tables, policy: Policy, count: int):
     return markov.sample_rows(xp, rng, tables, count), markov.sample_reform_rows(xp, rng, tables, count)
 
 
+def path_codes(xp, tables: Tables, state: State) -> dict:
+    """One period of every trajectory in one byte each: crop + 1 (0 = fallow), water class + 3 × carbon class,
+    and the cane cut (0 when the field holds no cane)."""
+    cane = state.crop == tables.sugarcane
+    return {"crop": (state.crop + 1).astype(xp.int8),
+            "environment": (state.water_class + 3 * carbon_class(xp, tables, state.carbon)).astype(xp.uint8),
+            "cane_cut": xp.where(cane, state.cane_cut, 0).astype(xp.uint8)}
+
+
 class Recorder:
     """Collects crop counts every period, the state of every trajectory at each year end,
-    and the first `keep` trajectories period by period."""
+    the first `keep` trajectories period by period, and optionally every trajectory's path codes."""
 
-    def __init__(self, xp, tables: Tables, state: State, count: int, keep: int):
+    def __init__(self, xp, tables: Tables, state: State, count: int, keep: int, paths: bool = False):
         self.xp, self.tables, self.keep = xp, tables, min(keep, count)
+        self.paths = {name: xp.empty((tables.periods + 1, count), dtype=code.dtype)
+                      for name, code in path_codes(xp, tables, state).items()} if paths else None
         years = tables.horizon_years + 1
         self.crop = xp.empty((years, count), dtype=int)
         self.water_class = xp.empty((years, count), dtype=int)
@@ -331,6 +343,9 @@ class Recorder:
         self.crop_count[step] = self.xp.bincount(state.crop + 1, minlength=self.crop_count.shape[1])
         for name, row in self.track.items():
             row[step] = getattr(state, name)[: self.keep]
+        if self.paths is not None:
+            for name, code in path_codes(self.xp, self.tables, state).items():
+                self.paths[name][step] = code
 
     def record(self, period: int, state: State) -> None:
         self._period(period + 1, state)
@@ -341,4 +356,4 @@ class Recorder:
         return {"value": state.value, "priced": state.priced, "route": state.route, "crop": self.crop, "crop_count": self.crop_count,
                 "water_fraction": state.water_fraction,
                 "water_class": self.water_class, "carbon": self.carbon, "track": self.track,
-                "climate": climate[: self.keep]}
+                "climate": climate[: self.keep], "paths": self.paths}

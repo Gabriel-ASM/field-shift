@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
 from functools import lru_cache
 
 from .backend import array_module
 from .calendar import DAYS_PER_YEAR
-from .monte_carlo import Policy, simulate
+from .batches import simulate_batches
+from .monte_carlo import Policy
 from .payload import profile_payload, reference_payload
 from .summary import Support, summarize
 from .tables import Tables, build_tables
@@ -112,16 +114,33 @@ def check_request(tables: Tables, request: dict) -> None:
         raise RunError(f"at most {MAX_TRAJECTORIES} trajectories per scenario")
 
 
-def run(request: dict, default_state: str, device: str = "auto", tracks: int = 0) -> dict:
-    """Simulate every scenario with the same seed, so they all face the same environment."""
+def prepare(request: dict, default_state: str) -> tuple[Tables, list[Policy]]:
+    """Check a request and turn its scenarios into policies; raises RunError before anything is simulated."""
     tables = tables_for(request["profile"])
     check_request(tables, request)
+    return tables, [policy_of(tables, scenario, default_state) for scenario in request["scenarios"]]
+
+
+def total_trajectories(request: dict) -> int:
+    return request["trajectories"] * len(request["scenarios"])
+
+
+def run(request: dict, default_state: str, device: str = "auto", tracks: int = 0,
+        progress: Callable[[int], None] = lambda done: None, raw: list | None = None) -> dict:
+    """Simulate every scenario with the same seed, so they all face the same environment.
+
+    `progress` gets the trajectories done so far, over all scenarios. When `raw` is a list, the joined arrays of each
+    scenario, with every trajectory's path codes, are appended to it (for route details served later)."""
+    tables, policies = prepare(request, default_state)
     xp = array_module(device)
     on_device, started = tables.on(xp), time.perf_counter()
     scenarios = []
-    for scenario in request["scenarios"]:
-        policy = policy_of(tables, scenario, default_state)
-        result = simulate(xp, on_device, policy, request["seed"], request["trajectories"], min(tracks, MAX_TRACKS))
+    for index, (scenario, policy) in enumerate(zip(request["scenarios"], policies)):
+        before = index * request["trajectories"]
+        result = simulate_batches(xp, on_device, policy, request["seed"], request["trajectories"], min(tracks, MAX_TRACKS),
+                                  paths=raw is not None, progress=lambda done: progress(before + done))
+        if raw is not None:
+            raw.append(result)
         scenarios.append({"id": scenario["id"], "label": scenario.get("label", scenario["id"]),
                           "initial_crop": tables.crops[policy.initial_crop], **summarize(result, tables, support_of(tables))})
     return {

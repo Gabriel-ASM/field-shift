@@ -241,3 +241,56 @@ def test_runs_endpoint(client):
     assert client.get("/runs/options/nowhere").status_code == 404
     assert client.post("/runs", json={"profile": "franca-sp"}).status_code == 422
     assert client.post("/runs", params={"device": "cpu"}, json={**REQUEST, "horizon_days": 30}).status_code == 422
+
+
+def test_batches_are_the_same_batches_run_one_after_another(tables):
+    """A run in batches equals simulating each batch with its derived seed in sequence and joining the results."""
+    from field_shift.engines.batches import batch_seed, batch_sizes, join, on_host, simulate_batches
+    from field_shift.engines.summary import Support, summarize
+    policy, done = Policy(tables.crops.index("soybean")), []
+    batched = simulate_batches(np, tables, policy, 9, 2500, keep=3, batch=1000, progress=done.append)
+    by_hand = join([on_host(simulate(np, tables, policy, batch_seed(9, i), size, 3 if i == 0 else 0))
+                    for i, size in enumerate(batch_sizes(2500, 1000))])
+    support = Support(ranked=2, recommended=20)
+    assert done == [1000, 2000, 2500]
+    assert summarize(batched, tables, support) == summarize(by_hand, tables, support)
+
+
+def test_a_job_gives_the_same_result_as_one_call_and_serves_route_details():
+    import time
+    from field_shift.api.jobs import Jobs
+    from field_shift.engines.summary import route_detail
+    request = {**REQUEST, "trajectories": 1200}
+    direct = run(request, "soybean:skip_stages", "cpu", tracks=2)
+    jobs = Jobs()
+    job = jobs.start(request, "soybean:skip_stages", "cpu", 2)
+    for _ in range(600):
+        if job.status != "running":
+            break
+        time.sleep(0.05)
+    assert job.status == "done" and job.done == job.total == 2400
+    strip = lambda result: [{k: v for k, v in s.items()} for s in result["scenarios"]]
+    assert strip(job.result) == strip(direct)
+    route = job.result["scenarios"][0]["routes"][0]
+    detail = route_detail(job.raw[0], tables_for("franca-sp"), route["crops"])
+    assert detail["trajectories"] == route["trajectories"]
+    assert all(sum(period) == route["trajectories"] for period in detail["frames"]["water"])
+    assert all(track["crop"][0] == route["crops"][0] for track in detail["tracks"])
+    assert route_detail(job.raw[0], tables_for("franca-sp"), ["mucuna", "mucuna", "mucuna"]) is None
+
+
+def test_job_endpoints(client):
+    import time
+    started = client.post("/runs/jobs", params={"device": "cpu"}, json={**REQUEST, "trajectories": 300})
+    assert started.status_code == 202, started.text
+    job_id = started.json()["id"]
+    for _ in range(600):
+        view = client.get(f"/runs/jobs/{job_id}").json()
+        if view["status"] != "running":
+            break
+        time.sleep(0.05)
+    assert view["status"] == "done" and view["done"] == view["total"] == 600
+    crops = ",".join(view["result"]["scenarios"][0]["routes"][0]["crops"])
+    assert client.get(f"/runs/jobs/{job_id}/route", params={"crops": crops}).status_code == 200
+    assert client.get("/runs/jobs/nothing").status_code == 404
+    assert client.post("/runs/jobs", json={**REQUEST, "horizon_days": 30}).status_code == 422
