@@ -323,7 +323,7 @@ def test_soybean_on_soybean_costs_soil_carbon(tables):
     that a rotation would build, converted to g/kg in 0-30 cm with the profile's bulk density."""
     from field_shift.engines.monte_carlo import State, advance_soil
     soybean, maize = tables.crops.index("soybean"), tables.crops.index("maize_grain")
-    density = 1.3566666666666667          # Franca, SoilGrids bdod 0-30 cm
+    density = 1.36                        # Franca, SoilGrids bdod 0-30 cm, window mean
     assert tables.repeat_carbon_penalty.tolist() == pytest.approx([0.29 / 3 / density, 0.51 / 3 / density])
     state = State(np, tables, Policy(soybean), 3)
     state.crop, state.streak = np.array([soybean, soybean, maize]), np.array([1, 2, 2])
