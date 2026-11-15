@@ -131,6 +131,22 @@ def test_a_dev_server_accepts_any_front(client):
     assert client.get("/runs/options/franca-sp", headers={"X-Field-Shift-Version": "0000000"}).status_code == 200
 
 
+def test_the_page_is_revalidated_and_hashed_assets_are_kept(generated, tmp_path, monkeypatch):
+    import mongomock
+    from fastapi.testclient import TestClient
+    from field_shift.api import create_app
+
+    (tmp_path / "index.html").write_text("<h1>front</h1>", encoding="utf-8")
+    (tmp_path / "assets").mkdir()
+    (tmp_path / "assets" / "index-3f2a.js").write_text("1", encoding="utf-8")
+    monkeypatch.setenv("FIELD_SHIFT_WEB_DIR", str(tmp_path))
+    front = TestClient(create_app(mongomock.MongoClient()["x"]))
+    for path in ("/", "/index.html"):
+        assert front.get(path).headers["cache-control"] == "no-cache"
+    assert "immutable" in front.get("/assets/index-3f2a.js").headers["cache-control"]
+    etag = front.get("/").headers["etag"]
+    assert front.get("/", headers={"If-None-Match": etag}).headers["cache-control"] == "no-cache"
+
 def test_reference_is_only_served_when_configured(client, generated, tmp_path, monkeypatch):
     import mongomock
     from fastapi.testclient import TestClient

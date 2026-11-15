@@ -9,6 +9,8 @@ from fastapi import FastAPI
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from pymongo.database import Database
+from starlette.responses import Response
+from starlette.types import Scope
 
 from .. import ROOT
 from ..db import connect
@@ -18,6 +20,17 @@ DESCRIPTION = """
 Backend of Field Shift. This phase exposes the data contracts (v2), their views, and the
 profiles and Markov chains generated from the current data, and Monte Carlo runs (POST /runs).
 """
+
+
+class Front(StaticFiles):
+    """The built front. Vite names everything under assets/ by its content hash, so those files never change;
+    the rest (index.html above all) is revalidated on every load, so a redeploy reaches open tabs on reload."""
+
+    async def get_response(self, path: str, scope: Scope) -> Response:
+        response = await super().get_response(path, scope)
+        hashed = path.startswith("assets/")
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable" if hashed else "no-cache"
+        return response
 
 
 def create_app(database: Database | None = None) -> FastAPI:
@@ -49,5 +62,5 @@ def create_app(database: Database | None = None) -> FastAPI:
         app.mount("/pages", StaticFiles(directory=pages), name="pages")
     web = Path(os.environ.get("FIELD_SHIFT_WEB_DIR", ROOT / "web"))
     if web.is_dir():
-        app.mount("/", StaticFiles(directory=web, html=True), name="web")
+        app.mount("/", Front(directory=web, html=True), name="web")
     return app
