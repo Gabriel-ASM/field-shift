@@ -12,7 +12,6 @@ import { YourChoices } from "../result/YourChoices.tsx";
 import type { RouteDetail, RunResult } from "../types.ts";
 import type { Journey } from "../useFieldShift.ts";
 import { cropLabel } from "../ui/colors.ts";
-import { EnvironmentChart } from "../ui/EnvironmentChart.tsx";
 import { EnvironmentFrames, SOIL_SERIES, WATER_SERIES } from "../ui/EnvironmentFrames.tsx";
 import { count, money } from "../ui/format.ts";
 import { Legend } from "../ui/Legend.tsx";
@@ -61,22 +60,20 @@ function Heading({ single, explain }: { single: boolean; explain: () => void }) 
   );
 }
 
-/** Soil and water of the sequence on screen, every half month: the main charts of the result. */
-function Frames({ detail, error, years }: { detail: RouteDetail | null; error: string | null; years: number }) {
+/** Water and soil of the sequence on screen, every ~15 days: the cards of the team's result page. */
+function Frames({ detail, error, years, recommended }: { detail: RouteDetail | null; error: string | null; years: number; recommended: boolean }) {
+  if (error) return <article className="result-chart-card"><p className="error">{error}</p></article>;
+  if (!detail) return <article className="result-chart-card"><p className="note">Loading the scenarios of this sequence…</p></article>;
+  const along = recommended ? "along the recommended sequence" : "along this sequence";
   return (
-    <article className="result-chart-card">
-      <div className="result-chart-heading">
-        <h3>Soil and water along this sequence</h3>
-        {detail && <span className="chart-badge">{count(detail.trajectories)} scenarios</span>}
-        <p>Share of the scenarios that followed this sequence in each condition, every half month. Move over a chart to read a month.</p>
-      </div>
-      {error ? <p className="error">{error}</p> : !detail ? <p className="note">Loading the scenarios of this sequence…</p> : (
-        <div className="environment-results-grid">
-          <EnvironmentFrames title="Water in the soil" frames={detail.frames.water} series={WATER_SERIES} years={years} />
-          <EnvironmentFrames title="Soil organic carbon" frames={detail.frames.soil} series={SOIL_SERIES} years={years} />
-        </div>
-      )}
-    </article>
+    <div className="environment-results-grid">
+      <EnvironmentFrames frames={detail.frames.water} series={WATER_SERIES} years={years} text={{
+        title: `Water ${along}`, description: "Share of matching scenarios in each water condition, measured every ~15 days.",
+        label: `Continuous distribution of good, fair and bad water conditions over ${years * 12} months` }} />
+      <EnvironmentFrames frames={detail.frames.soil} series={SOIL_SERIES} years={years} text={{
+        title: `Soil ${along}`, description: "Share of matching scenarios in each soil-carbon class, measured every ~15 days.",
+        label: `Continuous distribution of good, fair and bad soil conditions over ${years * 12} months` }} />
+    </div>
   );
 }
 
@@ -89,7 +86,6 @@ function Unfolded({ run, detail, cuts }: { run: RunResult; detail: RouteDetail |
       <Timebar periodsPerYear={run.clock.periods / run.clock.horizon_years} />
       <Legend crops={crops} />
       <TrackStrips tracks={detail.tracks} cuts={cuts} />
-      <EnvironmentChart water={detail.water} carbon={detail.carbon} />
     </article>
   );
 }
@@ -124,7 +120,7 @@ export function ResultStep({ journey }: { journey: Journey }) {
         </article>
         <ResultMetrics route={selected.route} settings={run.ranking} />
       </div>
-      <Frames detail={detail} error={error} years={run.clock.horizon_years} />
+      <Frames detail={detail} error={error} years={run.clock.horizon_years} recommended={selected === best} />
       <ReturnChart value={selected.route.value!} fullSupport={run.ranking.support.full_score} />
       <div className="result-info">
         <Facts journey={journey} run={run} scenario={scenario} best={selected} />

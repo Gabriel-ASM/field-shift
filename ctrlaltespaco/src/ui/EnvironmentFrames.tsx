@@ -1,7 +1,8 @@
-/** Share of one route's trajectories in each water or soil class, every half month, as stacked areas.
- *  Layout and colours of renderEnvironmentOutcomeChart in field_shift/front/producer.js. */
+/** Share of one route's trajectories in each water or soil class, every half month, as stacked areas, in a card.
+ *  Card, layout, colours and interaction of renderEnvironmentOutcomeChart and the result cards of
+ *  field_shift/front/producer.js and index.html (#farmer-water-chart, #farmer-soil-chart). */
 
-import { useState, type PointerEvent } from "react";
+import { useState, type KeyboardEvent, type PointerEvent } from "react";
 import { count, percent } from "./format.ts";
 
 const WIDTH = 640, HEIGHT = 260, LEFT = 42, RIGHT = 12, TOP = 20, BOTTOM = 216;
@@ -66,7 +67,24 @@ function Grid({ last, years }: { last: number; years: number }) {
   );
 }
 
-export function EnvironmentFrames({ title, frames, series, years }: { title: string; frames: number[][]; series: Series[]; years: number }) {
+interface CardText {
+  title: string;
+  description: string;
+  label: string;        // aria label of the chart
+  hint?: string;
+}
+
+const HINT = "Hover, touch, or focus and use the arrow keys to inspect a period.";
+
+function nextPeriod(key: string, period: number, last: number): number | null {
+  if (key === "ArrowLeft") return Math.max(0, period - 1);
+  if (key === "ArrowRight") return Math.min(last, period + 1);
+  if (key === "Home") return 0;
+  if (key === "End") return last;
+  return null;
+}
+
+export function EnvironmentFrames({ text, frames, series, years }: { text: CardText; frames: number[][]; series: Series[]; years: number }) {
   const last = frames.length - 1;
   const [period, setPeriod] = useState(last);
   if (last < 1) return null;
@@ -75,19 +93,31 @@ export function EnvironmentFrames({ title, frames, series, years }: { title: str
     const at = ((event.clientX - box.left) * WIDTH) / Math.max(1, box.width);
     setPeriod(Math.min(last, Math.max(0, Math.round(((at - LEFT) / PLOT_WIDTH) * last))));
   };
-  const row = frames[period]!, total = Math.max(1, row.reduce((sum, value) => sum + value, 0));
+  const key = (event: KeyboardEvent<SVGSVGElement>) => {
+    const next = nextPeriod(event.key, Math.min(period, last), last);
+    if (next === null) return;
+    event.preventDefault();
+    setPeriod(next);
+  };
+  const row = frames[Math.min(period, last)]!, total = Math.max(1, row.reduce((sum, value) => sum + value, 0));
   return (
-    <figure className="frames-chart">
-      <figcaption>{title}</figcaption>
-      <svg className="result-chart" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" aria-label={`${title}, share of scenarios in each class every half month`}>
+    <article className="result-chart-card">
+      <div className="result-chart-heading">
+        <h3>{text.title}</h3><span className="chart-badge">{count(total)} scenarios</span><p>{text.description}</p>
+      </div>
+      <div className="result-chart-legend" aria-label={`${text.title} legend`}>
+        {series.map(({ label, color }) => <span key={label}><i style={{ background: color }} />{label}</span>)}
+      </div>
+      <svg className="result-chart" viewBox={`0 0 ${WIDTH} ${HEIGHT}`} role="img" tabIndex={0} aria-label={text.label} onKeyDown={key}>
         <Areas edges={stack(frames, series)} series={series} last={last} />
         <Grid last={last} years={years} />
-        <line x1={x(period, last)} y1={TOP} x2={x(period, last)} y2={BOTTOM} stroke="#263e31" strokeWidth={1.2} strokeDasharray="3 3" pointerEvents="none" />
+        <line x1={x(Math.min(period, last), last)} y1={TOP} x2={x(Math.min(period, last), last)} y2={BOTTOM} stroke="#263e31" strokeWidth={1.2} strokeDasharray="3 3" pointerEvents="none" />
         <rect x={LEFT} y={TOP} width={PLOT_WIDTH} height={PLOT_HEIGHT} fill="transparent" style={{ cursor: "crosshair" }} onPointerMove={point} onPointerDown={point} />
       </svg>
       <p className="chart-period-detail">
-        Month {((period * years * 12) / last).toFixed(1)} · {count(total)} scenarios · {series.map(({ index, label }) => `${label} ${percent(row[index]! / total)}`).join(" · ")}
+        Month {((Math.min(period, last) * years * 12) / last).toFixed(1)} · {count(total)} scenarios · {series.map(({ index, label }) => `${label} ${percent(row[index]! / total)}`).join(" · ")}
       </p>
-    </figure>
+      <p className="chart-interaction-hint">{text.hint ?? HINT}</p>
+    </article>
   );
 }

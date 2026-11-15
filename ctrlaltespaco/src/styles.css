@@ -73,11 +73,6 @@ input[type="range"] { width: 100%; padding: 0; accent-color: var(--green); }
 .choices-summary dd { margin: 0; }
 .tracks { display: block; width: 100%; margin: 0 0 14px; image-rendering: pixelated; border-radius: 6px; background: var(--soft); }
 h4 { margin: 12px 0 6px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-.environment { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.environment svg { display: block; width: 100%; height: auto; }
-.environment text { fill: var(--muted); font-size: 9px; }
-.environment figure { margin: 0; }
-.environment figcaption { font-size: 0.76rem; color: var(--muted); margin-top: 4px; }
 
 /* The plan, once the panel has grown over the map. Cards and charts come from reference.css. */
 .card { padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
@@ -105,5 +100,3 @@ h4 { margin: 12px 0 6px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0
 .result-eyebrow.is-option button { margin-left: 6px; padding: 4px 10px; font-size: 0.7rem; letter-spacing: 0; text-transform: none; }
 button.alternative-route { width: 100%; border: 1px solid transparent; text-align: left; cursor: pointer; }
 button.alternative-route[aria-pressed="true"] { border-color: var(--fs-green); background: var(--fs-green-soft); }
-.frames-chart { margin: 0; }
-.frames-chart figcaption { margin-top: 12px; color: var(--ink); font-size: 0.85rem; font-weight: 700; }
