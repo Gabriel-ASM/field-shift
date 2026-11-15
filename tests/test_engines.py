@@ -156,6 +156,27 @@ def test_cover_crop_cost_is_split_and_the_next_soybean_gains(tables):
     assert residual_gain(np, tables, state, np.full(3, brachiaria), np.array([100.0, 160.0, 160.0])).tolist() == [0, 0, 0]
 
 
+def test_standing_cane_reforms_after_its_last_modeled_cut(tables):
+    """Franca from cane: from the 1st cut the field keeps cane for years; from the 5th (last) cut it is reformed
+    at the first harvest, so after two years almost no trajectory still has its first cane field."""
+    cane = tables.crops.index("sugarcane")
+    still_cane = {}
+    for cut in (1, 5):
+        result = simulate(np, tables, Policy(cane, initial_sugarcane_cut=cut), 3, 2000)
+        planted_again = result["route"] != cane + 1      # any planting after the first cane
+        still_cane[cut] = float(((result["crop"][2] == cane) & ~planted_again).mean())
+    assert int(tables.sugarcane_cuts) == 5
+    assert still_cane[1] > 0.95 and still_cane[5] < 0.05
+
+
+def test_cane_cut_is_checked_against_the_modeled_cuts():
+    scenario = {"id": "cane", "initial_state": "sugarcane:skip_stages", "policy": {"kind": "markov"}}
+    with pytest.raises(RunError, match="cuts 1 to 5"):
+        run({**REQUEST, "trajectories": 10, "scenarios": [{**scenario, "initial_sugarcane_cut": 6}]}, "soybean:skip_stages", "cpu")
+    from field_shift.engines.run import options
+    assert options("franca-sp")["sugarcane_cuts"] == 5
+
+
 def test_route_key_round_trip():
     names = ["a", "b", "c", "fallow"]
     key = 0

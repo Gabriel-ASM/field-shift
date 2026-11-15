@@ -11,13 +11,18 @@ import { TrackStrips } from "../ui/TrackStrips.tsx";
 
 const OTHERS = 4;
 
-function Sequence({ crops }: { crops: string[] }) {
+/** "In the field", with the next cut when the field is standing cane. */
+function fieldLabel(crop: string, caneCut: number): string {
+  return crop === "sugarcane" ? `In the field · cut ${caneCut} next` : "In the field";
+}
+
+function Sequence({ crops, caneCut }: { crops: string[]; caneCut: number }) {
   return (
     <ol className="sequence">
       {crops.map((crop, index) => (
         <li key={index} style={{ borderColor: cropColor(crop) }}>
           <CropArt crop={crop} size={36} />
-          <span><small>{index === 0 ? "In the field" : `Planting ${index}`}</small>{cropLabel(crop)}</span>
+          <span><small>{index === 0 ? fieldLabel(crop, caneCut) : `Planting ${index}`}</small>{cropLabel(crop)}</span>
         </li>
       ))}
     </ol>
@@ -103,7 +108,7 @@ export function ResultStep({ journey }: { journey: Journey }) {
       </div>
       <article className="recommendation">
         <h3>Your suggested sequence</h3>
-        <Sequence crops={best.route.crops} />
+        <Sequence crops={best.route.crops} caneCut={journey.caneCut} />
         <p className="note">Planned by crop cycles over a five-year horizon.</p>
       </article>
       <Metrics best={best} />

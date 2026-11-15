@@ -40,6 +40,8 @@ export interface RankingSettings {
 export interface RunChoices {
   crops: string[];
   initial_crops: string[];
+  /** Harvests of a cane field before it is reformed; null when the profile has no cane. */
+  sugarcane_cuts: number | null;
   ranking: RankingSettings;
 }
 
@@ -57,6 +59,8 @@ export interface ScenarioRequest {
   id: string;
   label: string;
   initial_state?: string;
+  /** Next harvest of standing cane (1 = first cut); only when the scenario starts on sugarcane. */
+  initial_sugarcane_cut?: number;
   policy: Policy;
 }
 

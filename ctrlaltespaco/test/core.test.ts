@@ -22,6 +22,12 @@ test("the journey simulates the region from the farmer's crop", () => {
   });
 });
 
+test("standing cane sends the next cut; other crops do not send the field", () => {
+  assert.equal(regionScenario("sugarcane", 4).initial_sugarcane_cut, 4);
+  assert.equal(regionScenario("sugarcane").initial_sugarcane_cut, 1);
+  assert.equal("initial_sugarcane_cut" in regionScenario("soybean", 4), false);
+});
+
 test("score is break-even at zero and saturates at the scale", () => {
   assert.equal(scoreOnTen(0, 100, SETTINGS), 5);
   assert.equal(scoreOnTen(100, 100, SETTINGS), 10);

@@ -39,6 +39,8 @@ export interface Journey {
   step: Step;
   place: Place | null;
   crop: string | null;
+  /** Next harvest of standing cane; used only when the crop is sugarcane. */
+  caneCut: number;
   /** Share of the score given to soil and water. */
   weight: number;
   seed: number;
@@ -47,6 +49,7 @@ export interface Journey {
   go: (step: Step) => void;
   choosePlace: (profile: Profile) => void;
   chooseCrop: (crop: string) => void;
+  chooseCaneCut: (cut: number) => void;
   setWeight: (weight: number) => void;
   setSeed: (seed: number) => void;
   simulate: () => void;
@@ -58,6 +61,7 @@ export function useJourney(world: World | null): Journey {
   const [step, go] = useState<Step>("location");
   const [place, setPlace] = useState<Place | null>(null);
   const [crop, setCrop] = useState<string | null>(null);
+  const [caneCut, setCaneCut] = useState(1);
   const [weight, setWeight] = useState(0.2);
   const [seed, setSeed] = useState(2026);
   const [run, setRun] = useState<RunResult | null>(null);
@@ -79,20 +83,25 @@ export function useJourney(world: World | null): Journey {
     setRun(null);
   }, []);
 
+  const chooseCaneCut = useCallback((cut: number) => {
+    setCaneCut(cut);
+    setRun(null);
+  }, []);
+
   /** Runs the engine, unless this place, crop and seed were already simulated: priorities only re-rank. */
   const simulate = useCallback(() => {
     if (!world || !place || !crop) return;
-    const key = `${place.profile.id}|${crop}|${seed}`;
+    const key = `${place.profile.id}|${crop}|${caneCut}|${seed}`;
     if (run && simulated === key) return go("result");
     go("simulation");
     setError(null);
-    createRun({ profile: place.profile.id, seed, scenarios: [regionScenario(crop)], ...world.config.run }).then((result) => {
+    createRun({ profile: place.profile.id, seed, scenarios: [regionScenario(crop, caneCut)], ...world.config.run }).then((result) => {
       playhead.reset(result.clock.periods);
       setRun(result);
       setSimulated(key);
       go("result");
     }, (failure) => setError(message(failure)));
-  }, [world, place, crop, seed, run, simulated]);
+  }, [world, place, crop, caneCut, seed, run, simulated]);
 
   const restart = useCallback(() => {
     setPlace(null);
@@ -102,5 +111,5 @@ export function useJourney(world: World | null): Journey {
     go("location");
   }, []);
 
-  return { step, place, crop, weight, seed, run, error, go, choosePlace, chooseCrop, setWeight, setSeed, simulate, restart };
+  return { step, place, crop, caneCut, weight, seed, run, error, go, choosePlace, chooseCrop, chooseCaneCut, setWeight, setSeed, simulate, restart };
 }

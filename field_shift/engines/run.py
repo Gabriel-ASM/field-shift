@@ -35,13 +35,26 @@ def crop_of_state(state_id: str) -> str:
     return state_id.split(":")[0]
 
 
+def sugarcane_cuts(tables: Tables) -> int | None:
+    """Harvests of a cane field before it is reformed (crop-cycle-assumptions.json), or None without cane."""
+    return int(tables.sugarcane_cuts) if tables.sugarcane >= 0 else None
+
+
+def initial_cut(tables: Tables, scenario: dict) -> int:
+    """The next harvest of standing cane, checked against the cuts the model has."""
+    cut, cuts = int(scenario.get("initial_sugarcane_cut", 1)), sugarcane_cuts(tables)
+    if cuts is not None and not 1 <= cut <= cuts:
+        raise RunError(f"initial_sugarcane_cut={cut}: this profile models cuts 1 to {cuts}")
+    return cut
+
+
 def policy_of(tables: Tables, scenario: dict, default_state: str) -> Policy:
     """A rotation starts on its first crop unless the scenario says otherwise; a markov scenario on the chain's."""
     policy = scenario["policy"]
     sequence = tuple(crop_index(tables, crop) for crop in policy.get("sequence", ()))
     start = scenario.get("initial_state") or (None if sequence else default_state)
     initial = crop_index(tables, crop_of_state(start)) if start else sequence[0]
-    return Policy(initial, sequence, int(scenario.get("initial_sugarcane_cut", 1)))
+    return Policy(initial, sequence, initial_cut(tables, scenario))
 
 
 def options(profile_id: str) -> dict:
@@ -49,7 +62,7 @@ def options(profile_id: str) -> dict:
     tables = tables_for(profile_id)
     selectable = profile_payload(profile_id)["crop_markov"]["initial_crop_ids"]
     return {"profile": profile_id, "crops": list(tables.crops), "initial_crops": [c for c in selectable if c in tables.crops],
-            "ranking": ranking_settings(tables), "max_trajectories": MAX_TRAJECTORIES, "horizon_days": tables.horizon_years * DAYS_PER_YEAR}
+            "sugarcane_cuts": sugarcane_cuts(tables), "ranking": ranking_settings(tables), "max_trajectories": MAX_TRAJECTORIES, "horizon_days": tables.horizon_years * DAYS_PER_YEAR}
 
 
 def ranking_settings(tables: Tables) -> dict:
