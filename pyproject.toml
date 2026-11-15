@@ -9,6 +9,12 @@ dependencies = [
     "pymongo>=4.8",
     "jsonschema>=4.22",
     "referencing>=0.35",
+    "numpy>=2",
+]
+
+[project.optional-dependencies]
+gpu = [
+    "cupy-cuda12x[ctk]>=13.6",
 ]
 
 [dependency-groups]

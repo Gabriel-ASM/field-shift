@@ -12,11 +12,11 @@ from pymongo.database import Database
 
 from .. import ROOT
 from ..db import connect
-from .routes import chains, contracts, profiles, views
+from .routes import chains, contracts, profiles, runs, views
 
 DESCRIPTION = """
 Backend of Field Shift. This phase exposes the data contracts (v2), their views, and the
-profiles and Markov chains generated from the current data. Simulation runs come with the engines.
+profiles and Markov chains generated from the current data, and Monte Carlo runs (POST /runs).
 """
 
 
@@ -38,7 +38,7 @@ def create_app(database: Database | None = None) -> FastAPI:
     def health() -> dict[str, str]:
         return {"status": "ok"}
 
-    for module in (contracts, views, profiles, chains):
+    for module in (contracts, views, profiles, chains, runs):
         app.include_router(module.router)
 
     # Static mounts come last, so every API route above wins over a file with the same path.

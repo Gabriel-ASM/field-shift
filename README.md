@@ -38,6 +38,7 @@ FIELD_SHIFT_TEST_MONGO_URI=mongodb://localhost:27017 uv run pytest   # also runs
 |---|---|
 | `field_shift/contracts` | Load, validate and bundle the v2 JSON Schemas; translate them to MongoDB validators; cross-reference checks |
 | `field_shift/ingest` | Build v2 chains and profiles from the v1 files in `data/profiles` |
+| `field_shift/engines` | Markov choice and vectorized Monte Carlo (NumPy, or CuPy on a CUDA GPU with `uv sync --extra gpu`); `POST /runs` |
 | `field_shift/db` | MongoDB collections validated by the contracts |
 | `field_shift/api` | FastAPI: contracts, validation, views, profiles, chains |
 | `field_shift/views` | Contract graph and tree for the web |
