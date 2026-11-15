@@ -360,7 +360,7 @@
           "uf *": "string",
           "ibge_code *": "string"
         },
-        "scope": "enum: field | municipality | grid_cell",
+        "scope": "enum: field | municipality | grid_cell | window_mean",
         "initial_node *": {
           "-> markov.json#/definitions/node": {
             "state *": "string",

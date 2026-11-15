@@ -85,7 +85,10 @@ class Tables:
     discount_rate: float
     # total soil nitrogen (soil_nitrogen of soil-crop-response-hypotheses.json, 7a836bf): a stock, not available N
     total_n_initial: float          # kg N/ha, 0-30 cm (SoilGrids)
-    total_n_balance: np.ndarray     # (C,) kg N/ha per year while the crop is in the field
+    total_n_balance: np.ndarray     # (C,) kg N/ha per year while the crop is in the field (steers the chain)
+    total_n_fixation: np.ndarray    # (C,) kg N/ha fixed per cycle, before the trajectory's factor
+    total_n_export: np.ndarray      # (C,) kg N/ha exported per cycle
+    fixation_factor: np.ndarray     # (2,) lowest and highest factor on fixation, drawn per trajectory
     total_n_target_per_carbon: float  # kg N/ha of the C:N target per g/kg of soil carbon
     total_n_span: float             # deficit span, as a fraction of the target
     total_n_coefficient: float
@@ -94,7 +97,8 @@ class Tables:
     # soybean on soybean (soybean-repetition-soil.json): soil carbon the field does not accrue, g/kg per year
     repeat_carbon_crop: int         # crop index the penalty applies to, or -2
     repeat_carbon_penalty: np.ndarray  # (2,) lowest and highest penalty
-    nitrogen: Nitrogen | None = None    # None: no nitrogen parameters, the repeated-crop penalty applies
+    # available soil nitrogen (model block of nitrogen-balance.json); None switches the balance off
+    nitrogen: Nitrogen | None = None
 
     @property
     def periods(self) -> int:
@@ -249,12 +253,38 @@ def _total_nitrogen(crops, payload, hypotheses) -> dict:
     return {
         "total_n_initial": float(soil["total_nitrogen_stock_top_0_30_kg_ha"]),
         "total_n_balance": _per_crop(crops, lambda c: _number(model["annual_net_balance_kg_n_ha_year_by_crop"].get(c), 0.0)),
+        "total_n_fixation": _per_crop(crops, lambda c: _number(model["fixation_kg_n_ha_per_cycle_by_crop"].get(c), 0.0)),
+        "total_n_export": _per_crop(crops, lambda c: _number(model["export_kg_n_ha_per_cycle_by_crop"].get(c), 0.0)),
+        "fixation_factor": np.array([float(model["fixation_scenario_factor"]["min"]), float(model["fixation_scenario_factor"]["max"])]),
         "total_n_target_per_carbon": target_per_carbon,
         "total_n_span": float(model["deficit_span_fraction_of_target"]),
         "total_n_coefficient": float(model["probability_log_weight_coefficient"]),
         "total_n_scale": float(model["probability_balance_scale_kg_ha_year"]),
         "total_n_class_limits": np.array([float(thresholds["low_max_exclusive"]), float(thresholds["medium_max_exclusive"])]),
     }
+
+
+def _nitrogen(crops, model: dict) -> Nitrogen:
+    """The available-N balance, from the `model` block of nitrogen-balance.json (sourced numbers, the team's per-cycle
+    numbers for the other crops). Crops it does not name are neutral."""
+    rules = model["crops"]
+    value = lambda crop, key, default=0.0: _number((rules.get(crop) or {}).get(key), default)
+    fertilizer = lambda crop, end: _number(((rules.get(crop) or {}).get("fertilizer_kg_ha") or {}).get(end), 0.0)
+    response = lambda crop, key, default: _number(((rules.get(crop) or {}).get("yield_response") or {}).get(key), default)
+    return Nitrogen(
+        initial=float(model["initial_available_kg_ha"]["value"]),
+        credit=_per_crop(crops, lambda c: value(c, "fixation_kg_ha_per_cycle")),
+        credit_per_tonne=_per_crop(crops, lambda c: value(c, "fixation_kg_per_tonne")),
+        fertilizer=_per_crop(crops, lambda c: fertilizer(c, "min")),
+        fertilizer_high=_per_crop(crops, lambda c: fertilizer(c, "max")),
+        removal=_per_crop(crops, lambda c: value(c, "removal_kg_per_tonne")),
+        removal_per_cycle=_per_crop(crops, lambda c: value(c, "removal_kg_ha_per_cycle")),
+        demand=_per_crop(crops, lambda c: response(c, "demand_kg_ha", 0.0)),
+        floor=_per_crop(crops, lambda c: response(c, "floor", 1.0)),
+        loss_fraction=np.zeros(3),          # no sourced leaching by rain class (model.rain_losses)
+        fertilizer_loss=float(model["fertilizer_loss_fraction"]["value"]),
+        mineralization=float(model["mineralization_fraction_per_year"]["value"]),
+    )
 
 
 def _repeat_carbon(crops, payload, rule: dict) -> dict:
@@ -314,4 +344,5 @@ def build_tables(payload: dict, reference: dict) -> Tables:
         **_economics(crops, payload, hypotheses, crop_cycles),
         **_total_nitrogen(crops, payload, hypotheses),
         **_repeat_carbon(crops, payload, read_json(DATA_ROOT / "reference" / "soybean-repetition-soil.json")),
+        nitrogen=_nitrogen(crops, read_json(DATA_ROOT / "reference" / "nitrogen-balance.json")["model"]),
     )

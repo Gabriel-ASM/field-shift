@@ -1047,9 +1047,9 @@
         },
         {
           "path": "scope",
-          "type": "enum: field | municipality | grid_cell",
+          "type": "enum: field | municipality | grid_cell | window_mean",
           "required": false,
-          "description": "What the soil values represent. grid_cell = map estimate at the municipality centroid, not a field sample."
+          "description": "What the soil values represent. grid_cell = map estimate at the municipality centroid; window_mean = mean of the map cells in a window around the city, spread uniformly over the profile. Neither is a field sample."
         },
         {
           "path": "initial_node",

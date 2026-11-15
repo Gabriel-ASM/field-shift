@@ -30,7 +30,8 @@ def value_summary(values: np.ndarray) -> dict | None:
     ordered = np.sort(values)
     p5, p50, p95 = np.quantile(ordered, QUANTILES)
     return {"mean": float(ordered.mean()), "p5": float(p5), "p50": float(p50), "p95": float(p95),
-            "cvar5": float(tail_mean(ordered)), "count": int(ordered.size)}
+            "cvar5": float(tail_mean(ordered)), "count": int(ordered.size),
+            "loss_probability": float((ordered < 0).mean())}
 
 
 def tail_mean(ordered: np.ndarray) -> float:
@@ -68,11 +69,9 @@ def decode_route(key: int, names: list[str]) -> list[str]:
     return crops[::-1]
 
 
-def yield_penalties(crops: list[str], tables: Tables) -> list[float] | None:
+def yield_penalties(crops: list[str], tables: Tables) -> list[float]:
     """Yield lost at each planting's harvest by replanting the same crop (repeated_crop_effect), as the result page of
-    producer.js shows it. None when the profile has nitrogen parameters: then the loss depends on the soil's N."""
-    if tables.nitrogen:
-        return None
+    producer.js shows it. The available-N response comes on top of it and varies by trajectory, so it is not here."""
     penalties, streak = [], 0
     for index, crop in enumerate(crops):
         streak = streak + 1 if index and crop == crops[index - 1] else 1
@@ -173,8 +172,6 @@ def summarize(result: dict, tables: Tables, support: Support) -> dict:
         "final_water_multiplier": float(final["water_multiplier"].mean()),
         "routes": route_list,
         "ranking_reference": reference,
-        # Every trajectory as one route: for a fixed rotation, this is the rotation's own result.
-        "overall": route_summary([], np.arange(value.size), priced, value, final, value.size, tables, support),
         "tracks": tracks(result["track"], result["climate"], tables, names),
     }
 
@@ -204,20 +201,20 @@ def route_tracks(paths: dict, members: np.ndarray, names: list[str]) -> list[dic
             for i in range(shown.size)]
 
 
-def route_detail(raw: dict, tables: Tables, crops: list[str] | None) -> dict | None:
+def route_detail(raw: dict, tables: Tables, crops: list[str]) -> dict | None:
     """Everything the result view shows about one route besides its summary: water and soil class counts every
-    period, water shares and carbon quantiles at each year end, and some of its trajectories. `crops` None takes
-    every trajectory of the scenario (a fixed rotation). None if no trajectory followed the route."""
+    period, water shares and carbon quantiles at each year end, and some of its trajectories. None if no trajectory
+    followed it."""
     names = [*tables.crops, "fallow"]
-    if crops is not None and any(crop not in names for crop in crops):
+    if any(crop not in names for crop in crops):
         return None
-    members = np.arange(raw["route"].size) if crops is None else np.flatnonzero(raw["route"] == route_key(crops, names))
+    members = np.flatnonzero(raw["route"] == route_key(crops, names))
     if members.size == 0:
         return None
     environment = raw["paths"]["environment"][:, members]
     carbon, water_class = raw["carbon"][:, members], raw["water_class"][:, members]
     return {
-        "crops": crops or [], "trajectories": int(members.size),
+        "crops": crops, "trajectories": int(members.size),
         "frames": {"water": class_counts(environment % 3), "soil": class_counts((environment // 3) % 3),
                    "nitrogen": class_counts(environment // 9)},
         "water": [dict(zip(WATER_STATES, shares(year, 3))) for year in water_class],

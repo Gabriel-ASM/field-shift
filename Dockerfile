@@ -2,11 +2,15 @@
 #   docker build -t field-shift .
 #   docker run --rm -p 8000:8000 field-shift        # http://localhost:8000
 # MongoDB listens only inside the container. Add `-v field-shift-db:/data/db` to keep the database.
+# `--build-arg FIELD_SHIFT_VERSION=<commit>` stamps the front and the API with the build (GET /config `version`);
+# without it both say "dev", which never asks a tab to reload.
 FROM node:22-slim AS front
 WORKDIR /front
 COPY ctrlaltespaco/package.json ctrlaltespaco/package-lock.json ./
 RUN npm ci
 COPY ctrlaltespaco/ ./
+ARG FIELD_SHIFT_VERSION=dev
+ENV FIELD_SHIFT_VERSION=$FIELD_SHIFT_VERSION
 RUN npm run build
 
 FROM mongo:7 AS base
@@ -47,6 +51,10 @@ RUN useradd --system --no-create-home app \
     && mkdir -p data/v2 \
     && chown -R app data/v2 \
     && chmod +x /usr/local/bin/field-shift-entrypoint
+
+# Last, so a new commit does not rebuild the layers above.
+ARG FIELD_SHIFT_VERSION=dev
+ENV FIELD_SHIFT_VERSION=$FIELD_SHIFT_VERSION
 
 EXPOSE 8000
 VOLUME /data/db

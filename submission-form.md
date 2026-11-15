@@ -23,7 +23,6 @@ Field Shift is a decision-support tool that lets a farmer compare crop rotations
 ## Project (links)
 
 [PENDENTE: public URL of the app, if it is published]
-[PENDENTE: repository link, if the team wants it listed — https://github.com/Gabriel-ASM/field-shift]
 
 ---
 
@@ -65,7 +64,7 @@ Mark the farmer's current rotation as its own strategy next to the suggested one
 
 **In the product:** none. The recommendation comes from a Markov chain and a Monte Carlo simulation with explicit equations; no machine-learning or generative model produces or adjusts results.
 
-**In development:** AI coding assistants (Anthropic Claude, through Claude Code) were used to write and review code, port the simulator from JavaScript to Python, write tests and draft documentation and these form texts. [PENDENTE: other AI tools used by team members, and whether any image or text in the demo was AI-generated]. All data, modeling choices and numbers were defined and checked by the team; AI-assisted code is covered by automated tests and by the statistical comparison between the two engines.
+**In development:** AI coding assistants (Anthropic Claude, through Claude Code and ChatGPT and Kimi, through Codex) were used to write and review code, port the simulator from JavaScript to Python, write tests and draft documentation and these form texts. All data, modeling choices and numbers were defined and checked by the team; AI-assisted code is covered by automated tests and by the statistical comparison between the two engines.
 
 ---
 

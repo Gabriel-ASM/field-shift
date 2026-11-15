@@ -3,6 +3,7 @@ import { test } from "node:test";
 import { preference, rank, recommended, scoreOnTen, supportScore, weights } from "../src/ranking.ts";
 import { bandwidth, density } from "../src/ui/density.ts";
 import { regionScenario } from "../src/scenarios.ts";
+import { groupTracks, segments } from "../src/ui/tracks.ts";
 import type { RankingReference, RankingSettings, Route } from "../src/types.ts";
 
 const SETTINGS: RankingSettings = {
@@ -14,7 +15,7 @@ const SETTINGS: RankingSettings = {
 };
 
 function route(crops: string[], median: number, carbon: number, samples = 500): Route {
-  const value = { mean: median, p5: median - 1000, p50: median, p95: median + 1000, cvar5: median - 2000, count: samples };
+  const value = { mean: median, p5: median - 1000, p50: median, p95: median + 1000, cvar5: median - 2000, count: samples, loss_probability: 0.1 };
   return { crops, share: 0.1, trajectories: samples, value, final_carbon: carbon, final_carbon_class: "medium", final_water_multiplier: 1,
     final_water: { water_low: 0.2, water_medium: 0.5, water_high: 0.3 }, final_water_fraction: 0.5, final_total_nitrogen: carbon * 300, yield_penalty: crops.map(() => 0) };
 }
@@ -101,18 +102,35 @@ test("total N scores against the C:N target of the route's final carbon", async 
   assert.deepEqual([0.5, 1, 1.3].map((ratio) => nitrogenClass(at(ratio), SETTINGS)), ["low", "medium", "high"]);
 });
 
-test("a candidate is re-simulated as a fixed rotation and used once every candidate is back", async () => {
-  const { rotationScenario } = await import("../src/scenarios.ts");
-  const { refinedRoutes } = await import("../src/result/useRefinement.ts");
-  assert.deepEqual(rotationScenario("c0", ["soybean", "maize_grain"]), {
-    id: "c0", label: "soybean → maize_grain", initial_state: "soybean:skip_stages",
-    policy: { kind: "rotation", sequence: ["soybean", "maize_grain"], fallback: "fallow:skip_stages" },
-  });
-  assert.equal(rotationScenario("c1", ["sugarcane", "soybean"], 4).initial_sugarcane_cut, 4);
-  const ranked = rank([route(["soybean", "maize_grain"], 9000, 20), route(["soybean", "brachiaria"], 8000, 20)], REFERENCE, SETTINGS, balance(0.2));
-  const own = (crops: string[]) => ({ route: { ...route(crops, 1, 20, 10000), crops }, job: "j", scenario: 0 });
-  const partial = { refined: new Map([["soybean,maize_grain", own(["soybean", "maize_grain"])]]), progress: null, error: null };
-  assert.equal(refinedRoutes(ranked, partial), null);
-  partial.refined.set("soybean,brachiaria", own(["soybean", "brachiaria"]));
-  assert.deepEqual(refinedRoutes(ranked, partial)!.map((item) => item.value!.count), [10000, 10000]);
+
+test("identical trajectories form one group and consecutive periods merge into stretches", () => {
+  const same = { crop: ["soybean", "soybean", "fallow", "sugarcane", "sugarcane"], cane_cut: [0, 0, 0, 1, 2] };
+  const other = { crop: ["soybean", "fallow", "fallow", "sugarcane", "sugarcane"], cane_cut: [0, 0, 0, 1, 1] };
+  const groups = groupTracks([same, { ...same }, other]);
+  assert.deepEqual(groups.map((group) => group.count), [2, 1]);
+  assert.deepEqual(segments(same).map(({ crop, cut, start, end }) => [crop, cut, start, end]), [
+    ["soybean", 0, 0, 2], ["fallow", 0, 2, 3], ["sugarcane", 1, 3, 4], ["sugarcane", 2, 4, 5]]);
+});
+
+import { decendioOfDay, plantings, windowText } from "../src/result/plan.ts";
+
+test("plantings read off a trajectory and ZARC windows in words", () => {
+  assert.equal(decendioOfDay(0), 1);
+  assert.equal(decendioOfDay(273), 28);      // October 1st
+  const track = { crop: ["soybean", "fallow", "maize_grain", "maize_grain", "sugarcane", "sugarcane"], cane_cut: [0, 0, 0, 0, 1, 2] };
+  assert.deepEqual(plantings(track, 4), [{ crop: "maize_grain", year: 1, decendio: 19 }, { crop: "sugarcane", year: 2, decendio: 1 }]);
+  assert.equal(windowText({ 1: 20, 27: 30, 28: 30, 29: 20, 30: 20, 36: 20 }), "late Sep – early Oct (30%), mid Oct – late Oct (20%), late Dec – early Jan (20%)");
+});
+
+import { centre, distanceKm, nearest } from "../src/map/places.ts";
+
+test("the nearest complete profile to a searched municipality", () => {
+  const ring: [number, number][] = [[-48, -21], [-47, -21], [-47, -20], [-48, -20], [-48, -21]];
+  const square = { features: [{ geometry: { type: "Polygon" as const, coordinates: [ring] } }] };
+  assert.deepEqual(centre(square), [-20.5, -47.5]);
+  assert.ok(Math.abs(distanceKm([0, 0], [0, 1]) - 111.2) < 0.1);
+  const at = (id: string, lat: number, long: number) => ({ id, initial_node: { climate: { lat, long } } }) as never;
+  const found = nearest([at("far", -9.9, -63), at("close", -20.5, -47.4)], [-20.5, -47.5])!;
+  assert.equal((found.profile as unknown as { id: string }).id, "close");
+  assert.ok(found.km < 20);
 });

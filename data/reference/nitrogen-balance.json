@@ -1,0 +1,504 @@
+{
+  "notes": [
+    "Scope: Brazil, rainfed (sequeiro); profiles Ariquemes-RO, Franca-SP, Varginha-MG. Balance per design A03: N(t+1) = N + fixation + fertilizer - removal - losses, kg N/ha.",
+    "Status: partial. Verified with text read from the PDF or HTML source (checked in this session): soybean grain N and N accumulation (Hungria et al. 2012), maize grain N export and total extraction (Simao et al. 2017), maize urea N balance and losses (Coelho et al., Sete Lagoas, 1987), sugarcane N response (Santana et al. 2020, via agent text extraction, quotes not re-checked by me). Everything else is null with a gap.",
+    "Not sourced, left null: per-cycle biological fixation (kg N/ha) for every legume; residual N credit in kg N/ha for every crop; losses as a function of rainfall or drainage class; sugarcane N removal per tonne of stalk; maize-after-soybean vs maize-after-maize and soybean-in-rotation yield effects (only candidate trials surfaced by search, not read in full, so no numbers are recorded); quadratic/Mitscherlich parameters for any crop (the sources read give responses but not the fitted coefficients).",
+    "Not searched in this pass (priority groups 1-2 only for soybean, maize, bean and sugarcane): peanut, oat, forage radish, brachiaria, millet, crotalaria, mucuna, sorghum, wheat. All null.",
+    "Support labels: observed = measured in a cited experiment (site and season given in source); pooled = planning or recommendation value stated in a cited publication, not computed from data here; derived = computed by the project from cited values (formula given); prior = assumption without source (none used).",
+    "Units: the source for soybean writes 'kg de N/ha' next to 'por 1.000 kg de grãos'; the value is read as kg N per tonne of grain (the sentence is about per-tonne demand). Keep this in mind when reading the quote.",
+    "Scale caveat: most numbers come from one or two sites and one or two seasons (Rio Verde-GO 2014; Sete Lagoas-MG 1987; Pernambuco 2015-16). None is validated for the three project profiles. Transfer to Ariquemes, Franca or Varginha is a hypothesis, not a result.",
+    "SoilGrids units for initial_n (nitrogen in cg/kg, bdod in cg/cm3) are assumed to match the base_tecnica.md convention (bdod ÷ 100). The nitrogen unit was not checked against the SoilGrids documentation in this pass.",
+    "Pass 2026-11-15 (legume fixation): soybean (Alves et al. 2006), peanut and mucuna (Okito et al. 2004), crotalaria (Perin et al. 2004; Araújo et al. 2010) read in full from the PDFs; dry bean range from a secondary citation in Chagas et al. 2010. Comparison with soil_nitrogen.annual_net_balance_kg_n_ha_year_by_crop of soil-crop-response-hypotheses.json: soybean -192 there against a measured net balance of -8 to +19 kg N/ha per cycle; crotalaria +450 against 106-173 fixed; mucuna +336 against 60."
+  ],
+  "fixation_kg_n_ha_per_cycle": {
+    "soybean": {
+      "value": 184.5,
+      "min": 175.9,
+      "max": 193.2,
+      "unit": "kg N/ha per cycle",
+      "support": "observed",
+      "source": "Alves, B.J.R.; Zotarelli, L.; Fernandes, F.M.; Heckler, J.C.; Macedo, R.A.T.; Boddey, R.M.; Jantalia, C.P.; Urquiaga, S. 2006. Fixação biológica de nitrogênio e fertilizantes nitrogenados no balanço de nitrogênio em soja, milho e algodão. Pesquisa Agropecuária Brasileira 41(3): 449-456. doi:10.1590/S0100-204X2006000300011",
+      "url": "https://seer.sct.embrapa.br/index.php/pab/article/download/7158/4203",
+      "quote": "Em função do bom desenvolvimento da cultura da soja, as quantidades de N derivadas da FBN foram elevadas, com variação entre 176 e 193 kg ha-1 de nitrogênio (Tabela 3). Porém, os valores devem ter sido ainda maiores, uma vez que o N acumulado nas raízes não foi quantificado.",
+      "table": "Tabela 3: 2000/2001 FBN 82,5% = 193,2 kg/ha; 2001/2002 87,6% = 175,9 kg/ha. Tabela 2: yield 3.553 and 2.935 kg/ha; N exported in grain 200,9 and 165,9 kg/ha.",
+      "context": "Dourados-MS, Latossolo Vermelho distroférrico, no-till, two summer seasons, inoculated; 15N natural abundance, shoots only.",
+      "gap": "Shoots only (roots add about 5% by the authors' estimate). One site, two seasons. Fixation scales with yield; the per-cycle number fits yields near 3 t/ha."
+    },
+    "soybean_residual_credit": {
+      "value": null,
+      "min": -8,
+      "max": 19,
+      "unit": "kg N/ha net soil balance per cycle (fixation minus grain export)",
+      "support": "observed",
+      "source": "Alves, B.J.R.; Zotarelli, L.; Fernandes, F.M.; Heckler, J.C.; Macedo, R.A.T.; Boddey, R.M.; Jantalia, C.P.; Urquiaga, S. 2006. Fixação biológica de nitrogênio e fertilizantes nitrogenados no balanço de nitrogênio em soja, milho e algodão. Pesquisa Agropecuária Brasileira 41(3): 449-456. doi:10.1590/S0100-204X2006000300011",
+      "url": "https://seer.sct.embrapa.br/index.php/pab/article/download/7158/4203",
+      "quote": "A alta contribuição da FBN para as plantas de soja compensou a quantidade de N exportada nos grãos, na ocasião da colheita (Tabela 4). [...] o que implicaria em um balanço de nitrogênio de +2 kg ha-1 de N no primeiro ano, e de +19 kg ha-1 de N no segundo.",
+      "note": "Shoot-only balance was -8 (2000/01) and +10 (2001/02) kg/ha; adding root N it becomes +2 and +19. Soybean is about N-neutral for the soil, not a net source and not a large sink.",
+      "gap": "Same site and seasons as the fixation value."
+    },
+    "dry_bean": {
+      "value": null,
+      "min": 25,
+      "max": 65,
+      "unit": "kg N/ha per cycle",
+      "support": "pooled",
+      "source": "Chagas, E.; Araújo, A.P.; Alves, B.J.R.; Teixeira, M.G. 2010. Seeds enriched with phosphorus and molybdenum improve the contribution of biological nitrogen fixation to common bean as estimated by 15N isotope dilution. Revista Brasileira de Ciência do Solo 34(4): 1093-1102 (introduction, citing Ruschel et al. 1982).",
+      "url": "https://www.scielo.br/j/rbcs/a/j7g4VRN78TmwsZvJmq83VPy/?lang=en",
+      "quote": "Nevertheless, ranges of biologically fixed N2 in field-grown bean lines were reported as from 25 to 65 kg ha-1 (Ruschel et al., 1982) or 40 to 125 kg ha-1 (Rennie & Kemp, 1983) in shoots at physiological maturity, or from 21 to 44 kg ha-1 in grains (Pereira et al., 1989). Additionally, field experiments in seven countries showed that the N2 fixation contributed with 35 % of the N accumulated by bean crops, with the highest figures at 70 % (Hardarson et al., 1993).",
+      "gap": "Secondary citation: Ruschel et al. 1982 (Brazil) not read. Rennie & Kemp 1983 is Canadian and not used for the range. A Brazilian field 15N value read in full is still missing (Pacheco 2014 UFRRJ thesis could not be downloaded). Bean fixes less than its grain removes at commercial yields, so its net soil balance is expected negative."
+    },
+    "peanut": {
+      "value": 40.9,
+      "min": null,
+      "max": null,
+      "unit": "kg N/ha per cycle",
+      "support": "observed",
+      "source": "Okito, A.; Alves, B.J.R.; Urquiaga, S.; Boddey, R.M. 2004. Nitrogen fixation by groundnut and velvet bean and residual benefit to a subsequent maize crop. Pesquisa Agropecuária Brasileira 39(12): 1183-1190.",
+      "url": "https://apct.sede.embrapa.br/pab/article/download/6894/3950/22342",
+      "quote": "The contribution of BNF calculated from δ15N data was 40.9, 59.6 and 30.9 kg ha-1, for groundnut, velvet bean and the natural fallow, respectively. The only legume grain harvested was from the groundnut, which yielded approximately 1.000 kg ha-1.",
+      "table": "Table 2: groundnut %Ndfa 52.4, 40.9 kg/ha from BNF. Table 4: N derived from BNF 55.6 (with roots/husks), N exported in grain 49.4 kg/ha.",
+      "context": "Seropédica-RJ, sandy Argissolo, low fertility, cultivar Tatú, smallholder management.",
+      "gap": "Low yield (1 t/ha) against about 3.5 t/ha in commercial Brazilian peanut; fixation at commercial yields is not measured here."
+    },
+    "crotalaria": {
+      "value": 173.2,
+      "min": 105.9,
+      "max": 173.2,
+      "unit": "kg N/ha per cycle",
+      "support": "observed",
+      "source": "Perin, A.; Santos, R.H.S.; Urquiaga, S.; Guerra, J.G.M.; Cecon, P.R. 2004. Produção de fitomassa, acúmulo de nutrientes e fixação biológica de nitrogênio por adubos verdes em cultivo isolado e consorciado. Pesquisa Agropecuária Brasileira 39(1): 35-40 (value, max). Araújo, E.S. et al. 2010. Balanço de nitrogênio em área de produção de sementes de crotalária-juncea nas condições da Baixada Fluminense. Embrapa Agrobiologia, Boletim de Pesquisa e Desenvolvimento 66 (min).",
+      "url": "https://seer.sct.embrapa.br/index.php/pab/article/download/6733/3789",
+      "url_min": "https://www.infoteca.cnptia.embrapa.br/infoteca/bitstream/doc/884716/1/bot06610.pdf",
+      "quote": "A FBN foi 61% na leguminosa quando consorciada e 57% quando isolada, incorporando ao solo via FBN 89 e 173 kg/ha de N, respectivamente, constituindo-se excelente estratégia de incremento de N ao solo.",
+      "quote_min": "No presente estudo, a quantidade de N aportada via FBN foi de 105,9 kg ha-1 e a quantidade de N removida na colheita (grãos e palha dos grãos) foi de 62,1 kg ha-1, o que resultou em um balanço positivo de 43,8 kg ha-1.",
+      "context": "Perin: Seropédica-RJ, Crotalaria juncea alone, cut at 68 days, 305 kg N/ha accumulated. Boletim 66: Seropédica-RJ, C. juncea at full flowering, 67% BNF.",
+      "gap": "Both from the Baixada Fluminense (RJ). As green manure nothing is exported, so the whole fixation is a soil input; the team's +450 kg N/ha/year is 2.6 times the highest value read."
+    },
+    "mucuna": {
+      "value": 59.6,
+      "min": null,
+      "max": null,
+      "unit": "kg N/ha per cycle",
+      "support": "observed",
+      "source": "Okito, A.; Alves, B.J.R.; Urquiaga, S.; Boddey, R.M. 2004. Nitrogen fixation by groundnut and velvet bean and residual benefit to a subsequent maize crop. Pesquisa Agropecuária Brasileira 39(12): 1183-1190.",
+      "url": "https://apct.sede.embrapa.br/pab/article/download/6894/3950/22342",
+      "quote": "The contribution of BNF calculated from δ15N data was 40.9, 59.6 and 30.9 kg ha-1, for groundnut, velvet bean and the natural fallow, respectively.",
+      "table": "Table 1: 1,782 kg/ha dry matter, 84.8 kg N/ha accumulated; Table 2: %Ndfa 69.6. Nothing exported (green manure), so the whole 59.6 stays in the field.",
+      "context": "Same trial as peanut (Seropédica-RJ, sandy low-fertility soil).",
+      "gap": "Low biomass (1.8 t/ha) for velvet bean; one site, one season."
+    },
+    "cover_crops_straw_n_recycling": {
+      "value": null,
+      "min": null,
+      "max": null,
+      "unit": "kg N/ha",
+      "support": "observed",
+      "source": null,
+      "url": null,
+      "quote": null,
+      "gap": "Not searched in this pass (forage radish, brachiaria, millet)."
+    }
+  },
+  "removal_kg_n_per_tonne": {
+    "soybean": {
+      "grain_export": {
+        "value": 65,
+        "min": null,
+        "max": null,
+        "unit": "kg N per t grain",
+        "support": "pooled",
+        "source": "Hungria, Campo & Nogueira, 2012 (as above)",
+        "url": "https://www.alice.cnptia.embrapa.br/alice/bitstream/doc/990886/1/ApesquisaemfixacaobiologicadonitrogenionaEmbrapaSojapassadopresenteeperspectivasfuturas.pdf",
+        "quote": "para cada 1.000 kg de grãos de soja, são necessários cerca de 80 kg de N/ha (65 kg alocados nas sementes e 15 kg de N nas folhas, caule e raízes)",
+        "gap": "Planning value from a review article, not a field measurement. No range given. Read as kg N per t grain (see notes on units)."
+      },
+      "total_accumulated": {
+        "value": 80,
+        "min": null,
+        "max": null,
+        "unit": "kg N per t grain",
+        "support": "pooled",
+        "source": "Hungria, Campo & Nogueira, 2012 (as above)",
+        "url": "https://www.alice.cnptia.embrapa.br/alice/bitstream/doc/990886/1/ApesquisaemfixacaobiologicadonitrogenionaEmbrapaSojapassadopresenteeperspectivasfuturas.pdf",
+        "quote": "cerca de 80 kg de N/ha (65 kg alocados nas sementes e 15 kg de N nas folhas, caule e raízes)",
+        "gap": "Planning value. Same caveat as above."
+      }
+    },
+    "maize_grain": {
+      "grain_export": {
+        "value": 14.2,
+        "min": 13.0,
+        "max": 15.3,
+        "unit": "kg N per t grain",
+        "support": "observed",
+        "source": "Simão et al., 2017, 'Demanda de nutrientes pelo milho safrinha em função da época de semeadura e adubação', Revista Brasileira de Milho e Sorgo 16(3):481-494, Table 7",
+        "url": "https://rbms.sede.embrapa.br/ojs/article/download/881/pdf/8118",
+        "quote": "Em média, a exportação por tonelada de grãos produzida foi de 14,2; 1,5; 2,8; 0,07; 0,7 e 1,0 kg de N, P, K, Ca, Mg e S (Table 7: N export 13,0 Jan sowing, 15,3 Feb sowing, mean 14,2).",
+        "gap": "One site (Rio Verde-GO), safrinha 2014, two sowing dates. Literature range for export cited inside the same paper: 15.0 (Duarte et al. 2013), 15.8 (Roscoe & Miranda 2013), and 14.2 (this paper)."
+      },
+      "total_extraction": {
+        "value": 21.7,
+        "min": 20.4,
+        "max": 23.0,
+        "unit": "kg N per t grain",
+        "support": "observed",
+        "source": "Simão et al., 2017, Table 7",
+        "url": "https://rbms.sede.embrapa.br/ojs/article/download/881/pdf/8118",
+        "quote": "Extração por tonelada de grãos: N 20,4 (Janeiro), 23,0 (Fevereiro), média 21,7",
+        "gap": "Same site and seasons as above. Literature range cited in the paper is 16.7 to 28 kg N/t, which is secondary and not verified."
+      }
+    },
+    "sugarcane_stalk": {
+      "value": null,
+      "min": null,
+      "max": null,
+      "unit": "kg N per t stalk",
+      "support": "observed",
+      "source": "Santana et al., 2020, 'Critical nitrogen dilution curves and productivity assessments for plant cane', Rev. Bras. Eng. Agríc. Ambient. 24(4):244-251",
+      "url": "https://scielo.br/j/rbeaa/a/w7ss8ngvjwsBDMfGqw9WNVd/?lang=en",
+      "quote": "Not found in the text read. Only critical N concentrations (g/kg) and dilution equation b-values are reported.",
+      "gap": "No kg N per t stalk value in the sources read. A secondary text gives about 1.4 kg N/t stalk (roughly half of the N taken up), but its origin and wording are unclear, so it is not recorded. Needs an Embrapa or IAC source."
+    },
+    "sorghum_grain": {
+      "value": null,
+      "min": null,
+      "max": null,
+      "unit": "kg N per t grain",
+      "support": "observed",
+      "source": null,
+      "url": null,
+      "quote": null,
+      "gap": "Not searched in this pass."
+    },
+    "wheat": {
+      "value": null,
+      "min": null,
+      "max": null,
+      "unit": "kg N per t grain",
+      "support": "observed",
+      "source": null,
+      "url": null,
+      "quote": null,
+      "gap": "Not searched in this pass."
+    },
+    "oat": {
+      "value": null,
+      "min": null,
+      "max": null,
+      "unit": "kg N per t grain",
+      "support": "observed",
+      "source": null,
+      "url": null,
+      "quote": null,
+      "gap": "Not searched in this pass."
+    },
+    "dry_bean": {
+      "value": null,
+      "min": null,
+      "max": null,
+      "unit": "kg N per t grain",
+      "support": "observed",
+      "source": null,
+      "url": null,
+      "quote": null,
+      "gap": "Not verified. Secondary citation (Fageria et al. 2015, 36.5 kg N/t) not checked against the primary source."
+    },
+    "peanut": {
+      "value": null,
+      "min": null,
+      "max": null,
+      "unit": "kg N per t pod or kernel",
+      "support": "observed",
+      "source": null,
+      "url": null,
+      "quote": null,
+      "gap": "Not searched in this pass."
+    }
+  },
+  "losses": {
+    "urea_applied_to_maize_fraction_lost": {
+      "value": 0.124,
+      "min": 0.124,
+      "max": 0.184,
+      "unit": "fraction of applied N",
+      "support": "observed",
+      "source": "Coelho, França, Bahia Filho & Guedes, 1987 trial, Latossolo Vermelho-Escuro, Sete Lagoas-MG (CNPMS). 15N-urea balance, 60 kg N/ha, maize. Journal not identified from the extracted text.",
+      "url": "https://ainfo.cnptia.embrapa.br/digital/bitstream/item/80926/1/Balanco-nitrogenio-1.pdf",
+      "quote": "Após a correção do erro, verifica-se que, em média, 12,4 e 18,4% do N-fertilizante foi perdido do sistema, respectivamente, para uréia aplicada na superfície e incorporada no solo. Essas perdas foram provavelmente devido à volatilização de amônia.",
+      "gap": "Single site and single season. Recovery 77-82% of applied N in plant+soil. Loss is mostly ammonia volatilization for surface urea. Not a function of rainfall or drainage class. No data for leaching or denitrification in the text read."
+    },
+    "maize_topdressing_typical": {
+      "value": null,
+      "min": null,
+      "max": null,
+      "unit": "kg N/ha per cycle",
+      "support": "pooled",
+      "source": "Not verified in this pass. Search summaries mention 40-80 kg N/ha for rainfed maize top-dressing (regional recommendations, Embrapa Milho e Sorgo); the primary text was not read.",
+      "url": null,
+      "quote": null,
+      "gap": "Typical rate not recorded. Need the regional recommendation table (MG, SP, RO) with the primary URL. The observed dose for 90% of maximum grain (see yield_response) is a separate data point."
+    },
+    "soybean_nitrogen_fertilizer": {
+      "value": null,
+      "min": null,
+      "max": null,
+      "unit": "kg N/ha per cycle",
+      "support": "pooled",
+      "source": "Hungria, Campo & Nogueira, 2012 (as above)",
+      "url": "https://www.alice.cnptia.embrapa.br/alice/bitstream/doc/990886/1/ApesquisaemfixacaobiologicadonitrogenionaEmbrapaSojapassadopresenteeperspectivasfuturas.pdf",
+      "quote": "Rendimentos que superam a média nacional em quatro vezes sem o uso de fertilizantes nitrogenados são obtidos exclusivamente com a inoculação com essas estirpes (paragraph on soybean/bean strains; not a rate).",
+      "gap": "The text implies no N fertilizer is needed when inoculated; no rate is stated. Not recorded as a value."
+    },
+    "dry_bean_nitrogen_fertilizer": {
+      "value": 60,
+      "min": null,
+      "max": null,
+      "unit": "kg N/ha per cycle",
+      "support": "pooled",
+      "source": "Hungria, Campo & Nogueira, 2012 (as above)",
+      "url": "https://www.alice.cnptia.embrapa.br/alice/bitstream/doc/990886/1/ApesquisaemfixacaobiologicadonitrogenionaEmbrapaSojapassadopresenteeperspectivasfuturas.pdf",
+      "quote": "a recomendação atual de 60 kg de N/ha para a cultura (feijoeiro)",
+      "gap": "Stated as the current recommendation in a 2012 review, not checked against the current regional table. Not a range."
+    },
+    "rainfall_or_drainage_class": {
+      "value": null,
+      "min": null,
+      "max": null,
+      "unit": "fraction per class",
+      "support": "observed",
+      "source": null,
+      "url": null,
+      "quote": null,
+      "gap": "Loss as a function of rainfall or drainage class is not in any source read. Needs a leaching or denitrification study for Brazilian tropical soils."
+    }
+  },
+  "yield_response": {
+    "maize_grain_response_curve": {
+      "form": "not stated in extracted text (maximum yield is 'calculated', model not named)",
+      "value": null,
+      "min": null,
+      "max": null,
+      "unit": "kg grain/ha vs kg N/ha",
+      "support": "observed",
+      "source": "Coelho, França, Bahia Filho & Guedes, 1987 trial, Sete Lagoas-MG (CNPMS)",
+      "url": "https://ainfo.cnptia.embrapa.br/digital/bitstream/item/80926/1/Balanco-nitrogenio-1.pdf",
+      "quote": "a produção de grãos aumentou de 3.940 para 7.110 kg/ha, com o aumento da dose de N de zero para 120 kg/ha. As produções obtidas com as doses de 60, 120 e 240 kg N/ha não apresentaram diferenças entre si (Tukey 5%). As produções máximas calculadas foram de 7.300 kg/ha ... foi de cerca de 80 kg de N/ha [for 90% of maximum grain, 6.570 kg/ha].",
+      "gap": "Parameters not extracted; one site (1987). Plateau at about 60-120 kg N/ha. Good enough for a linear-plateau prior but not for calibration."
+    },
+    "maize_after_soybean_vs_after_maize": {
+      "value": null,
+      "min": null,
+      "max": null,
+      "unit": "kg grain/ha difference",
+      "support": "observed",
+      "source": "No direct comparison read. Simão et al., 2017 studied off-season maize after soybean only. Candidate trials surfaced by search (Sete Lagoas rotation trial with N 0/40/80; Lago Azul irrigated trial, Embrapa PAB) were not read in full.",
+      "url": "https://rbms.sede.embrapa.br/ojs/article/download/881/pdf/8118",
+      "quote": null,
+      "gap": "No verified rotation effect on maize. Need the Sete Lagoas rotation table and an analysis of long-term experiments (Embrapa Milho e Sorgo / Cerrados) before any number is recorded."
+    },
+    "soybean_monoculture_vs_rotation": {
+      "value": null,
+      "min": null,
+      "max": null,
+      "unit": "kg grain/ha difference",
+      "support": "observed",
+      "source": "Not found in the sources read.",
+      "url": null,
+      "quote": null,
+      "gap": "Need long-term rotation trial data for soybean in Brazil (Embrapa Soja / Cerrados / IAPAR)."
+    },
+    "sugarcane_plant_cane_N_response": {
+      "form": "quadratic polynomial (text: 'The data adjusted to the quadratic polynomial model')",
+      "value": 129.45,
+      "min": 0,
+      "max": 200,
+      "unit": "kg N/ha (optimum dose)",
+      "support": "observed",
+      "source": "Santana, Oliveira, Silva, Santos, Silva & Freire, 2020, Rev. Bras. Eng. Agríc. Ambient. 24(4):244-251, Abreu e Lima-PE, Nov 2015-Nov 2016, urea, doses 0, 30, 60, 90, 120, 150, 200 kg N/ha",
+      "url": "https://scielo.br/j/rbeaa/a/w7ss8ngvjwsBDMfGqw9WNVd/?lang=en",
+      "quote": "plant cane responds to N 'until an estimated dose of 129.45 kg N ha-1', with 'an increment of 18.43 Mg ha-1 (18.66%)' and 'estimated maximum yield of 117.19 Mg ha-1 of stalks'.",
+      "gap": "Quote obtained through an agent text extraction of the HTML and not re-read by me. Quadratic coefficients not extracted (value is the optimum only). One site and one season, Pernambuco, not a project profile. Ratoon cane (cana-soca) figures from a secondary source (124-146 kg N/ha) are not recorded as verified."
+    },
+    "sorghum_wheat_oat_millet_brachiaria_radish_crotalaria_mucuna_peanut": {
+      "value": null,
+      "min": null,
+      "max": null,
+      "unit": "kg grain/ha vs kg N/ha",
+      "support": "observed",
+      "source": null,
+      "url": null,
+      "quote": null,
+      "gap": "Not searched in this pass."
+    }
+  },
+  "initial_n": {
+    "method": "Stock of mineral N at start of cycle. Estimate from SoilGrids total N (g/kg) and bulk density, then mineralization of organic N per year. Formula below is derived, not taken from a source as a whole.",
+    "formula_organic_N_kg_ha": "N_org (kg/ha, depth d in dm) = Nt (g/kg) x 1e-3 x BD (kg/dm3) x d (dm) x 1e6 kg per dm of soil per ha, i.e. for 0-30 cm (d = 3): N_org = 3000 x BD x Nt",
+    "formula_mineralizable_per_year": "N_min (kg/ha/yr) = fraction x N_org. Fraction from Coelho et al. (1987) = 0.02 per year, measured for 0-20 cm during a maize cycle.",
+    "value": null,
+    "min": null,
+    "max": null,
+    "unit": "kg N/ha (0-30 cm)",
+    "support": "derived",
+    "source": "Mineralization rate: Coelho, França, Bahia Filho & Guedes, 1987 trial, Sete Lagoas-MG. Soil supply by unfertilized control was 54 kg N/ha, estimated 60 kg N/ha with 2% mineralization of soil organic N in 0-20 cm.",
+    "url": "https://ainfo.cnptia.embrapa.br/digital/bitstream/item/80926/1/Balanco-nitrogenio-1.pdf",
+    "quote": "A capacidade do solo em suprir N à cultura foi de 54 kg/ha ... Essa quantidade está próxima do valor estimado de 60 kg de N/ha, considerando-se uma taxa média de mineralização de 2% do N orgânico do solo na camada de 0-20 cm, durante o ciclo da cultura do milho.",
+    "gap": "The 2%/yr rate is from one site, one season, and 0-20 cm. Extension to 0-30 cm is a project assumption. Brazilian tropical soil values from other sources (Embrapa Solos, IAC) not yet read. SoilGrids unit conversions not checked against SoilGrids docs. Not validated for Ariquemes, Franca or Varginha."
+  },
+  "model": {
+    "purpose": "Values the Python engine reads for the available-N balance of field_shift/engines/nitrogen.py (design A03). Each number points to an entry of this file. A crop with no sourced number is neutral for available N (no input, no removal, no yield response); the repeated-crop yield penalty of crop-cycle-assumptions.json keeps applying to every crop, since it stands for rotation effects beyond N.",
+    "pool": "Mineral N available to the crop in the field, kg N/ha, 0-30 cm. It starts empty, gains mineralization of the total N stock every period, fertilizer at planting (less the volatilized share) and the legume's fixed N at harvest, and loses the N in the harvested product.",
+    "initial_available_kg_ha": {
+      "value": 0.0,
+      "support": "derived",
+      "basis": "The pool is what mineralization supplies from the start of the run; Coelho et al. (1987) measured 54 kg N/ha supplied by an unfertilized soil over one maize cycle, which the mineralization rate reproduces."
+    },
+    "mineralization_fraction_per_year": {
+      "value": 0.02,
+      "support": "observed",
+      "see": "initial_n",
+      "applies_to": "the total N stock of soil_nitrogen (soil-crop-response-hypotheses.json), which moves by each crop's balance"
+    },
+    "fertilizer_loss_fraction": {
+      "value": 0.124,
+      "support": "observed",
+      "see": "losses.urea_applied_to_maize_fraction_lost",
+      "basis": "Surface urea (the 0.184 of the same trial is for incorporated urea)."
+    },
+    "rain_losses": {
+      "value": null,
+      "support": "gap",
+      "see": "losses.rainfall_or_drainage_class",
+      "basis": "No sourced leaching by rain class: losses per period are zero."
+    },
+    "crops": {
+      "soybean": {
+        "fixation_kg_per_tonne": 56.9,
+        "removal_kg_per_tonne": 65,
+        "support": "observed",
+        "see": [
+          "fixation_kg_n_ha_per_cycle.soybean",
+          "removal_kg_n_per_tonne.soybean.grain_export"
+        ],
+        "derivation": "Alves et al. 2006: 184.5 kg N/ha fixed (mean of 193.2 and 175.9) over a mean yield of 3.244 t/ha (3,553 and 2,935) = 56.9 kg N fixed per tonne of grain; scaling with yield keeps the measured near-zero balance at other yields.",
+        "team": {
+          "fixation_kg_ha_per_cycle": 120,
+          "removal_kg_ha_per_cycle": 200
+        },
+        "yield_response": null
+      },
+      "maize_grain": {
+        "removal_kg_per_tonne": 14.2,
+        "fertilizer_kg_ha": {
+          "min": 70,
+          "max": 115,
+          "support": "observed",
+          "source": "Alves et al. 2006 (see fixation_kg_n_ha_per_cycle.soybean), N applied to maize in the two seasons of the trial; drawn uniformly per trajectory",
+          "quote": "No primeiro ano, foram adicionados 115 kg ha-1 de N, de forma parcelada, para ambas as culturas; somente a parte aérea das plantas foi avaliada. No segundo ano, somente a cultura do milho foi avaliada, tendo recebido 70 kg ha-1 de N aos 29 DAE."
+        },
+        "see": [
+          "removal_kg_n_per_tonne.maize_grain.grain_export",
+          "yield_response.maize_grain_response_curve"
+        ],
+        "yield_response": {
+          "form": "linear-plateau",
+          "demand_kg_ha": 106.6,
+          "floor": 0.067,
+          "support": "derived",
+          "derivation": "Coelho et al. (1987): unfertilized soil supplied 54 kg N/ha and yielded 3,940 kg/ha; yield reached its plateau (7,300 kg/ha calculated maximum) by 60 kg N/ha applied, 60 x (1 - 0.124) = 52.6 kg available. Demand = 54 + 52.6 = 106.6. Floor f solves f + (1 - f) x 54/106.6 = 3,940/7,300, f = 0.067. The response multiplies the regional (IBGE) yield, read as the plateau yield of fertilized farms."
+        },
+        "team": {
+          "fixation_kg_ha_per_cycle": 0,
+          "removal_kg_ha_per_cycle": 80
+        },
+        "support": "observed (removal, fertilizer); derived (yield_response)"
+      },
+      "peanut": {
+        "fixation_kg_ha_per_cycle": 80,
+        "removal_kg_ha_per_cycle": 100,
+        "support": "team_hypothesis",
+        "yield_response": null,
+        "check": "Okito et al. 2004 measured 40.9 kg N/ha fixed and 49.4 kg N/ha exported at about 1 t/ha of unhulled grain (fixation_kg_n_ha_per_cycle.peanut); regional yields are 1.5-3.9 t/ha, so the team's commercial-yield pair is used."
+      },
+      "crotalaria": {
+        "fixation_kg_ha_per_cycle": 173.2,
+        "removal_kg_per_tonne": 0,
+        "see": [
+          "fixation_kg_n_ha_per_cycle.crotalaria"
+        ],
+        "basis": "Green manure: nothing is exported.",
+        "yield_response": null,
+        "team": {
+          "fixation_kg_ha_per_cycle": 150,
+          "removal_kg_ha_per_cycle": 0
+        },
+        "support": "observed"
+      },
+      "mucuna": {
+        "fixation_kg_ha_per_cycle": 140,
+        "removal_kg_ha_per_cycle": 0,
+        "support": "team_hypothesis",
+        "yield_response": null,
+        "check": "Okito et al. 2004 measured 59.6 kg N/ha fixed by a 1.8 t/ha dry-matter stand (fixation_kg_n_ha_per_cycle.mucuna); the team's 140 is for a fuller stand. Not reconciled."
+      },
+      "oat": {
+        "fixation_kg_ha_per_cycle": 0,
+        "removal_kg_ha_per_cycle": 0,
+        "support": "team_hypothesis",
+        "yield_response": null
+      },
+      "forage_radish": {
+        "fixation_kg_ha_per_cycle": 0,
+        "removal_kg_ha_per_cycle": 0,
+        "support": "team_hypothesis",
+        "yield_response": null
+      },
+      "wheat": {
+        "fixation_kg_ha_per_cycle": 0,
+        "removal_kg_ha_per_cycle": 60,
+        "support": "team_hypothesis",
+        "yield_response": null
+      },
+      "sorghum_grain": {
+        "fixation_kg_ha_per_cycle": 0,
+        "removal_kg_ha_per_cycle": 60,
+        "support": "team_hypothesis",
+        "yield_response": null
+      },
+      "brachiaria": {
+        "fixation_kg_ha_per_cycle": 0,
+        "removal_kg_ha_per_cycle": 0,
+        "support": "team_hypothesis",
+        "yield_response": null
+      },
+      "dry_bean": {
+        "fixation_kg_ha_per_cycle": 60,
+        "removal_kg_ha_per_cycle": 80,
+        "support": "team_hypothesis",
+        "yield_response": null,
+        "check": "Fixation agrees with the 25-65 kg N/ha range of fixation_kg_n_ha_per_cycle.dry_bean. The 60 kg N/ha fertilizer recommendation (losses.dry_bean_nitrogen_fertilizer) is left out: the team's balance has no fertilizer and whether the recommendation stacks on fixation is not sourced."
+      },
+      "millet": {
+        "fixation_kg_ha_per_cycle": 0,
+        "removal_kg_ha_per_cycle": 0,
+        "support": "team_hypothesis",
+        "yield_response": null
+      },
+      "sugarcane": {
+        "fixation_kg_ha_per_cycle": 0,
+        "removal_kg_ha_per_cycle": 80,
+        "support": "team_hypothesis",
+        "yield_response": null
+      },
+      "coffee": {
+        "fixation_kg_ha_per_cycle": 0,
+        "removal_kg_ha_per_cycle": 60,
+        "support": "team_hypothesis",
+        "yield_response": null
+      }
+    },
+    "team_source": "Team survey by Gabriel and Hua (dados-levantados-hua-gabriel.html, meta.premissas: fbn and export_n per cycle, the same in the four cities; also the source of soil_nitrogen.annual_net_balance_kg_n_ha_year_by_crop, which annualizes fbn - export_n). No primary source is cited there.",
+    "rule": "A primary source (observed) wins where one is recorded; the team's per-cycle numbers fill the other crops (support team_hypothesis). Per-tonne numbers scale with each harvest; per-cycle numbers do not.",
+    "no_yield_response": "Only maize responds to available N (the one sourced response curve). Other crops still move the pool."
+  }
+}

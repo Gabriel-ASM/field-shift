@@ -6,14 +6,14 @@
     "uf": "RO",
     "ibge_code": "1100023"
   },
-  "scope": "grid_cell",
+  "scope": "window_mean",
   "initial_node": {
     "state": "soybean:skip_stages",
     "day": 0,
     "soil": {
       "pH": 4.483,
-      "organic_carbon": 14.783,
-      "N2": 4364.4,
+      "organic_carbon": 20.121,
+      "N2": 6043.79,
       "available_water_capacity": 121.32,
       "available_water_fraction": 0.5
     },

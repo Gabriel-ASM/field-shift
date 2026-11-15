@@ -6,14 +6,14 @@
     "uf": "MG",
     "ibge_code": "3170701"
   },
-  "scope": "grid_cell",
+  "scope": "window_mean",
   "initial_node": {
     "state": "soybean:skip_stages",
     "day": 0,
     "soil": {
       "pH": 5.1,
-      "organic_carbon": 21.733,
-      "N2": 6003.9,
+      "organic_carbon": 22.102,
+      "N2": 6274.17,
       "available_water_capacity": 123.83,
       "available_water_fraction": 0.5
     },

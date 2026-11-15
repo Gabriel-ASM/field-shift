@@ -1,8 +1,8 @@
-"""Soil nitrogen balance: N(t+1) = N + fixation + fertilizer - removal - losses, in kg N/ha.
+"""Available soil nitrogen: N(t+1) = N + mineralization + fertilizer + fixation - removal - losses, in kg N/ha.
 
-This is variable A03 of the team's model design. With it, what a crop leaves or takes changes the yield of
-the next one, which is what rewards rotation over repeating the same crop. It replaces the fixed
-repeated-crop penalty whenever a profile has nitrogen parameters; without them the engine keeps the penalty.
+This is variable A03 of the team's model design. With it, what a crop leaves or takes changes the yield of the
+next one that responds to N. Parameters come from the `model` block of data/reference/nitrogen-balance.json;
+crops with no sourced number are neutral (no input, no removal, full yield).
 
 All functions work on a batch of trajectories; `crop` is an array of crop indices.
 """
@@ -17,12 +17,17 @@ import numpy as np
 @dataclass(frozen=True)
 class Nitrogen:
     initial: float                  # kg N/ha available at the start
-    credit: np.ndarray              # (C,) kg N/ha left in the soil by one cycle (legume fixation, cover residue)
-    fertilizer: np.ndarray          # (C,) kg N/ha applied at planting
+    credit: np.ndarray              # (C,) kg N/ha fixed in one cycle and left in the field at harvest
+    credit_per_tonne: np.ndarray    # (C,) kg N fixed per tonne harvested, for crops whose fixation scales with yield
+    fertilizer: np.ndarray          # (C,) lowest kg N/ha applied at planting
+    fertilizer_high: np.ndarray     # (C,) highest; each trajectory draws its dose in between
     removal: np.ndarray             # (C,) kg N taken away per tonne harvested
-    demand: np.ndarray              # (C,) kg N/ha needed for full yield; 0 for crops that fix their own
+    removal_per_cycle: np.ndarray   # (C,) kg N/ha taken away per harvest, for crops known only per cycle
+    demand: np.ndarray              # (C,) kg N/ha available for full yield; 0 for crops with no N response
     floor: np.ndarray               # (C,) yield multiplier when no nitrogen is available
     loss_fraction: np.ndarray       # (3,) share of the available N lost per period, by rain class
+    fertilizer_loss: float = 0.0    # share of the applied N lost at once (ammonia volatilization)
+    mineralization: float = 0.0     # share of the total N stock made available per year
 
     def on(self, xp) -> "Nitrogen":
         arrays = {f.name: xp.asarray(getattr(self, f.name)) for f in fields(self)
@@ -42,10 +47,24 @@ def after_losses(params: Nitrogen, available, rain):
     return available * (1 - params.loss_fraction[rain])
 
 
-def after_harvest(xp, params: Nitrogen, crop, available, harvested_tonnes):
-    """Available N after a harvest: the crop's credit comes in, the N in the product goes out."""
-    return xp.maximum(0.0, available + params.credit[crop] - params.removal[crop] * harvested_tonnes)
+def after_mineralization(params: Nitrogen, available, total_n, years: float):
+    """Available N after the organic N of the total stock mineralizes for `years`."""
+    return available + params.mineralization * total_n * years
 
 
-def after_planting(params: Nitrogen, crop, available):
-    return available + params.fertilizer[crop]
+def after_harvest(xp, params: Nitrogen, crop, available, harvested_tonnes, factor=1.0):
+    """Available N after a harvest: the fixed N (times the trajectory's fixation factor) comes in, the N in the
+    product goes out."""
+    fixed = (params.credit[crop] + params.credit_per_tonne[crop] * harvested_tonnes) * factor
+    exported = params.removal_per_cycle[crop] + params.removal[crop] * harvested_tonnes
+    return xp.maximum(0.0, available + fixed - exported)
+
+
+def dose(params: Nitrogen, crop, draw):
+    """Fertilizer applied at planting, kg N/ha, for a draw in [0, 1)."""
+    low = params.fertilizer[crop]
+    return low + draw * (params.fertilizer_high[crop] - low)
+
+
+def after_planting(params: Nitrogen, crop, available, draw=0.0):
+    return available + dose(params, crop, draw) * (1 - params.fertilizer_loss)

@@ -108,6 +108,45 @@ def test_runtime_config_comes_from_the_environment(client, monkeypatch):
     assert client.get("/config").json()["cms"]["url"] == "http://cms.local"
 
 
+
+def test_config_reports_the_build_and_defaults_to_dev(client, monkeypatch):
+    assert client.get("/config").json()["version"] == "dev"
+    monkeypatch.setenv("FIELD_SHIFT_VERSION", "abc1234")
+    assert client.get("/config").json()["version"] == "abc1234"
+
+
+def test_runs_refuse_a_front_built_from_another_commit(client, monkeypatch):
+    monkeypatch.setenv("FIELD_SHIFT_VERSION", "abc1234")
+    stale = client.get("/runs/options/franca-sp", headers={"X-Field-Shift-Version": "0000000"})
+    assert stale.status_code == 409
+    assert "reload the page" in stale.json()["detail"] and stale.headers["X-Field-Shift-Version"] == "abc1234"
+    refused = client.post("/runs/jobs", headers={"X-Field-Shift-Version": "0000000"}, json={"profile": "franca-sp"})
+    assert refused.status_code == 409
+    for version in ("abc1234", "dev", None):
+        headers = {"X-Field-Shift-Version": version} if version else {}
+        assert client.get("/runs/options/franca-sp", headers=headers).status_code == 200
+
+
+def test_a_dev_server_accepts_any_front(client):
+    assert client.get("/runs/options/franca-sp", headers={"X-Field-Shift-Version": "0000000"}).status_code == 200
+
+
+def test_the_page_is_revalidated_and_hashed_assets_are_kept(generated, tmp_path, monkeypatch):
+    import mongomock
+    from fastapi.testclient import TestClient
+    from field_shift.api import create_app
+
+    (tmp_path / "index.html").write_text("<h1>front</h1>", encoding="utf-8")
+    (tmp_path / "assets").mkdir()
+    (tmp_path / "assets" / "index-3f2a.js").write_text("1", encoding="utf-8")
+    monkeypatch.setenv("FIELD_SHIFT_WEB_DIR", str(tmp_path))
+    front = TestClient(create_app(mongomock.MongoClient()["x"]))
+    for path in ("/", "/index.html"):
+        assert front.get(path).headers["cache-control"] == "no-cache"
+    assert "immutable" in front.get("/assets/index-3f2a.js").headers["cache-control"]
+    etag = front.get("/").headers["etag"]
+    assert front.get("/", headers={"If-None-Match": etag}).headers["cache-control"] == "no-cache"
+
 def test_reference_is_only_served_when_configured(client, generated, tmp_path, monkeypatch):
     import mongomock
     from fastapi.testclient import TestClient
@@ -127,3 +166,35 @@ def test_boundaries_are_served(client):
     assert len(client.get("/geo/states").json()["features"]) == 27
     assert client.get("/geo/profiles/franca-sp").json()["features"][0]["properties"]["codarea"] == "3516200"
     assert client.get("/geo/profiles/nowhere").status_code == 404
+
+
+def test_planting_windows_give_the_lowest_zarc_risk_per_decendio():
+    import mongomock
+    from fastapi.testclient import TestClient
+    from field_shift.api import create_app
+    client = TestClient(create_app(mongomock.MongoClient()["x"]))
+    windows = client.get("/profiles/franca-sp/planting-windows").json()
+    soybean = windows["crops"]["soybean"]
+    assert windows["risk_levels"] == [20, 30, 40] and soybean["official"] and windows["seasons"] == ["2026/2027"]
+    assert soybean["risk"]["30"] == 20 and set(soybean["risk"].values()) <= {20, 30, 40}
+    assert client.get("/profiles/nowhere/planting-windows").status_code == 404
+
+
+def test_municipality_search_is_accent_insensitive_and_prefix_first():
+    from field_shift.api.routes.geo import search
+    names = [(row["name"], row["uf"]) for row in search("sao paulo", 5)]
+    assert names[0] == ("São Paulo", "SP")
+    franca = search("franca", 50)
+    assert franca[0]["name"] == "Franca" and franca[0]["code"] == "3516200"
+    assert search("   ", 5) == []
+
+
+def test_any_municipal_boundary_comes_from_the_stored_file():
+    import mongomock
+    from fastapi.testclient import TestClient
+    from field_shift.api import create_app
+    client = TestClient(create_app(mongomock.MongoClient()["x"]))
+    assert client.get("/geo/municipalities/9999999").status_code == 404
+    rio_verde = client.get("/geo/municipalities/5218805").json()
+    assert rio_verde["features"][0]["properties"]["codarea"] == "5218805"
+    assert client.get("/geo/municipalities?q=vargin").json()[0]["name"] == "Varginha"

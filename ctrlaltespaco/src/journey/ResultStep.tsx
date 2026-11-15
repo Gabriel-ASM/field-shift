@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { MethodDialog } from "../method/MethodDialog.tsx";
 import { options, rank, recommended, routeKey, selectRoute, type RankedRoute } from "../ranking.ts";
+import { CompareRoutes } from "../result/CompareRoutes.tsx";
+import { wellFormed } from "../resultShape.ts";
 import { Facts } from "../result/Facts.tsx";
 import { RouteOptions } from "../result/RouteOptions.tsx";
-import { useRouteDetail, type DetailSource } from "../result/useRouteDetail.ts";
-import { REFINE_CANDIDATES, REFINE_TRAJECTORIES, refinedRoutes, useRefinement, type Refinement } from "../result/useRefinement.ts";
-import { ResultMetrics } from "../result/ResultMetrics.tsx";
+import { useRouteDetail } from "../result/useRouteDetail.ts";
+//import { ResultMetrics } from "../result/ResultMetrics.tsx";
 import { RotationPath } from "../result/RotationPath.tsx";
 import { YourChoices } from "../result/YourChoices.tsx";
 import type { RouteDetail, RunResult } from "../types.ts";
@@ -19,13 +20,15 @@ import { Legend } from "../ui/Legend.tsx";
 import { ReturnChart } from "../ui/ReturnChart.tsx";
 import { Timebar } from "../ui/Timebar.tsx";
 import { TrackStrips } from "../ui/TrackStrips.tsx";
+import { PrintPlan } from "../result/PrintPlan.tsx";
 
 const EXPLORATORY = 4;
 const OPTIONS = 6;
 
-function Actions({ journey }: { journey: Journey }) {
+function Actions({ journey, printable = false }: { journey: Journey; printable?: boolean }) {
   return (
     <div className="actions">
+      {printable ? <button type="button" onClick={() => window.print()}>Print this plan</button> : null}
       <button type="button" onClick={journey.restart}>Explore another scenario</button>
       <button type="button" className="primary" onClick={() => journey.go("priority")}>Adjust my priorities</button>
     </div>
@@ -90,54 +93,37 @@ function Unfolded({ run, detail, cuts }: { run: RunResult; detail: RouteDetail |
       <h3>How the scenarios of this sequence unfolded</h3>
       <Timebar periodsPerYear={run.clock.periods / run.clock.horizon_years} />
       <Legend crops={crops} />
-      <TrackStrips tracks={detail.tracks} cuts={cuts} />
+      <TrackStrips tracks={detail.tracks} cuts={cuts} periodsPerYear={run.clock.periods / run.clock.horizon_years} />
     </article>
   );
-}
-
-/** Progress of re-simulating the best candidates as fixed rotations, or the note that it is done. */
-function RefineStatus({ refinement, refined }: { refinement: Refinement; refined: boolean }) {
-  if (refinement.error) return <p className="note">We could not check the candidates as fixed rotations: {refinement.error}. Showing the regional run.</p>;
-  if (refined) return <p className="refine-status is-done">✓ The top {REFINE_CANDIDATES} sequences were each simulated again in {count(REFINE_TRAJECTORIES)} scenarios, planted on purpose. The numbers below come from those runs.</p>;
-  const { done = 0, total = 0 } = refinement.progress ?? {};
-  return (
-    <p className="refine-status">
-      Checking the top {REFINE_CANDIDATES} sequences with {count(REFINE_TRAJECTORIES)} scenarios each… {total ? `${count(done)} of ${count(total)}` : ""}
-      <small> Until then, the numbers come from the scenarios of the regional run that happened to follow each sequence.</small>
-    </p>
-  );
-}
-
-/** Where to ask for the detail of the sequence on screen. */
-function detailSource(journey: Journey, refinement: Refinement, selected: RankedRoute | undefined, refined: boolean): DetailSource {
-  const entry = selected && refined ? refinement.refined.get(routeKey(selected.route)) : undefined;
-  return entry ? { job: entry.job, crops: null, scenario: entry.scenario } : { job: journey.job, crops: selected?.route.crops ?? [], scenario: 0 };
 }
 
 export function ResultStep({ journey }: { journey: Journey }) {
   const [explaining, setExplaining] = useState(false);
   const [chosen, choose] = useState<string | null>(null);
+  const [comparing, setComparing] = useState<string | null>(null);
   const run = journey.run!;
-  const scenario = run.scenarios[0]!;
-  const chain = rank(scenario.routes, scenario.ranking_reference, run.ranking, journey);
-  const candidates = options(chain, run.ranking, REFINE_CANDIDATES);
-  const refinement = useRefinement({ profile: run.profile, seed: run.seed, caneCut: journey.caneCut, run: journey.job }, candidates);
-  const refinedList = refinedRoutes(candidates, refinement);
-  const ranked = refinedList ? rank(refinedList, scenario.ranking_reference, run.ranking, journey) : chain;
+  const scenario = wellFormed(run) ? run.scenarios[0]! : null;
+  const ranked = scenario ? rank(scenario.routes, scenario.ranking_reference, run.ranking, journey) : [];
   const best = recommended(ranked, run.ranking);
   const selected = selectRoute(ranked, run.ranking, chosen);
-  const { detail, error } = useRouteDetail(detailSource(journey, refinement, selected, Boolean(refinedList)));
+  const { detail, error } = useRouteDetail(journey.job, selected?.route.crops ?? []);
+  if (!scenario) {
+    return <section><h2>We couldn't read this result</h2><p className="note">The result came back in an unexpected format (server version {journey.server}). Reload the page.</p>
+      <div className="actions"><button type="button" className="primary" onClick={() => window.location.reload()}>Reload</button></div></section>;
+  }
   if (!ranked.length) {
     return <section><h2>We couldn't rank a rotation</h2><p className="note">No simulated sequence has complete price and cost data from at least {count(run.ranking.support.minimum_ranked)} scenarios.</p><Actions journey={journey} /></section>;
   }
   if (!best || !selected) return <Exploratory ranked={ranked} run={run} journey={journey} />;
   const single = selected.route.crops.length < 2;
+  const choices = options(ranked, run.ranking, OPTIONS);
+  const compared = choices.find((item) => routeKey(item.route) === comparing) ?? choices.find((item) => item !== best);
   const facts = { model: run.model, ranking: run.ranking, periods: run.clock.periods, trajectories: scenario.trajectories,
     rankedRoutes: scenario.ranking_reference?.routes ?? 0, weight: journey.weight, returnWeight: journey.returnWeight };
   return (
     <section className="result">
       <Heading single={single} explain={() => setExplaining(true)} />
-      <RefineStatus refinement={refinement} refined={Boolean(refinedList)} />
       <div className="result-hero">
         <article className="recommendation-card">
           {selected === best
@@ -147,19 +133,23 @@ export function ResultStep({ journey }: { journey: Journey }) {
           <p>Planned by crop cycles over a five-year horizon.</p>
           <RotationPath route={selected.route} caneCut={journey.caneCut} />
         </article>
-        <ResultMetrics ranked={selected} settings={run.ranking} />
+        {/* <ResultMetrics ranked={selected} settings={run.ranking} /> */}
       </div>
+      <CompareRoutes best={best} compared={compared} settings={run.ranking} confirmed={compared !== undefined && selected === compared}
+        onConfirm={() => compared && choose(routeKey(compared.route))} />
       <Frames detail={detail} error={error} years={run.clock.horizon_years} recommended={selected === best} />
       <ReturnChart value={selected.route.value!} fullSupport={run.ranking.support.full_score} />
       <div className="result-info">
-        <Facts journey={journey} run={run} scenario={scenario} best={selected}
-          regionalShare={refinedList ? chain.find((item) => routeKey(item.route) === routeKey(selected.route))?.route.share ?? null : null} />
-        <RouteOptions options={options(ranked, run.ranking, OPTIONS)} best={best} selected={selected} choose={choose} />
+        <Facts journey={journey} run={run} scenario={scenario} best={selected} />
+        <RouteOptions options={choices} best={best} compared={compared} pick={setComparing} />
       </div>
       <Unfolded run={run} detail={detail} cuts={journey.place!.choices.sugarcane_cuts} />
       <YourChoices journey={journey} trajectories={scenario.trajectories} />
       <p className="note">An exploratory study based on municipal data and model assumptions. These values do not guarantee income and do not replace an agronomist's assessment of your field.</p>
-      <Actions journey={journey} />
+      <Actions journey={journey} printable />
+      <PrintPlan profile={journey.place!.profile} start={journey.crop!} ranked={selected} settings={run.ranking}
+        tracks={detail?.tracks ?? null} periodsPerYear={run.clock.periods / run.clock.horizon_years}
+        years={run.clock.horizon_years} seed={journey.seed} trajectories={scenario.trajectories} />
       <MethodDialog open={explaining} onClose={() => setExplaining(false)} facts={facts} />
     </section>
   );

@@ -7,7 +7,8 @@
   "required": ["location_id", "scope", "reference_date", "source", "depth_cm", "available_water_capacity_mm", "quality", "layers", "total_nitrogen_top_0_30_g_kg", "total_nitrogen_stock_top_0_30_kg_ha", "organic_carbon_stock_top_0_30_kg_ha", "bulk_density_top_0_30_kg_dm3", "carbon_nitrogen_stock_ratio_top_0_30"],
   "properties": {
     "location_id": {"type": "string", "minLength": 1},
-    "scope": {"type": "string", "enum": ["field", "municipality", "grid_cell"]},
+    "scope": {"type": "string", "enum": ["field", "municipality", "grid_cell", "window_mean"]},
+    "window_mean": {"type": "object", "description": "Where the 0-30 cm values come from when scope is window_mean: a mean of SoilGrids cells around the city, spread uniformly over the profile."},
     "reference_date": {"type": ["string", "null"], "format": "date"},
     "source": {"type": "string"},
     "depth_cm": {"type": "number", "exclusiveMinimum": 0},

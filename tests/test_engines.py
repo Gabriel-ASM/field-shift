@@ -57,7 +57,6 @@ def test_fixed_rotation_plants_its_sequence(tables):
     crops = rotation["routes"][0]["crops"]
     assert crops[:4] == ["soybean", "maize_grain", "soybean", "maize_grain"]
     assert set(rotation["tracks"][0]["crop"]) <= {"soybean", "maize_grain", "fallow"}
-    assert rotation["overall"]["crops"] == ["soybean", "maize_grain"] and rotation["overall"]["yield_penalty"] == [0, 0]
 
 
 def test_run_summary_is_consistent():
@@ -91,7 +90,9 @@ def nitrogen_fixture(tables):
     size, legume = len(tables.crops), tables.crops.index("soybean")
     credit, demand = np.zeros(size), np.full(size, 120.0)
     credit[legume], demand[legume] = 40.0, 0.0
-    return Nitrogen(initial=60.0, credit=credit, fertilizer=np.zeros(size), removal=np.full(size, 15.0), demand=demand,
+    return Nitrogen(initial=60.0, credit=credit, credit_per_tonne=np.zeros(size), fertilizer=np.zeros(size),
+                    fertilizer_high=np.zeros(size), removal=np.full(size, 15.0), removal_per_cycle=np.zeros(size),
+                    demand=demand,
                     floor=np.full(size, 0.5), loss_fraction=np.array([0.0, 0.01, 0.03]))
 
 
@@ -298,15 +299,16 @@ def test_job_endpoints(client):
 
 
 def test_total_nitrogen_moves_by_the_crop_balance_and_steers_the_chain(tables):
-    """soil_nitrogen (7a836bf): the stock moves by each crop's annual net balance; below the C:N target the chain
-    favours crops with a positive balance (crotalaria +450) over negative ones (maize −192)."""
+    """soil_nitrogen: the stock moves by each crop's per-cycle fixation x factor - export over its cycle; below the
+    C:N target the chain favours crops with a positive balance (crotalaria +450/yr) over negative ones (maize −192)."""
     from field_shift.engines.monte_carlo import State, advance_total_nitrogen
     maize, crotalaria = tables.crops.index("maize_grain"), tables.crops.index("crotalaria")
-    state = State(np, tables, Policy(maize), 2)
-    state.crop = np.array([maize, -1])
+    state = State(np, tables, Policy(maize), 3)
+    state.crop, state.fixation_factor = np.array([maize, -1, crotalaria]), np.array([1.0, 1.0, 1.3])
     advance_total_nitrogen(np, tables, state)
-    step = tables.period_days / 365
-    assert state.total_nitrogen.tolist() == pytest.approx([tables.total_n_initial - 192 * step, tables.total_n_initial])
+    share = lambda crop: tables.period_days / tables.cycle_days[crop]
+    assert state.total_nitrogen.tolist() == pytest.approx([tables.total_n_initial - 80 * share(maize), tables.total_n_initial,
+                                                           tables.total_n_initial + 150 * 1.3 * share(crotalaria)])
     target = tables.total_n_target_per_carbon * tables.initial_carbon
     soybean = tables.crops.index("soybean")
     poor = markov.probabilities(np, tables, soybean, 0.5, tables.initial_carbon, 0.4 * target)
@@ -321,7 +323,7 @@ def test_soybean_on_soybean_costs_soil_carbon(tables):
     that a rotation would build, converted to g/kg in 0-30 cm with the profile's bulk density."""
     from field_shift.engines.monte_carlo import State, advance_soil
     soybean, maize = tables.crops.index("soybean"), tables.crops.index("maize_grain")
-    density = 1.3566666666666667          # Franca, SoilGrids bdod 0-30 cm
+    density = 1.36                        # Franca, SoilGrids bdod 0-30 cm, window mean
     assert tables.repeat_carbon_penalty.tolist() == pytest.approx([0.29 / 3 / density, 0.51 / 3 / density])
     state = State(np, tables, Policy(soybean), 3)
     state.crop, state.streak = np.array([soybean, soybean, maize]), np.array([1, 2, 2])
@@ -331,16 +333,22 @@ def test_soybean_on_soybean_costs_soil_carbon(tables):
     assert state.carbon.tolist() == pytest.approx([tables.initial_carbon, tables.initial_carbon - 0.1 * step, tables.initial_carbon])
 
 
+def test_available_nitrogen_comes_from_the_sourced_model_block(tables):
+    """nitrogen-balance.json `model`: sourced numbers first (soybean per tonne, maize response), the team's per-cycle
+    numbers for the other crops; only maize responds to N."""
+    n, index = tables.nitrogen, tables.crops.index
+    assert n is not None and n.initial == 0.0 and n.mineralization == 0.02
+    assert n.credit_per_tonne[index("soybean")] == 56.9 and n.removal[index("soybean")] == 65
+    assert n.demand[index("maize_grain")] > 0 and n.fertilizer[index("maize_grain")] < n.fertilizer_high[index("maize_grain")]
+    assert (n.credit[index("dry_bean")], n.removal_per_cycle[index("dry_bean")]) == (60, 80)
+    assert n.removal_per_cycle[index("sugarcane")] == 80 and n.credit[index("crotalaria")] == 173.2
+    assert [crop for crop, demand in zip(tables.crops, n.demand) if demand > 0] == ["maize_grain"]
 
-def test_a_fixed_rotation_reports_its_own_result_and_detail(tables):
-    """Re-simulating a candidate sequence as a fixed rotation: `overall` covers every trajectory of the scenario."""
-    from field_shift.engines.summary import Support, route_detail, summarize
+
+def test_maize_on_maize_runs_short_of_nitrogen_and_soybean_does_not(tables):
+    from dataclasses import replace
+    off = replace(tables, nitrogen=None)
     soybean, maize = tables.crops.index("soybean"), tables.crops.index("maize_grain")
-    raw = __import__("field_shift.engines.batches", fromlist=["x"]).simulate_batches(
-        np, tables, Policy(soybean, (soybean, maize)), 5, 800, paths=True)
-    summary = summarize(raw, tables, Support(ranked=2, recommended=20))
-    overall = summary["overall"]
-    assert overall["trajectories"] == 800 and overall["value"]["count"] == int(raw["priced"].sum())
-    assert overall["value"]["distribution"]["counts"] and overall["crops"] == []
-    detail = route_detail(raw, tables, None)
-    assert detail["trajectories"] == 800 and all(sum(period) == 800 for period in detail["frames"]["water"])
+    value = lambda t, crops: simulate(np, t, Policy(crops[0], crops), 3, 2000)["value"].mean()
+    assert value(tables, (maize,)) < value(off, (maize,))
+    assert abs(value(tables, (soybean,)) - value(off, (soybean,))) < 1e-9

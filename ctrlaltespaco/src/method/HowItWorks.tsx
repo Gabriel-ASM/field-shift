@@ -74,7 +74,7 @@ function SoilMethod() {
         <path d="M40 45V25m0 10c-9 0-13-5-13-12 9 0 13 5 13 12Zm0-5c0-9 5-14 14-14 0 9-5 14-14 14Z" fill="#f5f8f3" stroke="#5b9270" strokeWidth="1.8" strokeLinejoin="round" />
         <circle className="carbon-dot" cx="23" cy="49" r="2" fill="#8b7657" /><circle className="carbon-dot dot-two" cx="48" cy="54" r="2" fill="#8b7657" /><circle className="carbon-dot dot-three" cx="59" cy="47" r="2" fill="#8b7657" />
       </svg>
-      <div><h3>Soil</h3><p>SoilGrids sets the starting organic carbon. Each crop then changes it through explicit, exploratory assumptions.</p></div>
+      <div><h3>Soil</h3><p>SoilGrids sets the starting organic carbon and nitrogen. Each crop then changes it through explicit, exploratory assumptions.</p></div>
     </article>
   );
 }

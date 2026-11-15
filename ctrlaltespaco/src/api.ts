@@ -1,11 +1,24 @@
-import type { Boundary, ChainMatrix, JobView, Profile, ProfileSummary, RouteDetail, RunChoices, RunResult, RuntimeConfig, ScenarioRequest } from "./types.ts";
+import { BUNDLE_VERSION, DEV, RELOAD_MESSAGE, VERSION_HEADER } from "./version.ts";
+import type { Boundary, ChainMatrix, JobView, Municipality, PlantingWindows, Profile, ProfileSummary, RouteDetail, RunChoices, RunResult, RuntimeConfig, ScenarioRequest } from "./types.ts";
 
 const HORIZON_DAYS = 1825;
 
 export class ApiError extends Error {}
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(path, init);
+/** The API runs another build than this bundle: the page must be reloaded. */
+export class OutdatedError extends Error {
+  constructor(readonly server: string) {
+    super(RELOAD_MESSAGE);
+  }
+}
+
+/** Every request names the bundle's build; the run routes answer 409, with their own build, when it differs. */
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const headers = new Headers(init.headers);
+  headers.set(VERSION_HEADER, BUNDLE_VERSION);
+  const response = await fetch(path, { ...init, headers });
+  const server = response.headers.get(VERSION_HEADER);
+  if (response.status === 409 && server) throw new OutdatedError(server);
   if (!response.ok) throw new ApiError(await failureMessage(path, response));
   return (await response.json()) as T;
 }
@@ -18,8 +31,14 @@ async function failureMessage(path: string, response: Response): Promise<string>
 }
 
 export const getConfig = () => request<RuntimeConfig>("/config");
+
+/** The API's build now, never from a cache: it may have been redeployed since the page loaded. */
+export const getServerVersion = async () => (await request<RuntimeConfig>("/config", { cache: "no-store" })).version ?? DEV;
 export const listProfiles = () => request<ProfileSummary[]>("/profiles");
 export const getProfile = (id: string) => request<Profile>(`/profiles/${encodeURIComponent(id)}`);
+export const searchMunicipalities = (query: string) => request<Municipality[]>(`/geo/municipalities?q=${encodeURIComponent(query)}`);
+export const getMunicipalityBoundary = (code: string) => request<Boundary>(`/geo/municipalities/${encodeURIComponent(code)}`);
+export const getPlantingWindows = (id: string) => request<PlantingWindows>(`/profiles/${encodeURIComponent(id)}/planting-windows`);
 export const getMatrix = (id: string) => request<ChainMatrix>(`/profiles/${encodeURIComponent(id)}/chain/matrix`);
 export const getRunChoices = (id: string) => request<RunChoices>(`/runs/options/${encodeURIComponent(id)}`);
 export const getStates = () => request<Boundary>("/geo/states");
@@ -52,9 +71,6 @@ export function startJob(options: RunOptions): Promise<{ id: string; total: numb
 
 export const getJob = (id: string) => request<JobView>(`/runs/jobs/${encodeURIComponent(id)}`);
 
-/** Water and soil every period, year-end charts and some trajectories of one route of a finished job;
- *  `crops` null takes every trajectory of the scenario (a fixed rotation). */
-export function getRoute(job: string, crops: string[] | null, scenario = 0): Promise<RouteDetail> {
-  const route = crops ? `&crops=${encodeURIComponent(crops.join(","))}` : "";
-  return request<RouteDetail>(`/runs/jobs/${encodeURIComponent(job)}/route?scenario=${scenario}${route}`);
-}
+/** Water and soil every period, year-end charts and some trajectories of one route of a finished job. */
+export const getRoute = (job: string, crops: string[], scenario = 0) =>
+  request<RouteDetail>(`/runs/jobs/${encodeURIComponent(job)}/route?scenario=${scenario}&crops=${encodeURIComponent(crops.join(","))}`);

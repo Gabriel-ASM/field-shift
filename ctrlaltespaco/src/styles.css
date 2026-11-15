@@ -71,13 +71,18 @@ input[type="range"] { width: 100%; padding: 0; accent-color: var(--green); }
 .choices-summary dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 12px 0; font-size: 0.86rem; }
 .choices-summary dt { color: var(--muted); }
 .choices-summary dd { margin: 0; }
-.tracks { display: block; width: 100%; margin: 0 0 14px; image-rendering: pixelated; border-radius: 6px; background: var(--soft); }
+.tracks { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: stretch; margin: 0 0 14px; }
+.tracks svg { display: block; width: 100%; height: auto; min-height: 22px; border-radius: 6px; background: var(--soft); }
+.tracks svg rect[fill]:hover { opacity: 0.8; }
+.tracks-counts { display: grid; margin: 0; padding: 0; list-style: none; font-size: 0.78rem; color: var(--muted, #5b6b5b); }
+.tracks-counts li { display: flex; align-items: center; white-space: nowrap; }
+.tracks-summary { margin: 4px 0 8px; }
 h4 { margin: 12px 0 6px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 
 /* The plan, once the panel has grown over the map. Cards and charts come from reference.css. */
 .card { padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
 .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 3px; }
-.result { display: grid; gap: 20px; max-width: 1120px; margin: 0 auto; }
+.result { display: grid; gap: 20px; max-width: 1120px; padding: 1em ; margin: 0 auto; }
 .result-heading { display: grid; justify-items: center; text-align: center; }
 .result-heading h2 { max-width: 760px; margin: 0 0 8px; font-size: clamp(1.6rem, 3.4vw, 2.6rem); line-height: 1.08; letter-spacing: -0.04em; }
 .result-heading .lead { margin: 0; }
@@ -90,6 +95,12 @@ h4 { margin: 12px 0 6px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0
   .panel { top: 46vh; width: 100vw; border-left: 0; border-top: 1px solid var(--line); }
   .panel.wide { top: 0; }
 }
+.micro-card { margin-top: 18px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.micro-card .micro-count { color: var(--muted); font-size: 0.72rem; font-variant-numeric: tabular-nums; }
+.micro-card h3 { margin: 4px 0 6px; font-size: 0.95rem; }
+.micro-card p { margin: 0; color: var(--muted); font-size: 0.86rem; line-height: 1.5; animation: micro-in 0.6s ease; }
+@keyframes micro-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .micro-card p { animation: none; } }
 .run-progress { margin: 4px 0 8px; }
 .run-progress-track { height: 8px; overflow: hidden; border-radius: 99px; background: #e8eee8; }
 .run-progress-track div { height: 100%; border-radius: inherit; background: var(--green); transition: width 0.3s ease; }
@@ -155,3 +166,37 @@ button.alternative-route[aria-pressed="true"] { border-color: var(--fs-green); b
   .welcome-data { line-height: 1.6; }
   .welcome-footnote { text-align: left; }
 }
+
+/* P7: the printable plan. Hidden on screen; when printing, only the plan shows, on one A4 page. */
+.print-plan { display: none; }
+@media print {
+  @page { size: A4; margin: 14mm; }
+  html, body { background: #fff !important; height: auto !important; overflow: visible !important; }
+  body > :not(.print-plan) { display: none !important; }
+  .print-plan { display: block; width: 100%; color: #111; background: #fff; font: 10.5pt/1.4 system-ui, sans-serif; }
+  .print-calendar td:nth-child(3) { white-space: nowrap; }
+  .print-plan h1 { font-size: 16pt; margin: 0 0 2pt; }
+  .print-plan header p { margin: 0 0 10pt; color: #444; }
+  .print-plan h2 { font-size: 11.5pt; margin: 10pt 0 4pt; border-bottom: 1px solid #bbb; padding-bottom: 2pt; }
+  .print-sequence { font-size: 12.5pt; font-weight: 600; margin: 0; }
+  .print-calendar { width: 100%; border-collapse: collapse; }
+  .print-calendar th, .print-calendar td { text-align: left; vertical-align: top; padding: 2pt 6pt 2pt 0; border-bottom: 1px solid #e3e3e3; }
+  .print-indicators { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8pt; margin: 0; }
+  .print-indicators dt { font-weight: 600; }
+  .print-indicators dd { margin: 0; }
+  .print-small { font-size: 8.5pt; color: #444; }
+  .print-sources { margin: 0; padding-left: 12pt; }
+  .print-plan section { break-inside: avoid; }
+}
+
+/* Experimental search over every Brazilian municipality. */
+.place-search { margin: 18px 0 8px; }
+.place-search label span { display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; }
+.place-search input { width: 100%; padding: 10px 12px; border: 1px solid var(--line, #d6ddd6); border-radius: 10px; font: inherit; }
+.badge { margin-left: 6px; padding: 1px 7px; border-radius: 99px; background: #fff3d6; color: #8a5a00; font-size: 0.7rem; font-style: normal; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+.place-matches { margin: 4px 0 0; padding: 4px; list-style: none; border: 1px solid var(--line, #d6ddd6); border-radius: 10px; background: #fff; max-height: 260px; overflow: auto; }
+.place-matches button { width: 100%; padding: 7px 10px; border: 0; border-radius: 7px; background: none; font: inherit; text-align: left; cursor: pointer; }
+.place-matches button:hover, .place-matches button:focus-visible { background: var(--soft, #eef3ee); }
+.place-matches small { color: var(--muted, #5b6b5b); margin-left: 4px; }
+.explored { margin-top: 10px; }
+.explored p { margin: 0 0 8px; font-size: 0.88rem; }

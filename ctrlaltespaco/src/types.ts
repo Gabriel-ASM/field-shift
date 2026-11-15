@@ -1,6 +1,8 @@
 /** Shapes of the API answers the front uses. They mirror field_shift/api and field_shift/engines/summary.py. */
 
 export interface RuntimeConfig {
+  /** Build of the API (the commit), "dev" outside an image. Absent from APIs older than the check. */
+  version?: string;
   basemap: { tiles: string; max_zoom: number; attribution: string };
   cms: { url: string | null; token: string | null };
   run: { trajectories: number; tracks: number };
@@ -14,6 +16,18 @@ export interface ProfileSummary {
 
 export interface Profile extends ProfileSummary {
   initial_node: { state: string; soil: Record<string, number>; climate: { lat: number; long: number } };
+  scope?: string;
+  economics?: { reference_currency_month?: string; discount_rate?: unknown };
+  climate_history?: { period: [string, string]; source: string };
+}
+
+/** MAPA ZARC planting windows per crop: lowest published risk (%) of each decendio 1-36; null for the
+ *  project's all-year windows of covers without an official row. */
+export interface PlantingWindows {
+  seasons: string[];
+  risk_levels: number[];
+  crops: Record<string, { official: boolean; risk: Record<string, number | null> }>;
+  source: { publisher: string; system: string; url: string; license?: string };
 }
 
 export interface ChainMatrix {
@@ -112,6 +126,8 @@ export interface ValueSummary {
   p95: number;
   cvar5: number;
   count: number;
+  /** Share of the valid present values below zero (a loss over the horizon). */
+  loss_probability: number;
   /** Only on routes with enough priced scenarios to be recommended. */
   distribution?: Distribution;
 }
@@ -146,8 +162,6 @@ export interface ScenarioResult {
   carbon: { p5: number; p50: number; p95: number }[];
   routes: Route[];
   ranking_reference: RankingReference | null;
-  /** Every trajectory of the scenario as one route: a fixed rotation's own result. */
-  overall: Route;
   tracks: Track[];
 }
 
@@ -183,6 +197,13 @@ export interface RunResult {
 }
 
 export type Position = [longitude: number, latitude: number];
+
+/** A Brazilian municipality from the IBGE list (experimental search). */
+export interface Municipality {
+  code: string;
+  name: string;
+  uf: string;
+}
 
 export interface Boundary {
   features: { geometry: { type: "Polygon"; coordinates: Position[][] } | { type: "MultiPolygon"; coordinates: Position[][][] } }[];

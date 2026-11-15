@@ -2,6 +2,8 @@ import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
 import { CropStep } from "./journey/CropStep.tsx";
 import { LocationStep } from "./journey/LocationStep.tsx";
+import type { Explored } from "./journey/PlaceSearch.tsx";
+import { Outdated } from "./journey/Outdated.tsx";
 import { PriorityStep } from "./journey/PriorityStep.tsx";
 import { ResultStep } from "./journey/ResultStep.tsx";
 import { SimulationStep } from "./journey/SimulationStep.tsx";
@@ -12,9 +14,18 @@ import { useJourney, useWorld, type Journey, type World } from "./useFieldShift.
 
 const PANEL_WIDTH = "min(460px, 100vw)";
 
-function Screen({ journey, world, area }: { journey: Journey; world: World; area: number | null }) {
+interface ScreenProps {
+  journey: Journey;
+  world: World;
+  area: number | null;
+  explored: Explored | null;
+  onExplore: (explored: Explored | null) => void;
+}
+
+function Screen({ journey, world, area, explored, onExplore }: ScreenProps) {
+  if (journey.outdated) return <Outdated />;
   switch (journey.step) {
-    case "location": return <LocationStep journey={journey} world={world} area={area} />;
+    case "location": return <LocationStep journey={journey} world={world} area={area} explored={explored} onExplore={onExplore} />;
     case "crop": return <CropStep journey={journey} />;
     case "priority": return <PriorityStep journey={journey} world={world} />;
     case "simulation": return <SimulationStep journey={journey} world={world} />;
@@ -38,6 +49,7 @@ export function App() {
   const journey = useJourney(world);
   const [area, setArea] = useState<number | null>(null);
   const [started, setStarted] = useState(false);
+  const [explored, setExplored] = useState<Explored | null>(null);
   const wide = journey.step === "result";
   const panel = usePanelWidth(wide);
   // Each step starts at its top: the panel scrolls, and would otherwise keep the previous step's position.
@@ -48,20 +60,21 @@ export function App() {
   if (!world) return <p className="loading">Loading…</p>;
   if (!started) return <WelcomeStep futures={world.config.run.trajectories} onStart={() => setStarted(true)} />;
   const choosePlace = (id: string) => {
+    setExplored(null);
     journey.choosePlace(world.profiles.find((profile) => profile.id === id)!);
     if (journey.step !== "location") journey.go("location");
   };
   return (
     <div className="app">
       <FieldMap config={world.config} states={world.states} profiles={world.profiles} selected={journey.place?.profile ?? null}
-        municipality={journey.place?.municipality ?? null} onSelect={choosePlace} onArea={setArea} />
+        municipality={journey.place?.municipality ?? null} explored={explored?.boundary ?? null} onSelect={choosePlace} onArea={setArea} />
       <aside ref={panel} className={wide ? "panel wide" : "panel"}>
         <header>
-          <strong>Field Shift</strong>
+          <strong>Ctrl + Alt + Espaço</strong>
           <Steps current={journey.step} />
         </header>
-        <Screen journey={journey} world={world} area={area} />
-        {journey.step !== "simulation" && journey.error && <p className="error">{journey.error}</p>}
+        <Screen journey={journey} world={world} area={area} explored={explored} onExplore={setExplored} />
+        {journey.step !== "simulation" && !journey.outdated && journey.error && <p className="error">{journey.error}</p>}
       </aside>
     </div>
   );

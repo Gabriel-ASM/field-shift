@@ -33,22 +33,22 @@ function Balance({ journey, settings }: { journey: Journey; settings: RankingSet
 }
 
 /** α: within the financial return, the high return (P95) against the average of the worst futures (CVaR5). */
-function ReturnMix({ journey, settings }: { journey: Journey; settings: RankingSettings }) {
-  return (
-    <div className="setting">
-      <div className="poles">
-        <span><strong>Safer in bad years</strong><small>Average of the worst 5% of futures (CVaR₅).</small></span>
-        <span><strong>Bigger upside</strong><small>High return, the 95th percentile (P95).</small></span>
-      </div>
-      <input type="range" min={0} max={1} step={settings.return_weight.step} value={journey.returnWeight}
-        aria-label="Weight of the high return against the worst outcomes" onChange={(event) => journey.setReturnWeight(Number(event.target.value))} />
-      <p className="balance">
-        <strong>How we judge the money</strong>
-        <span>{percent(journey.returnWeight)} high return (P95) · {percent(1 - journey.returnWeight)} worst outcomes (CVaR₅)</span>
-      </p>
-    </div>
-  );
-}
+// function ReturnMix({ journey, settings }: { journey: Journey; settings: RankingSettings }) {
+//   return (
+//     <div className="setting">
+//       <div className="poles">
+//         <span><strong>Safer in bad years</strong><small>Average of the worst 5% of futures (CVaR₅).</small></span>
+//         <span><strong>Bigger upside</strong><small>High return, the 95th percentile (P95).</small></span>
+//       </div>
+//       <input type="range" min={0} max={1} step={settings.return_weight.step} value={journey.returnWeight}
+//         aria-label="Weight of the high return against the worst outcomes" onChange={(event) => journey.setReturnWeight(Number(event.target.value))} />
+//       <p className="balance">
+//         <strong>How we judge the money</strong>
+//         <span>{percent(journey.returnWeight)} high return (P95) · {percent(1 - journey.returnWeight)} worst outcomes (CVaR₅)</span>
+//       </p>
+//     </div>
+//   );
+// }
 
 /** The fixed part of the score: how many scenarios stand behind a sequence. */
 function SupportNote({ settings }: { settings: RankingSettings }) {
@@ -69,11 +69,11 @@ export function PriorityStep({ journey, world }: { journey: Journey; world: Worl
       <h2>Let's balance it your way</h2>
       <p className="lead">Drag the sliders to give more weight to financial returns or to soil and water conservation.</p>
       <Balance journey={journey} settings={settings} />
-      <ReturnMix journey={journey} settings={settings} />
+      {/* <ReturnMix journey={journey} settings={settings} /> */}
       <SupportNote settings={settings} />
-      <label className="seed">Random seed
+      {/* <label className="seed">Random seed
         <input type="number" min={0} value={journey.seed} onChange={(event) => journey.setSeed(Number(event.target.value) || 0)} />
-      </label>
+      </label> */}
       <p className="note">{count(world.config.run.trajectories)} scenarios. The same seed reproduces a result exactly.</p>
       <div className="actions">
         <button type="button" onClick={() => journey.go("crop")}>Adjust crop</button>

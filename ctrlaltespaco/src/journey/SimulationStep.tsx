@@ -2,6 +2,7 @@ import type { Progress } from "../runJob.ts";
 import type { Journey, World } from "../useFieldShift.ts";
 import { count, percent } from "../ui/format.ts";
 import { GrowthScene } from "../ui/GrowthScene.tsx";
+import { Microlearning } from "../ui/Microlearning.tsx";
 
 /** Trajectories the engine has finished, as it reports them batch by batch. */
 function Counter({ progress }: { progress: Progress | null }) {
@@ -34,6 +35,7 @@ export function SimulationStep({ journey, world }: { journey: Journey; world: Wo
                 <button type="button" className="primary" onClick={journey.simulate}>Try again</button></div>
             </>
           ) : <p className="note">There's nothing else you need to do. Your plan appears here as soon as it is ready.</p>}
+          {!journey.error && <Microlearning />}
         </div>
       </div>
     </section>
