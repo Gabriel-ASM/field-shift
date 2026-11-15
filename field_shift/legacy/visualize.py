@@ -6,7 +6,7 @@ from pathlib import Path
 from random import Random
 
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 TEMPLATE = Path(__file__).with_name("replay.html")
 STATE_NAMES = {"RO": "Rondônia", "SP": "São Paulo", "MG": "Minas Gerais"}
 

@@ -72,7 +72,7 @@ Calendários oficiais também foram encontrados para soja, milho, café/cana, am
 
 `raw/ibge/pam-municipal-5457-1988-2025.json` preserva os dados SIDRA da tabela PAM 5457 para os três municípios; `raw/ibge/pam-state-5457-1988-2025.json` guarda a consulta estadual por UF para fallback de preço/rendimento quando um produto não tem série municipal. A consulta inclui arroz, amendoim, aveia, cana, feijão, milho, soja, sorgo, trigo e dois tipos de café. Cada perfil separa produto×ano e inclui produtividade (kg/ha), área, quantidade e valor nominal. O resumo tem mediana correta, faixa observada, anos válidos e a razão nominal valor da produção/área para 2021–2025. PAM é agregado regional e não vira resposta causal de produtividade, preço atual ou série em reais constantes.
 
-`raw/yahoo-finance/` guarda as respostas históricas de fechamento para soja CBOT `ZSK27.CBT` e milho CBOT `ZCK27.CBT` em 13/11/2026; `raw/bacen/` preserva a PTAX de venda da mesma data. `reference/yahoo-harvest-futures.json` normaliza os preços por tonelada, com moeda, unidade, vencimento e conversão. Recrie o snapshot com `python -m field_shift.freeze_harvest_prices --date 2026-11-13`. As cotações ficam congeladas na data da simulação e não são chamadas durante a página.
+`raw/yahoo-finance/` guarda as respostas históricas de fechamento para soja CBOT `ZSK27.CBT` e milho CBOT `ZCK27.CBT` em 13/11/2026; `raw/bacen/` preserva a PTAX de venda da mesma data. `reference/yahoo-harvest-futures.json` normaliza os preços por tonelada, com moeda, unidade, vencimento e conversão. Recrie o snapshot com `python -m field_shift.legacy.freeze_harvest_prices --date 2026-11-13`. As cotações ficam congeladas na data da simulação e não são chamadas durante a página.
 
 `raw/conab/costs/` preserva planilhas oficiais de custo por cultura, sistema e município levantado. `raw/ibge/ipca-table-1737-2017-202610.json` preserva o índice usado para converter valores nominais a uma referência monetária comum. Execute `python data/pipeline/build_economic_benchmarks.py` para extrair 1.809 painéis CONAB e gerar `reference/economic-benchmarks.json`, que liga preço, rendimento e custo quando há cobertura.
 
@@ -90,7 +90,7 @@ O motor adiciona Dirichlet `α=0,5` por destino viável a cada linha de contagem
 
 ## Simulação Monte Carlo
 
-`python -m field_shift.demo` roda uma execução registrada por perfil com 10.000 trajetórias, 120 quinzenas (cinco anos), semente 2026 e blocos de duas quinzenas. Cada trajetória sorteia blocos de clima de anos históricos completos, uma realização das linhas Dirichlet e o estado hídrico seguinte por passo. As métricas em `processed/demo-simulation-results.json` mostram frequência de quinzenas em água baixa, duração de sequências baixas e a distribuição do estado final. Esse motor continua disponível como trilha de balanço hídrico.
+`python -m field_shift.legacy.demo` roda uma execução registrada por perfil com 10.000 trajetórias, 120 quinzenas (cinco anos), semente 2026 e blocos de duas quinzenas. Cada trajetória sorteia blocos de clima de anos históricos completos, uma realização das linhas Dirichlet e o estado hídrico seguinte por passo. As métricas em `processed/demo-simulation-results.json` mostram frequência de quinzenas em água baixa, duração de sequências baixas e a distribuição do estado final. Esse motor continua disponível como trilha de balanço hídrico.
 
 Na página, cada trajetória sorteia linhas Dirichlet com parâmetros `massa_top5 + α` e avança até cinco anos. Em cada ano reamostra 24 quinzenas da chuva NASA POWER, atualiza água e carbono do solo e só então repondera e amostra a cultura do próximo plantio. A área anual do top 5 e as participações ficam expostas na linha do tempo; a massa top-5, o suporte fracionário e os pares rank 1 aparecem no grafo/matriz. Produtos PAM fora do catálogo não entram nesse ranking anual. A matriz hídrica completa continua disponível para inspeção.
 
@@ -102,10 +102,10 @@ python data/pipeline/build_profiles.py
 python data/pipeline/prepare_crop_data.py
 python data/pipeline/build_crop_markov.py
 python data/pipeline/build_crop_transition_markov.py
-python -m field_shift.demo
-python -m field_shift.crop_demo --profile data/profiles/franca-sp --crop peanut --planting-decendio 1 --risk 20
-python -m field_shift --profile data/profiles/ariquemes-ro --policy data/policies/balanco-hidrico-referencia.json --initial-state water_medium
-python -m field_shift.visualize --output docs/visualizacao.html --seed 2026
+python -m field_shift.legacy.demo
+python -m field_shift.legacy.crop_demo --profile data/profiles/franca-sp --crop peanut --planting-decendio 1 --risk 20
+python -m field_shift.legacy --profile data/profiles/ariquemes-ro --policy data/policies/balanco-hidrico-referencia.json --initial-state water_medium
+python -m field_shift.legacy.visualize --output docs/visualizacao.html --seed 2026
 ```
 
 Os pipelines de transformação leem `raw/`; não baixam dados por conta própria. `fetch_pam.py` e `fetch_zarc_municipal_extracts.py` baixam as tábuas abertas MAPA e os dados PAM usados nesta entrega; `fetch_zarc_examples.py` consulta relatórios SISZARC filtrados para auditoria. A página gerada empacota ZARC, PAM, Kc, modelos e história ambiental para abrir localmente sem API externa. A origem, o período, as unidades, a resolução, o hash e a qualidade de cada conjunto estão no manifesto de cada perfil.
