@@ -12,7 +12,7 @@ from pymongo.database import Database
 
 from .. import ROOT
 from ..db import connect
-from .routes import chains, contracts, profiles, runs, views
+from .routes import chains, config, contracts, geo, profiles, runs, views
 
 DESCRIPTION = """
 Backend of Field Shift. This phase exposes the data contracts (v2), their views, and the
@@ -38,7 +38,7 @@ def create_app(database: Database | None = None) -> FastAPI:
     def health() -> dict[str, str]:
         return {"status": "ok"}
 
-    for module in (contracts, views, profiles, chains, runs):
+    for module in (config, contracts, views, profiles, chains, runs, geo):
         app.include_router(module.router)
 
     # Static mounts come last, so every API route above wins over a file with the same path.

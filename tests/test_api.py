@@ -100,3 +100,15 @@ def test_map_demo_is_served_and_its_api_calls_work(client):
 
 def test_profile_page_is_served(client):
     assert "Starting conditions" in client.get("/profile.html").text
+
+
+def test_runtime_config_comes_from_the_environment(client, monkeypatch):
+    assert "gibs.earthdata.nasa.gov" in client.get("/config").json()["basemap"]["tiles"]
+    monkeypatch.setenv("FIELD_SHIFT_CMS_URL", "http://cms.local")
+    assert client.get("/config").json()["cms"]["url"] == "http://cms.local"
+
+
+def test_boundaries_are_served(client):
+    assert len(client.get("/geo/states").json()["features"]) == 27
+    assert client.get("/geo/profiles/franca-sp").json()["features"][0]["properties"]["codarea"] == "3516200"
+    assert client.get("/geo/profiles/nowhere").status_code == 404
