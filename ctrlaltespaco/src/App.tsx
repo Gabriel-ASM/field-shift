@@ -6,6 +6,7 @@ import { PriorityStep } from "./journey/PriorityStep.tsx";
 import { ResultStep } from "./journey/ResultStep.tsx";
 import { SimulationStep } from "./journey/SimulationStep.tsx";
 import { Steps } from "./journey/Steps.tsx";
+import { WelcomeStep } from "./journey/WelcomeStep.tsx";
 import { FieldMap } from "./map/FieldMap.tsx";
 import { useJourney, useWorld, type Journey, type World } from "./useFieldShift.ts";
 
@@ -36,6 +37,7 @@ export function App() {
   const { world, error } = useWorld();
   const journey = useJourney(world);
   const [area, setArea] = useState<number | null>(null);
+  const [started, setStarted] = useState(false);
   const wide = journey.step === "result";
   const panel = usePanelWidth(wide);
   // Each step starts at its top: the panel scrolls, and would otherwise keep the previous step's position.
@@ -44,6 +46,7 @@ export function App() {
   }, [journey.step, panel]);
   if (error) return <p className="error fatal">Could not reach the Field Shift API: {error}</p>;
   if (!world) return <p className="loading">Loading…</p>;
+  if (!started) return <WelcomeStep futures={world.config.run.trajectories} onStart={() => setStarted(true)} />;
   const choosePlace = (id: string) => {
     journey.choosePlace(world.profiles.find((profile) => profile.id === id)!);
     if (journey.step !== "location") journey.go("location");

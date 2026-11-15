@@ -24,7 +24,7 @@ function Tabs({ current, choose }: { current: Tab; choose: (tab: Tab) => void })
   );
 }
 
-export function MethodDialog({ open, onClose, facts }: { open: boolean; onClose: () => void; facts: EngineFacts }) {
+export function MethodDialog({ open, onClose, facts, futures = 100000 }: { open: boolean; onClose: () => void; facts: EngineFacts | null; futures?: number }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [tab, setTab] = useState<Tab>("simple");
   useEffect(() => {
@@ -44,9 +44,11 @@ export function MethodDialog({ open, onClose, facts }: { open: boolean; onClose:
         </div>
         <button className="method-close" type="button" aria-label="Close explanation" onClick={onClose}>×</button>
       </header>
-      <Tabs current={tab} choose={setTab} />
+      {facts && <Tabs current={tab} choose={setTab} />}
       <div className="method-body method-panel" role="tabpanel">
-        {tab === "simple" ? <HowItWorks futures={facts.trajectories} years={facts.model.horizon_years} /> : <UnderTheHood facts={facts} />}
+        {tab === "simple" || !facts
+          ? <HowItWorks futures={facts?.trajectories ?? futures} years={facts?.model.horizon_years ?? 5} />
+          : <UnderTheHood facts={facts} />}
       </div>
     </dialog>
   );

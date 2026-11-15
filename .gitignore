@@ -5,3 +5,6 @@ __pycache__/
 .venv/
 .pytest_cache/
 !.env.example
+.run
+_field_shift_nitrogen_work
+relatorio/captura
