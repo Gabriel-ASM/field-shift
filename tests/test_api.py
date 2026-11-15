@@ -60,3 +60,22 @@ def test_documented_entry_point_is_the_app_factory():
     from uvicorn.importer import import_from_string
 
     assert callable(import_from_string("field_shift.api:create_app"))
+
+
+def test_front_and_pages_are_served_without_shadowing_the_api(client):
+    landing = client.get("/")
+    assert landing.status_code == 200 and "Field Shift" in landing.text
+    assert client.get("/pages/contracts-v2.html").headers["content-type"].startswith("text/html")
+    assert client.get("/health").json() == {"status": "ok"}
+    assert client.get("/openapi.json").json()["info"]["title"] == "Field Shift API"
+    assert client.get("/profiles/nowhere").status_code == 404
+
+
+def test_web_dir_can_be_replaced(generated, tmp_path, monkeypatch):
+    import mongomock
+    from fastapi.testclient import TestClient
+    from field_shift.api import create_app
+
+    (tmp_path / "index.html").write_text("<h1>real front</h1>", encoding="utf-8")
+    monkeypatch.setenv("FIELD_SHIFT_WEB_DIR", str(tmp_path))
+    assert "real front" in TestClient(create_app(mongomock.MongoClient()["x"])).get("/").text

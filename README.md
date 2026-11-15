@@ -10,6 +10,17 @@ O projeto responde ao desafio [Field Shift: Adapting Farms with NASA Data](https
 
 The research app is being turned into a backend for a web application. Design and audit graphs: [docs/backend-design.md](docs/backend-design.md). Contract map: [docs/contracts-v2.html](docs/contracts-v2.html).
 
+Everything in one image (MongoDB + API + front); the database is loaded when the container starts and is not reachable from outside it:
+
+```bash
+docker build -t field-shift .
+docker run --rm -p 8000:8000 field-shift  # front at http://localhost:8000, API docs at /docs
+```
+
+The front lives in `web/` and is served at `/`; set `FIELD_SHIFT_WEB_DIR` to serve another build. The generated pages in `docs/` are served at `/pages`.
+
+Local development:
+
 ```bash
 uv sync                                   # install dependencies
 uv run pytest                             # unit and API tests
@@ -17,9 +28,9 @@ uv run python -m field_shift.contracts    # validate the contract examples
 uv run python -m field_shift.ingest       # v1 data -> data/v2 (chains, profiles, audit report)
 uv run python -m field_shift.views        # regenerate the contract views
 
-docker compose up -d mongo                # MongoDB on localhost:27017
+docker run -d --name field-shift-mongo -p 127.0.0.1:27017:27017 mongo:7   # throwaway MongoDB
 uv run python -m field_shift.ingest --mongo mongodb://localhost:27017
-uv run uvicorn --factory field_shift.api:create_app   # API docs at http://localhost:8000/docs
+uv run uvicorn --factory field_shift.api:create_app   # http://localhost:8000
 FIELD_SHIFT_TEST_MONGO_URI=mongodb://localhost:27017 uv run pytest   # also runs the MongoDB validator tests
 ```
 

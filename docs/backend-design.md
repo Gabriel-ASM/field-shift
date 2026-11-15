@@ -314,9 +314,15 @@ field_shift/
   api/         factory and routes: contracts, views, profiles, chains (runs with the engines)
   views/       contract graph and tree
   legacy/      v1 modules and replay.html
+web/           front served at / (placeholder landing page until the real build lands)
+docker/        entrypoint of the single image
 tests/         unit per module, MongoDB integration, API
-pyproject.toml, docker-compose.yml (MongoDB + API)
+pyproject.toml, Dockerfile
 ```
+
+### Deployment: single image
+
+MongoDB, the API and the front ship in one image (`Dockerfile`, based on `mongo:7`). The entrypoint starts `mongod` bound to 127.0.0.1 inside the container, runs `python -m field_shift.ingest --mongo` (idempotent: installs the validators and upserts chains and profiles), then starts uvicorn on port 8000, the only published port. The API serves the front from `web/` at `/` (`FIELD_SHIFT_WEB_DIR` points it at another build) and the generated pages of `docs/` at `/pages`. The runtime data (`data/` without `raw` and `processed`, about 19 MB) is inside the image; nothing is loaded from outside. The database lives in the `/data/db` volume and is rebuilt from the image at every start, so losing it loses nothing.
 
 ## Reuse
 

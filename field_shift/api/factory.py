@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from pymongo.database import Database
 
+from .. import ROOT
 from ..db import connect
 from .routes import chains, contracts, profiles, views
 
@@ -17,7 +20,10 @@ profiles and Markov chains generated from the current data. Simulation runs come
 
 
 def create_app(database: Database | None = None) -> FastAPI:
-    """Build the app. Without `database`, connect using FIELD_SHIFT_MONGO_URI and FIELD_SHIFT_DB."""
+    """Build the app. Without `database`, connect using FIELD_SHIFT_MONGO_URI and FIELD_SHIFT_DB.
+
+    The front is served from `web/` (or FIELD_SHIFT_WEB_DIR) at `/`, and the generated HTML pages in `docs/` at `/pages`.
+    """
     app = FastAPI(title="Field Shift API", version="0.2.0", description=DESCRIPTION)
     app.state.database = database if database is not None else connect(
         os.environ.get("FIELD_SHIFT_MONGO_URI", "mongodb://localhost:27017"),
@@ -30,4 +36,12 @@ def create_app(database: Database | None = None) -> FastAPI:
 
     for module in (contracts, views, profiles, chains):
         app.include_router(module.router)
+
+    # Static mounts come last, so every API route above wins over a file with the same path.
+    pages = ROOT / "docs"
+    if pages.is_dir():
+        app.mount("/pages", StaticFiles(directory=pages), name="pages")
+    web = Path(os.environ.get("FIELD_SHIFT_WEB_DIR", ROOT / "web"))
+    if web.is_dir():
+        app.mount("/", StaticFiles(directory=web, html=True), name="web")
     return app
