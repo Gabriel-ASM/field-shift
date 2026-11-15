@@ -18,9 +18,11 @@ import numpy as np
 class Nitrogen:
     initial: float                  # kg N/ha available at the start
     credit: np.ndarray              # (C,) kg N/ha fixed in one cycle and left in the field at harvest
+    credit_per_tonne: np.ndarray    # (C,) kg N fixed per tonne harvested, for crops whose fixation scales with yield
     fertilizer: np.ndarray          # (C,) lowest kg N/ha applied at planting
     fertilizer_high: np.ndarray     # (C,) highest; each trajectory draws its dose in between
     removal: np.ndarray             # (C,) kg N taken away per tonne harvested
+    removal_per_cycle: np.ndarray   # (C,) kg N/ha taken away per harvest, for crops known only per cycle
     demand: np.ndarray              # (C,) kg N/ha available for full yield; 0 for crops with no N response
     floor: np.ndarray               # (C,) yield multiplier when no nitrogen is available
     loss_fraction: np.ndarray       # (3,) share of the available N lost per period, by rain class
@@ -52,7 +54,9 @@ def after_mineralization(params: Nitrogen, available, total_n, years: float):
 
 def after_harvest(xp, params: Nitrogen, crop, available, harvested_tonnes):
     """Available N after a harvest: the fixed N comes in, the N in the product goes out."""
-    return xp.maximum(0.0, available + params.credit[crop] - params.removal[crop] * harvested_tonnes)
+    fixed = params.credit[crop] + params.credit_per_tonne[crop] * harvested_tonnes
+    exported = params.removal_per_cycle[crop] + params.removal[crop] * harvested_tonnes
+    return xp.maximum(0.0, available + fixed - exported)
 
 
 def dose(params: Nitrogen, crop, draw):

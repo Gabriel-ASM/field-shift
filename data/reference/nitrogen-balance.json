@@ -373,12 +373,18 @@
     },
     "crops": {
       "soybean": {
-        "fixation_kg_ha_per_cycle": 184.5,
+        "fixation_kg_per_tonne": 56.9,
         "removal_kg_per_tonne": 65,
+        "support": "observed",
         "see": [
           "fixation_kg_n_ha_per_cycle.soybean",
           "removal_kg_n_per_tonne.soybean.grain_export"
         ],
+        "derivation": "Alves et al. 2006: 184.5 kg N/ha fixed (mean of 193.2 and 175.9) over a mean yield of 3.244 t/ha (3,553 and 2,935) = 56.9 kg N fixed per tonne of grain; scaling with yield keeps the measured near-zero balance at other yields.",
+        "team": {
+          "fixation_kg_ha_per_cycle": 120,
+          "removal_kg_ha_per_cycle": 200
+        },
         "yield_response": null
       },
       "maize_grain": {
@@ -400,16 +406,18 @@
           "floor": 0.067,
           "support": "derived",
           "derivation": "Coelho et al. (1987): unfertilized soil supplied 54 kg N/ha and yielded 3,940 kg/ha; yield reached its plateau (7,300 kg/ha calculated maximum) by 60 kg N/ha applied, 60 x (1 - 0.124) = 52.6 kg available. Demand = 54 + 52.6 = 106.6. Floor f solves f + (1 - f) x 54/106.6 = 3,940/7,300, f = 0.067. The response multiplies the regional (IBGE) yield, read as the plateau yield of fertilized farms."
+        },
+        "team": {
+          "fixation_kg_ha_per_cycle": 0,
+          "removal_kg_ha_per_cycle": 80
         }
       },
       "peanut": {
-        "fixation_kg_ha_per_cycle": 40.9,
-        "removal_kg_per_tonne": 49.4,
-        "see": [
-          "fixation_kg_n_ha_per_cycle.peanut"
-        ],
-        "removal_basis": "Okito et al. 2004 Table 1: 49.4 kg N/ha in about 1,000 kg/ha of unhulled grain.",
-        "yield_response": null
+        "fixation_kg_ha_per_cycle": 80,
+        "removal_kg_ha_per_cycle": 100,
+        "support": "team_hypothesis",
+        "yield_response": null,
+        "check": "Okito et al. 2004 measured 40.9 kg N/ha fixed and 49.4 kg N/ha exported at about 1 t/ha of unhulled grain (fixation_kg_n_ha_per_cycle.peanut); regional yields are 1.5-3.9 t/ha, so the team's commercial-yield pair is used."
       },
       "crotalaria": {
         "fixation_kg_ha_per_cycle": 173.2,
@@ -418,22 +426,77 @@
           "fixation_kg_n_ha_per_cycle.crotalaria"
         ],
         "basis": "Green manure: nothing is exported.",
-        "yield_response": null
+        "yield_response": null,
+        "team": {
+          "fixation_kg_ha_per_cycle": 150,
+          "removal_kg_ha_per_cycle": 0
+        }
       },
       "mucuna": {
-        "fixation_kg_ha_per_cycle": 59.6,
-        "removal_kg_per_tonne": 0,
-        "see": [
-          "fixation_kg_n_ha_per_cycle.mucuna"
-        ],
-        "basis": "Green manure: nothing is exported.",
+        "fixation_kg_ha_per_cycle": 140,
+        "removal_kg_ha_per_cycle": 0,
+        "support": "team_hypothesis",
+        "yield_response": null,
+        "check": "Okito et al. 2004 measured 59.6 kg N/ha fixed by a 1.8 t/ha dry-matter stand (fixation_kg_n_ha_per_cycle.mucuna); the team's 140 is for a fuller stand. Not reconciled."
+      },
+      "oat": {
+        "fixation_kg_ha_per_cycle": 0,
+        "removal_kg_ha_per_cycle": 0,
+        "support": "team_hypothesis",
+        "yield_response": null
+      },
+      "forage_radish": {
+        "fixation_kg_ha_per_cycle": 0,
+        "removal_kg_ha_per_cycle": 0,
+        "support": "team_hypothesis",
+        "yield_response": null
+      },
+      "wheat": {
+        "fixation_kg_ha_per_cycle": 0,
+        "removal_kg_ha_per_cycle": 60,
+        "support": "team_hypothesis",
+        "yield_response": null
+      },
+      "sorghum_grain": {
+        "fixation_kg_ha_per_cycle": 0,
+        "removal_kg_ha_per_cycle": 60,
+        "support": "team_hypothesis",
+        "yield_response": null
+      },
+      "brachiaria": {
+        "fixation_kg_ha_per_cycle": 0,
+        "removal_kg_ha_per_cycle": 0,
+        "support": "team_hypothesis",
+        "yield_response": null
+      },
+      "dry_bean": {
+        "fixation_kg_ha_per_cycle": 60,
+        "removal_kg_ha_per_cycle": 80,
+        "support": "team_hypothesis",
+        "yield_response": null,
+        "check": "Fixation agrees with the 25-65 kg N/ha range of fixation_kg_n_ha_per_cycle.dry_bean. The 60 kg N/ha fertilizer recommendation (losses.dry_bean_nitrogen_fertilizer) is left out: the team's balance has no fertilizer and whether the recommendation stacks on fixation is not sourced."
+      },
+      "millet": {
+        "fixation_kg_ha_per_cycle": 0,
+        "removal_kg_ha_per_cycle": 0,
+        "support": "team_hypothesis",
+        "yield_response": null
+      },
+      "sugarcane": {
+        "fixation_kg_ha_per_cycle": 0,
+        "removal_kg_ha_per_cycle": 80,
+        "support": "team_hypothesis",
+        "yield_response": null
+      },
+      "coffee": {
+        "fixation_kg_ha_per_cycle": 0,
+        "removal_kg_ha_per_cycle": 60,
+        "support": "team_hypothesis",
         "yield_response": null
       }
     },
-    "neutral": {
-      "dry_bean": "Fixation is a secondary range (25-65 kg/ha) and grain removal per tonne is not sourced; the 60 kg N/ha recommendation is left out with them so as not to count an input without its output.",
-      "sugarcane": "Stalk removal and the ratoon response are not sourced; the plant-cane optimum (129 kg N/ha) has no matching fertilizer rate.",
-      "others": "coffee, sorghum, wheat, oat, forage radish, brachiaria, millet: nothing sourced."
-    }
+    "team_source": "Team survey by Gabriel and Hua (dados-levantados-hua-gabriel.html, meta.premissas: fbn and export_n per cycle, the same in the four cities; also the source of soil_nitrogen.annual_net_balance_kg_n_ha_year_by_crop, which annualizes fbn - export_n). No primary source is cited there.",
+    "rule": "A primary source (observed) wins where one is recorded; the team's per-cycle numbers fill the other crops (support team_hypothesis). Per-tonne numbers scale with each harvest; per-cycle numbers do not.",
+    "no_yield_response": "Only maize responds to available N (the one sourced response curve). Other crops still move the pool."
   }
 }

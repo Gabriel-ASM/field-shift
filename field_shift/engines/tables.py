@@ -259,7 +259,8 @@ def _total_nitrogen(crops, payload, hypotheses) -> dict:
 
 
 def _nitrogen(crops, model: dict) -> Nitrogen:
-    """The available-N balance, from the `model` block of nitrogen-balance.json. Crops it does not name are neutral."""
+    """The available-N balance, from the `model` block of nitrogen-balance.json (sourced numbers, the team's per-cycle
+    numbers for the other crops). Crops it does not name are neutral."""
     rules = model["crops"]
     value = lambda crop, key, default=0.0: _number((rules.get(crop) or {}).get(key), default)
     fertilizer = lambda crop, end: _number(((rules.get(crop) or {}).get("fertilizer_kg_ha") or {}).get(end), 0.0)
@@ -267,9 +268,11 @@ def _nitrogen(crops, model: dict) -> Nitrogen:
     return Nitrogen(
         initial=float(model["initial_available_kg_ha"]["value"]),
         credit=_per_crop(crops, lambda c: value(c, "fixation_kg_ha_per_cycle")),
+        credit_per_tonne=_per_crop(crops, lambda c: value(c, "fixation_kg_per_tonne")),
         fertilizer=_per_crop(crops, lambda c: fertilizer(c, "min")),
         fertilizer_high=_per_crop(crops, lambda c: fertilizer(c, "max")),
         removal=_per_crop(crops, lambda c: value(c, "removal_kg_per_tonne")),
+        removal_per_cycle=_per_crop(crops, lambda c: value(c, "removal_kg_ha_per_cycle")),
         demand=_per_crop(crops, lambda c: response(c, "demand_kg_ha", 0.0)),
         floor=_per_crop(crops, lambda c: response(c, "floor", 1.0)),
         loss_fraction=np.zeros(3),          # no sourced leaching by rain class (model.rain_losses)

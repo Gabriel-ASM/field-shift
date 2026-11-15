@@ -91,8 +91,9 @@ def nitrogen_fixture(tables):
     size, legume = len(tables.crops), tables.crops.index("soybean")
     credit, demand = np.zeros(size), np.full(size, 120.0)
     credit[legume], demand[legume] = 40.0, 0.0
-    return Nitrogen(initial=60.0, credit=credit, fertilizer=np.zeros(size), fertilizer_high=np.zeros(size),
-                    removal=np.full(size, 15.0), demand=demand,
+    return Nitrogen(initial=60.0, credit=credit, credit_per_tonne=np.zeros(size), fertilizer=np.zeros(size),
+                    fertilizer_high=np.zeros(size), removal=np.full(size, 15.0), removal_per_cycle=np.zeros(size),
+                    demand=demand,
                     floor=np.full(size, 0.5), loss_fraction=np.array([0.0, 0.01, 0.03]))
 
 
@@ -348,15 +349,15 @@ def test_a_fixed_rotation_reports_its_own_result_and_detail(tables):
 
 
 def test_available_nitrogen_comes_from_the_sourced_model_block(tables):
-    """nitrogen-balance.json `model`: legumes leave what they fixed, maize responds to N, unsourced crops are neutral."""
+    """nitrogen-balance.json `model`: sourced numbers first (soybean per tonne, maize response), the team's per-cycle
+    numbers for the other crops; only maize responds to N."""
     n, index = tables.nitrogen, tables.crops.index
     assert n is not None and n.initial == 0.0 and n.mineralization == 0.02
-    assert n.credit[index("soybean")] == 184.5 and n.removal[index("soybean")] == 65
+    assert n.credit_per_tonne[index("soybean")] == 56.9 and n.removal[index("soybean")] == 65
     assert n.demand[index("maize_grain")] > 0 and n.fertilizer[index("maize_grain")] < n.fertilizer_high[index("maize_grain")]
-    for crop in ("dry_bean", "sugarcane", "coffee"):
-        if crop in tables.crops:
-            i = index(crop)
-            assert (n.credit[i], n.removal[i], n.demand[i], n.fertilizer_high[i]) == (0, 0, 0, 0)
+    assert (n.credit[index("dry_bean")], n.removal_per_cycle[index("dry_bean")]) == (60, 80)
+    assert n.removal_per_cycle[index("sugarcane")] == 80 and n.credit[index("crotalaria")] == 173.2
+    assert [crop for crop, demand in zip(tables.crops, n.demand) if demand > 0] == ["maize_grain"]
 
 
 def test_maize_on_maize_runs_short_of_nitrogen_and_soybean_does_not(tables):
