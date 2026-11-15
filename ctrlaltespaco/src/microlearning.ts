@@ -8,7 +8,6 @@ export interface Card {
 
 export const CARDS: readonly Card[] = [
   { title: "Many futures", body: "We don't forecast one year. Each simulated scenario draws its own sequence of weather years from the region's history." },
-  { title: "Same environment, fair comparison", body: "Every sequence faces the same scenarios and the same seed, so the comparison is fair. The same seed reproduces the result exactly." },
   { title: "Crop states", body: "Each crop is a state. Regional history, water and soil guide the odds of the next crop in the sequence." },
   { title: "Water in the soil", body: "Rain and evaporation update the water in the soil every half month, adjusted for what each crop needs." },
   { title: "Value over time", body: "Income and costs over five years are brought to today's value in R$/ha. A harvest later counts for less than one now." },
