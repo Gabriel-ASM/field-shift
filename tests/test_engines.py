@@ -113,6 +113,49 @@ def test_with_nitrogen_maize_after_soybean_beats_maize_after_maize(tables):
     assert rotated > repeated and repeated != penalty_only
 
 
+def chain_routes(tables, start: str, count: int = 3000) -> list[list[str]]:
+    names = [*tables.crops, "fallow"]
+    result = simulate(np, tables, Policy(tables.crops.index(start)), 11, count)
+    return [decode_route(int(key), names) for key in np.unique(result["route"])]
+
+
+def longest_run(route: list[str], crop: str) -> int:
+    best = run = 0
+    for planted in route:
+        run = run + 1 if planted == crop else 0
+        best = max(best, run)
+    return best
+
+
+def test_chain_never_switches_directly_between_maize_and_soybean(tables):
+    """crop-cycle-assumptions.json: maize and soybean need a completed cycle of another crop in between."""
+    assert tables.sequence_block[tables.crops.index("soybean"), tables.crops.index("maize_grain")]
+    for route in chain_routes(tables, "soybean"):
+        pairs = zip(route, route[1:])
+        assert not any({a, b} == {"soybean", "maize_grain"} for a, b in pairs), route
+
+
+def test_chain_stops_replanting_at_the_penalty_cap(tables):
+    """crop-cycle-assumptions.json: maize loses 0.022 per replanting up to 0.043, soybean 0.08 up to 0.20, so the
+    cap is reached at the 3rd maize and the 4th soybean in a row, and neither is planted again after that."""
+    routes = chain_routes(tables, "maize_grain") + chain_routes(tables, "soybean")
+    assert max(longest_run(route, "maize_grain") for route in routes) == 3
+    assert max(longest_run(route, "soybean") for route in routes) == 4
+
+
+def test_cover_crop_cost_is_split_and_the_next_soybean_gains(tables):
+    from field_shift.engines.monte_carlo import State, harvest_cash, residual_gain, sowing_cash
+    brachiaria, soybean = tables.crops.index("brachiaria"), tables.crops.index("soybean")
+    crop = np.array([brachiaria])
+    at_sowing, at_harvest = sowing_cash(np, tables, crop), harvest_cash(tables, crop, np.zeros(1), np.zeros(1), 0.0)
+    assert (at_sowing + at_harvest)[0] == pytest.approx(-tables.cost[brachiaria])
+    state = State(np, tables, Policy(brachiaria), 3)
+    state.last_harvest_day = np.array([100.0, 100.0, np.nan])
+    gain = residual_gain(np, tables, state, np.full(3, soybean), np.array([100.0, 160.0, 160.0]))
+    assert gain.tolist() == pytest.approx([0.06, 0.03, 0.0])
+    assert residual_gain(np, tables, state, np.full(3, brachiaria), np.array([100.0, 160.0, 160.0])).tolist() == [0, 0, 0]
+
+
 def test_route_key_round_trip():
     names = ["a", "b", "c", "fallow"]
     key = 0

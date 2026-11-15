@@ -44,6 +44,8 @@ class State:
         self.water_class = water_class(xp, tables, self.water_fraction)
         self.carbon = full(tables.initial_carbon)
         self.nitrogen = full(tables.nitrogen.initial if tables.nitrogen else 0.0)
+        self.last_harvest_day = full(xp.nan)
+        self.residual = full(0.0)       # yield gain of the crop in the field from the cover crop before it
         self.harvest_in = full(float(tables.cycle_days[policy.initial_crop]))
         self.maturing_for = full(0.0)
         self.formation_in = full(xp.inf)
@@ -123,10 +125,10 @@ def harvested_tonnes(xp, tables: Tables, state: State, crop):
     return tables.yield_tonnes[crop] * response * rotation_multiplier(xp, tables, state, crop)
 
 
-def harvest_cash(tables: Tables, crop, tonnes, day):
-    """Revenue minus cost of one harvest, in BRL/ha of that day."""
+def harvest_cash(tables: Tables, crop, tonnes, residual, day):
+    """Revenue minus cost of one harvest, in BRL/ha of that day. A cover crop paid part of its cost at sowing."""
     price = tables.price[crop] * (1 + tables.price_trend[crop]) ** (day / DAYS_PER_YEAR)
-    return tonnes * price - tables.cost[crop]
+    return tonnes * price * (1 + residual) - tables.cost[crop] * (1 - tables.cover_share[crop])
 
 
 def harvest(xp, tables: Tables, state: State, day: float) -> None:
@@ -134,7 +136,10 @@ def harvest(xp, tables: Tables, state: State, day: float) -> None:
     ripe = (state.crop >= 0) & (state.harvest_in <= EPSILON)
     crop = crop_or_first(xp, state.crop)
     tonnes = harvested_tonnes(xp, tables, state, crop)
-    state.value = state.value + xp.where(ripe, harvest_cash(tables, crop, tonnes, day) / discount(tables, day), 0.0)
+    cash = harvest_cash(tables, crop, tonnes, state.residual, day)
+    state.value = state.value + xp.where(ripe, cash / discount(tables, day), 0.0)
+    state.residual = xp.where(ripe, 0.0, state.residual)
+    state.last_harvest_day = xp.where(ripe, day, state.last_harvest_day)
     if tables.nitrogen:
         state.nitrogen = xp.where(ripe, nitrogen.after_harvest(xp, tables.nitrogen, crop, state.nitrogen, tonnes), state.nitrogen)
     state.priced = state.priced & ~(ripe & ~tables.harvest_priced[crop])
@@ -155,8 +160,23 @@ def harvest(xp, tables: Tables, state: State, day: float) -> None:
     state.formation_in = xp.where(ripe, xp.inf, state.formation_in)
 
 
+def replant_blocked(xp, tables: Tables, state: State):
+    """The last crop reached the cap of the replanting penalty: the chain may not plant it again."""
+    at_cap = repeat_multiplier(xp, tables, state.last_crop, state.streak) <= tables.repeat_floor[state.last_crop] + 1e-12
+    return tables.replant_block[state.last_crop] & at_cap
+
+
+def chain_rules(xp, tables: Tables, state: State, allowed, reform):
+    """The team's policy on top of the chain: no replanting at the penalty cap (except after a cane reform),
+    no direct switch between crops of the same group. Fallow keeps the last crop, so it is no break."""
+    same = xp.arange(allowed.shape[1])[None, :] == state.last_crop[:, None]
+    blocked = (replant_blocked(xp, tables, state) & ~reform)[:, None] & same
+    return allowed & ~blocked & ~tables.sequence_block[state.last_crop]
+
+
 def choose_from_chain(xp, tables: Tables, state: State, allowed, reform, rows, reform_rows, uniform):
     index = xp.arange(state.crop.shape[0])
+    allowed = chain_rules(xp, tables, state, allowed, reform)
     base = xp.where(reform[:, None], reform_rows, rows[index, state.last_crop])
     weights = markov.destination_weights(xp, tables, base, allowed, state.water_fraction, state.carbon)
     return markov.draw(xp, weights, uniform), allowed.any(axis=1)
@@ -190,17 +210,34 @@ def formation_cash(xp, tables: Tables, crop, days):
     return -tables.cost[crop] * tables.formation_share[crop] * xp.minimum(1.0, days / DAYS_PER_YEAR)
 
 
+def residual_gain(xp, tables: Tables, state: State, crop, sown_on):
+    """Yield gain of a soybean sown after a cover crop: the cover's maximum, falling linearly to zero with the
+    days between the cover's harvest and the sowing. Only the crop harvested just before counts."""
+    delay = sown_on - state.last_harvest_day
+    fading = xp.clip(1 - delay / tables.residual_days[state.last_crop], 0, 1)
+    gain = tables.residual_gain[state.last_crop] * fading
+    return xp.where((crop == tables.soybean) & (delay >= 0), gain, 0.0)
+
+
+def sowing_cash(xp, tables: Tables, crop):
+    """Cost paid on the sowing day, in BRL/ha: a perennial's first formation cost, a cover crop's sowing share."""
+    formation = formation_cash(xp, tables, crop, xp.minimum(DAYS_PER_YEAR, tables.maturation_days[crop]))
+    return xp.where(tables.perennial[crop], formation, 0.0) - tables.cost[crop] * tables.cover_share[crop]
+
+
 def plant(xp, tables: Tables, state: State, day: float) -> None:
-    """Sow the scheduled crop and start its clocks; a perennial pays its first formation cost."""
+    """Sow the scheduled crop and start its clocks. A perennial pays its first formation cost, a cover crop
+    the sowing share of its cost."""
     sowing = (state.crop < 0) & (state.pending_crop >= 0) & (state.pending_day <= day)
     crop = crop_or_first(xp, state.pending_crop)
     sown_on = xp.where(sowing, state.pending_day, 0.0)
     elapsed = xp.maximum(0.0, day - sown_on)
     perennial = sowing & tables.perennial[crop]
+    paying = sowing & (tables.perennial[crop] | tables.cover[crop])
     first_cycle = xp.maximum(tables.cycle_days[crop], tables.maturation_days[crop])
-    cash = formation_cash(xp, tables, crop, xp.minimum(DAYS_PER_YEAR, tables.maturation_days[crop]))
-    state.value = state.value + xp.where(perennial, cash / discount(tables, sown_on), 0.0)
-    state.priced = state.priced & ~(perennial & ~tables.formation_priced[crop])
+    state.value = state.value + xp.where(paying, sowing_cash(xp, tables, crop) / discount(tables, sown_on), 0.0)
+    state.priced = state.priced & ~(paying & ~tables.formation_priced[crop])
+    state.residual = xp.where(sowing, residual_gain(xp, tables, state, crop, sown_on), state.residual)
     state.crop = xp.where(sowing, crop, state.crop)
     if tables.nitrogen:
         state.nitrogen = xp.where(sowing, nitrogen.after_planting(tables.nitrogen, crop, state.nitrogen), state.nitrogen)

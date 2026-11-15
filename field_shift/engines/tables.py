@@ -34,6 +34,9 @@ class Tables:
     perennial: np.ndarray           # (C,) bool
     repeat_penalty: np.ndarray      # (C,) yield loss per consecutive replanting
     repeat_floor: np.ndarray        # (C,) lowest yield multiplier from replanting
+    # choice rules of the team's policy (crop-cycle-assumptions.json)
+    replant_block: np.ndarray       # (C,) bool, replanting is blocked once the penalty reaches its cap
+    sequence_block: np.ndarray      # (C, C) bool, direct switch forbidden (same group, different crop)
     # choice
     mass: np.ndarray                # (C, C) PAM mass of each edge
     reform_mass: np.ndarray         # (C,) PAM mass out of sugarcane, used after reform
@@ -70,6 +73,11 @@ class Tables:
     formation_share: np.ndarray     # (C,) share of the cost charged per year while a perennial forms
     harvest_priced: np.ndarray      # (C,) bool, harvest cash flow can be computed
     formation_priced: np.ndarray    # (C,) bool
+    cover: np.ndarray               # (C,) bool, unsold cover crop: its cost is split between sowing and termination
+    cover_share: np.ndarray         # (C,) share of a cover crop's cost paid at sowing (0 for other crops)
+    residual_gain: np.ndarray       # (C,) highest yield gain of a soybean sown right after this crop's harvest
+    residual_days: np.ndarray       # (C,) days after that harvest at which the gain reaches zero
+    soybean: int                    # crop index, or -2 when the profile has no soybean
     water_yield: np.ndarray         # (3,) yield multiplier per water class
     carbon_yield: np.ndarray        # (3,) yield multiplier per soil carbon class
     carbon_class_limits: np.ndarray  # (2,)
@@ -119,6 +127,21 @@ def _clock(crops, crop_cycles, lifecycle, period) -> dict:
         "repeat_penalty": _per_crop(crops, lambda c: penalty(c) if applies(c) else 0.0),
         "repeat_floor": _per_crop(crops, lambda c: 1.0 - cap(c) if applies(c) else 1.0),
         "sugarcane_cuts": _number(rule("sugarcane").get("modeled_harvest_cuts")),
+    }
+
+
+def _rules(crops, crop_cycles) -> dict:
+    """The team's choice rules: no replanting at the penalty cap, and no direct switch inside a crop group."""
+    effect = crop_cycles.get("repeated_crop_effect") or {}
+    specific = lambda crop: (effect.get("crop_specific") or {}).get(crop) or effect
+    applies = lambda crop: (crop_cycles["crops"].get(crop) or {}).get("class") in (effect.get("applies_to_classes") or [])
+    capped = lambda crop: applies(crop) and _number(specific(crop).get("maximum_yield_penalty_fraction"), 0.0) > 0
+    blocking = effect.get("block_replant_after_penalty_cap") is True
+    groups = (crop_cycles.get("sequence_constraints") or {}).get("break_required_between_crop_groups") or []
+    same_group = lambda a, b: a != b and any(a in group and b in group for group in groups)
+    return {
+        "replant_block": _per_crop(crops, lambda c: blocking and capped(c), bool),
+        "sequence_block": np.array([[same_group(a, b) for b in crops] for a in crops], dtype=bool).reshape(len(crops), len(crops)),
     }
 
 
@@ -190,6 +213,20 @@ def _water(crops, states, payload, hypotheses) -> dict:
     }
 
 
+def _cover(crops, entry) -> dict:
+    """Unsold cover crops (cost_panel.cover_management): cost split between sowing and termination, and the
+    yield gain they may give to the first soybean sown after them."""
+    management = lambda crop: (entry(crop).get("cost_panel") or {}).get("cover_management") or {}
+    residual = lambda crop: management(crop).get("soybean_residual") or {}
+    return {
+        "cover": _per_crop(crops, lambda c: bool(management(c)), bool),
+        "cover_share": _per_crop(crops, lambda c: _number(management(c).get("planting_share"), 0.0)),
+        "residual_gain": _per_crop(crops, lambda c: _number(residual(c).get("max_yield_gain_fraction"), 0.0)),
+        "residual_days": _per_crop(crops, lambda c: _number(residual(c).get("max_days_to_planting"), 1.0)),
+        "soybean": crops.index("soybean") if "soybean" in crops else -2,
+    }
+
+
 def _economics(crops, payload, hypotheses, crop_cycles) -> dict:
     economics, response = payload["economics"], hypotheses["economic_yield_response"]
     inputs = economics.get("crop_inputs") or {}
@@ -202,6 +239,7 @@ def _economics(crops, payload, hypotheses, crop_cycles) -> dict:
     thresholds = hypotheses["soil_carbon"]["state_thresholds_g_kg"]
     priced = selected & np.isfinite(cost)
     return {
+        **_cover(crops, entry),
         "yield_tonnes": np.nan_to_num(yields), "price": np.nan_to_num(price), "cost": np.nan_to_num(cost),
         "price_trend": _per_crop(crops, lambda c: _number((entry(c).get("price") or {}).get("trend_annual_fraction"), 0.0)),
         "formation_share": _per_crop(crops, lambda c: _number(formation.get(f"{c}_annual_formation_cost_fraction"), DEFAULT_FORMATION_SHARE)),
@@ -229,6 +267,7 @@ def build_tables(payload: dict, reference: dict) -> Tables:
         period_days=period, periods_per_year=int(basis["environment_periods_per_year"]),
         horizon_years=int(basis["horizon_months"]) // 12,
         **_clock(crops, crop_cycles, lifecycle, period),
+        **_rules(crops, crop_cycles),
         **_calendar(crops, chain, windows, crop_cycles, lifecycle),
         **_choice(crops, states, hypotheses),
         **_water(crops, states, payload, hypotheses),
