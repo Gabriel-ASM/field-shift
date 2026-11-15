@@ -171,8 +171,6 @@ def summarize(result: dict, tables: Tables, support: Support) -> dict:
         "final_water_multiplier": float(final["water_multiplier"].mean()),
         "routes": route_list,
         "ranking_reference": reference,
-        # Every trajectory as one route: for a fixed rotation, this is the rotation's own result.
-        "overall": route_summary([], np.arange(value.size), priced, value, final, value.size, tables, support),
         "tracks": tracks(result["track"], result["climate"], tables, names),
     }
 
@@ -202,20 +200,20 @@ def route_tracks(paths: dict, members: np.ndarray, names: list[str]) -> list[dic
             for i in range(shown.size)]
 
 
-def route_detail(raw: dict, tables: Tables, crops: list[str] | None) -> dict | None:
+def route_detail(raw: dict, tables: Tables, crops: list[str]) -> dict | None:
     """Everything the result view shows about one route besides its summary: water and soil class counts every
-    period, water shares and carbon quantiles at each year end, and some of its trajectories. `crops` None takes
-    every trajectory of the scenario (a fixed rotation). None if no trajectory followed the route."""
+    period, water shares and carbon quantiles at each year end, and some of its trajectories. None if no trajectory
+    followed it."""
     names = [*tables.crops, "fallow"]
-    if crops is not None and any(crop not in names for crop in crops):
+    if any(crop not in names for crop in crops):
         return None
-    members = np.arange(raw["route"].size) if crops is None else np.flatnonzero(raw["route"] == route_key(crops, names))
+    members = np.flatnonzero(raw["route"] == route_key(crops, names))
     if members.size == 0:
         return None
     environment = raw["paths"]["environment"][:, members]
     carbon, water_class = raw["carbon"][:, members], raw["water_class"][:, members]
     return {
-        "crops": crops or [], "trajectories": int(members.size),
+        "crops": crops, "trajectories": int(members.size),
         "frames": {"water": class_counts(environment % 3), "soil": class_counts((environment // 3) % 3),
                    "nitrogen": class_counts(environment // 9)},
         "water": [dict(zip(WATER_STATES, shares(year, 3))) for year in water_class],

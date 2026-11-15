@@ -102,21 +102,6 @@ test("total N scores against the C:N target of the route's final carbon", async 
   assert.deepEqual([0.5, 1, 1.3].map((ratio) => nitrogenClass(at(ratio), SETTINGS)), ["low", "medium", "high"]);
 });
 
-test("a candidate is re-simulated as a fixed rotation and used once every candidate is back", async () => {
-  const { rotationScenario } = await import("../src/scenarios.ts");
-  const { refinedRoutes } = await import("../src/result/useRefinement.ts");
-  assert.deepEqual(rotationScenario("c0", ["soybean", "maize_grain"]), {
-    id: "c0", label: "soybean → maize_grain", initial_state: "soybean:skip_stages",
-    policy: { kind: "rotation", sequence: ["soybean", "maize_grain"], fallback: "fallow:skip_stages" },
-  });
-  assert.equal(rotationScenario("c1", ["sugarcane", "soybean"], 4).initial_sugarcane_cut, 4);
-  const ranked = rank([route(["soybean", "maize_grain"], 9000, 20), route(["soybean", "brachiaria"], 8000, 20)], REFERENCE, SETTINGS, balance(0.2));
-  const own = (crops: string[]) => ({ route: { ...route(crops, 1, 20, 10000), crops }, job: "j", scenario: 0 });
-  const partial = { refined: new Map([["soybean,maize_grain", own(["soybean", "maize_grain"])]]), progress: null, error: null };
-  assert.equal(refinedRoutes(ranked, partial), null);
-  partial.refined.set("soybean,brachiaria", own(["soybean", "brachiaria"]));
-  assert.deepEqual(refinedRoutes(ranked, partial)!.map((item) => item.value!.count), [10000, 10000]);
-});
 
 test("identical trajectories form one group and consecutive periods merge into stretches", () => {
   const same = { crop: ["soybean", "soybean", "fallow", "sugarcane", "sugarcane"], cane_cut: [0, 0, 0, 1, 2] };

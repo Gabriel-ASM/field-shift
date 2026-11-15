@@ -57,7 +57,6 @@ def test_fixed_rotation_plants_its_sequence(tables):
     crops = rotation["routes"][0]["crops"]
     assert crops[:4] == ["soybean", "maize_grain", "soybean", "maize_grain"]
     assert set(rotation["tracks"][0]["crop"]) <= {"soybean", "maize_grain", "fallow"}
-    assert rotation["overall"]["crops"] == ["soybean", "maize_grain"] and rotation["overall"]["yield_penalty"] == [0, 0]
 
 
 def test_run_summary_is_consistent():
@@ -332,21 +331,6 @@ def test_soybean_on_soybean_costs_soil_carbon(tables):
     advance_soil(np, tables, state, rate, penalty)
     step = tables.period_days / 365
     assert state.carbon.tolist() == pytest.approx([tables.initial_carbon, tables.initial_carbon - 0.1 * step, tables.initial_carbon])
-
-
-
-def test_a_fixed_rotation_reports_its_own_result_and_detail(tables):
-    """Re-simulating a candidate sequence as a fixed rotation: `overall` covers every trajectory of the scenario."""
-    from field_shift.engines.summary import Support, route_detail, summarize
-    soybean, maize = tables.crops.index("soybean"), tables.crops.index("maize_grain")
-    raw = __import__("field_shift.engines.batches", fromlist=["x"]).simulate_batches(
-        np, tables, Policy(soybean, (soybean, maize)), 5, 800, paths=True)
-    summary = summarize(raw, tables, Support(ranked=2, recommended=20))
-    overall = summary["overall"]
-    assert overall["trajectories"] == 800 and overall["value"]["count"] == int(raw["priced"].sum())
-    assert overall["value"]["distribution"]["counts"] and overall["crops"] == []
-    detail = route_detail(raw, tables, None)
-    assert detail["trajectories"] == 800 and all(sum(period) == 800 for period in detail["frames"]["water"])
 
 
 def test_available_nitrogen_comes_from_the_sourced_model_block(tables):
