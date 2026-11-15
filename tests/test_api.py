@@ -86,3 +86,13 @@ def test_large_pages_are_compressed(client):
     assert response.headers["content-encoding"] == "gzip"
     assert len(response.content) > 1_000_000        # decoded body is the full page
     assert client.get("/health").headers.get("content-encoding") is None   # tiny responses stay as they are
+
+
+def test_map_demo_is_served_and_its_api_calls_work(client):
+    """web/demo.html reads profiles and chains and posts the stored chain back to /validate/markov."""
+    assert "v2 demo" in client.get("/demo.html").text
+    for profile in client.get("/profiles").json():
+        detail = client.get(f"/profiles/{profile['id']}").json()
+        assert {"lat", "long"} <= detail["initial_node"]["climate"].keys()
+        chain = client.get(f"/profiles/{profile['id']}/chain").json()
+        assert client.post("/validate/markov", json=chain).json()["valid"] is True
