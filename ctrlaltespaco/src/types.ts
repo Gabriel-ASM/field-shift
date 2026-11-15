@@ -22,9 +22,31 @@ export interface ChainMatrix {
   rows: { from: string; cells: ({ probability: number } | null)[] }[];
 }
 
+export interface RankingSettings {
+  minimum: number;
+  maximum: number;
+  break_even: number;
+  minimum_scale: number;
+  minimum_samples: number;
+  environment_weight: { default_weight: number; maximum_weight: number; weight_step: number };
+  soil_share: number;
+  water_share: number;
+  soil_reference: number;
+  water_scale: number;
+}
+
 export interface RunChoices {
   crops: string[];
   initial_crops: string[];
+  ranking: RankingSettings;
+}
+
+export interface Route {
+  crops: string[];
+  share: number;
+  value: ValueSummary | null;
+  final_carbon: number;
+  final_water_multiplier: number;
 }
 
 export type Policy = { kind: "markov" } | { kind: "rotation"; sequence: string[]; fallback: string };
@@ -63,7 +85,7 @@ export interface ScenarioResult {
   occupancy: Record<string, number>[];
   water: Record<string, number>[];
   carbon: { p5: number; p50: number; p95: number }[];
-  routes: { crops: string[]; share: number; value: ValueSummary | null }[];
+  routes: Route[];
   tracks: Track[];
 }
 
@@ -74,6 +96,7 @@ export interface RunResult {
   seconds: number;
   clock: { period_days: number; periods: number; horizon_years: number };
   crops: string[];
+  ranking: RankingSettings;
   scenarios: ScenarioResult[];
 }
 

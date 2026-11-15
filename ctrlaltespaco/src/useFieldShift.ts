@@ -1,22 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { createRun, getConfig, getMatrix, getMunicipality, getProfile, getRunChoices, getStates, listProfiles } from "./api.ts";
-import { chainCrops, scenariosFor, suggestedRotation } from "./scenarios.ts";
+import { createRun, getConfig, getMunicipality, getProfile, getRunChoices, getStates, listProfiles } from "./api.ts";
+import { regionScenario } from "./scenarios.ts";
 import { playhead } from "./state/playhead.ts";
-import type { Boundary, ChainMatrix, Profile, RunResult, RuntimeConfig } from "./types.ts";
+import type { Boundary, Profile, RunChoices, RunResult, RuntimeConfig } from "./types.ts";
 
 export interface World {
   config: RuntimeConfig;
   profiles: Profile[];
   states: Boundary;
-}
-
-export interface Selection {
-  profile: Profile;
-  municipality: Boundary;
-  matrix: ChainMatrix;
-  crops: string[];
-  /** Crops a simulation may start from. */
-  startCrops: string[];
 }
 
 const message = (error: unknown) => (error instanceof Error ? error.message : String(error));
@@ -35,68 +26,81 @@ export function useWorld(): { world: World | null; error: string | null } {
   return { world, error };
 }
 
-export interface Simulation {
-  selection: Selection | null;
-  sequence: string[];
-  start: string;
-  seed: number;
-  run: RunResult | null;
-  running: boolean;
-  error: string | null;
-  select: (profile: Profile) => void;
-  setSequence: (sequence: string[]) => void;
-  setStart: (crop: string) => void;
-  setSeed: (seed: number) => void;
-  simulate: () => void;
+export type Step = "location" | "crop" | "priority" | "simulation" | "result";
+export const STEPS: Step[] = ["location", "crop", "priority", "simulation", "result"];
+
+export interface Place {
+  profile: Profile;
+  municipality: Boundary;
+  choices: RunChoices;
 }
 
-/** The selected profile and its simulation. Selecting a profile runs it with the rotation its chain suggests. */
-export function useSimulation(world: World | null): Simulation {
-  const [selection, setSelection] = useState<Selection | null>(null);
-  const [sequence, setSequence] = useState<string[]>([]);
-  const [start, setStartCrop] = useState("");
+export interface Journey {
+  step: Step;
+  place: Place | null;
+  crop: string | null;
+  /** Share of the score given to soil and water. */
+  weight: number;
+  seed: number;
+  run: RunResult | null;
+  error: string | null;
+  go: (step: Step) => void;
+  choosePlace: (profile: Profile) => void;
+  chooseCrop: (crop: string) => void;
+  setWeight: (weight: number) => void;
+  setSeed: (seed: number) => void;
+  simulate: () => void;
+  restart: () => void;
+}
+
+/** The linear journey: place, crop, priority, simulation, result. */
+export function useJourney(world: World | null): Journey {
+  const [step, go] = useState<Step>("location");
+  const [place, setPlace] = useState<Place | null>(null);
+  const [crop, setCrop] = useState<string | null>(null);
+  const [weight, setWeight] = useState(0.2);
   const [seed, setSeed] = useState(2026);
   const [run, setRun] = useState<RunResult | null>(null);
-  const [running, setRunning] = useState(false);
+  const [simulated, setSimulated] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const launch = useCallback(async (profile: string, rotation: string[], crop: string, runSeed: number) => {
-    if (!world) return;
-    setRunning(true);
+  const choosePlace = useCallback((profile: Profile) => {
     setError(null);
-    try {
-      const result = await createRun({ profile, seed: runSeed, scenarios: scenariosFor(rotation, crop), ...world.config.run });
+    setRun(null);
+    setCrop(null);
+    Promise.all([getMunicipality(profile.id), getRunChoices(profile.id)]).then(([municipality, choices]) => {
+      setPlace({ profile, municipality, choices });
+      setWeight(choices.ranking.environment_weight.default_weight);
+    }, (failure) => setError(message(failure)));
+  }, []);
+
+  const chooseCrop = useCallback((chosen: string) => {
+    setCrop(chosen);
+    setRun(null);
+  }, []);
+
+  /** Runs the engine, unless this place, crop and seed were already simulated: priorities only re-rank. */
+  const simulate = useCallback(() => {
+    if (!world || !place || !crop) return;
+    const key = `${place.profile.id}|${crop}|${seed}`;
+    if (run && simulated === key) return go("result");
+    go("simulation");
+    setError(null);
+    createRun({ profile: place.profile.id, seed, scenarios: [regionScenario(crop)], ...world.config.run }).then((result) => {
       playhead.reset(result.clock.periods);
       setRun(result);
-    } catch (failure) {
-      setError(message(failure));
-    } finally {
-      setRunning(false);
-    }
-  }, [world]);
-
-  const select = useCallback((profile: Profile) => {
-    setRun(null);
-    Promise.all([getMatrix(profile.id), getMunicipality(profile.id), getRunChoices(profile.id)]).then(([matrix, municipality, choices]) => {
-      const crop = choices.initial_crops[0] ?? choices.crops[0]!;
-      const rotation = suggestedRotation(matrix, crop);
-      setSelection({ profile, municipality, matrix, crops: chainCrops(matrix), startCrops: choices.initial_crops });
-      setStartCrop(crop);
-      setSequence(rotation);
-      void launch(profile.id, rotation, crop, seed);
+      setSimulated(key);
+      go("result");
     }, (failure) => setError(message(failure)));
-  }, [seed, launch]);
+  }, [world, place, crop, seed, run, simulated]);
 
-  /** Changing the starting crop also restarts the compared rotation from it. */
-  const setStart = useCallback((crop: string) => {
-    if (!selection) return;
-    setStartCrop(crop);
-    setSequence(suggestedRotation(selection.matrix, crop));
-  }, [selection]);
+  const restart = useCallback(() => {
+    setPlace(null);
+    setCrop(null);
+    setRun(null);
+    setError(null);
+    go("location");
+  }, []);
 
-  const simulate = useCallback(() => {
-    if (selection) void launch(selection.profile.id, sequence, start, seed);
-  }, [selection, sequence, start, seed, launch]);
-
-  return { selection, sequence, start, seed, run, running, error, select, setSequence, setStart, setSeed, simulate };
+  return { step, place, crop, weight, seed, run, error, go, choosePlace, chooseCrop, setWeight, setSeed, simulate, restart };
 }
