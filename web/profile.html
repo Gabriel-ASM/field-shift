@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Field Shift · profile</title>
+<style>
+  :root { --bg: #f6f5f0; --fg: #1d2420; --muted: #5d6a62; --card: #fff; --line: #d9ddd4; --accent: #2f6b45; --soft: #e9efe6; --warn: #9a6a12; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #141815; --fg: #e6ebe5; --muted: #9aa69d; --card: #1c221e; --line: #2e3731; --accent: #7fc496; --soft: #232c26; --warn: #e0b45c; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 system-ui, sans-serif; }
+  main { max-width: 880px; margin: 0 auto; padding: 24px 16px 48px; }
+  a { color: var(--accent); }
+  nav { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 28px; font-size: .9rem; }
+  nav .pill { padding: 5px 14px; border: 1px solid var(--line); border-radius: 999px; text-decoration: none; color: var(--fg); background: var(--card); }
+  nav .pill[aria-current] { background: var(--accent); border-color: var(--accent); color: var(--bg); font-weight: 600; }
+  nav .home { margin-right: auto; }
+  .eyebrow { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0; }
+  h1 { font-size: 2.4rem; line-height: 1.1; margin: 4px 0 8px; letter-spacing: -.02em; }
+  .lead { color: var(--muted); margin: 0 0 8px; max-width: 62ch; }
+  h2 { font-size: 1.15rem; margin: 40px 0 4px; }
+  h2 + p { color: var(--muted); margin: 0 0 14px; font-size: .92rem; max-width: 66ch; }
+  .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .card h3 { margin: 0; font-size: .9rem; font-weight: 600; color: var(--muted); }
+  .value { font-size: 2rem; font-weight: 650; line-height: 1.2; font-variant-numeric: tabular-nums; margin: 2px 0 8px; }
+  .value small { font-size: .9rem; font-weight: 400; color: var(--muted); }
+  .hint { font-size: .86rem; color: var(--muted); margin: 8px 0 10px; }
+  .gauge { position: relative; height: 8px; border-radius: 4px; background: var(--soft); margin: 14px 0 4px; }
+  .gauge.ph { background: linear-gradient(90deg, #d9694a, #e6b84c 40%, #6fae7c 50%, #5a95c9 75%, #6a6fc0); }
+  .gauge i { position: absolute; top: -4px; width: 4px; height: 16px; margin-left: -2px; border-radius: 2px; background: var(--fg); outline: 2px solid var(--card); }
+  .gauge b { position: absolute; inset: 0 auto 0 0; border-radius: 4px; background: var(--accent); }
+  .scale { display: flex; justify-content: space-between; font-size: .72rem; color: var(--muted); }
+  .badge { display: inline-block; font-size: .74rem; font-weight: 600; padding: 1px 9px; border-radius: 999px; border: 1px solid var(--line); }
+  .badge.observed, .badge.derived { color: var(--accent); border-color: var(--accent); }
+  .badge.prior, .badge.pooled { color: var(--warn); border-color: var(--warn); }
+  details { font-size: .84rem; color: var(--muted); margin-top: 8px; }
+  summary { cursor: pointer; }
+  details p { margin: 6px 0 0; overflow-wrap: anywhere; }
+  .after { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .after h3 { color: var(--fg); font-size: 1rem; display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .dot { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+  .row { display: grid; grid-template-columns: 9.5em 1fr 3em; gap: 8px; align-items: center; font-size: .9rem; margin: 6px 0; }
+  .row .bar { height: 10px; border-radius: 5px; background: var(--soft); overflow: hidden; }
+  .row .bar b { display: block; height: 100%; border-radius: 5px; }
+  .row span:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+  .start { font-size: .72rem; font-weight: 600; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 0 8px; margin-left: auto; }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0; font-size: .92rem; }
+  dt { color: var(--muted); }
+  dd { margin: 0; overflow-wrap: anywhere; }
+  .legend { display: grid; gap: 8px; font-size: .88rem; color: var(--muted); margin: 0; padding: 0; list-style: none; }
+  footer { margin-top: 40px; font-size: .85rem; color: var(--muted); }
+  #error { color: #c0392b; }
+</style>
+</head>
+<body>
+<main>
+  <nav id="nav"><a class="home" href="/">← Field Shift</a></nav>
+  <p id="error"></p>
+  <p class="eyebrow" id="eyebrow"></p>
+  <h1 id="name">Loading…</h1>
+  <p class="lead" id="lead"></p>
+
+  <h2>Starting conditions</h2>
+  <p>What a simulation assumes about this place on day zero. Each value says how well it is supported by data.</p>
+  <div class="grid" id="values"></div>
+
+  <h2>What usually follows what</h2>
+  <p id="chain-lead">How likely each crop is to be followed by another from one year to the next, estimated from the municipality's yearly crop areas.</p>
+  <div class="after" id="after"></div>
+
+  <h2>Climate record</h2>
+  <p>The weather history that simulations resample for this place.</p>
+  <div class="card"><dl id="climate"></dl></div>
+
+  <h2>How to read the evidence labels</h2>
+  <p>Every number carries one of these labels, so nobody mistakes an assumption for a measurement.</p>
+  <ul class="legend">
+    <li><span class="badge observed">observed</span> counted or measured directly for this place.</li>
+    <li><span class="badge derived">derived</span> computed from data about this place through a stated method.</li>
+    <li><span class="badge pooled">pooled</span> borrowed from a wider region because local data is thin.</li>
+    <li><span class="badge prior">prior</span> an assumption, used until data replaces it.</li>
+  </ul>
+
+  <footer id="footer"></footer>
+</main>
+
+<script>
+const COLORS = {soybean: "#3f8f5a", maize_grain: "#e0a526", dry_bean: "#b05a3c", sugarcane: "#4a7fb5", fallow: "#9aa0a6"};
+const OTHER = ["#8e6bb0", "#3aa3a0", "#c2578f", "#7d8a3a", "#6f7fbf"];
+/** Plain-language presentation of each node value. Unknown pointers fall back to the pointer itself. */
+const FIELDS = {
+  "/soil/pH": {title: "Soil acidity (pH)", digits: 1, gauge: "ph", hint: "Measured in water, top 30 cm."},
+  "/soil/organic_carbon": {title: "Organic carbon", unit: "g/kg", digits: 1, hint: "Carbon stored in the top 30 cm of soil."},
+  "/soil/available_water_capacity": {title: "Water the soil can hold", unit: "mm", digits: 0, hint: "Water available to plants down to 1 m when the soil is full."},
+  "/soil/available_water_fraction": {title: "Soil water at the start", percent: true, gauge: "fill", hint: "How full that water store is on day zero."},
+  "/soil/N2": {title: "Soil nitrogen", digits: 1},
+  "/climate/alt": {title: "Altitude", unit: "m", digits: 0},
+};
+const SCOPES = {grid_cell: "Municipality centre, not a specific field"};
+
+const $ = id => document.getElementById(id);
+const make = (tag, props = {}, ...children) => {
+  const node = Object.assign(document.createElement(tag), props);
+  node.append(...children);
+  return node;
+};
+const crop = state => state.split(":")[0];
+const words = text => text.replace(/_/g, " ");
+const title = text => words(text).replace(/^./, c => c.toUpperCase());
+const pct = value => (value * 100).toFixed(value > 0 && value < 0.1 ? 1 : 0) + "%";
+const at = (node, pointer) => pointer.split("/").slice(1).reduce((value, key) => value?.[key], node);
+const get = async path => {
+  const response = await fetch(path);
+  if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
+  return response.json();
+};
+
+function valueCard(node, entry) {
+  const field = FIELDS[entry.pointer] ?? {title: title(entry.pointer.split("/").pop()), digits: 2};
+  const raw = at(node, entry.pointer);
+  const card = make("div", {className: "card"}, make("h3", {textContent: field.title}));
+  const shown = field.percent ? pct(raw) : Number(raw).toFixed(field.digits);
+  card.append(make("div", {className: "value"}, shown, field.unit ? make("small", {textContent: " " + field.unit}) : ""));
+  if (field.gauge === "ph") {
+    const gauge = make("div", {className: "gauge ph"}, make("i"));
+    gauge.firstChild.style.left = `${Math.min(100, Math.max(0, raw / 14 * 100))}%`;
+    card.append(gauge, make("div", {className: "scale"}, make("span", {textContent: "0 acidic"}),
+                            make("span", {textContent: "7 neutral"}), make("span", {textContent: "14 alkaline"})));
+  }
+  if (field.gauge === "fill") {
+    const gauge = make("div", {className: "gauge"}, make("b"));
+    gauge.firstChild.style.width = pct(raw);
+    card.append(gauge, make("div", {className: "scale"}, make("span", {textContent: "empty"}), make("span", {textContent: "full"})));
+  }
+  if (field.hint) card.append(make("p", {className: "hint", textContent: field.hint}));
+  card.append(make("span", {className: `badge ${entry.support}`, textContent: entry.support}),
+              make("details", {}, make("summary", {textContent: "Where this comes from"}), make("p", {textContent: entry.provenance})));
+  return card;
+}
+
+function rotation(chain) {
+  const colors = {};
+  let spare = 0;
+  const color = state => colors[crop(state)] ??= COLORS[crop(state)] ?? OTHER[spare++ % OTHER.length];
+  const origins = [...new Set(chain.transitions.map(edge => edge.from))];
+  const cards = origins.map(origin => {
+    const edges = chain.transitions.filter(edge => edge.from === origin).sort((a, b) => b.probability - a.probability);
+    const head = make("h3", {}, make("span", {className: "dot"}), `After ${words(crop(origin))}`);
+    head.firstChild.style.background = color(origin);
+    if (origin === chain.initial_state) head.append(make("span", {className: "start", textContent: "starting crop"}));
+    const card = make("div", {className: "card"}, head);
+    for (const edge of edges) {
+      const fill = make("b");
+      fill.style.width = pct(edge.probability);
+      fill.style.background = color(edge.to);
+      const name = edge.to === origin ? `${words(crop(edge.to))} again` : words(crop(edge.to));
+      card.append(make("div", {className: "row"}, make("span", {textContent: name}),
+                       make("div", {className: "bar"}, fill), make("span", {textContent: pct(edge.probability)})));
+    }
+    const supports = [...new Set(edges.map(edge => edge.support))];
+    card.append(make("p", {className: "hint"}, ...supports.map(s => make("span", {className: `badge ${s}`, textContent: s}))),
+                make("details", {}, make("summary", {textContent: "Where this comes from"}), make("p", {textContent: edges[0].provenance})));
+    return card;
+  });
+  const targets = new Set(chain.transitions.map(edge => edge.to));
+  const stuck = [...targets].filter(state => !origins.includes(state)).map(state => words(crop(state)));
+  const stays = origins.filter(origin => chain.transitions.filter(edge => edge.from === origin).every(edge => edge.to === origin))
+                       .map(state => words(crop(state)));
+  let note = `${chain.transitions.length} transitions between ${origins.length} crops.`;
+  if (stays.length) note += ` Once in ${stays.join(", ")}, the estimate has no way out.`;
+  if (stuck.length) note += ` There is too little data after ${stuck.join(", ")} to say what follows.`;
+  return {cards, note};
+}
+
+async function load() {
+  const id = new URLSearchParams(location.search).get("id");
+  const list = await get("/profiles");
+  $("nav").append(...list.map(item => {
+    const link = make("a", {className: "pill", href: `?id=${encodeURIComponent(item.id)}`, textContent: item.label});
+    if (item.id === id) link.setAttribute("aria-current", "page");
+    return link;
+  }));
+  if (!id) { location.replace(`?id=${encodeURIComponent(list[0].id)}`); return; }
+  const [profile, chain] = await Promise.all([get(`/profiles/${encodeURIComponent(id)}`), get(`/profiles/${encodeURIComponent(id)}/chain`)]);
+  const node = profile.initial_node, place = profile.municipality ?? {};
+  document.title = `Field Shift · ${profile.label}`;
+  $("eyebrow").textContent = ["Profile", place.ibge_code && `IBGE ${place.ibge_code}`].filter(Boolean).join(" · ");
+  $("name").textContent = profile.label;
+  $("lead").textContent = `${SCOPES[profile.scope] ?? title(profile.scope ?? "")}. Simulations for this place start with ${words(crop(node.state))}.`;
+
+  const location_ = new Set(["/climate/lat", "/climate/long"]);
+  $("values").replaceChildren(...profile.values.filter(entry => !location_.has(entry.pointer)).map(entry => valueCard(node, entry)));
+
+  const {cards, note} = rotation(chain);
+  $("after").replaceChildren(...cards);
+  $("chain-lead").textContent += " " + note;
+
+  const history = profile.climate_history ?? {}, position = profile.values.find(entry => entry.pointer === "/climate/lat");
+  const rows = [["Source", history.source], ["Period", history.period && `${history.period[0]} to ${history.period[1]} (${
+                  Math.round((new Date(history.period[1]) - new Date(history.period[0])) / 31557600000)} years, daily)`],
+                ["Position", node.climate && `${node.climate.lat.toFixed(3)}, ${node.climate.long.toFixed(3)}`],
+                ["Position source", position?.provenance]];
+  $("climate").replaceChildren(...rows.filter(([, value]) => value).flatMap(([name, value]) =>
+    [make("dt", {textContent: name}), make("dd", {textContent: value})]));
+
+  $("footer").replaceChildren("Exploratory results, not agronomic advice. ",
+    make("a", {href: "/demo.html", textContent: "See it on the map"}), " · ",
+    make("a", {href: `/profiles/${encodeURIComponent(id)}`, textContent: "Raw profile (JSON)"}), " · ",
+    make("a", {href: `/profiles/${encodeURIComponent(id)}/chain`, textContent: "Raw chain (JSON)"}));
+}
+load().catch(error => { $("name").textContent = "Profile unavailable"; $("error").textContent = error.message; });
+</script>
+</body>
+</html>

@@ -96,3 +96,7 @@ def test_map_demo_is_served_and_its_api_calls_work(client):
         assert {"lat", "long"} <= detail["initial_node"]["climate"].keys()
         chain = client.get(f"/profiles/{profile['id']}/chain").json()
         assert client.post("/validate/markov", json=chain).json()["valid"] is True
+
+
+def test_profile_page_is_served(client):
+    assert "Starting conditions" in client.get("/profile.html").text

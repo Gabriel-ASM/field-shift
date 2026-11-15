@@ -20,7 +20,7 @@
   header { padding: 16px; max-width: 1180px; margin: 0 auto; }
   header h1 { margin: 0; font-size: 1.3rem; }
   header p { margin: 2px 0 0; color: var(--muted); font-size: .9rem; }
-  header a { color: var(--accent); }
+  a { color: var(--accent); }
   main { max-width: 1180px; margin: 0 auto; padding: 0 16px 32px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); }
   @media (max-width: 820px) { main { grid-template-columns: minmax(0, 1fr); } }
   .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
@@ -73,7 +73,7 @@
   </section>
 
   <section class="card">
-    <h2 id="title">Profile</h2>
+    <h2><span id="title">Profile</span> · <a id="open" href="/profile.html">open profile</a></h2>
     <p id="error"></p>
     <div class="facts" id="facts"></div>
     <h2>State probability over the years <span class="badge" id="valid"></span></h2>
@@ -229,6 +229,7 @@ function render() {
   if (!site) return;
   const {profile} = site, soil = profile.initial_node.soil, climate = profile.initial_node.climate;
   $("title").textContent = profile.label;
+  $("open").href = `/profile.html?id=${encodeURIComponent(profile.id)}`;
   const facts = [[soil.pH, "soil pH"], [soil.organic_carbon, "organic carbon, g/kg"],
                  [soil.available_water_capacity, "available water capacity, mm"],
                  [`${climate.lat.toFixed(2)}, ${climate.long.toFixed(2)}`, "lat, long"]];

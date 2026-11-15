@@ -35,7 +35,7 @@
     <li><a href="/docs"><b>API reference</b><span>OpenAPI: contracts, validation, views, profiles, chains</span></a></li>
   </ul>
 
-  <h2>Profiles in the database</h2>
+  <h2>Profiles</h2>
   <ul id="profiles"><li><a><span>Loading…</span></a></li></ul>
 
   <footer>Placeholder front. Replace the contents of <code>web/</code> (or set <code>FIELD_SHIFT_WEB_DIR</code>) with the real build.</footer>
@@ -46,9 +46,9 @@ fetch("/profiles").then(r => r.json()).then(profiles => {
   list.replaceChildren(...profiles.map(p => {
     const li = document.createElement("li"), a = document.createElement("a");
     const b = document.createElement("b"), s = document.createElement("span");
-    a.href = `/profiles/${encodeURIComponent(p.id)}/chain/matrix`;
+    a.href = `/profile.html?id=${encodeURIComponent(p.id)}`;
     b.textContent = p.label || p.id;
-    s.textContent = "Transition matrix (JSON)";
+    s.textContent = "Starting conditions, usual crop sequence and data sources";
     a.append(b, s); li.append(a); return li;
   }));
 }).catch(() => { document.getElementById("profiles").innerHTML = "<li><a><span>API not reachable.</span></a></li>"; });
