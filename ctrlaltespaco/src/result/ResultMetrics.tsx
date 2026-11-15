@@ -5,7 +5,7 @@ import type { RankingSettings, Route, WaterClass } from "../types.ts";
 import { count, money, percent } from "../ui/format.ts";
 
 const SOIL = { low: "Needs care", medium: "Fair", high: "Good" } as const;
-const NITROGEN = { low: "N below target", medium: "N near target", high: "N above target" } as const;
+const NITROGEN = { low: "Nitrogen below target", medium: "Nitrogen near target", high: "Nitrogen above target" } as const;
 const WATER: Record<WaterClass, string> = { water_low: "Low", water_medium: "Medium", water_high: "High" };
 
 /** The most frequent final water class of the route, and its share. */
