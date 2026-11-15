@@ -1,0 +1,335 @@
+{
+    "seed": 2026,
+    "trajectories": 1000,
+    "horizon_days": 1825,
+    "period_days": 15,
+    "profile": "franca-sp",
+    "climate_source": "historical_year_resample",
+    "events": [
+        {
+            "id": "drought_soybean_summer",
+            "label": "Summer dry spell on soybean",
+            "kind": "drought",
+            "probability": {
+                "value": 0.08,
+                "per": "period"
+            },
+            "duration_days": {
+                "distribution": "triangular",
+                "params": {
+                    "min": 10,
+                    "mode": 15,
+                    "max": 25
+                }
+            },
+            "when": [
+                {
+                    "path": "/climate/month",
+                    "op": "in",
+                    "value": [
+                        "january",
+                        "february"
+                    ]
+                }
+            ],
+            "crops": [
+                "soybean"
+            ],
+            "max_occurrences": 1,
+            "effects": [
+                {
+                    "target": "/soil/available_water_fraction",
+                    "operation": "set",
+                    "value": 0.1,
+                    "at": "entry",
+                    "support": "prior",
+                    "provenance": "example placeholder, not calibrated"
+                },
+                {
+                    "target": "/financial/yield",
+                    "operation": "multiply",
+                    "value": {
+                        "distribution": "uniform",
+                        "params": {
+                            "min": 0.7,
+                            "max": 0.9
+                        }
+                    },
+                    "at": "entry",
+                    "support": "prior",
+                    "provenance": "example placeholder, not calibrated"
+                }
+            ],
+            "editable": true,
+            "support": "prior",
+            "provenance": "example placeholder, not calibrated"
+        },
+        {
+            "id": "frost_maize_winter",
+            "label": "Frost on second-season maize",
+            "kind": "frost",
+            "probability": {
+                "value": 0.03,
+                "per": "period"
+            },
+            "duration_days": 1,
+            "when": [
+                {
+                    "path": "/climate/month",
+                    "op": "in",
+                    "value": [
+                        "june",
+                        "july"
+                    ]
+                }
+            ],
+            "crops": [
+                "maize_grain"
+            ],
+            "effects": [
+                {
+                    "target": "/financial/yield",
+                    "operation": "multiply",
+                    "value": 0.6,
+                    "at": "entry",
+                    "support": "prior",
+                    "provenance": "example placeholder, not calibrated"
+                }
+            ],
+            "editable": true,
+            "support": "prior",
+            "provenance": "example placeholder, not calibrated"
+        }
+    ],
+    "chain": {
+        "description": "Hypothetical Cerrado system S1: soybean -> second-season maize or brachiaria -> soybean. Every number is a prior placeholder. Each crop is a skip_stages state: cost fires at entry (sowing), revenue at exit (harvest), N rates integrate over the full cycle. Edges carry only probabilities and the pH gate.",
+        "initial_state": "brachiaria:skip_stages",
+        "states": [
+            {
+                "id": "soybean:skip_stages",
+                "crop": "soybean",
+                "stage": "skip_stages",
+                "duration_days": {
+                    "distribution": "triangular",
+                    "params": {
+                        "min": 100,
+                        "mode": 115,
+                        "max": 130
+                    }
+                },
+                "effects": [
+                    {
+                        "target": "/soil/N2",
+                        "operation": "rate",
+                        "value": 0.2,
+                        "unit": "kg/ha/day",
+                        "support": "prior",
+                        "provenance": "biological N fixation, placeholder"
+                    },
+                    {
+                        "target": "/financial/cost",
+                        "operation": "add",
+                        "value": {
+                            "distribution": "triangular",
+                            "params": {
+                                "min": 2500,
+                                "mode": 3200,
+                                "max": 4000
+                            }
+                        },
+                        "unit": "BRL/ha",
+                        "support": "prior",
+                        "provenance": "example placeholder; order of magnitude from system S1 in research/levantamento-agronomico-rascunho.md",
+                        "at": "entry"
+                    },
+                    {
+                        "target": "/financial/revenue",
+                        "operation": "add",
+                        "value": {
+                            "distribution": "normal",
+                            "params": {
+                                "mean": 7000,
+                                "sd": 1500
+                            }
+                        },
+                        "unit": "BRL/ha",
+                        "support": "prior",
+                        "provenance": "example placeholder; order of magnitude from system S1 in research/levantamento-agronomico-rascunho.md",
+                        "at": "exit"
+                    }
+                ]
+            },
+            {
+                "id": "maize_grain:skip_stages",
+                "crop": "maize_grain",
+                "stage": "skip_stages",
+                "duration_days": {
+                    "distribution": "uniform",
+                    "params": {
+                        "min": 110,
+                        "max": 140
+                    }
+                },
+                "effects": [
+                    {
+                        "target": "/soil/N2",
+                        "operation": "rate",
+                        "value": -0.5,
+                        "unit": "kg/ha/day",
+                        "bounds": {
+                            "min": 0
+                        },
+                        "support": "prior",
+                        "provenance": "maize N uptake, placeholder"
+                    },
+                    {
+                        "target": "/financial/cost",
+                        "operation": "add",
+                        "value": {
+                            "distribution": "triangular",
+                            "params": {
+                                "min": 2800,
+                                "mode": 3600,
+                                "max": 4500
+                            }
+                        },
+                        "unit": "BRL/ha",
+                        "support": "prior",
+                        "provenance": "example placeholder; order of magnitude from system S1 in research/levantamento-agronomico-rascunho.md",
+                        "at": "entry"
+                    },
+                    {
+                        "target": "/financial/revenue",
+                        "operation": "add",
+                        "value": {
+                            "distribution": "normal",
+                            "params": {
+                                "mean": 4500,
+                                "sd": 1500
+                            }
+                        },
+                        "unit": "BRL/ha",
+                        "support": "prior",
+                        "provenance": "example placeholder; order of magnitude from system S1 in research/levantamento-agronomico-rascunho.md",
+                        "at": "exit"
+                    }
+                ]
+            },
+            {
+                "id": "brachiaria:skip_stages",
+                "crop": "brachiaria",
+                "stage": "skip_stages",
+                "duration_days": {
+                    "distribution": "uniform",
+                    "params": {
+                        "min": 90,
+                        "max": 150
+                    }
+                },
+                "allowed_actions": [
+                    "liming"
+                ],
+                "effects": [
+                    {
+                        "target": "/soil/N2",
+                        "operation": "rate",
+                        "value": 0.05,
+                        "unit": "kg/ha/day",
+                        "support": "prior",
+                        "provenance": "N cycling by straw, placeholder"
+                    }
+                ]
+            }
+        ],
+        "transitions": [
+            {
+                "from": "brachiaria:skip_stages",
+                "to": "soybean:skip_stages",
+                "action": null,
+                "probability": 1,
+                "when": [
+                    {
+                        "path": "/soil/pH",
+                        "op": ">=",
+                        "value": 5.5
+                    }
+                ],
+                "support": "prior",
+                "provenance": "soybean in the Cerrado needs pH around 5.5-6.0"
+            },
+            {
+                "from": "brachiaria:skip_stages",
+                "to": "brachiaria:skip_stages",
+                "action": null,
+                "probability": 1,
+                "when": [
+                    {
+                        "path": "/soil/pH",
+                        "op": "<",
+                        "value": 5.5
+                    }
+                ],
+                "support": "prior",
+                "provenance": "acid soil: stays in cover crop until liming raises pH"
+            },
+            {
+                "from": "soybean:skip_stages",
+                "to": "maize_grain:skip_stages",
+                "action": null,
+                "probability": 0.7,
+                "support": "prior",
+                "provenance": "example placeholder; order of magnitude from system S1 in research/levantamento-agronomico-rascunho.md"
+            },
+            {
+                "from": "soybean:skip_stages",
+                "to": "brachiaria:skip_stages",
+                "action": null,
+                "probability": 0.3,
+                "support": "prior",
+                "provenance": "second-season maize window missed: goes to cover crop"
+            },
+            {
+                "from": "maize_grain:skip_stages",
+                "to": "brachiaria:skip_stages",
+                "action": null,
+                "probability": 1,
+                "support": "prior",
+                "provenance": "example placeholder; order of magnitude from system S1 in research/levantamento-agronomico-rascunho.md"
+            }
+        ]
+    },
+    "scenarios": [
+        {
+            "id": "s1-rotation",
+            "label": "Soybean -> maize -> brachiaria",
+            "policy": {
+                "kind": "rotation",
+                "sequence": [
+                    "soybean",
+                    "maize_grain",
+                    "brachiaria"
+                ],
+                "fallback": "brachiaria:skip_stages"
+            }
+        },
+        {
+            "id": "soybean-brachiaria",
+            "label": "Soybean -> brachiaria (no second crop)",
+            "policy": {
+                "kind": "rotation",
+                "sequence": [
+                    "soybean",
+                    "brachiaria"
+                ],
+                "fallback": "brachiaria:skip_stages"
+            }
+        },
+        {
+            "id": "regional-baseline",
+            "label": "What the region usually does",
+            "policy": {
+                "kind": "markov"
+            }
+        }
+    ]
+}

@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Runtime defaults for the interactive crop Markov and Monte Carlo page.",
+  "monte_carlo": {
+    "maximum_trajectories": 100000,
+    "initial_preview_trajectories": 1000,
+    "refinement_targets": [
+      1000,
+      5000,
+      20000,
+      100000
+    ],
+    "progress_interval": 500,
+    "graph_refresh_interval": 20000,
+    "stable_leader_checkpoints": 2,
+    "minimum_leader_vpl_samples": 100
+  },
+  "ranking_score": {
+    "minimum": 0,
+    "maximum": 10,
+    "break_even": 5,
+    "normalization_scale": "max(abs(common_reference_cvar5), abs(common_reference_p95), minimum_scale_brl_per_ha)",
+    "minimum_scale_brl_per_ha": 1,
+    "formula": "clamp(break_even + weighted_score_brl_per_ha / normalization_scale * (weighted_score_brl_per_ha < 0 ? break_even - minimum : maximum - break_even), minimum, maximum)",
+    "sample_count_role": "informational_only; trajectory and valid VPL counts do not change or weight any score",
+    "interpretation": "The total score is a direct weighted combination of the economic subscore and final soil/water subscores. CVaR5 is an optional resilience measure inside economics. Sample count is informational only.",
+    "environment": {
+      "default_weight": 0.2,
+      "maximum_weight": 0.5,
+      "weight_step": 0.05,
+      "soil_share": 0.6666666667,
+      "water_share": 0.3333333333,
+      "soil_reference_g_kg": 20,
+      "soil_score_formula": "clamp(mean_final_soc_g_kg / soil_reference_g_kg * 10, 0, 10)",
+      "water_multiplier_source": "soilHypotheses.economic_yield_response.water_multiplier_by_class",
+      "water_score_formula": "clamp(5 + (mean_final_water_multiplier - 1) / max(abs(low_multiplier - 1), abs(high_multiplier - 1)) * 5, 0, 10)",
+      "total_score_formula": "(1 - environment_weight) * economic_score10 + environment_weight * (soil_share * soil_score10 + water_share * water_score10)"
+    }
+  }
+}

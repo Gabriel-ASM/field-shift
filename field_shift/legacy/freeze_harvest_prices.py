@@ -11,7 +11,7 @@ from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 YAHOO_SYMBOLS = {
     "soybean": {"symbol": "ZSK27.CBT", "pounds_per_bushel": 60},
     "maize": {"symbol": "ZCK27.CBT", "pounds_per_bushel": 56},

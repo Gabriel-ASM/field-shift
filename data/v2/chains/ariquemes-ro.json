@@ -1,0 +1,3305 @@
+{
+  "id": "ariquemes-ro",
+  "profile": "ariquemes-ro",
+  "description": "Regional PAM proxy with a Dirichlet prior. Probabilities precede calendar and environmental adjustment.",
+  "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination.",
+  "initial_state": "soybean:skip_stages",
+  "alpha_per_destination": 0.5,
+  "pam_history": {
+    "source": {
+      "publisher": "IBGE",
+      "survey": "Produção Agrícola Municipal (PAM)",
+      "table": 5457,
+      "url": "https://apisidra.ibge.gov.br/values/t/5457/n6/1100023,3516200,3170701/v/112,214,215,216/p/1988-2025/c782/40101,40102,40103,40106,40112,40122,40124,40125,40127,40140,40141?formato=json",
+      "municipality_ibge_code": "1100023",
+      "municipality": "Ariquemes",
+      "period": [
+        1988,
+        2025
+      ]
+    },
+    "period": [
+      1988,
+      2025
+    ],
+    "top_crop_limit": 5,
+    "annual_sequence": [
+      {
+        "year": 1988,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 5917.0,
+        "top5_area_total_ha": 9482.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 5917.0,
+            "area_share_within_top5": 0.6240244674119384
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 3434.0,
+            "area_share_within_top5": 0.3621598818814596
+          },
+          {
+            "rank": 3,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 131.0,
+            "area_share_within_top5": 0.013815650706601982
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "sugarcane": 131.0,
+          "dry_bean": 3434.0,
+          "maize_grain": 5917.0
+        }
+      },
+      {
+        "year": 1989,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 8000.0,
+        "top5_area_total_ha": 12000.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 8000.0,
+            "area_share_within_top5": 0.6666666666666666
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 3800.0,
+            "area_share_within_top5": 0.31666666666666665
+          },
+          {
+            "rank": 3,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 200.0,
+            "area_share_within_top5": 0.016666666666666666
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "sugarcane": 200.0,
+          "dry_bean": 3800.0,
+          "maize_grain": 8000.0
+        }
+      },
+      {
+        "year": 1990,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 6800.0,
+        "top5_area_total_ha": 11000.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 6800.0,
+            "area_share_within_top5": 0.6181818181818182
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 4000.0,
+            "area_share_within_top5": 0.36363636363636365
+          },
+          {
+            "rank": 3,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 200.0,
+            "area_share_within_top5": 0.01818181818181818
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "sugarcane": 200.0,
+          "dry_bean": 4000.0,
+          "maize_grain": 6800.0
+        }
+      },
+      {
+        "year": 1991,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 6800.0,
+        "top5_area_total_ha": 8100.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 6800.0,
+            "area_share_within_top5": 0.8395061728395061
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 1100.0,
+            "area_share_within_top5": 0.13580246913580246
+          },
+          {
+            "rank": 3,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 200.0,
+            "area_share_within_top5": 0.024691358024691357
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "sugarcane": 200.0,
+          "dry_bean": 1100.0,
+          "maize_grain": 6800.0
+        }
+      },
+      {
+        "year": 1992,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 6800.0,
+        "top5_area_total_ha": 8510.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 6800.0,
+            "area_share_within_top5": 0.799059929494712
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 1500.0,
+            "area_share_within_top5": 0.1762632197414806
+          },
+          {
+            "rank": 3,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 210.0,
+            "area_share_within_top5": 0.024676850763807285
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "sugarcane": 210.0,
+          "dry_bean": 1500.0,
+          "maize_grain": 6800.0
+        }
+      },
+      {
+        "year": 1993,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 1658.0,
+        "top5_area_total_ha": 2749.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 1658.0,
+            "area_share_within_top5": 0.6031284103310295
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 1039.0,
+            "area_share_within_top5": 0.3779556202255366
+          },
+          {
+            "rank": 3,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 52.0,
+            "area_share_within_top5": 0.018915969443433975
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "sugarcane": 52.0,
+          "dry_bean": 1039.0,
+          "maize_grain": 1658.0
+        }
+      },
+      {
+        "year": 1994,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 1990.0,
+        "top5_area_total_ha": 3180.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 1990.0,
+            "area_share_within_top5": 0.6257861635220126
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 1143.0,
+            "area_share_within_top5": 0.3594339622641509
+          },
+          {
+            "rank": 3,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 47.0,
+            "area_share_within_top5": 0.014779874213836478
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "sugarcane": 47.0,
+          "dry_bean": 1143.0,
+          "maize_grain": 1990.0
+        }
+      },
+      {
+        "year": 1995,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 1990.0,
+        "top5_area_total_ha": 3238.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 1990.0,
+            "area_share_within_top5": 0.6145768993205682
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 1200.0,
+            "area_share_within_top5": 0.3705991352686844
+          },
+          {
+            "rank": 3,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 48.0,
+            "area_share_within_top5": 0.014823965410747375
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "sugarcane": 48.0,
+          "dry_bean": 1200.0,
+          "maize_grain": 1990.0
+        }
+      },
+      {
+        "year": 1996,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 2978.0,
+        "top5_area_total_ha": 3575.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 2978.0,
+            "area_share_within_top5": 0.833006993006993
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 594.0,
+            "area_share_within_top5": 0.16615384615384615
+          },
+          {
+            "rank": 3,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 3.0,
+            "area_share_within_top5": 0.0008391608391608392
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "sugarcane": 3.0,
+          "dry_bean": 594.0,
+          "maize_grain": 2978.0
+        }
+      },
+      {
+        "year": 1997,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 3113.0,
+        "top5_area_total_ha": 3737.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 3113.0,
+            "area_share_within_top5": 0.833021139951833
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 621.0,
+            "area_share_within_top5": 0.16617607706716617
+          },
+          {
+            "rank": 3,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 3.0,
+            "area_share_within_top5": 0.0008027829810008028
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "sugarcane": 3.0,
+          "dry_bean": 621.0,
+          "maize_grain": 3113.0
+        }
+      },
+      {
+        "year": 1998,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 2660.0,
+        "top5_area_total_ha": 3578.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 2660.0,
+            "area_share_within_top5": 0.7434320849636669
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 914.0,
+            "area_share_within_top5": 0.2554499720514254
+          },
+          {
+            "rank": 3,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 4.0,
+            "area_share_within_top5": 0.0011179429849077697
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "sugarcane": 4.0,
+          "dry_bean": 914.0,
+          "maize_grain": 2660.0
+        }
+      },
+      {
+        "year": 1999,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 1400.0,
+        "top5_area_total_ha": 1985.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 1400.0,
+            "area_share_within_top5": 0.7052896725440806
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 580.0,
+            "area_share_within_top5": 0.29219143576826195
+          },
+          {
+            "rank": 3,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 5.0,
+            "area_share_within_top5": 0.0025188916876574307
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "sugarcane": 5.0,
+          "dry_bean": 580.0,
+          "maize_grain": 1400.0
+        }
+      },
+      {
+        "year": 2000,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 1250.0,
+        "top5_area_total_ha": 1545.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 1250.0,
+            "area_share_within_top5": 0.8090614886731392
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 290.0,
+            "area_share_within_top5": 0.18770226537216828
+          },
+          {
+            "rank": 3,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 5.0,
+            "area_share_within_top5": 0.003236245954692557
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "sugarcane": 5.0,
+          "dry_bean": 290.0,
+          "maize_grain": 1250.0
+        }
+      },
+      {
+        "year": 2001,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 1050.0,
+        "top5_area_total_ha": 1315.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 1050.0,
+            "area_share_within_top5": 0.7984790874524715
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 260.0,
+            "area_share_within_top5": 0.19771863117870722
+          },
+          {
+            "rank": 3,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 5.0,
+            "area_share_within_top5": 0.0038022813688212928
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "sugarcane": 5.0,
+          "dry_bean": 260.0,
+          "maize_grain": 1050.0
+        }
+      },
+      {
+        "year": 2002,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 1000.0,
+        "top5_area_total_ha": 1641.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 1000.0,
+            "area_share_within_top5": 0.6093845216331505
+          },
+          {
+            "rank": 2,
+            "state_id": "soybean",
+            "crop_name": "Soja",
+            "harvested_area_ha": 450.0,
+            "area_share_within_top5": 0.2742230347349177
+          },
+          {
+            "rank": 3,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 183.0,
+            "area_share_within_top5": 0.11151736745886655
+          },
+          {
+            "rank": 4,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 8.0,
+            "area_share_within_top5": 0.004875076173065204
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "sugarcane": 8.0,
+          "dry_bean": 183.0,
+          "maize_grain": 1000.0,
+          "soybean": 450.0
+        }
+      },
+      {
+        "year": 2003,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 1000.0,
+        "top5_area_total_ha": 1216.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 1000.0,
+            "area_share_within_top5": 0.8223684210526315
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 208.0,
+            "area_share_within_top5": 0.17105263157894737
+          },
+          {
+            "rank": 3,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 8.0,
+            "area_share_within_top5": 0.006578947368421052
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "sugarcane": 8.0,
+          "dry_bean": 208.0,
+          "maize_grain": 1000.0
+        }
+      },
+      {
+        "year": 2004,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 1600.0,
+        "top5_area_total_ha": 2082.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 1600.0,
+            "area_share_within_top5": 0.7684918347742555
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 477.0,
+            "area_share_within_top5": 0.22910662824207492
+          },
+          {
+            "rank": 3,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 5.0,
+            "area_share_within_top5": 0.0024015369836695487
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "sugarcane": 5.0,
+          "dry_bean": 477.0,
+          "maize_grain": 1600.0
+        }
+      },
+      {
+        "year": 2005,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 2130.0,
+        "top5_area_total_ha": 2685.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 2130.0,
+            "area_share_within_top5": 0.7932960893854749
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 550.0,
+            "area_share_within_top5": 0.2048417132216015
+          },
+          {
+            "rank": 3,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 5.0,
+            "area_share_within_top5": 0.00186219739292365
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "sugarcane": 5.0,
+          "dry_bean": 550.0,
+          "maize_grain": 2130.0
+        }
+      },
+      {
+        "year": 2006,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 2343.0,
+        "top5_area_total_ha": 2950.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 2343.0,
+            "area_share_within_top5": 0.7942372881355932
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 550.0,
+            "area_share_within_top5": 0.1864406779661017
+          },
+          {
+            "rank": 3,
+            "state_id": "soybean",
+            "crop_name": "Soja",
+            "harvested_area_ha": 50.0,
+            "area_share_within_top5": 0.01694915254237288
+          },
+          {
+            "rank": 4,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 5.0,
+            "area_share_within_top5": 0.001694915254237288
+          },
+          {
+            "rank": 5,
+            "state_id": "peanut",
+            "crop_name": "Amendoim",
+            "harvested_area_ha": 2.0,
+            "area_share_within_top5": 0.0006779661016949153
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "peanut": 2.0,
+          "sugarcane": 5.0,
+          "dry_bean": 550.0,
+          "maize_grain": 2343.0,
+          "soybean": 50.0
+        }
+      },
+      {
+        "year": 2007,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 2577.0,
+        "top5_area_total_ha": 3400.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 2577.0,
+            "area_share_within_top5": 0.7579411764705882
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 810.0,
+            "area_share_within_top5": 0.23823529411764705
+          },
+          {
+            "rank": 3,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 10.0,
+            "area_share_within_top5": 0.0029411764705882353
+          },
+          {
+            "rank": 4,
+            "state_id": "peanut",
+            "crop_name": "Amendoim",
+            "harvested_area_ha": 3.0,
+            "area_share_within_top5": 0.0008823529411764706
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "peanut": 3.0,
+          "sugarcane": 10.0,
+          "dry_bean": 810.0,
+          "maize_grain": 2577.0
+        }
+      },
+      {
+        "year": 2008,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 2577.0,
+        "top5_area_total_ha": 3747.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 2577.0,
+            "area_share_within_top5": 0.6877502001601281
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 1157.0,
+            "area_share_within_top5": 0.3087803576194289
+          },
+          {
+            "rank": 3,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 10.0,
+            "area_share_within_top5": 0.0026688017080330933
+          },
+          {
+            "rank": 4,
+            "state_id": "peanut",
+            "crop_name": "Amendoim",
+            "harvested_area_ha": 3.0,
+            "area_share_within_top5": 0.0008006405124099279
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "peanut": 3.0,
+          "sugarcane": 10.0,
+          "dry_bean": 1157.0,
+          "maize_grain": 2577.0
+        }
+      },
+      {
+        "year": 2009,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 3566.0,
+        "top5_area_total_ha": 5409.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 3566.0,
+            "area_share_within_top5": 0.6592715843963765
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 1430.0,
+            "area_share_within_top5": 0.2643741911628767
+          },
+          {
+            "rank": 3,
+            "state_id": "soybean",
+            "crop_name": "Soja",
+            "harvested_area_ha": 400.0,
+            "area_share_within_top5": 0.07395082270290257
+          },
+          {
+            "rank": 4,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 10.0,
+            "area_share_within_top5": 0.0018487705675725643
+          },
+          {
+            "rank": 5,
+            "state_id": "peanut",
+            "crop_name": "Amendoim",
+            "harvested_area_ha": 3.0,
+            "area_share_within_top5": 0.0005546311702717693
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "peanut": 3.0,
+          "sugarcane": 10.0,
+          "dry_bean": 1430.0,
+          "maize_grain": 3566.0,
+          "soybean": 400.0
+        }
+      },
+      {
+        "year": 2010,
+        "state_id": "maize_grain",
+        "crop_name": "Milho",
+        "harvested_area_ha": 4279.0,
+        "top5_area_total_ha": 6809.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 4279.0,
+            "area_share_within_top5": 0.6284329563812601
+          },
+          {
+            "rank": 2,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 1430.0,
+            "area_share_within_top5": 0.210016155088853
+          },
+          {
+            "rank": 3,
+            "state_id": "soybean",
+            "crop_name": "Soja",
+            "harvested_area_ha": 1100.0,
+            "area_share_within_top5": 0.16155088852988692
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "dry_bean": 1430.0,
+          "maize_grain": 4279.0,
+          "soybean": 1100.0
+        }
+      },
+      {
+        "year": 2011,
+        "state_id": "dry_bean",
+        "crop_name": "Feijão",
+        "harvested_area_ha": 1430.0,
+        "top5_area_total_ha": 4136.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 1430.0,
+            "area_share_within_top5": 0.34574468085106386
+          },
+          {
+            "rank": 2,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 1350.0,
+            "area_share_within_top5": 0.32640232108317213
+          },
+          {
+            "rank": 3,
+            "state_id": "soybean",
+            "crop_name": "Soja",
+            "harvested_area_ha": 1350.0,
+            "area_share_within_top5": 0.32640232108317213
+          },
+          {
+            "rank": 4,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 6.0,
+            "area_share_within_top5": 0.0014506769825918763
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "sugarcane": 6.0,
+          "dry_bean": 1430.0,
+          "maize_grain": 1350.0,
+          "soybean": 1350.0
+        }
+      },
+      {
+        "year": 2012,
+        "state_id": "coffee",
+        "crop_name": "Café",
+        "harvested_area_ha": 4764.0,
+        "top5_area_total_ha": 7574.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "coffee",
+            "crop_name": "Café",
+            "harvested_area_ha": 4764.0,
+            "area_share_within_top5": 0.6289939265909691
+          },
+          {
+            "rank": 2,
+            "state_id": "soybean",
+            "crop_name": "Soja",
+            "harvested_area_ha": 1642.0,
+            "area_share_within_top5": 0.21679429627673621
+          },
+          {
+            "rank": 3,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 750.0,
+            "area_share_within_top5": 0.09902297332981251
+          },
+          {
+            "rank": 4,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 418.0,
+            "area_share_within_top5": 0.05518880380248217
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "coffee": 4764.0,
+          "dry_bean": 418.0,
+          "maize_grain": 750.0,
+          "soybean": 1642.0
+        }
+      },
+      {
+        "year": 2013,
+        "state_id": "soybean",
+        "crop_name": "Soja",
+        "harvested_area_ha": 1642.0,
+        "top5_area_total_ha": 2973.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "soybean",
+            "crop_name": "Soja",
+            "harvested_area_ha": 1642.0,
+            "area_share_within_top5": 0.5523040699630003
+          },
+          {
+            "rank": 2,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 675.0,
+            "area_share_within_top5": 0.22704339051463168
+          },
+          {
+            "rank": 3,
+            "state_id": "coffee",
+            "crop_name": "Café",
+            "harvested_area_ha": 630.0,
+            "area_share_within_top5": 0.2119071644803229
+          },
+          {
+            "rank": 4,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 20.0,
+            "area_share_within_top5": 0.006727211570803902
+          },
+          {
+            "rank": 5,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 6.0,
+            "area_share_within_top5": 0.0020181634712411706
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "coffee": 630.0,
+          "sugarcane": 6.0,
+          "dry_bean": 20.0,
+          "maize_grain": 675.0,
+          "soybean": 1642.0
+        }
+      },
+      {
+        "year": 2014,
+        "state_id": "soybean",
+        "crop_name": "Soja",
+        "harvested_area_ha": 1685.0,
+        "top5_area_total_ha": 3088.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "soybean",
+            "crop_name": "Soja",
+            "harvested_area_ha": 1685.0,
+            "area_share_within_top5": 0.5456606217616581
+          },
+          {
+            "rank": 2,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 777.0,
+            "area_share_within_top5": 0.25161917098445596
+          },
+          {
+            "rank": 3,
+            "state_id": "coffee",
+            "crop_name": "Café",
+            "harvested_area_ha": 600.0,
+            "area_share_within_top5": 0.19430051813471502
+          },
+          {
+            "rank": 4,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 20.0,
+            "area_share_within_top5": 0.006476683937823834
+          },
+          {
+            "rank": 5,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 6.0,
+            "area_share_within_top5": 0.0019430051813471502
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "coffee": 600.0,
+          "sugarcane": 6.0,
+          "dry_bean": 20.0,
+          "maize_grain": 777.0,
+          "soybean": 1685.0
+        }
+      },
+      {
+        "year": 2015,
+        "state_id": "soybean",
+        "crop_name": "Soja",
+        "harvested_area_ha": 2243.0,
+        "top5_area_total_ha": 3583.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "soybean",
+            "crop_name": "Soja",
+            "harvested_area_ha": 2243.0,
+            "area_share_within_top5": 0.6260117220206531
+          },
+          {
+            "rank": 2,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 695.0,
+            "area_share_within_top5": 0.1939715322355568
+          },
+          {
+            "rank": 3,
+            "state_id": "coffee",
+            "crop_name": "Café",
+            "harvested_area_ha": 605.0,
+            "area_share_within_top5": 0.1688529165503768
+          },
+          {
+            "rank": 4,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 30.0,
+            "area_share_within_top5": 0.008372871895060006
+          },
+          {
+            "rank": 5,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 10.0,
+            "area_share_within_top5": 0.0027909572983533353
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "coffee": 605.0,
+          "sugarcane": 10.0,
+          "dry_bean": 30.0,
+          "maize_grain": 695.0,
+          "soybean": 2243.0
+        }
+      },
+      {
+        "year": 2016,
+        "state_id": "soybean",
+        "crop_name": "Soja",
+        "harvested_area_ha": 2078.0,
+        "top5_area_total_ha": 3246.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "soybean",
+            "crop_name": "Soja",
+            "harvested_area_ha": 2078.0,
+            "area_share_within_top5": 0.6401725200246458
+          },
+          {
+            "rank": 2,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 697.0,
+            "area_share_within_top5": 0.21472581638940233
+          },
+          {
+            "rank": 3,
+            "state_id": "coffee",
+            "crop_name": "Café",
+            "harvested_area_ha": 430.0,
+            "area_share_within_top5": 0.13247073321010475
+          },
+          {
+            "rank": 4,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 30.0,
+            "area_share_within_top5": 0.009242144177449169
+          },
+          {
+            "rank": 5,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 11.0,
+            "area_share_within_top5": 0.0033887861983980284
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "coffee": 430.0,
+          "sugarcane": 11.0,
+          "dry_bean": 30.0,
+          "maize_grain": 697.0,
+          "soybean": 2078.0
+        }
+      },
+      {
+        "year": 2017,
+        "state_id": "soybean",
+        "crop_name": "Soja",
+        "harvested_area_ha": 3321.0,
+        "top5_area_total_ha": 4691.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "soybean",
+            "crop_name": "Soja",
+            "harvested_area_ha": 3321.0,
+            "area_share_within_top5": 0.7079513962907695
+          },
+          {
+            "rank": 2,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 975.0,
+            "area_share_within_top5": 0.20784480920912385
+          },
+          {
+            "rank": 3,
+            "state_id": "coffee",
+            "crop_name": "Café",
+            "harvested_area_ha": 360.0,
+            "area_share_within_top5": 0.07674269878490728
+          },
+          {
+            "rank": 4,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 25.0,
+            "area_share_within_top5": 0.005329354082285227
+          },
+          {
+            "rank": 5,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 10.0,
+            "area_share_within_top5": 0.002131741632914091
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "coffee": 360.0,
+          "sugarcane": 10.0,
+          "dry_bean": 25.0,
+          "maize_grain": 975.0,
+          "soybean": 3321.0
+        }
+      },
+      {
+        "year": 2018,
+        "state_id": "soybean",
+        "crop_name": "Soja",
+        "harvested_area_ha": 5600.0,
+        "top5_area_total_ha": 6900.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "soybean",
+            "crop_name": "Soja",
+            "harvested_area_ha": 5600.0,
+            "area_share_within_top5": 0.8115942028985508
+          },
+          {
+            "rank": 2,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 1000.0,
+            "area_share_within_top5": 0.14492753623188406
+          },
+          {
+            "rank": 3,
+            "state_id": "coffee",
+            "crop_name": "Café",
+            "harvested_area_ha": 270.0,
+            "area_share_within_top5": 0.0391304347826087
+          },
+          {
+            "rank": 4,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 20.0,
+            "area_share_within_top5": 0.002898550724637681
+          },
+          {
+            "rank": 5,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 10.0,
+            "area_share_within_top5": 0.0014492753623188406
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "coffee": 270.0,
+          "sugarcane": 20.0,
+          "dry_bean": 10.0,
+          "maize_grain": 1000.0,
+          "soybean": 5600.0
+        }
+      },
+      {
+        "year": 2019,
+        "state_id": "soybean",
+        "crop_name": "Soja",
+        "harvested_area_ha": 7893.0,
+        "top5_area_total_ha": 9554.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "soybean",
+            "crop_name": "Soja",
+            "harvested_area_ha": 7893.0,
+            "area_share_within_top5": 0.8261461168097132
+          },
+          {
+            "rank": 2,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 1400.0,
+            "area_share_within_top5": 0.1465354825204103
+          },
+          {
+            "rank": 3,
+            "state_id": "coffee",
+            "crop_name": "Café",
+            "harvested_area_ha": 231.0,
+            "area_share_within_top5": 0.0241783546158677
+          },
+          {
+            "rank": 4,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 20.0,
+            "area_share_within_top5": 0.0020933640360058614
+          },
+          {
+            "rank": 5,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 10.0,
+            "area_share_within_top5": 0.0010466820180029307
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "coffee": 231.0,
+          "sugarcane": 20.0,
+          "dry_bean": 10.0,
+          "maize_grain": 1400.0,
+          "soybean": 7893.0
+        }
+      },
+      {
+        "year": 2020,
+        "state_id": "soybean",
+        "crop_name": "Soja",
+        "harvested_area_ha": 7782.0,
+        "top5_area_total_ha": 9673.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "soybean",
+            "crop_name": "Soja",
+            "harvested_area_ha": 7782.0,
+            "area_share_within_top5": 0.8045073917088804
+          },
+          {
+            "rank": 2,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 1600.0,
+            "area_share_within_top5": 0.16540887005065646
+          },
+          {
+            "rank": 3,
+            "state_id": "coffee",
+            "crop_name": "Café",
+            "harvested_area_ha": 261.0,
+            "area_share_within_top5": 0.026982321927013338
+          },
+          {
+            "rank": 4,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 20.0,
+            "area_share_within_top5": 0.002067610875633206
+          },
+          {
+            "rank": 5,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 10.0,
+            "area_share_within_top5": 0.001033805437816603
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "coffee": 261.0,
+          "sugarcane": 20.0,
+          "dry_bean": 10.0,
+          "maize_grain": 1600.0,
+          "soybean": 7782.0
+        }
+      },
+      {
+        "year": 2021,
+        "state_id": "soybean",
+        "crop_name": "Soja",
+        "harvested_area_ha": 6979.0,
+        "top5_area_total_ha": 9094.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "soybean",
+            "crop_name": "Soja",
+            "harvested_area_ha": 6979.0,
+            "area_share_within_top5": 0.767429074114801
+          },
+          {
+            "rank": 2,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 1900.0,
+            "area_share_within_top5": 0.20892896415218826
+          },
+          {
+            "rank": 3,
+            "state_id": "coffee",
+            "crop_name": "Café",
+            "harvested_area_ha": 185.0,
+            "area_share_within_top5": 0.020343083351660435
+          },
+          {
+            "rank": 4,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 20.0,
+            "area_share_within_top5": 0.0021992522542335605
+          },
+          {
+            "rank": 5,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 10.0,
+            "area_share_within_top5": 0.0010996261271167802
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "coffee": 185.0,
+          "sugarcane": 20.0,
+          "dry_bean": 10.0,
+          "maize_grain": 1900.0,
+          "soybean": 6979.0
+        }
+      },
+      {
+        "year": 2022,
+        "state_id": "soybean",
+        "crop_name": "Soja",
+        "harvested_area_ha": 9191.0,
+        "top5_area_total_ha": 11780.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "soybean",
+            "crop_name": "Soja",
+            "harvested_area_ha": 9191.0,
+            "area_share_within_top5": 0.7802207130730051
+          },
+          {
+            "rank": 2,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 2400.0,
+            "area_share_within_top5": 0.2037351443123939
+          },
+          {
+            "rank": 3,
+            "state_id": "coffee",
+            "crop_name": "Café",
+            "harvested_area_ha": 165.0,
+            "area_share_within_top5": 0.01400679117147708
+          },
+          {
+            "rank": 4,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 20.0,
+            "area_share_within_top5": 0.001697792869269949
+          },
+          {
+            "rank": 5,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 4.0,
+            "area_share_within_top5": 0.00033955857385398983
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "coffee": 165.0,
+          "sugarcane": 20.0,
+          "dry_bean": 4.0,
+          "maize_grain": 2400.0,
+          "soybean": 9191.0
+        }
+      },
+      {
+        "year": 2023,
+        "state_id": "soybean",
+        "crop_name": "Soja",
+        "harvested_area_ha": 13106.0,
+        "top5_area_total_ha": 15754.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "soybean",
+            "crop_name": "Soja",
+            "harvested_area_ha": 13106.0,
+            "area_share_within_top5": 0.8319157039482036
+          },
+          {
+            "rank": 2,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 2370.0,
+            "area_share_within_top5": 0.15043798400406247
+          },
+          {
+            "rank": 3,
+            "state_id": "coffee",
+            "crop_name": "Café",
+            "harvested_area_ha": 250.0,
+            "area_share_within_top5": 0.01586898565443697
+          },
+          {
+            "rank": 4,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 25.0,
+            "area_share_within_top5": 0.0015868985654436969
+          },
+          {
+            "rank": 5,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 3.0,
+            "area_share_within_top5": 0.00019042782785324362
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "coffee": 250.0,
+          "sugarcane": 25.0,
+          "dry_bean": 3.0,
+          "maize_grain": 2370.0,
+          "soybean": 13106.0
+        }
+      },
+      {
+        "year": 2024,
+        "state_id": "soybean",
+        "crop_name": "Soja",
+        "harvested_area_ha": 15980.0,
+        "top5_area_total_ha": 24253.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "soybean",
+            "crop_name": "Soja",
+            "harvested_area_ha": 15980.0,
+            "area_share_within_top5": 0.6588875603018184
+          },
+          {
+            "rank": 2,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 7875.0,
+            "area_share_within_top5": 0.324702098709438
+          },
+          {
+            "rank": 3,
+            "state_id": "coffee",
+            "crop_name": "Café",
+            "harvested_area_ha": 370.0,
+            "area_share_within_top5": 0.01525584463777677
+          },
+          {
+            "rank": 4,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 25.0,
+            "area_share_within_top5": 0.0010308003133632953
+          },
+          {
+            "rank": 5,
+            "state_id": "dry_bean",
+            "crop_name": "Feijão",
+            "harvested_area_ha": 3.0,
+            "area_share_within_top5": 0.00012369603760359544
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "coffee": 370.0,
+          "sugarcane": 25.0,
+          "dry_bean": 3.0,
+          "maize_grain": 7875.0,
+          "soybean": 15980.0
+        }
+      },
+      {
+        "year": 2025,
+        "state_id": "soybean",
+        "crop_name": "Soja",
+        "harvested_area_ha": 14933.0,
+        "top5_area_total_ha": 26543.0,
+        "top5_crops": [
+          {
+            "rank": 1,
+            "state_id": "soybean",
+            "crop_name": "Soja",
+            "harvested_area_ha": 14933.0,
+            "area_share_within_top5": 0.5625965414610256
+          },
+          {
+            "rank": 2,
+            "state_id": "maize_grain",
+            "crop_name": "Milho",
+            "harvested_area_ha": 11150.0,
+            "area_share_within_top5": 0.42007308895000567
+          },
+          {
+            "rank": 3,
+            "state_id": "coffee",
+            "crop_name": "Café",
+            "harvested_area_ha": 370.0,
+            "area_share_within_top5": 0.013939645104170591
+          },
+          {
+            "rank": 4,
+            "state_id": "sorghum_grain",
+            "crop_name": "Sorgo",
+            "harvested_area_ha": 70.0,
+            "area_share_within_top5": 0.002637230154843085
+          },
+          {
+            "rank": 5,
+            "state_id": "sugarcane",
+            "crop_name": "Cana-de-açúcar",
+            "harvested_area_ha": 20.0,
+            "area_share_within_top5": 0.0007534943299551671
+          }
+        ],
+        "reported_crop_areas_ha": {
+          "coffee": 370.0,
+          "sugarcane": 20.0,
+          "dry_bean": 3.0,
+          "maize_grain": 11150.0,
+          "soybean": 14933.0,
+          "sorghum_grain": 70.0
+        }
+      }
+    ]
+  },
+  "states": [
+    {
+      "id": "soybean:skip_stages",
+      "crop": "soybean",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "maize_grain:skip_stages",
+      "crop": "maize_grain",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "sugarcane:skip_stages",
+      "crop": "sugarcane",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "sorghum_grain:skip_stages",
+      "crop": "sorghum_grain",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "wheat:skip_stages",
+      "crop": "wheat",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "dry_bean:skip_stages",
+      "crop": "dry_bean",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "peanut:skip_stages",
+      "crop": "peanut",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "oat:skip_stages",
+      "crop": "oat",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "forage_radish:skip_stages",
+      "crop": "forage_radish",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "brachiaria:skip_stages",
+      "crop": "brachiaria",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "millet:skip_stages",
+      "crop": "millet",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "crotalaria:skip_stages",
+      "crop": "crotalaria",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "mucuna:skip_stages",
+      "crop": "mucuna",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "fallow:skip_stages",
+      "crop": "fallow",
+      "stage": "skip_stages"
+    }
+  ],
+  "transitions": [
+    {
+      "from": "soybean:skip_stages",
+      "to": "soybean:skip_stages",
+      "action": null,
+      "probability": 0.45076972811253757,
+      "mass": 6.445879361575,
+      "outgoing_mass": 8.908930388158,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination.",
+      "count": 12,
+      "outgoing_count": 12
+    },
+    {
+      "from": "soybean:skip_stages",
+      "to": "maize_grain:skip_stages",
+      "action": null,
+      "probability": 0.1803041775279978,
+      "mass": 2.278294520223,
+      "outgoing_mass": 8.908930388158,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination.",
+      "outgoing_count": 12
+    },
+    {
+      "from": "soybean:skip_stages",
+      "to": "sugarcane:skip_stages",
+      "action": null,
+      "probability": 0.03372924015513898,
+      "mass": 0.019731513596,
+      "outgoing_mass": 8.908930388158,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination.",
+      "outgoing_count": 12
+    },
+    {
+      "from": "soybean:skip_stages",
+      "to": "sorghum_grain:skip_stages",
+      "action": null,
+      "probability": 0.032561483860592495,
+      "mass": 0.001737638143,
+      "outgoing_mass": 8.908930388158,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination.",
+      "outgoing_count": 12
+    },
+    {
+      "from": "soybean:skip_stages",
+      "to": "wheat:skip_stages",
+      "action": null,
+      "probability": 0.032448715608726336,
+      "mass": 0.0,
+      "outgoing_mass": 8.908930388158,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "soybean:skip_stages",
+      "to": "dry_bean:skip_stages",
+      "action": null,
+      "probability": 0.04304467492407747,
+      "mass": 0.163272399486,
+      "outgoing_mass": 8.908930388158,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination.",
+      "outgoing_count": 12
+    },
+    {
+      "from": "soybean:skip_stages",
+      "to": "peanut:skip_stages",
+      "action": null,
+      "probability": 0.03244968615857135,
+      "mass": 1.4955135e-05,
+      "outgoing_mass": 8.908930388158,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination.",
+      "outgoing_count": 12
+    },
+    {
+      "from": "soybean:skip_stages",
+      "to": "oat:skip_stages",
+      "action": null,
+      "probability": 0.032448715608726336,
+      "mass": 0.0,
+      "outgoing_mass": 8.908930388158,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "soybean:skip_stages",
+      "to": "forage_radish:skip_stages",
+      "action": null,
+      "probability": 0.032448715608726336,
+      "mass": 0.0,
+      "outgoing_mass": 8.908930388158,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "soybean:skip_stages",
+      "to": "brachiaria:skip_stages",
+      "action": null,
+      "probability": 0.032448715608726336,
+      "mass": 0.0,
+      "outgoing_mass": 8.908930388158,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "soybean:skip_stages",
+      "to": "millet:skip_stages",
+      "action": null,
+      "probability": 0.032448715608726336,
+      "mass": 0.0,
+      "outgoing_mass": 8.908930388158,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "soybean:skip_stages",
+      "to": "crotalaria:skip_stages",
+      "action": null,
+      "probability": 0.032448715608726336,
+      "mass": 0.0,
+      "outgoing_mass": 8.908930388158,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "soybean:skip_stages",
+      "to": "mucuna:skip_stages",
+      "action": null,
+      "probability": 0.032448715608726336,
+      "mass": 0.0,
+      "outgoing_mass": 8.908930388158,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "maize_grain:skip_stages",
+      "to": "soybean:skip_stages",
+      "action": null,
+      "probability": 0.11422021196257345,
+      "mass": 2.425488044665,
+      "outgoing_mass": 19.112700190256998,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination.",
+      "outgoing_count": 23
+    },
+    {
+      "from": "maize_grain:skip_stages",
+      "to": "maize_grain:skip_stages",
+      "action": null,
+      "probability": 0.5075279386269803,
+      "mass": 12.499160930232,
+      "outgoing_mass": 19.112700190256998,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination.",
+      "count": 22,
+      "outgoing_count": 23
+    },
+    {
+      "from": "maize_grain:skip_stages",
+      "to": "sugarcane:skip_stages",
+      "action": null,
+      "probability": 0.02441982262752298,
+      "mass": 0.125457595658,
+      "outgoing_mass": 19.112700190256998,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination.",
+      "outgoing_count": 23
+    },
+    {
+      "from": "maize_grain:skip_stages",
+      "to": "sorghum_grain:skip_stages",
+      "action": null,
+      "probability": 0.019554998514234135,
+      "mass": 0.000856314166,
+      "outgoing_mass": 19.112700190256998,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination.",
+      "outgoing_count": 23
+    },
+    {
+      "from": "maize_grain:skip_stages",
+      "to": "wheat:skip_stages",
+      "action": null,
+      "probability": 0.019521565328367785,
+      "mass": 0.0,
+      "outgoing_mass": 19.112700190256998,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "maize_grain:skip_stages",
+      "to": "dry_bean:skip_stages",
+      "action": null,
+      "probability": 0.1780175600421632,
+      "mass": 4.059510393961,
+      "outgoing_mass": 19.112700190256998,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination.",
+      "count": 1,
+      "outgoing_count": 23
+    },
+    {
+      "from": "maize_grain:skip_stages",
+      "to": "peanut:skip_stages",
+      "action": null,
+      "probability": 0.019608510927951506,
+      "mass": 0.002226911575,
+      "outgoing_mass": 19.112700190256998,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination.",
+      "outgoing_count": 23
+    },
+    {
+      "from": "maize_grain:skip_stages",
+      "to": "oat:skip_stages",
+      "action": null,
+      "probability": 0.019521565328367785,
+      "mass": 0.0,
+      "outgoing_mass": 19.112700190256998,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "maize_grain:skip_stages",
+      "to": "forage_radish:skip_stages",
+      "action": null,
+      "probability": 0.019521565328367785,
+      "mass": 0.0,
+      "outgoing_mass": 19.112700190256998,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "maize_grain:skip_stages",
+      "to": "brachiaria:skip_stages",
+      "action": null,
+      "probability": 0.019521565328367785,
+      "mass": 0.0,
+      "outgoing_mass": 19.112700190256998,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "maize_grain:skip_stages",
+      "to": "millet:skip_stages",
+      "action": null,
+      "probability": 0.019521565328367785,
+      "mass": 0.0,
+      "outgoing_mass": 19.112700190256998,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "maize_grain:skip_stages",
+      "to": "crotalaria:skip_stages",
+      "action": null,
+      "probability": 0.019521565328367785,
+      "mass": 0.0,
+      "outgoing_mass": 19.112700190256998,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "maize_grain:skip_stages",
+      "to": "mucuna:skip_stages",
+      "action": null,
+      "probability": 0.019521565328367785,
+      "mass": 0.0,
+      "outgoing_mass": 19.112700190256998,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "sugarcane:skip_stages",
+      "to": "sugarcane:skip_stages",
+      "action": null,
+      "probability": 1.0,
+      "mass": 0.002742066679,
+      "outgoing_mass": 0.002742066679,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "sorghum_grain:skip_stages",
+      "to": "soybean:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "sorghum_grain:skip_stages",
+      "to": "maize_grain:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "sorghum_grain:skip_stages",
+      "to": "sugarcane:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "sorghum_grain:skip_stages",
+      "to": "sorghum_grain:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "sorghum_grain:skip_stages",
+      "to": "wheat:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "sorghum_grain:skip_stages",
+      "to": "dry_bean:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "sorghum_grain:skip_stages",
+      "to": "peanut:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "sorghum_grain:skip_stages",
+      "to": "oat:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "sorghum_grain:skip_stages",
+      "to": "forage_radish:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "sorghum_grain:skip_stages",
+      "to": "brachiaria:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "sorghum_grain:skip_stages",
+      "to": "millet:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "sorghum_grain:skip_stages",
+      "to": "crotalaria:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "sorghum_grain:skip_stages",
+      "to": "mucuna:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "wheat:skip_stages",
+      "to": "soybean:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "wheat:skip_stages",
+      "to": "maize_grain:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "wheat:skip_stages",
+      "to": "sugarcane:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "wheat:skip_stages",
+      "to": "sorghum_grain:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "wheat:skip_stages",
+      "to": "wheat:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "wheat:skip_stages",
+      "to": "dry_bean:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "wheat:skip_stages",
+      "to": "peanut:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "wheat:skip_stages",
+      "to": "oat:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "wheat:skip_stages",
+      "to": "forage_radish:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "wheat:skip_stages",
+      "to": "brachiaria:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "wheat:skip_stages",
+      "to": "millet:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "wheat:skip_stages",
+      "to": "crotalaria:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "wheat:skip_stages",
+      "to": "mucuna:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "dry_bean:skip_stages",
+      "to": "soybean:skip_stages",
+      "action": null,
+      "probability": 0.06677030279967143,
+      "mass": 0.325343424128,
+      "outgoing_mass": 5.86093576817,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination.",
+      "outgoing_count": 1
+    },
+    {
+      "from": "dry_bean:skip_stages",
+      "to": "maize_grain:skip_stages",
+      "action": null,
+      "probability": 0.367166931995628,
+      "mass": 4.038526862594,
+      "outgoing_mass": 5.86093576817,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination.",
+      "outgoing_count": 1
+    },
+    {
+      "from": "dry_bean:skip_stages",
+      "to": "sugarcane:skip_stages",
+      "action": null,
+      "probability": 0.044208868086036676,
+      "mass": 0.046462978795,
+      "outgoing_mass": 5.86093576817,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination.",
+      "outgoing_count": 1
+    },
+    {
+      "from": "dry_bean:skip_stages",
+      "to": "sorghum_grain:skip_stages",
+      "action": null,
+      "probability": 0.040450038378366526,
+      "mass": 3.26215e-07,
+      "outgoing_mass": 5.86093576817,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination.",
+      "outgoing_count": 1
+    },
+    {
+      "from": "dry_bean:skip_stages",
+      "to": "wheat:skip_stages",
+      "action": null,
+      "probability": 0.040450011987565204,
+      "mass": 0.0,
+      "outgoing_mass": 5.86093576817,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "dry_bean:skip_stages",
+      "to": "dry_bean:skip_stages",
+      "action": null,
+      "probability": 0.15774993339923182,
+      "mass": 1.449936794181,
+      "outgoing_mass": 5.86093576817,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination.",
+      "outgoing_count": 1
+    },
+    {
+      "from": "dry_bean:skip_stages",
+      "to": "peanut:skip_stages",
+      "action": null,
+      "probability": 0.04050384142810913,
+      "mass": 0.000665382257,
+      "outgoing_mass": 5.86093576817,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination.",
+      "outgoing_count": 1
+    },
+    {
+      "from": "dry_bean:skip_stages",
+      "to": "oat:skip_stages",
+      "action": null,
+      "probability": 0.040450011987565204,
+      "mass": 0.0,
+      "outgoing_mass": 5.86093576817,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "dry_bean:skip_stages",
+      "to": "forage_radish:skip_stages",
+      "action": null,
+      "probability": 0.040450011987565204,
+      "mass": 0.0,
+      "outgoing_mass": 5.86093576817,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "dry_bean:skip_stages",
+      "to": "brachiaria:skip_stages",
+      "action": null,
+      "probability": 0.040450011987565204,
+      "mass": 0.0,
+      "outgoing_mass": 5.86093576817,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "dry_bean:skip_stages",
+      "to": "millet:skip_stages",
+      "action": null,
+      "probability": 0.040450011987565204,
+      "mass": 0.0,
+      "outgoing_mass": 5.86093576817,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "dry_bean:skip_stages",
+      "to": "crotalaria:skip_stages",
+      "action": null,
+      "probability": 0.040450011987565204,
+      "mass": 0.0,
+      "outgoing_mass": 5.86093576817,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "dry_bean:skip_stages",
+      "to": "mucuna:skip_stages",
+      "action": null,
+      "probability": 0.040450011987565204,
+      "mass": 0.0,
+      "outgoing_mass": 5.86093576817,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "peanut:skip_stages",
+      "to": "soybean:skip_stages",
+      "action": null,
+      "probability": 0.07691147181677661,
+      "mass": 0.000148809183,
+      "outgoing_mass": 0.002915590726,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "peanut:skip_stages",
+      "to": "maize_grain:skip_stages",
+      "action": null,
+      "probability": 0.07719569443557177,
+      "mass": 0.001997084882,
+      "outgoing_mass": 0.002915590726,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "peanut:skip_stages",
+      "to": "sugarcane:skip_stages",
+      "action": null,
+      "probability": 0.07688948473467395,
+      "mass": 5.829044e-06,
+      "outgoing_mass": 0.002915590726,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "peanut:skip_stages",
+      "to": "sorghum_grain:skip_stages",
+      "action": null,
+      "probability": 0.07688858836074464,
+      "mass": 0.0,
+      "outgoing_mass": 0.002915590726,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "peanut:skip_stages",
+      "to": "wheat:skip_stages",
+      "action": null,
+      "probability": 0.07688858836074464,
+      "mass": 0.0,
+      "outgoing_mass": 0.002915590726,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "peanut:skip_stages",
+      "to": "dry_bean:skip_stages",
+      "action": null,
+      "probability": 0.07700578485412783,
+      "mass": 0.000762118904,
+      "outgoing_mass": 0.002915590726,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "peanut:skip_stages",
+      "to": "peanut:skip_stages",
+      "action": null,
+      "probability": 0.07688885727289267,
+      "mass": 1.748713e-06,
+      "outgoing_mass": 0.002915590726,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "peanut:skip_stages",
+      "to": "oat:skip_stages",
+      "action": null,
+      "probability": 0.07688858836074464,
+      "mass": 0.0,
+      "outgoing_mass": 0.002915590726,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "peanut:skip_stages",
+      "to": "forage_radish:skip_stages",
+      "action": null,
+      "probability": 0.07688858836074464,
+      "mass": 0.0,
+      "outgoing_mass": 0.002915590726,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "peanut:skip_stages",
+      "to": "brachiaria:skip_stages",
+      "action": null,
+      "probability": 0.07688858836074464,
+      "mass": 0.0,
+      "outgoing_mass": 0.002915590726,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "peanut:skip_stages",
+      "to": "millet:skip_stages",
+      "action": null,
+      "probability": 0.07688858836074464,
+      "mass": 0.0,
+      "outgoing_mass": 0.002915590726,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "peanut:skip_stages",
+      "to": "crotalaria:skip_stages",
+      "action": null,
+      "probability": 0.07688858836074464,
+      "mass": 0.0,
+      "outgoing_mass": 0.002915590726,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "peanut:skip_stages",
+      "to": "mucuna:skip_stages",
+      "action": null,
+      "probability": 0.07688858836074464,
+      "mass": 0.0,
+      "outgoing_mass": 0.002915590726,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "oat:skip_stages",
+      "to": "soybean:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "oat:skip_stages",
+      "to": "maize_grain:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "oat:skip_stages",
+      "to": "sugarcane:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "oat:skip_stages",
+      "to": "sorghum_grain:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "oat:skip_stages",
+      "to": "wheat:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "oat:skip_stages",
+      "to": "dry_bean:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "oat:skip_stages",
+      "to": "peanut:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "oat:skip_stages",
+      "to": "oat:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "oat:skip_stages",
+      "to": "forage_radish:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "oat:skip_stages",
+      "to": "brachiaria:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "oat:skip_stages",
+      "to": "millet:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "oat:skip_stages",
+      "to": "crotalaria:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "oat:skip_stages",
+      "to": "mucuna:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "forage_radish:skip_stages",
+      "to": "soybean:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "forage_radish:skip_stages",
+      "to": "maize_grain:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "forage_radish:skip_stages",
+      "to": "sugarcane:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "forage_radish:skip_stages",
+      "to": "sorghum_grain:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "forage_radish:skip_stages",
+      "to": "wheat:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "forage_radish:skip_stages",
+      "to": "dry_bean:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "forage_radish:skip_stages",
+      "to": "peanut:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "forage_radish:skip_stages",
+      "to": "oat:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "forage_radish:skip_stages",
+      "to": "forage_radish:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "forage_radish:skip_stages",
+      "to": "brachiaria:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "forage_radish:skip_stages",
+      "to": "millet:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "forage_radish:skip_stages",
+      "to": "crotalaria:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "forage_radish:skip_stages",
+      "to": "mucuna:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "brachiaria:skip_stages",
+      "to": "soybean:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "brachiaria:skip_stages",
+      "to": "maize_grain:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "brachiaria:skip_stages",
+      "to": "sugarcane:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "brachiaria:skip_stages",
+      "to": "sorghum_grain:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "brachiaria:skip_stages",
+      "to": "wheat:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "brachiaria:skip_stages",
+      "to": "dry_bean:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "brachiaria:skip_stages",
+      "to": "peanut:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "brachiaria:skip_stages",
+      "to": "oat:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "brachiaria:skip_stages",
+      "to": "forage_radish:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "brachiaria:skip_stages",
+      "to": "brachiaria:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "brachiaria:skip_stages",
+      "to": "millet:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "brachiaria:skip_stages",
+      "to": "crotalaria:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "brachiaria:skip_stages",
+      "to": "mucuna:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "millet:skip_stages",
+      "to": "soybean:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "millet:skip_stages",
+      "to": "maize_grain:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "millet:skip_stages",
+      "to": "sugarcane:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "millet:skip_stages",
+      "to": "sorghum_grain:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "millet:skip_stages",
+      "to": "wheat:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "millet:skip_stages",
+      "to": "dry_bean:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "millet:skip_stages",
+      "to": "peanut:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "millet:skip_stages",
+      "to": "oat:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "millet:skip_stages",
+      "to": "forage_radish:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "millet:skip_stages",
+      "to": "brachiaria:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "millet:skip_stages",
+      "to": "millet:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "millet:skip_stages",
+      "to": "crotalaria:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "millet:skip_stages",
+      "to": "mucuna:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "crotalaria:skip_stages",
+      "to": "soybean:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "crotalaria:skip_stages",
+      "to": "maize_grain:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "crotalaria:skip_stages",
+      "to": "sugarcane:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "crotalaria:skip_stages",
+      "to": "sorghum_grain:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "crotalaria:skip_stages",
+      "to": "wheat:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "crotalaria:skip_stages",
+      "to": "dry_bean:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "crotalaria:skip_stages",
+      "to": "peanut:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "crotalaria:skip_stages",
+      "to": "oat:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "crotalaria:skip_stages",
+      "to": "forage_radish:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "crotalaria:skip_stages",
+      "to": "brachiaria:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "crotalaria:skip_stages",
+      "to": "millet:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "crotalaria:skip_stages",
+      "to": "crotalaria:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "crotalaria:skip_stages",
+      "to": "mucuna:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "mucuna:skip_stages",
+      "to": "soybean:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "mucuna:skip_stages",
+      "to": "maize_grain:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "mucuna:skip_stages",
+      "to": "sugarcane:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "mucuna:skip_stages",
+      "to": "sorghum_grain:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "mucuna:skip_stages",
+      "to": "wheat:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "mucuna:skip_stages",
+      "to": "dry_bean:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "mucuna:skip_stages",
+      "to": "peanut:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "mucuna:skip_stages",
+      "to": "oat:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "mucuna:skip_stages",
+      "to": "forage_radish:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "mucuna:skip_stages",
+      "to": "brachiaria:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "mucuna:skip_stages",
+      "to": "millet:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "mucuna:skip_stages",
+      "to": "crotalaria:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    },
+    {
+      "from": "mucuna:skip_stages",
+      "to": "mucuna:skip_stages",
+      "action": null,
+      "probability": 0.07692307692307693,
+      "mass": 0.0,
+      "outgoing_mass": 0.0,
+      "support": "prior",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Symmetric Dirichlet prior alpha=0.5 per eligible destination."
+    }
+  ]
+}

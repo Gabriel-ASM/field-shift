@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Field Shift</title>
+<style>
+  :root { --bg: #f6f5f0; --fg: #1d2420; --muted: #5d6a62; --card: #fff; --line: #d9ddd4; --accent: #2f6b45; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #141815; --fg: #e6ebe5; --muted: #9aa69d; --card: #1c221e; --line: #2e3731; --accent: #7fc496; }
+  }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 system-ui, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 48px 16px; }
+  h1 { margin: 0 0 4px; font-size: 2rem; }
+  p.lead { margin: 0 0 32px; color: var(--muted); }
+  h2 { font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 32px 0 8px; }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  li a { display: block; padding: 12px 16px; background: var(--card); border: 1px solid var(--line); border-radius: 8px; color: inherit; text-decoration: none; }
+  li a:hover { border-color: var(--accent); }
+  li a b { color: var(--accent); }
+  li a span { display: block; color: var(--muted); font-size: .9rem; }
+  footer { margin-top: 40px; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Field Shift</h1>
+  <p class="lead">Compare crop rotations with NASA Earth observations, local soil data and producer priorities. Results are exploratory, not agronomic advice.</p>
+
+  <h2>Pages</h2>
+  <ul>
+    <li><a href="/demo.html"><b>Map demo (v2)</b><span>Crop-state probability per municipality, year by year, from the API</span></a></li>
+    <li><a href="/pages/visualizacao.html"><b>Interactive demo (v1)</b><span>Markov matrix and 60-month comparison per municipality</span></a></li>
+    <li><a href="/pages/contracts-v2.html"><b>Contract map (v2)</b><span>How the data contracts connect</span></a></li>
+    <li><a href="/docs"><b>API reference</b><span>OpenAPI: contracts, validation, views, profiles, chains</span></a></li>
+  </ul>
+
+  <h2>Profiles</h2>
+  <ul id="profiles"><li><a><span>Loading…</span></a></li></ul>
+
+  <footer>Placeholder front. Replace the contents of <code>web/</code> (or set <code>FIELD_SHIFT_WEB_DIR</code>) with the real build.</footer>
+</main>
+<script>
+fetch("/profiles").then(r => r.json()).then(profiles => {
+  const list = document.getElementById("profiles");
+  list.replaceChildren(...profiles.map(p => {
+    const li = document.createElement("li"), a = document.createElement("a");
+    const b = document.createElement("b"), s = document.createElement("span");
+    a.href = `/profile.html?id=${encodeURIComponent(p.id)}`;
+    b.textContent = p.label || p.id;
+    s.textContent = "Starting conditions, usual crop sequence and data sources";
+    a.append(b, s); li.append(a); return li;
+  }));
+}).catch(() => { document.getElementById("profiles").innerHTML = "<li><a><span>API not reachable.</span></a></li>"; });
+</script>
+</body>
+</html>

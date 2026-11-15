@@ -103,65 +103,32 @@
           }
         }
       },
-      "markov.json": {
-        "description": "string",
-        "initial_state *": "string",
-        "states *": {
+      "monte_carlo.json": {
+        "ranking_preferences": {
+          "environment_weight *": "number 0..0.5",
+          "return_weight *": "number 0..1"
+        },
+        "seed *": "integer 0..",
+        "trajectories *": "integer 1..",
+        "horizon_days *": "integer 1..",
+        "period_days": "integer 1..",
+        "profile *": "string",
+        "climate_source": "enum: historical_year_resample | historical_period_resample",
+        "events": {
           "[ ] each item": {
-            "-> markov.json#/definitions/state": {
+            "-> event.json": {
               "id *": "string",
-              "crop *": "string",
-              "stage *": {
-                "-> crop.json#/definitions/stage_name": "enum: skip_stages | preparation | sowing | germination | growth | flowering | ... (10)"
+              "label": "string",
+              "kind *": "enum: pest | disease | drought | heavy_rain | heat_wave | frost | ... (8)",
+              "probability *": {
+                "value *": {
+                  "-> effect.json#/definitions/quantity": "number or distribution"
+                },
+                "per *": "enum: day | period | month | year | cycle"
               },
-              "duration_days": {
+              "duration_days *": {
                 "-> effect.json#/definitions/quantity": "number or distribution"
               },
-              "effects": {
-                "[ ] each item": {
-                  "-> effect.json": {
-                    "target *": "string",
-                    "operation *": "enum: add | multiply | set | rate",
-                    "value *": {
-                      "-> effect.json#/definitions/quantity": "number or distribution"
-                    },
-                    "unit": "string",
-                    "at": "enum: entry | exit",
-                    "when": {
-                      "[ ] each item": {
-                        "-> effect.json#/definitions/condition": {
-                          "path *": "string",
-                          "op *": "enum: < | <= | == | != | >= | > | ... (7)",
-                          "value *": "any"
-                        }
-                      }
-                    },
-                    "bounds": {
-                      "min": "number",
-                      "max": "number"
-                    },
-                    "support *": {
-                      "-> effect.json#/definitions/support": "enum: observed | derived | pooled | prior"
-                    },
-                    "provenance": "string"
-                  }
-                }
-              },
-              "allowed_actions": {
-                "[ ] each item": "string"
-              }
-            }
-          }
-        },
-        "transitions *": {
-          "[ ] each item": {
-            "-> markov.json#/definitions/transition": {
-              "from *": "string",
-              "to *": "string",
-              "action": "string or null",
-              "probability *": "number 0..1",
-              "count": "integer 0..",
-              "outgoing_count": "integer 0..",
               "when": {
                 "[ ] each item": {
                   "-> effect.json#/definitions/condition": {
@@ -171,7 +138,11 @@
                   }
                 }
               },
-              "effects": {
+              "crops": {
+                "[ ] each item": "string"
+              },
+              "max_occurrences": "integer 1..",
+              "effects *": {
                 "[ ] each item": {
                   "-> effect.json": {
                     "target *": "string",
@@ -201,34 +172,255 @@
                   }
                 }
               },
+              "editable": "boolean",
               "support *": {
                 "-> effect.json#/definitions/support": "enum: observed | derived | pooled | prior"
               },
               "provenance": "string"
             }
           }
-        }
-      },
-      "monte_carlo.json": {
-        "seed": "integer",
-        "climate": {
-          "-> climate.json": {
-            "lat": "number [deg] -90..90",
-            "long": "number [deg] -180..180",
-            "alt": "number [m]",
-            "month": "enum: january | february | march | april | may | june | ... (12)",
-            "season": "enum: summer | autumn | winter | spring",
-            "solar_incidence": "number [W/m^2] 0..",
-            "weather": {
-              "pluviosity": "number [mm] 0..",
-              "temperature": "number [ºC]",
-              "relative_humidity": "number [%] 0..100",
-              "et0": "number [mm/day] 0.."
+        },
+        "chain *": {
+          "-> markov.json": {
+            "alpha_per_destination": "number 0..",
+            "pam_history": {
+              "source *": "object",
+              "period *": {
+                "[ ] each item": "integer"
+              },
+              "top_crop_limit *": "integer 1..5",
+              "annual_sequence *": {
+                "[ ] each item": {
+                  "year *": "integer",
+                  "state_id *": "string",
+                  "crop_name *": "string",
+                  "harvested_area_ha *": "number 0..",
+                  "top5_area_total_ha *": "number 0..",
+                  "top5_crops *": {
+                    "[ ] each item": {
+                      "rank *": "integer 1..5",
+                      "state_id *": "string",
+                      "crop_name *": "string",
+                      "harvested_area_ha *": "number 0..",
+                      "area_share_within_top5 *": "number 0..1"
+                    }
+                  },
+                  "reported_crop_areas_ha *": "object"
+                }
+              }
+            },
+            "id": "string",
+            "profile": "string",
+            "description": "string",
+            "provenance": "string",
+            "initial_state *": "string",
+            "states *": {
+              "[ ] each item": {
+                "-> markov.json#/definitions/state": {
+                  "id *": "string",
+                  "crop *": "string",
+                  "stage *": {
+                    "-> crop.json#/definitions/stage_name": "enum: skip_stages | preparation | sowing | germination | growth | flowering | ... (10)"
+                  },
+                  "duration_days": {
+                    "-> effect.json#/definitions/quantity": "number or distribution"
+                  },
+                  "effects": {
+                    "[ ] each item": {
+                      "-> effect.json": {
+                        "target *": "string",
+                        "operation *": "enum: add | multiply | set | rate",
+                        "value *": {
+                          "-> effect.json#/definitions/quantity": "number or distribution"
+                        },
+                        "unit": "string",
+                        "at": "enum: entry | exit",
+                        "when": {
+                          "[ ] each item": {
+                            "-> effect.json#/definitions/condition": {
+                              "path *": "string",
+                              "op *": "enum: < | <= | == | != | >= | > | ... (7)",
+                              "value *": "any"
+                            }
+                          }
+                        },
+                        "bounds": {
+                          "min": "number",
+                          "max": "number"
+                        },
+                        "support *": {
+                          "-> effect.json#/definitions/support": "enum: observed | derived | pooled | prior"
+                        },
+                        "provenance": "string"
+                      }
+                    }
+                  },
+                  "allowed_actions": {
+                    "[ ] each item": "string"
+                  }
+                }
+              }
+            },
+            "transitions *": {
+              "[ ] each item": {
+                "-> markov.json#/definitions/transition": {
+                  "from *": "string",
+                  "to *": "string",
+                  "action": "string or null",
+                  "probability *": "number 0..1",
+                  "count": "integer 0..",
+                  "outgoing_count": "integer 0..",
+                  "mass": "number 0..",
+                  "outgoing_mass": "number 0..",
+                  "when": {
+                    "[ ] each item": {
+                      "-> effect.json#/definitions/condition": {
+                        "path *": "string",
+                        "op *": "enum: < | <= | == | != | >= | > | ... (7)",
+                        "value *": "any"
+                      }
+                    }
+                  },
+                  "effects": {
+                    "[ ] each item": {
+                      "-> effect.json": {
+                        "target *": "string",
+                        "operation *": "enum: add | multiply | set | rate",
+                        "value *": {
+                          "-> effect.json#/definitions/quantity": "number or distribution"
+                        },
+                        "unit": "string",
+                        "at": "enum: entry | exit",
+                        "when": {
+                          "[ ] each item": {
+                            "-> effect.json#/definitions/condition": {
+                              "path *": "string",
+                              "op *": "enum: < | <= | == | != | >= | > | ... (7)",
+                              "value *": "any"
+                            }
+                          }
+                        },
+                        "bounds": {
+                          "min": "number",
+                          "max": "number"
+                        },
+                        "support *": {
+                          "-> effect.json#/definitions/support": "enum: observed | derived | pooled | prior"
+                        },
+                        "provenance": "string"
+                      }
+                    }
+                  },
+                  "support *": {
+                    "-> effect.json#/definitions/support": "enum: observed | derived | pooled | prior"
+                  },
+                  "provenance": "string"
+                }
+              }
             }
           }
         },
-        "weather": "object",
-        "markov": "object"
+        "scenarios *": {
+          "[ ] each item": {
+            "-> monte_carlo.json#/definitions/scenario": {
+              "id *": "string",
+              "label": "string",
+              "initial_state": "string",
+              "policy *": "number or distribution"
+            }
+          }
+        }
+      },
+      "profile.json": {
+        "economics": {
+          "municipality": "string",
+          "uf": "string",
+          "crop_inputs *": "object",
+          "economically_supported_crop_ids": {
+            "[ ] each item": "string"
+          },
+          "economic_exclusions": {
+            "[ ] each item": "string"
+          },
+          "discount_rate *": {
+            "real_annual_rate_approx *": "number"
+          },
+          "reference_currency_month *": "string"
+        },
+        "water_classes": {
+          "low_max_inclusive *": "number 0..1",
+          "medium_max_inclusive *": "number 0..1",
+          "provenance *": "string"
+        },
+        "id *": "string",
+        "label *": "string",
+        "municipality": {
+          "name *": "string",
+          "uf *": "string",
+          "ibge_code *": "string"
+        },
+        "scope": "enum: field | municipality | grid_cell",
+        "initial_node *": {
+          "-> markov.json#/definitions/node": {
+            "state *": "string",
+            "day": "integer 0..",
+            "soil *": {
+              "-> soil.json": {
+                "order": "enum: Latosol | Argisol | Neosol | Cambisol | Gleysol | Plinthosol | ... (14)",
+                "N2": "number 0..",
+                "pH": "number [log10] 0..14",
+                "organic_carbon": "number [g/kg] 0..",
+                "available_water_capacity": "number [mm] 0..",
+                "available_water_fraction": "number [fraction] 0..1",
+                "temperature_per_depth": {
+                  "[ ] each item": {
+                    "depth *": "number [cm] 0..",
+                    "temperature *": "number [ºC]"
+                  }
+                }
+              }
+            },
+            "climate": {
+              "-> climate.json": {
+                "lat": "number [deg] -90..90",
+                "long": "number [deg] -180..180",
+                "alt": "number [m]",
+                "month": "enum: january | february | march | april | may | june | ... (12)",
+                "season": "enum: summer | autumn | winter | spring",
+                "solar_incidence": "number [W/m^2] 0..",
+                "weather": {
+                  "pluviosity": "number [mm] 0..",
+                  "temperature": "number [ºC]",
+                  "relative_humidity": "number [%] 0..100",
+                  "et0": "number [mm/day] 0.."
+                }
+              }
+            },
+            "financial": {
+              "cash": "number [BRL/ha]",
+              "cost": "number [BRL/ha]",
+              "revenue": "number [BRL/ha]",
+              "yield": "number [kg/ha] 0..",
+              "price": "number [BRL/kg] 0.."
+            }
+          }
+        },
+        "values *": {
+          "[ ] each item": {
+            "pointer *": "string",
+            "support *": {
+              "-> effect.json#/definitions/support": "enum: observed | derived | pooled | prior"
+            },
+            "provenance *": "string"
+          }
+        },
+        "climate_history": {
+          "file *": "string",
+          "period *": {
+            "[ ] each item": "string"
+          },
+          "source *": "string"
+        }
       }
     },
     "id_links": [
@@ -238,15 +430,20 @@
       "markov.transition.from  ==  markov.state.id",
       "markov.transition.to  ==  markov.state.id",
       "markov.transition.action  ==  action.id",
-      "markov.node.state  ==  markov.state.id"
+      "markov.node.state  ==  markov.state.id",
+      "monte_carlo.scenario.initial_state  ==  markov.state.id",
+      "monte_carlo.rotation_policy.sequence[]  ==  crop.name",
+      "monte_carlo.rotation_policy.fallback  ==  markov.state.id",
+      "monte_carlo.profile  ==  profile.id",
+      "markov.profile  ==  profile.id",
+      "event.crops[]  ==  crop.name"
     ],
     "pointer_links": [
       "effect.target  ->  markov#node (written by effects)",
-      "effect.condition.path  ->  markov#node (read by conditions (when))"
+      "effect.condition.path  ->  markov#node (read by conditions (when))",
+      "event.when  ->  markov#node (event can start only while conditions hold)"
     ],
-    "missing_links": [
-      "monte_carlo.markov  -x-  markov: declared as a free object, not a $ref"
-    ],
+    "missing_links": [],
     "node_fields_effects_can_target": {
       "/state": "string  (simulation)",
       "/day": "integer 0..  (simulation)",

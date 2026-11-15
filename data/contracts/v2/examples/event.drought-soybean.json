@@ -1,0 +1,58 @@
+{
+    "id": "drought_soybean_summer",
+    "label": "Summer dry spell on soybean",
+    "kind": "drought",
+    "probability": {
+        "value": 0.08,
+        "per": "period"
+    },
+    "duration_days": {
+        "distribution": "triangular",
+        "params": {
+            "min": 10,
+            "mode": 15,
+            "max": 25
+        }
+    },
+    "when": [
+        {
+            "path": "/climate/month",
+            "op": "in",
+            "value": [
+                "january",
+                "february"
+            ]
+        }
+    ],
+    "crops": [
+        "soybean"
+    ],
+    "max_occurrences": 1,
+    "effects": [
+        {
+            "target": "/soil/available_water_fraction",
+            "operation": "set",
+            "value": 0.1,
+            "at": "entry",
+            "support": "prior",
+            "provenance": "example placeholder, not calibrated"
+        },
+        {
+            "target": "/financial/yield",
+            "operation": "multiply",
+            "value": {
+                "distribution": "uniform",
+                "params": {
+                    "min": 0.7,
+                    "max": 0.9
+                }
+            },
+            "at": "entry",
+            "support": "prior",
+            "provenance": "example placeholder, not calibrated"
+        }
+    ],
+    "editable": true,
+    "support": "prior",
+    "provenance": "example placeholder, not calibrated"
+}

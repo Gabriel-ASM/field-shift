@@ -6,11 +6,50 @@ O projeto responde ao desafio [Field Shift: Adapting Farms with NASA Data](https
 
 > **Status:** NASA POWER/SoilGrids, PAM/IBGE, ZARC/MAPA e custos CONAB ingeridos para Ariquemes‑RO, Franca‑SP e Varginha‑MG. A página mostra a cadeia Markov de 14 culturas como grafo; o Monte Carlo evolui água e carbono por quinzena, decide a transição na próxima oportunidade municipal após a colheita e semeia o destino na janela MAPA standalone. Apenas coberturas sem linha MAPA no perfil podem usar qualquer decêndio, como hipótese explícita. A espera é pousio e as tábuas MAPA anual 2026/2027 e perene vigente são repetidas nos 60 meses. Cultura inicial é estabelecida; culturas novas aguardam maturação. Café e cana mantêm sua identidade perene; café tem uma subcadeia separada de coberturas entrelinhas, com prior uniforme e zero contagens observadas. Replantios consecutivos de anuais reduzem o rendimento bruto por uma hipótese editável e não calibrada. O VPL usa preços PAM históricos em R$ reais, tendência anual limitada e editável, e desconta cada fluxo pela data do ciclo. Probabilidade Markov e frequência Monte Carlo aparecem separadamente. Resultados exploratórios, não prova causal nem recomendação agronômica.
 
+## Backend (in progress, branch `refactor/backend-engine`)
+
+The research app is being turned into a backend for a web application. Design and audit graphs: [docs/backend-design.md](docs/backend-design.md). Contract map: [docs/contracts-v2.html](docs/contracts-v2.html).
+
+Everything in one image (MongoDB + API + front); the database is loaded when the container starts and is not reachable from outside it:
+
+```bash
+docker build -t field-shift .
+docker run --rm -p 8000:8000 field-shift  # front at http://localhost:8000, API docs at /docs
+```
+
+The front lives in `web/` and is served at `/`; set `FIELD_SHIFT_WEB_DIR` to serve another build. The generated pages in `docs/` are served at `/pages`.
+
+Local development:
+
+```bash
+uv sync                                   # install dependencies
+uv run pytest                             # unit and API tests
+uv run python -m field_shift.contracts    # validate the contract examples
+uv run python -m field_shift.ingest       # v1 data -> data/v2 (chains, profiles, audit report)
+uv run python -m field_shift.views        # regenerate the contract views
+
+docker run -d --name field-shift-mongo -p 127.0.0.1:27017:27017 mongo:7   # throwaway MongoDB
+uv run python -m field_shift.ingest --mongo mongodb://localhost:27017
+uv run uvicorn --factory field_shift.api:create_app   # http://localhost:8000
+FIELD_SHIFT_TEST_MONGO_URI=mongodb://localhost:27017 uv run pytest   # also runs the MongoDB validator tests
+```
+
+| Package | Role |
+|---|---|
+| `field_shift/contracts` | Load, validate and bundle the v2 JSON Schemas; translate them to MongoDB validators; cross-reference checks |
+| `field_shift/ingest` | Build v2 chains and profiles from the v1 files in `data/profiles` |
+| `field_shift/db` | MongoDB collections validated by the contracts |
+| `field_shift/api` | FastAPI: contracts, validation, views, profiles, chains |
+| `field_shift/views` | Contract graph and tree for the web |
+| `field_shift/legacy` | The v1 research engine and page generator, kept until the new engines reach parity |
+
+The sections below describe the v1 research app (`field_shift/legacy`).
+
 ## Executar o motor
 
-Para executar a simulação de referência nos três perfis, rode `python -m field_shift.demo`. Para um perfil isolado, use `python -m field_shift --profile data/profiles/ariquemes-ro --policy data/policies/balanco-hidrico-referencia.json --initial-state water_medium`. Os dados brutos estão em `data/raw/`, os normalizados e as contagens Markov em `data/profiles/`, e as fontes/gaps estão em `data/README.md`.
+Para executar a simulação de referência nos três perfis, rode `python -m field_shift.legacy.demo`. Para um perfil isolado, use `python -m field_shift.legacy --profile data/profiles/ariquemes-ro --policy data/policies/balanco-hidrico-referencia.json --initial-state water_medium`. Os dados brutos estão em `data/raw/`, os normalizados e as contagens Markov em `data/profiles/`, e as fontes/gaps estão em `data/README.md`.
 
-Abra a [demonstração interativa](docs/visualizacao.html) para escolher o município, definir a cultura principal inicial, inspecionar a matriz Markov completa e comparar o VPL em 60 meses. Regenere custos/entradas econômicas com `python data/pipeline/build_economic_benchmarks.py`, a cadeia com `python data/pipeline/build_crop_transition_markov.py` e a página com `python -m field_shift.visualize --output docs/visualizacao.html --seed 2026`.
+Abra a [demonstração interativa](docs/visualizacao.html) para escolher o município, definir a cultura principal inicial, inspecionar a matriz Markov completa e comparar o VPL em 60 meses. As fontes e o gerador ficam em `field_shift/front/`; edite os arquivos dessa pasta e regenere a página. Regenere custos/entradas econômicas com `python data/pipeline/build_economic_benchmarks.py`, a cadeia com `python data/pipeline/build_crop_transition_markov.py` e a página com `python -m field_shift.front --output docs/visualizacao.html --seed 2026`. O gerador lê apenas `data/` na raiz e embute o necessário no HTML, sem usar `docs/data/`.
 
 ## Ideia em uma figura
 
@@ -35,7 +74,7 @@ flowchart LR
 
 Na página, cada nó principal contém uma cultura individual. Para cada município-ano, o PAM fornece o top 5 entre os produtos mapeados; suas áreas viram participações normalizadas. Entre anos consecutivos, o modelo soma massas esperadas `participação_t(i) × participação_t+1(j)` sob independência das marginais municipais. Isso usa mais que a cultura rank 1, mas não é rotação observada do mesmo talhão; os pares rank 1 aparecem à parte como diagnóstico e não são somados de novo. O grafo mostra todas as setas e ocupação Monte Carlo no fechamento de cada ano ou no ciclo completo. O relógio agronômico e as durações estão em [crop-cycle-assumptions.json](data/reference/crop-cycle-assumptions.json); como a PAM não observa ciclos intranuais do mesmo talhão, a probabilidade anual é reaplicada em cada decisão após uma colheita como hipótese transparente. A decisão Markov acontece na próxima oportunidade municipal de plantio; destinos com janela MAPA standalone nos 365 dias seguintes continuam possíveis, e o talhão espera em pousio até o calendário aplicável ao destino sorteado. Nabo forrageiro, braquiária, crotalária, mucuna e aveia-preta só recebem a hipótese de qualquer decêndio se faltar linha MAPA standalone; calendário oficial presente sempre prevalece. O calendário ZARC 2026/2027 é repetido nos cinco anos e agrega classes de solo/grupos de cultivar, portanto é uma restrição exploratória, não uma elegibilidade parcelar oficial. Linhas identificadas como consórcio não entram na cadeia principal. A prior continua uniforme com α=0,5 por destino: uma cultura sem massa histórica permanece possível; com 14 destinos e suporte zero, a probabilidade-base é 7,1%, mas cai conforme cresce o suporte — não é um piso fixo de 6–7%. Essa prior da cadeia é independente do n₀ usado para ponderar a confiabilidade econômica das rotas. A hipótese editável de rendimento por repetição é específica por cultura: soja 8 pp por replantio até 20%; milho 2,2 pp até 4,3%; ambas reduzem o VPL, não a probabilidade Markov nem os custos. Para café, uma subcadeia separada sorteia entre coberturas de entrelinha com prior uniforme, sem inventar contagens empíricas. Água vem da NASA POWER; carbono inicial vem do solo mapeado e as mudanças são hipóteses explícitas, não medições.
 
-O VPL parte de rendimento PAM, custo CONAB e preço-base pela mediana anual PAM real 2017–2025, convertido por IPCA ao mês de referência. A tendência entre medianas dos três primeiros e três últimos anos é limitada a ±5% ao ano e editável; as cotações futuras Yahoo de soja/milho ficam como referência separada. Cultura inicial é produtiva; novas anuais esperam um ciclo, café espera três anos e cana 18 meses. Custos de formação perene são frações editáveis de proxies de produção, lançadas no plantio e a cada ano de formação, com o último período proporcional; não são implantação medida. A primeira colheita após a maturação usa o rendimento PAM de lavouras adultas, pois falta curva de produção por idade; isso pode superestimar o primeiro corte. A demonstração usa 100.000 trajetórias e agrupa pelo percurso real: sequência de plantios ocorridos (incluindo replantios) e, no café, sequência de coberturas. Datas diferentes não criam rotas diferentes; as datas, água e solo de cada trajetória ainda determinam seus fluxos e VPL, e uma trilha de exemplo mantém esses eventos visíveis. Um único ranking paginado combina CVaR5 (resiliência) e P95 (retorno alto) com preferência ajustável. Para evitar que métricas de uma amostra dominem, o score é aproximado à referência geral de VPLs elegíveis com peso `n/(n+n₀)`; n₀ é editável e o peso aplicado aparece por rota. Frequência, amostra com VPL e valores de referência ficam visíveis. O ranking compara apenas sequências amostradas e não é uma política reotimizada em cada ciclo. Consulte [a cobertura e as limitações](data/reference/economic-input-coverage.json) e [as entradas rastreáveis](data/reference/economic-benchmarks.json).
+O VPL parte de rendimento PAM, custo CONAB e preço-base pela mediana anual PAM real 2017–2025, convertido por IPCA ao mês de referência. A tendência entre medianas dos três primeiros e três últimos anos é limitada a ±5% ao ano e editável; as cotações futuras Yahoo de soja/milho ficam como referência separada. Cultura inicial é produtiva; novas anuais esperam um ciclo, café espera três anos e cana 18 meses. Custos de formação perene são frações editáveis de proxies de produção, lançadas no plantio e a cada ano de formação, com o último período proporcional; não são implantação medida. A primeira colheita após a maturação usa o rendimento PAM de lavouras adultas, pois falta curva de produção por idade; isso pode superestimar o primeiro corte. A demonstração usa 100.000 trajetórias e agrupa pelo percurso real: sequência de plantios ocorridos (incluindo replantios) e, no café, sequência de coberturas. Datas diferentes não criam rotas diferentes; as datas, água e solo de cada trajetória ainda determinam seus fluxos e VPL, e uma trilha de exemplo mantém esses eventos visíveis. Um único ranking paginado combina CVaR5 (resiliência) e P95 (retorno alto) com preferência ajustável. Para evitar que métricas de uma amostra dominem, o score é aproximado à referência geral de VPLs elegíveis com peso `mínimo(30%, n_cauda/(n_cauda+n₀))`, com `n_cauda = teto(5% × VPLs da rota)`; n₀ é editável e medido em VPLs de cauda; a referência geral sempre mantém pelo menos 70% do score. Frequência, suporte total, tamanho da cauda e valores de referência ficam visíveis. O ranking compara apenas sequências amostradas e não é uma política reotimizada em cada ciclo. Consulte [a cobertura e as limitações](data/reference/economic-input-coverage.json) e [as entradas rastreáveis](data/reference/economic-benchmarks.json).
 
 ## Documentação
 

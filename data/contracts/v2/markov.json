@@ -2,7 +2,7 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "https://fieldshift.local/contracts/v2/markov.json",
     "title": "Markov chain graph",
-    "$comment": "The chain walks over DISCRETE states (crop x stage). CONTINUOUS variables (soil, climate, finances) live in the node and change only through effects: what the chain can alter is whatever appears as an effect target. The chain has no seed: Monte Carlo owns the seed (monte_carlo.json) and draws every transition and effect value with it.",
+    "$comment": "The chain walks over DISCRETE states (crop x stage). CONTINUOUS variables (soil, climate, finances) live in the node and change only through effects: what the chain can alter is whatever appears as an effect target. The chain holds no seed and makes no choice by itself: a scenario policy (monte_carlo.json) decides which edge to take, deterministically (rotation) or by drawing from 'probability' (markov).",
     "type": "object",
     "required": [
         "initial_state",
@@ -10,8 +10,133 @@
         "transitions"
     ],
     "properties": {
+    "alpha_per_destination": {
+      "type": "number",
+      "minimum": 0,
+      "exclusiveMinimum": 0,
+      "description": "Symmetric Dirichlet prior for the eligible crop destinations. Edge probability is the posterior mean before calendar and environmental adjustment."
+    },
+    "pam_history": {
+      "type": "object",
+      "description": "Municipal statistics for audit; includes historical crops excluded from the simulation. The annual shares are preserved without renormalization.",
+      "required": [
+        "source",
+        "period",
+        "top_crop_limit",
+        "annual_sequence"
+      ],
+      "properties": {
+        "source": {
+          "type": "object"
+        },
+        "period": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "top_crop_limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "annual_sequence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "year",
+              "state_id",
+              "crop_name",
+              "harvested_area_ha",
+              "top5_area_total_ha",
+              "top5_crops",
+              "reported_crop_areas_ha"
+            ],
+            "properties": {
+              "year": {
+                "type": "integer"
+              },
+              "state_id": {
+                "type": "string"
+              },
+              "crop_name": {
+                "type": "string"
+              },
+              "harvested_area_ha": {
+                "type": "number",
+                "minimum": 0
+              },
+              "top5_area_total_ha": {
+                "type": "number",
+                "minimum": 0
+              },
+              "top5_crops": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 5,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "rank",
+                    "state_id",
+                    "crop_name",
+                    "harvested_area_ha",
+                    "area_share_within_top5"
+                  ],
+                  "properties": {
+                    "rank": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 5
+                    },
+                    "state_id": {
+                      "type": "string"
+                    },
+                    "crop_name": {
+                      "type": "string"
+                    },
+                    "harvested_area_ha": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "area_share_within_top5": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    }
+                  }
+                }
+              },
+              "reported_crop_areas_ha": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+        "id": {
+            "type": "string",
+            "description": "Chain id. Generated chains use the profile id."
+        },
+        "profile": {
+            "type": "string",
+            "description": "Profile the chain was generated for (profile.json id). Absent in hand-written examples."
+        },
         "description": {
             "type": "string"
+        },
+        "provenance": {
+            "type": "string",
+            "description": "How the chain was produced: source files, rule and its parameters."
         },
         "initial_state": {
             "type": "string",
@@ -168,12 +293,22 @@
                 "count": {
                     "type": "integer",
                     "minimum": 0,
-                    "description": "Observed count behind the probability, when there is one"
+                    "description": "Whole observed transitions behind the edge, when there are any (v1: year pairs in which the municipality's dominant crop went from 'from' to 'to')."
                 },
                 "outgoing_count": {
                     "type": "integer",
                     "minimum": 0,
                     "description": "Total observed transitions leaving 'from'"
+                },
+                "mass": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Fractional evidence behind the edge when it is not a whole count (v1: sum over consecutive years of area share of 'from' x area share of 'to' among the top-5 PAM crops, which assumes independence)."
+                },
+                "outgoing_mass": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Raw PAM mass over eligible destinations before adding the prior. With alpha, the posterior mean is (mass + alpha) / (outgoing_mass + alpha * number of destinations)."
                 },
                 "when": {
                     "type": "array",
