@@ -1,0 +1,164 @@
+{
+  "id": "ariquemes-ro",
+  "profile": "ariquemes-ro",
+  "description": "Regional baseline for ariquemes-ro: what the municipality's crop areas suggest follows each crop. Edges exist only where PAM gives mass; crops without edges are reachable only through rotation scenarios.",
+  "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json). Rules: {\"excluded_crops\": [\"coffee\"], \"min_row_mass\": 1.0, \"min_probability\": 0.02}.",
+  "initial_state": "soybean:skip_stages",
+  "states": [
+    {
+      "id": "soybean:skip_stages",
+      "crop": "soybean",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "maize_grain:skip_stages",
+      "crop": "maize_grain",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "sugarcane:skip_stages",
+      "crop": "sugarcane",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "sorghum_grain:skip_stages",
+      "crop": "sorghum_grain",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "wheat:skip_stages",
+      "crop": "wheat",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "dry_bean:skip_stages",
+      "crop": "dry_bean",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "peanut:skip_stages",
+      "crop": "peanut",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "oat:skip_stages",
+      "crop": "oat",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "forage_radish:skip_stages",
+      "crop": "forage_radish",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "brachiaria:skip_stages",
+      "crop": "brachiaria",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "millet:skip_stages",
+      "crop": "millet",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "crotalaria:skip_stages",
+      "crop": "crotalaria",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "mucuna:skip_stages",
+      "crop": "mucuna",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "fallow:skip_stages",
+      "crop": "fallow",
+      "stage": "skip_stages"
+    }
+  ],
+  "transitions": [
+    {
+      "from": "soybean:skip_stages",
+      "to": "soybean:skip_stages",
+      "action": null,
+      "probability": 0.738853,
+      "mass": 6.445879,
+      "outgoing_mass": 8.724174,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json)",
+      "count": 12
+    },
+    {
+      "from": "soybean:skip_stages",
+      "to": "maize_grain:skip_stages",
+      "action": null,
+      "probability": 0.261147,
+      "mass": 2.278295,
+      "outgoing_mass": 8.724174,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json)"
+    },
+    {
+      "from": "maize_grain:skip_stages",
+      "to": "maize_grain:skip_stages",
+      "action": null,
+      "probability": 0.658399,
+      "mass": 12.499161,
+      "outgoing_mass": 18.984159,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json)",
+      "count": 22
+    },
+    {
+      "from": "maize_grain:skip_stages",
+      "to": "dry_bean:skip_stages",
+      "action": null,
+      "probability": 0.213837,
+      "mass": 4.05951,
+      "outgoing_mass": 18.984159,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json)",
+      "count": 1
+    },
+    {
+      "from": "maize_grain:skip_stages",
+      "to": "soybean:skip_stages",
+      "action": null,
+      "probability": 0.127764,
+      "mass": 2.425488,
+      "outgoing_mass": 18.984159,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json)"
+    },
+    {
+      "from": "dry_bean:skip_stages",
+      "to": "maize_grain:skip_stages",
+      "action": null,
+      "probability": 0.694644,
+      "mass": 4.038527,
+      "outgoing_mass": 5.813807,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json)"
+    },
+    {
+      "from": "dry_bean:skip_stages",
+      "to": "dry_bean:skip_stages",
+      "action": null,
+      "probability": 0.249395,
+      "mass": 1.449937,
+      "outgoing_mass": 5.813807,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json)"
+    },
+    {
+      "from": "dry_bean:skip_stages",
+      "to": "soybean:skip_stages",
+      "action": null,
+      "probability": 0.05596,
+      "mass": 0.325343,
+      "outgoing_mass": 5.813807,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, ariquemes-ro: top-5 area shares of consecutive years multiplied under independence (data/profiles/ariquemes-ro/crop-transition-markov.json)"
+    }
+  ]
+}

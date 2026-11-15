@@ -178,7 +178,10 @@
         },
         "chain *": {
           "-> markov.json": {
+            "id": "string",
+            "profile": "string",
             "description": "string",
+            "provenance": "string",
             "initial_state *": "string",
             "states *": {
               "[ ] each item": {
@@ -236,6 +239,8 @@
                   "probability *": "number 0..1",
                   "count": "integer 0..",
                   "outgoing_count": "integer 0..",
+                  "mass": "number 0..",
+                  "outgoing_mass": "number 0..",
                   "when": {
                     "[ ] each item": {
                       "-> effect.json#/definitions/condition": {
@@ -294,6 +299,77 @@
             }
           }
         }
+      },
+      "profile.json": {
+        "id *": "string",
+        "label *": "string",
+        "municipality": {
+          "name *": "string",
+          "uf *": "string",
+          "ibge_code *": "string"
+        },
+        "scope": "enum: field | municipality | grid_cell",
+        "initial_node *": {
+          "-> markov.json#/definitions/node": {
+            "state *": "string",
+            "day": "integer 0..",
+            "soil *": {
+              "-> soil.json": {
+                "order": "enum: Latosol | Argisol | Neosol | Cambisol | Gleysol | Plinthosol | ... (14)",
+                "N2": "number 0..",
+                "pH": "number [log10] 0..14",
+                "organic_carbon": "number [g/kg] 0..",
+                "available_water_capacity": "number [mm] 0..",
+                "available_water_fraction": "number [fraction] 0..1",
+                "temperature_per_depth": {
+                  "[ ] each item": {
+                    "depth *": "number [cm] 0..",
+                    "temperature *": "number [ºC]"
+                  }
+                }
+              }
+            },
+            "climate": {
+              "-> climate.json": {
+                "lat": "number [deg] -90..90",
+                "long": "number [deg] -180..180",
+                "alt": "number [m]",
+                "month": "enum: january | february | march | april | may | june | ... (12)",
+                "season": "enum: summer | autumn | winter | spring",
+                "solar_incidence": "number [W/m^2] 0..",
+                "weather": {
+                  "pluviosity": "number [mm] 0..",
+                  "temperature": "number [ºC]",
+                  "relative_humidity": "number [%] 0..100",
+                  "et0": "number [mm/day] 0.."
+                }
+              }
+            },
+            "financial": {
+              "cash": "number [BRL/ha]",
+              "cost": "number [BRL/ha]",
+              "revenue": "number [BRL/ha]",
+              "yield": "number [kg/ha] 0..",
+              "price": "number [BRL/kg] 0.."
+            }
+          }
+        },
+        "values *": {
+          "[ ] each item": {
+            "pointer *": "string",
+            "support *": {
+              "-> effect.json#/definitions/support": "enum: observed | derived | pooled | prior"
+            },
+            "provenance *": "string"
+          }
+        },
+        "climate_history": {
+          "file *": "string",
+          "period *": {
+            "[ ] each item": "string"
+          },
+          "source *": "string"
+        }
       }
     },
     "id_links": [
@@ -307,7 +383,8 @@
       "monte_carlo.scenario.initial_state  ==  markov.state.id",
       "monte_carlo.rotation_policy.sequence[]  ==  crop.name",
       "monte_carlo.rotation_policy.fallback  ==  markov.state.id",
-      "monte_carlo.profile  ==  profile.data/profiles/<id>",
+      "monte_carlo.profile  ==  profile.id",
+      "markov.profile  ==  profile.id",
       "event.crops[]  ==  crop.name"
     ],
     "pointer_links": [

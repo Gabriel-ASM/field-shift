@@ -1,0 +1,134 @@
+{
+  "id": "varginha-mg",
+  "profile": "varginha-mg",
+  "description": "Regional baseline for varginha-mg: what the municipality's crop areas suggest follows each crop. Edges exist only where PAM gives mass; crops without edges are reachable only through rotation scenarios.",
+  "provenance": "IBGE PAM 1988-2025, varginha-mg: top-5 area shares of consecutive years multiplied under independence (data/profiles/varginha-mg/crop-transition-markov.json). Rules: {\"excluded_crops\": [\"coffee\"], \"min_row_mass\": 1.0, \"min_probability\": 0.02}.",
+  "initial_state": "maize_grain:skip_stages",
+  "states": [
+    {
+      "id": "soybean:skip_stages",
+      "crop": "soybean",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "maize_grain:skip_stages",
+      "crop": "maize_grain",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "sugarcane:skip_stages",
+      "crop": "sugarcane",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "sorghum_grain:skip_stages",
+      "crop": "sorghum_grain",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "wheat:skip_stages",
+      "crop": "wheat",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "dry_bean:skip_stages",
+      "crop": "dry_bean",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "peanut:skip_stages",
+      "crop": "peanut",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "oat:skip_stages",
+      "crop": "oat",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "forage_radish:skip_stages",
+      "crop": "forage_radish",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "brachiaria:skip_stages",
+      "crop": "brachiaria",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "millet:skip_stages",
+      "crop": "millet",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "crotalaria:skip_stages",
+      "crop": "crotalaria",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "mucuna:skip_stages",
+      "crop": "mucuna",
+      "stage": "skip_stages"
+    },
+    {
+      "id": "fallow:skip_stages",
+      "crop": "fallow",
+      "stage": "skip_stages"
+    }
+  ],
+  "transitions": [
+    {
+      "from": "maize_grain:skip_stages",
+      "to": "maize_grain:skip_stages",
+      "action": null,
+      "probability": 0.612032,
+      "mass": 8.105316,
+      "outgoing_mass": 13.243285,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, varginha-mg: top-5 area shares of consecutive years multiplied under independence (data/profiles/varginha-mg/crop-transition-markov.json)",
+      "count": 12
+    },
+    {
+      "from": "maize_grain:skip_stages",
+      "to": "dry_bean:skip_stages",
+      "action": null,
+      "probability": 0.387968,
+      "mass": 5.137969,
+      "outgoing_mass": 13.243285,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, varginha-mg: top-5 area shares of consecutive years multiplied under independence (data/profiles/varginha-mg/crop-transition-markov.json)",
+      "count": 1
+    },
+    {
+      "from": "dry_bean:skip_stages",
+      "to": "maize_grain:skip_stages",
+      "action": null,
+      "probability": 0.508312,
+      "mass": 4.819939,
+      "outgoing_mass": 9.482251,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, varginha-mg: top-5 area shares of consecutive years multiplied under independence (data/profiles/varginha-mg/crop-transition-markov.json)"
+    },
+    {
+      "from": "dry_bean:skip_stages",
+      "to": "dry_bean:skip_stages",
+      "action": null,
+      "probability": 0.469059,
+      "mass": 4.447734,
+      "outgoing_mass": 9.482251,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, varginha-mg: top-5 area shares of consecutive years multiplied under independence (data/profiles/varginha-mg/crop-transition-markov.json)",
+      "count": 10
+    },
+    {
+      "from": "dry_bean:skip_stages",
+      "to": "sugarcane:skip_stages",
+      "action": null,
+      "probability": 0.022629,
+      "mass": 0.214577,
+      "outgoing_mass": 9.482251,
+      "support": "derived",
+      "provenance": "IBGE PAM 1988-2025, varginha-mg: top-5 area shares of consecutive years multiplied under independence (data/profiles/varginha-mg/crop-transition-markov.json)"
+    }
+  ]
+}

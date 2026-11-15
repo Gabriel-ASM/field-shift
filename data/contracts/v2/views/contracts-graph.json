@@ -7,6 +7,7 @@
     "event.json",
     "markov.json",
     "monte_carlo.json",
+    "profile.json",
     "soil.json"
   ],
   "nodes": [
@@ -417,10 +418,28 @@
       ],
       "fields": [
         {
+          "path": "id",
+          "type": "string",
+          "required": false,
+          "description": "Chain id. Generated chains use the profile id."
+        },
+        {
+          "path": "profile",
+          "type": "string",
+          "required": false,
+          "description": "Profile the chain was generated for (profile.json id). Absent in hand-written examples."
+        },
+        {
           "path": "description",
           "type": "string",
           "required": false,
           "description": ""
+        },
+        {
+          "path": "provenance",
+          "type": "string",
+          "required": false,
+          "description": "How the chain was produced: source files, rule and its parameters."
         },
         {
           "path": "initial_state",
@@ -558,13 +577,25 @@
           "path": "transition.count",
           "type": "integer 0..",
           "required": false,
-          "description": "Observed count behind the probability, when there is one"
+          "description": "Whole observed transitions behind the edge, when there are any (v1: year pairs in which the municipality's dominant crop went from 'from' to 'to')."
         },
         {
           "path": "transition.outgoing_count",
           "type": "integer 0..",
           "required": false,
           "description": "Total observed transitions leaving 'from'"
+        },
+        {
+          "path": "transition.mass",
+          "type": "number 0..",
+          "required": false,
+          "description": "Fractional evidence behind the edge when it is not a whole count (v1: sum over consecutive years of area share of 'from' x area share of 'to' among the top-5 PAM crops, which assumes independence)."
+        },
+        {
+          "path": "transition.outgoing_mass",
+          "type": "number 0..",
+          "required": false,
+          "description": "Total mass leaving 'from' over the destinations kept in the chain. probability = mass / outgoing_mass."
         },
         {
           "path": "transition.when",
@@ -702,6 +733,105 @@
         {
           "path": "markov_policy.kind",
           "type": "any",
+          "required": true,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "profile",
+      "file": "profile.json",
+      "title": "Location profile",
+      "comment": "One place the simulation can run for. Holds the node every trajectory starts from and says, value by value, where it came from.",
+      "definitions": [],
+      "fields": [
+        {
+          "path": "id",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "label",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "municipality.name",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "municipality.uf",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "municipality.ibge_code",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "scope",
+          "type": "enum: field | municipality | grid_cell",
+          "required": false,
+          "description": "What the soil values represent. grid_cell = map estimate at the municipality centroid, not a field sample."
+        },
+        {
+          "path": "initial_node",
+          "type": "-> markov.json#/definitions/node",
+          "required": true,
+          "description": "Node at day 0. 'state' is the default starting state; a scenario may override it."
+        },
+        {
+          "path": "values",
+          "type": "array of object",
+          "required": true,
+          "description": "Evidence for each initial value: one item per JSON Pointer set in initial_node."
+        },
+        {
+          "path": "values[].pointer",
+          "type": "string",
+          "required": true,
+          "description": "JSON Pointer into initial_node, e.g. /soil/pH"
+        },
+        {
+          "path": "values[].support",
+          "type": "-> effect.json#/definitions/support",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "values[].provenance",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "climate_history",
+          "type": "object",
+          "required": false,
+          "description": "Daily series the environment stream resamples."
+        },
+        {
+          "path": "climate_history.file",
+          "type": "string",
+          "required": true,
+          "description": "Path relative to the repository root"
+        },
+        {
+          "path": "climate_history.period",
+          "type": "array of string",
+          "required": true,
+          "description": "First and last day, ISO dates"
+        },
+        {
+          "path": "climate_history.source",
+          "type": "string",
           "required": true,
           "description": ""
         }
@@ -962,6 +1092,20 @@
       "target": "/definitions/scenario"
     },
     {
+      "kind": "ref",
+      "from": "profile",
+      "field": "initial_node",
+      "to": "markov",
+      "target": "/definitions/node"
+    },
+    {
+      "kind": "ref",
+      "from": "profile",
+      "field": "values[].support",
+      "to": "effect",
+      "target": "/definitions/support"
+    },
+    {
       "kind": "id",
       "from": "markov",
       "field": "initial_state",
@@ -1036,7 +1180,14 @@
       "from": "monte_carlo",
       "field": "profile",
       "to": "profile",
-      "target": "data/profiles/<id>"
+      "target": "id"
+    },
+    {
+      "kind": "id",
+      "from": "markov",
+      "field": "profile",
+      "to": "profile",
+      "target": "id"
     },
     {
       "kind": "id",

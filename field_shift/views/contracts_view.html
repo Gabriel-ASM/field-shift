@@ -157,7 +157,7 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 6px; }
 
   <footer>
     <span>Generated from <span id="sources"></span>.</span>
-    <span>Regenerate with <code>python data/pipeline/build_contract_views.py</code>. The same data feeds <code>data/contracts/v2/views/contracts-tree.json</code> for jsoncrack.com.</span>
+    <span>Regenerate with <code>python -m field_shift.views</code>. The same data feeds <code>data/contracts/v2/views/contracts-tree.json</code> for jsoncrack.com.</span>
   </footer>
 </main>
 
@@ -181,6 +181,7 @@ footer { color: var(--muted); font-size: 13px; display: grid; gap: 6px; }
   const W = 200, H = 84;
   const POS = {
     monte_carlo: [20, 30], markov: [400, 30], crop: [780, 30],
+    profile: [20, 144],
     climate: [20, 258], node: [400, 258], effect: [780, 258],
     event: [20, 486], soil: [400, 486], action: [780, 486],
   };

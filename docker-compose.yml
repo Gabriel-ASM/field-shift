@@ -1,0 +1,19 @@
+# Local development: MongoDB + API. Start with `docker compose up`, then load data with
+#   uv run python -m field_shift.ingest --mongo mongodb://localhost:27017
+services:
+  mongo:
+    image: mongo:7
+    ports: ["127.0.0.1:27017:27017"]
+    volumes: [mongo-data:/data/db]
+  api:
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm-slim
+    working_dir: /app
+    volumes: [".:/app"]
+    environment:
+      FIELD_SHIFT_MONGO_URI: mongodb://mongo:27017
+      UV_PROJECT_ENVIRONMENT: /tmp/venv
+    command: uv run uvicorn --factory field_shift.api:create_app --host 0.0.0.0 --port 8000
+    ports: ["127.0.0.1:8000:8000"]
+    depends_on: [mongo]
+volumes:
+  mongo-data:
