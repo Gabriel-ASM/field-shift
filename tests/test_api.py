@@ -108,6 +108,21 @@ def test_runtime_config_comes_from_the_environment(client, monkeypatch):
     assert client.get("/config").json()["cms"]["url"] == "http://cms.local"
 
 
+def test_reference_is_only_served_when_configured(client, generated, tmp_path, monkeypatch):
+    import mongomock
+    from fastapi.testclient import TestClient
+    from field_shift.api import create_app
+
+    assert client.get("/reference").status_code == 404
+    (tmp_path / "notes").mkdir()
+    (tmp_path / "notes" / "a<b>.md").write_text("# hi", encoding="utf-8")
+    monkeypatch.setenv("FIELD_SHIFT_REFERENCE_DIR", str(tmp_path))
+    browsing = TestClient(create_app(mongomock.MongoClient()["x"]))
+    page = browsing.get("/reference").text
+    assert "notes (1)" in page and "a&lt;b&gt;.md" in page
+    assert browsing.get("/reference/files/notes/a<b>.md").text == "# hi"
+
+
 def test_boundaries_are_served(client):
     assert len(client.get("/geo/states").json()["features"]) == 27
     assert client.get("/geo/profiles/franca-sp").json()["features"][0]["properties"]["codarea"] == "3516200"

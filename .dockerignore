@@ -2,15 +2,7 @@
 .venv
 .pytest_cache
 **/__pycache__
+**/node_modules
+ctrlaltespaco/dist
 .env
 .env.*
-data/raw
-data/processed
-research
-tests
-docs/*.md
-docs/tasks
-ctrlaltespaco/node_modules
-ctrlaltespaco/dist
-web
-downloads

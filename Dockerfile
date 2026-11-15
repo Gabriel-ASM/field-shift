@@ -9,7 +9,7 @@ RUN npm ci
 COPY ctrlaltespaco/ ./
 RUN npm run build
 
-FROM mongo:7
+FROM mongo:7 AS base
 
 COPY --from=ghcr.io/astral-sh/uv:0.5 /uv /usr/local/bin/uv
 
@@ -31,7 +31,14 @@ COPY pyproject.toml uv.lock ./
 RUN uv python install 3.12 && uv sync --frozen --no-dev --no-install-project
 
 COPY field_shift/ field_shift/
-COPY data/ data/
+COPY data/catalog/ data/catalog/
+COPY data/contracts/ data/contracts/
+COPY data/geo/ data/geo/
+COPY data/pipeline/ data/pipeline/
+COPY data/policies/ data/policies/
+COPY data/profiles/ data/profiles/
+COPY data/reference/ data/reference/
+COPY data/v2/ data/v2/
 COPY docs/*.html docs/
 COPY --from=front /front/dist ctrlaltespaco/dist
 COPY docker/entrypoint.sh /usr/local/bin/field-shift-entrypoint
@@ -47,3 +54,12 @@ HEALTHCHECK --interval=10s --timeout=3s --start-period=30s --retries=5 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)"
 
 ENTRYPOINT ["field-shift-entrypoint"]
+
+# Development image: the product plus the whole repository (research, downloads, raw data, earlier pages)
+# browsable at /reference.   docker build --target dev -t field-shift:dev .
+FROM base AS dev
+COPY . /app/reference/
+ENV FIELD_SHIFT_REFERENCE_DIR=/app/reference
+
+# Default target: the product only.
+FROM base AS production

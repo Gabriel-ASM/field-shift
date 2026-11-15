@@ -19,6 +19,12 @@ docker run --rm -p 8000:8000 field-shift  # front at http://localhost:8000, API 
 
 The image builds the front in `ctrlaltespaco/` (TypeScript, React Three Fiber, GSAP) and serves it at `/`; simulations run through `POST /runs`. The generated pages in `docs/` are served at `/pages`. Runtime settings of the front come from `GET /config`, set with `FIELD_SHIFT_*` environment variables (basemap tiles, CMS address, run size).
 
+Development image, with the whole repository (research, downloads, raw data, earlier pages) browsable at `/reference`:
+
+```bash
+docker build --target dev -t field-shift:dev .
+```
+
 Local development:
 
 ```bash
