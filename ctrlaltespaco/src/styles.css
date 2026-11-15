@@ -18,6 +18,9 @@ footer { position: absolute; left: 24px; bottom: 14px; color: var(--muted); font
   padding: 18px; overflow-y: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
   backdrop-filter: blur(14px); z-index: 10;
 }
+.places { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.places button { border-radius: 999px; font-size: 0.82rem; }
+.places button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
 .panel h2 { margin: 0 0 12px; font-size: 1.25rem; }
 .panel h3 { margin: 0 0 8px; font-size: 0.95rem; }
 .hint, .note { color: var(--muted); font-size: 0.82rem; margin: 8px 0; }

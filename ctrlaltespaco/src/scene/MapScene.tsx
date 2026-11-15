@@ -11,7 +11,8 @@ const NORTH_WEST: Position = [-84, 14];
 const SOUTH_EAST: Position = [-28, -42];
 const COUNTRY_ZOOM = 5;
 const DETAIL_RADIUS = 2;
-const COUNTRY_VIEW: View = { target: toWorld([-53, -14]), height: 4.4, back: 2.4 };
+/** Looks a little east of the country's centre, so Brazil sits in the part of the screen the panel leaves free. */
+const COUNTRY_VIEW: View = { target: toWorld([-45, -14]), height: 4.6, back: 2.4 };
 
 function siteView(profile: Profile): View {
   const { long, lat } = profile.initial_node.climate;

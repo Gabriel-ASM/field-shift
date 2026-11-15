@@ -1,5 +1,5 @@
 import { MapScene } from "./scene/MapScene.tsx";
-import type { RunResult } from "./types.ts";
+import type { Profile, RunResult } from "./types.ts";
 import { cropLabel } from "./ui/colors.ts";
 import { count } from "./ui/format.ts";
 import { Legend } from "./ui/Legend.tsx";
@@ -34,11 +34,34 @@ function Results({ run }: { run: RunResult }) {
   );
 }
 
-function Panel({ simulation }: { simulation: Simulation }) {
+/** Every municipality as a button, so a place is always reachable even when the map pin is out of view. */
+function Places({ profiles, selected, onSelect }: { profiles: Profile[]; selected: string | null; onSelect: (profile: Profile) => void }) {
+  return (
+    <nav className="places" aria-label="Municipalities">
+      {profiles.map((profile) => (
+        <button key={profile.id} type="button" aria-pressed={profile.id === selected} onClick={() => onSelect(profile)}>
+          {profile.label}
+        </button>
+      ))}
+    </nav>
+  );
+}
+
+function Panel({ simulation, profiles }: { simulation: Simulation; profiles: Profile[] }) {
   const { selection, sequence, start, seed, run, running, error } = simulation;
-  if (!selection) return <aside className="panel"><p className="hint">Choose a municipality on the map.</p></aside>;
+  const places = <Places profiles={profiles} selected={selection?.profile.id ?? null} onSelect={simulation.select} />;
+  if (!selection) {
+    return (
+      <aside className="panel">
+        <p className="hint">Choose a municipality here or on the map.</p>
+        {places}
+        {error && <p className="error">{error}</p>}
+      </aside>
+    );
+  }
   return (
     <aside className="panel">
+      {places}
       <h2>{selection.profile.label}</h2>
       <form className="controls" onSubmit={(event) => { event.preventDefault(); simulation.simulate(); }}>
         <label htmlFor="start-crop">Crop in the field today</label>
@@ -73,7 +96,7 @@ export function App() {
         <h1>Field Shift</h1>
         <p>Crop rotations under sampled climate, per municipality</p>
       </header>
-      <Panel simulation={simulation} />
+      <Panel simulation={simulation} profiles={world.profiles} />
       <footer>Basemap: {world.config.basemap.attribution} · Boundaries: IBGE</footer>
     </div>
   );

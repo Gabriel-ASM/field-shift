@@ -3,5 +3,8 @@ const PERCENT = new Intl.NumberFormat("en-US", { style: "percent", maximumFracti
 const COUNT = new Intl.NumberFormat("en-US");
 
 export const money = (value: number) => MONEY.format(value);
-export const percent = (value: number) => PERCENT.format(value);
+const SMALL_PERCENT = new Intl.NumberFormat("en-US", { style: "percent", maximumFractionDigits: 1 });
+
+/** Whole percents, with one decimal below 10% so small shares do not all read "0%". */
+export const percent = (value: number) => (value < 0.1 ? SMALL_PERCENT : PERCENT).format(value);
 export const count = (value: number) => COUNT.format(value);
