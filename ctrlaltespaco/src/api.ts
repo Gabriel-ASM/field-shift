@@ -1,5 +1,5 @@
 import { BUNDLE_VERSION, DEV, RELOAD_MESSAGE, VERSION_HEADER } from "./version.ts";
-import type { Boundary, ChainMatrix, JobView, PlantingWindows, Profile, ProfileSummary, RouteDetail, RunChoices, RunResult, RuntimeConfig, ScenarioRequest } from "./types.ts";
+import type { Boundary, ChainMatrix, JobView, Municipality, PlantingWindows, Profile, ProfileSummary, RouteDetail, RunChoices, RunResult, RuntimeConfig, ScenarioRequest } from "./types.ts";
 
 const HORIZON_DAYS = 1825;
 
@@ -36,6 +36,8 @@ export const getConfig = () => request<RuntimeConfig>("/config");
 export const getServerVersion = async () => (await request<RuntimeConfig>("/config", { cache: "no-store" })).version ?? DEV;
 export const listProfiles = () => request<ProfileSummary[]>("/profiles");
 export const getProfile = (id: string) => request<Profile>(`/profiles/${encodeURIComponent(id)}`);
+export const searchMunicipalities = (query: string) => request<Municipality[]>(`/geo/municipalities?q=${encodeURIComponent(query)}`);
+export const getMunicipalityBoundary = (code: string) => request<Boundary>(`/geo/municipalities/${encodeURIComponent(code)}`);
 export const getPlantingWindows = (id: string) => request<PlantingWindows>(`/profiles/${encodeURIComponent(id)}/planting-windows`);
 export const getMatrix = (id: string) => request<ChainMatrix>(`/profiles/${encodeURIComponent(id)}/chain/matrix`);
 export const getRunChoices = (id: string) => request<RunChoices>(`/runs/options/${encodeURIComponent(id)}`);

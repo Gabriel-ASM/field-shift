@@ -178,3 +178,21 @@ def test_planting_windows_give_the_lowest_zarc_risk_per_decendio():
     assert windows["risk_levels"] == [20, 30, 40] and soybean["official"] and windows["seasons"] == ["2026/2027"]
     assert soybean["risk"]["30"] == 20 and set(soybean["risk"].values()) <= {20, 30, 40}
     assert client.get("/profiles/nowhere/planting-windows").status_code == 404
+
+
+def test_municipality_search_is_accent_insensitive_and_prefix_first():
+    from field_shift.api.routes.geo import search
+    names = [(row["name"], row["uf"]) for row in search("sao paulo", 5)]
+    assert names[0] == ("São Paulo", "SP")
+    franca = search("franca", 50)
+    assert franca[0]["name"] == "Franca" and franca[0]["code"] == "3516200"
+    assert search("   ", 5) == []
+
+
+def test_unknown_municipality_code_is_404_without_calling_ibge():
+    import mongomock
+    from fastapi.testclient import TestClient
+    from field_shift.api import create_app
+    client = TestClient(create_app(mongomock.MongoClient()["x"]))
+    assert client.get("/geo/municipalities/9999999").status_code == 404
+    assert client.get("/geo/municipalities?q=vargin").json()[0]["name"] == "Varginha"

@@ -15,6 +15,8 @@ interface FieldMapProps {
   profiles: Profile[];
   selected: Profile | null;
   municipality: Boundary | null;
+  /** A municipality found in the experimental search, without a complete profile. */
+  explored: Boundary | null;
   onSelect: (id: string) => void;
   /** Area of the field the farmer drew, in hectares; null when it is removed. */
   onArea: (hectares: number | null) => void;
@@ -53,10 +55,11 @@ async function addDrawing(map: L.Map, onArea: (hectares: number | null) => void)
 }
 
 /** The map of the journey: basemap, state lines, one marker per municipality with data, and the field drawing tool. */
-export function FieldMap({ config, states, profiles, selected, municipality, onSelect, onArea }: FieldMapProps) {
+export function FieldMap({ config, states, profiles, selected, municipality, explored, onSelect, onArea }: FieldMapProps) {
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const outline = useRef<L.GeoJSON | null>(null);
+  const searched = useRef<L.GeoJSON | null>(null);
   const markers = useRef(new Map<string, L.CircleMarker>());
 
   useEffect(() => {
@@ -88,6 +91,14 @@ export function FieldMap({ config, states, profiles, selected, municipality, onS
       ? L.geoJSON(municipality as never, { style: { color: "#b88735", weight: 2, fillOpacity: 0.08 }, interactive: false }).addTo(map.current)
       : null;
   }, [municipality]);
+
+  useEffect(() => {
+    searched.current?.remove();
+    searched.current = null;
+    if (!explored || !map.current) return;
+    searched.current = L.geoJSON(explored as never, { style: { color: "#ffffff", weight: 2, dashArray: "6 5", fillColor: "#ffffff", fillOpacity: 0.12 }, interactive: false }).addTo(map.current);
+    map.current.flyToBounds(searched.current.getBounds(), { duration: 1.4, maxZoom: 10, padding: [40, 40] });
+  }, [explored]);
 
   return <div ref={container} className="field-map" aria-label="Map of municipalities with data" />;
 }

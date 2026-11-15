@@ -127,3 +127,15 @@ button.alternative-route[aria-pressed="true"] { border-color: var(--fs-green); b
   .print-sources { margin: 0; padding-left: 12pt; }
   .print-plan section { break-inside: avoid; }
 }
+
+/* Experimental search over every Brazilian municipality. */
+.place-search { margin: 18px 0 8px; }
+.place-search label span { display: block; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; }
+.place-search input { width: 100%; padding: 10px 12px; border: 1px solid var(--line, #d6ddd6); border-radius: 10px; font: inherit; }
+.badge { margin-left: 6px; padding: 1px 7px; border-radius: 99px; background: #fff3d6; color: #8a5a00; font-size: 0.7rem; font-style: normal; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+.place-matches { margin: 4px 0 0; padding: 4px; list-style: none; border: 1px solid var(--line, #d6ddd6); border-radius: 10px; background: #fff; max-height: 260px; overflow: auto; }
+.place-matches button { width: 100%; padding: 7px 10px; border: 0; border-radius: 7px; background: none; font: inherit; text-align: left; cursor: pointer; }
+.place-matches button:hover, .place-matches button:focus-visible { background: var(--soft, #eef3ee); }
+.place-matches small { color: var(--muted, #5b6b5b); margin-left: 4px; }
+.explored { margin-top: 10px; }
+.explored p { margin: 0 0 8px; font-size: 0.88rem; }

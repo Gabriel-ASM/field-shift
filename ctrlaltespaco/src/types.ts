@@ -196,6 +196,13 @@ export interface RunResult {
 
 export type Position = [longitude: number, latitude: number];
 
+/** A Brazilian municipality from the IBGE list (experimental search). */
+export interface Municipality {
+  code: string;
+  name: string;
+  uf: string;
+}
+
 export interface Boundary {
   features: { geometry: { type: "Polygon"; coordinates: Position[][] } | { type: "MultiPolygon"; coordinates: Position[][][] } }[];
 }

@@ -121,3 +121,16 @@ test("plantings read off a trajectory and ZARC windows in words", () => {
   assert.deepEqual(plantings(track, 4), [{ crop: "maize_grain", year: 1, decendio: 19 }, { crop: "sugarcane", year: 2, decendio: 1 }]);
   assert.equal(windowText({ 1: 20, 27: 30, 28: 30, 29: 20, 30: 20, 36: 20 }), "late Sep – early Oct (30%), mid Oct – late Oct (20%), late Dec – early Jan (20%)");
 });
+
+import { centre, distanceKm, nearest } from "../src/map/places.ts";
+
+test("the nearest complete profile to a searched municipality", () => {
+  const ring: [number, number][] = [[-48, -21], [-47, -21], [-47, -20], [-48, -20], [-48, -21]];
+  const square = { features: [{ geometry: { type: "Polygon" as const, coordinates: [ring] } }] };
+  assert.deepEqual(centre(square), [-20.5, -47.5]);
+  assert.ok(Math.abs(distanceKm([0, 0], [0, 1]) - 111.2) < 0.1);
+  const at = (id: string, lat: number, long: number) => ({ id, initial_node: { climate: { lat, long } } }) as never;
+  const found = nearest([at("far", -9.9, -63), at("close", -20.5, -47.4)], [-20.5, -47.5])!;
+  assert.equal((found.profile as unknown as { id: string }).id, "close");
+  assert.ok(found.km < 20);
+});
