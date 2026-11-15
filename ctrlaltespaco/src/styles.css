@@ -82,7 +82,7 @@ h4 { margin: 12px 0 6px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0
 /* The plan, once the panel has grown over the map. Cards and charts come from reference.css. */
 .card { padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
 .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 3px; }
-.result { display: grid; gap: 20px; max-width: 1120px; margin: 0 auto; }
+.result { display: grid; gap: 20px; max-width: 1120px; padding: 1em ; margin: 0 auto; }
 .result-heading { display: grid; justify-items: center; text-align: center; }
 .result-heading h2 { max-width: 760px; margin: 0 0 8px; font-size: clamp(1.6rem, 3.4vw, 2.6rem); line-height: 1.08; letter-spacing: -0.04em; }
 .result-heading .lead { margin: 0; }

@@ -8,7 +8,7 @@ import { wellFormed } from "../resultShape.ts";
 import { Facts } from "../result/Facts.tsx";
 import { RouteOptions } from "../result/RouteOptions.tsx";
 import { useRouteDetail } from "../result/useRouteDetail.ts";
-import { ResultMetrics } from "../result/ResultMetrics.tsx";
+//import { ResultMetrics } from "../result/ResultMetrics.tsx";
 import { RotationPath } from "../result/RotationPath.tsx";
 import { YourChoices } from "../result/YourChoices.tsx";
 import type { RouteDetail, RunResult } from "../types.ts";
@@ -133,7 +133,7 @@ export function ResultStep({ journey }: { journey: Journey }) {
           <p>Planned by crop cycles over a five-year horizon.</p>
           <RotationPath route={selected.route} caneCut={journey.caneCut} />
         </article>
-        <ResultMetrics ranked={selected} settings={run.ranking} />
+        {/* <ResultMetrics ranked={selected} settings={run.ranking} /> */}
       </div>
       <CompareRoutes best={best} compared={compared} settings={run.ranking} confirmed={compared !== undefined && selected === compared}
         onConfirm={() => compared && choose(routeKey(compared.route))} />
