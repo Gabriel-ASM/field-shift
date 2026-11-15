@@ -1,0 +1,50 @@
+# Premissas do cenário de rotação (Field Shift). EDITÁVEL.
+# Rótulos: [ref] verificado na pesquisa (base_tecnica.md) | [est] estimativa | [hip] hipótese de trabalho, SEM fonte.
+
+# Locais (centro do municipio; troque pelas coordenadas da lavoura). Altitude aproximada [est] — so afeta a pressao na ETo.
+locais:
+  cascavel:  {nome: "Cascavel-PR",  lat: -24.9578, lon: -53.4595, altitude_m: 700}
+  franca:    {nome: "Franca-SP",    lat: -20.5386, lon: -47.4008, altitude_m: 1000}
+  varginha:  {nome: "Varginha-MG",  lat: -21.5513, lon: -45.4303, altitude_m: 940}
+  ariquemes: {nome: "Ariquemes-RO", lat: -9.9133,  lon: -63.0408, altitude_m: 140}
+clima_anos: [2015, 2024]   # NASA POWER, climatologia mensal
+
+solo:
+  # SoilGrids 2.0 via WCS do ISRIC (soilgrids_<local>.json), media dos pixels com dado na bbox de ~1000 ha
+  camadas_cm: {"0-5cm": 5, "5-15cm": 10, "15-30cm": 15}
+  profundidade_total_cm: 30
+  # fatores de conversão do inteiro SoilGrids -> unidade final
+  fator: {soc: 10, clay: 10, bdod: 100, nitrogen: 100}   # unidade oficial ISRIC/WCS (N em cg/kg). O asset do Earth Engine vem x10 e usa 1000.
+
+rothc:   # [ref] constantes verificadas na base_tecnica.md
+  k_ano: {DPM: 10.0, RPM: 0.3, BIO: 0.66, HUM: 0.02}
+  razao_dpm_rpm_residuo: 1.44
+  bio_hum: [0.46, 0.54]
+  iom_a: 0.049
+  iom_b: 1.139
+  cobertura_c: 0.6           # [hip] solo sempre coberto (rotação contínua)
+  eto_para_evap: 1.0         # [est] déficit = chuva - ETo (equivale a chuva - 0,75 x evaporação de tanque)
+
+cenarios:  # multiplicam o aporte de C dos resíduos e a FBN (não a exportação)
+  baixo: 0.7
+  base: 1.0
+  alto: 1.3
+
+# Ordem da rotação: comerciais alternadas com coberturas [hip]. Todos os números abaixo são [hip].
+# meses: duração do slot | c_residuo: t C/ha devolvidas ao solo no slot | cn_residuo: relação C:N do resíduo
+# fbn: kg N/ha fixados (leguminosas) | export_n: kg N/ha exportados nos grãos
+culturas:
+  - {nome: Soja,            tipo: comercial, meses: 5,  c_residuo: 1.8, cn_residuo: 25, fbn: 120, export_n: 200}
+  - {nome: Aveia-preta,     tipo: cobertura, meses: 5,  c_residuo: 2.0, cn_residuo: 40, fbn: 0,   export_n: 0}
+  - {nome: Milho,           tipo: comercial, meses: 5,  c_residuo: 3.2, cn_residuo: 60, fbn: 0,   export_n: 80}
+  - {nome: Nabo-forrageiro, tipo: cobertura, meses: 3,  c_residuo: 1.0, cn_residuo: 20, fbn: 0,   export_n: 0}
+  - {nome: Trigo,           tipo: comercial, meses: 5,  c_residuo: 1.8, cn_residuo: 80, fbn: 0,   export_n: 60}
+  - {nome: Crotalária,      tipo: cobertura, meses: 4,  c_residuo: 1.8, cn_residuo: 20, fbn: 150, export_n: 0}
+  - {nome: Sorgo,           tipo: comercial, meses: 5,  c_residuo: 2.8, cn_residuo: 60, fbn: 0,   export_n: 60}
+  - {nome: Braquiária,      tipo: cobertura, meses: 6,  c_residuo: 3.0, cn_residuo: 45, fbn: 0,   export_n: 0}
+  - {nome: Feijão,          tipo: comercial, meses: 4,  c_residuo: 1.0, cn_residuo: 25, fbn: 60,  export_n: 80}
+  - {nome: Milheto,         tipo: cobertura, meses: 4,  c_residuo: 2.5, cn_residuo: 50, fbn: 0,   export_n: 0}
+  - {nome: Amendoim,        tipo: comercial, meses: 5,  c_residuo: 1.2, cn_residuo: 25, fbn: 80,  export_n: 100}
+  - {nome: Mucuna,          tipo: cobertura, meses: 5,  c_residuo: 2.0, cn_residuo: 18, fbn: 140, export_n: 0}
+  - {nome: Cana-de-açúcar,  tipo: comercial, meses: 12, c_residuo: 4.5, cn_residuo: 80, fbn: 0,   export_n: 80}
+  - {nome: Café,            tipo: comercial, meses: 12, c_residuo: 2.0, cn_residuo: 40, fbn: 0,   export_n: 60}
