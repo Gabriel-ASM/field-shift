@@ -6,7 +6,6 @@ import { options, rank, recommended, routeKey, selectRoute, type RankedRoute } f
 import { CompareRoutes } from "../result/CompareRoutes.tsx";
 import { wellFormed } from "../resultShape.ts";
 import { Facts } from "../result/Facts.tsx";
-import { RouteOptions } from "../result/RouteOptions.tsx";
 import { useRouteDetail } from "../result/useRouteDetail.ts";
 //import { ResultMetrics } from "../result/ResultMetrics.tsx";
 import { RotationPath } from "../result/RotationPath.tsx";
@@ -117,8 +116,8 @@ export function ResultStep({ journey }: { journey: Journey }) {
   }
   if (!best || !selected) return <Exploratory ranked={ranked} run={run} journey={journey} />;
   const single = selected.route.crops.length < 2;
-  const choices = options(ranked, run.ranking, OPTIONS);
-  const compared = choices.find((item) => routeKey(item.route) === comparing) ?? choices.find((item) => item !== best);
+  const alternatives = options(ranked, run.ranking, OPTIONS).filter((item) => item !== best);
+  const compared = alternatives.find((item) => routeKey(item.route) === comparing) ?? alternatives[0];
   const facts = { model: run.model, ranking: run.ranking, periods: run.clock.periods, trajectories: scenario.trajectories,
     rankedRoutes: scenario.ranking_reference?.routes ?? 0, weight: journey.weight, returnWeight: journey.returnWeight };
   return (
@@ -135,13 +134,13 @@ export function ResultStep({ journey }: { journey: Journey }) {
         </article>
         {/* <ResultMetrics ranked={selected} settings={run.ranking} /> */}
       </div>
-      <CompareRoutes best={best} compared={compared} settings={run.ranking} confirmed={compared !== undefined && selected === compared}
-        onConfirm={() => compared && choose(routeKey(compared.route))} />
+      <CompareRoutes best={best} alternatives={alternatives} compared={compared} settings={run.ranking}
+        confirmed={compared !== undefined && selected === compared} pick={setComparing}
+        onConfirm={() => compared && choose(routeKey(compared.route))} onAdjust={() => journey.go("priority")} />
       <Frames detail={detail} error={error} years={run.clock.horizon_years} recommended={selected === best} />
       <ReturnChart value={selected.route.value!} fullSupport={run.ranking.support.full_score} />
       <div className="result-info">
         <Facts journey={journey} run={run} scenario={scenario} best={selected} />
-        <RouteOptions options={choices} best={best} compared={compared} pick={setComparing} />
       </div>
       <Unfolded run={run} detail={detail} cuts={journey.place!.choices.sugarcane_cuts} />
       <YourChoices journey={journey} trajectories={scenario.trajectories} />

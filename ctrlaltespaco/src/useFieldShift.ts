@@ -80,7 +80,7 @@ export function useJourney(world: World | null): Journey {
   const [step, go] = useState<Step>("location");
   const [place, setPlace] = useState<Place | null>(null);
   const [crop, setCrop] = useState<string | null>(null);
-  const [caneCut, setCaneCut] = useState(1);
+  const [caneCut, setCaneCut] = useState(2);
   const [weight, setWeight] = useState(0.2);
   const [returnWeight, setReturnWeight] = useState(0.5);
   const [seed, setSeed] = useState(2026);

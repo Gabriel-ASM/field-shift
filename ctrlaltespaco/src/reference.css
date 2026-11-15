@@ -2,7 +2,7 @@
  * Ported rule by rule with the page's own --fs-* palette; only the selectors the v2 components use. */
 :root { --fs-ink:#183026; --fs-muted:#64736b; --fs-green:#216b46; --fs-green-dark:#155336; --fs-green-soft:#edf6ef; --fs-lime:#dcebcf; --fs-line:#dfe7e1; --fs-canvas:#f7f9f6; --fs-water:#327a91; --fs-water-soft:#edf6f8; --fs-soil:#87633e; --fs-soil-soft:#f7f2ea; }
 .simulation-footnote { margin:17px auto 0; color:#7b8980; font-size:.67rem; text-align:center; }
-.result-hero { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(290px,.75fr); gap:20px; align-items:stretch; }
+.result-hero { display:grid; grid-template-columns:minmax(0,1fr); gap:20px; align-items:stretch; }
 .result-hero>*,.recommendation-card,.rotation-path,.result-info>*,.result-panel { min-width:0; }
 .recommendation-card { padding:28px; border:1px solid #cfded1; border-radius:20px; background:linear-gradient(135deg,#fbfefb,#f2f8f1); }
 .result-eyebrow { display:flex; align-items:center; gap:7px; color:var(--fs-green); font-size:.7rem; font-weight:800; letter-spacing:.07em; text-transform:uppercase; }
@@ -29,7 +29,7 @@
 .metric-value small { font-size:.7rem; font-weight:550; letter-spacing:0; }
 .metric-detail { display:block; margin-top:7px; color:var(--fs-muted); font-size:.64rem; line-height:1.45; }
 .metric-card.income .metric-detail { color:#dbe9de; }
-.result-info { margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+.result-info { margin-top:20px; display:grid; grid-template-columns:minmax(0,1fr); gap:20px; }
 .result-panel { padding:22px; border:1px solid var(--fs-line); border-radius:16px; background:#fff; }
 .result-panel h3 { margin:0; font-size:.87rem; }
 .result-panel>p { margin:7px 0 0; color:var(--fs-muted); font-size:.71rem; line-height:1.55; }
@@ -51,6 +51,11 @@
 .compare-others { margin:0; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px 12px; font-size:.66rem; line-height:1.45; }
 .compare-others dt { color:var(--fs-muted); }
 .compare-others dd { margin:0; font-weight:700; text-align:right; font-variant-numeric:tabular-nums; }
+.compare-empty { display:grid; gap:8px; justify-items:start; align-content:start; }
+.compare-empty strong { font-size:.78rem; }
+.compare-empty p { margin:0; }
+.compare-options { margin-top:16px; }
+.compare-options h4 { margin:0; font-size:.78rem; }
 .compare-actions { margin-top:16px; display:flex; justify-content:flex-end; }
 .compare-actions button:disabled { opacity:.5; cursor:default; }
 .result-analytics { margin-top:20px; display:grid; gap:20px; }

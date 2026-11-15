@@ -31,7 +31,7 @@ test("the journey simulates the region from the farmer's crop", () => {
 
 test("standing cane sends the next cut; other crops do not send the field", () => {
   assert.equal(regionScenario("sugarcane", 4).initial_sugarcane_cut, 4);
-  assert.equal(regionScenario("sugarcane").initial_sugarcane_cut, 1);
+  assert.equal(regionScenario("sugarcane").initial_sugarcane_cut, 2, "the default is the 2nd cut: the 1st is not offered");
   assert.equal("initial_sugarcane_cut" in regionScenario("soybean", 4), false);
 });
 
