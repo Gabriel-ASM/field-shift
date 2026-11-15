@@ -63,7 +63,7 @@
 
   function updatePriority() {
     const environment=Number($("farmer-priority").value),finance=100-environment;
-    $("priority-value-copy").textContent=`${finance}% financial return · ${environment}% soil and water`;
+    $("priority-value-copy").textContent=`${finance}% financial return · ${environment}% soil and water · excluding fixed sample support`;
     $("priority-value-title").textContent=environment===0?"Fully focused on returns":environment<20?"Stronger focus on returns":environment===20?"Balanced, with a focus on returns":environment<40?"Balanced, with a focus on soil and water":environment<50?"Stronger focus on soil and water":"Soil and water come first";
   }
 
@@ -101,10 +101,116 @@
     return "Good";
   }
   function routeLabel(route) { return (route.routeEvents.crops||[]).map(farmerCropName).join(" → "); }
+  function chartMoney(value) { return new Intl.NumberFormat("en-US",{style:"currency",currency:"BRL",notation:"compact",maximumFractionDigits:1}).format(Number(value)); }
+
+  function renderReturnChart(best,values) {
+    const svg=$("return-distribution-chart"),width=760,height=225,left=46,right=33,top=25,bottom=174;
+    svg.replaceChildren();
+    svg.setAttribute("viewBox",`0 0 ${width} ${height}`);
+    $("return-chart-badge").textContent=`${best.count.toLocaleString("en-US")} valid NPVs`;
+
+    const sorted=[...values].sort((a,b)=>a-b),n=sorted.length,mean=sorted.reduce((sum,value)=>sum+value,0)/n;
+    const sd=Math.sqrt(sorted.reduce((sum,value)=>sum+(value-mean)**2,0)/n);
+    const iqr=quantileSorted(sorted,.75)-quantileSorted(sorted,.25),spread=sorted.at(-1)-sorted[0];
+    const bandwidth=Math.max(1,spread/200,.9*(iqr>0?Math.min(sd,iqr/1.34):sd)*n**(-.2));
+    const minimum=sorted[0]-3*bandwidth,maximum=sorted.at(-1)+3*bandwidth;
+    const xAt=value=>left+(width-left-right)*(value-minimum)/(maximum-minimum);
+    const samples=[];let start=0,end=0;
+    for(let i=0;i<=150;i++){
+      const value=minimum+(maximum-minimum)*i/150;
+      while(start<n&&sorted[start]<value-4*bandwidth)start++;
+      end=Math.max(end,start);
+      while(end<n&&sorted[end]<=value+4*bandwidth)end++;
+      let density=0;
+      for(let j=start;j<end;j++)density+=Math.exp(-.5*((value-sorted[j])/bandwidth)**2);
+      samples.push({value,density});
+    }
+    const peak=Math.max(...samples.map(point=>point.density),1);
+    const curve=samples.map(({value,density},index)=>(index?"L":"M")+xAt(value).toFixed(2)+" "+(bottom-(bottom-top)*density/peak).toFixed(2)).join(" ");
+    const area=curve+` L ${width-right} ${bottom} L ${left} ${bottom} Z`;
+    const cutoff=quantileSorted(sorted,.05),defs=svgElement("defs"),clip=svgElement("clipPath",{id:"recommended-npv-tail"});
+    clip.append(svgElement("rect",{x:left,y:top-2,width:xAt(cutoff)-left,height:bottom-top+2}));
+    defs.append(clip);svg.append(defs);
+    svg.append(svgElement("path",{d:area,fill:"#e6efe3"}),svgElement("path",{d:area,fill:"#ead4b2","clip-path":"url(#recommended-npv-tail)"}));
+    svg.append(svgElement("line",{x1:left,y1:bottom,x2:width-right,y2:bottom,stroke:"#9caf9e"}));
+    const metrics=[
+      {id:"cvar5",label:"CVaR₅",color:"#8b5725",dash:"2 3"},
+      {id:"median",label:"Median",color:"#25674a",dash:"6 4"},
+      {id:"p95",label:"P95",color:"#326e85",dash:"10 3 2 3"}
+    ];
+    for(const {id,label,color,dash} of metrics){
+      const value=best[id],x=xAt(value),line=svgElement("line",{x1:x,y1:top,x2:x,y2:bottom,stroke:color,"stroke-width":1.7,"stroke-dasharray":dash});
+      const title=svgElement("title");title.textContent=`${label}: ${brl(value, value!==0&&Math.abs(value)<1?2:0)}/ha`;line.append(title);svg.append(line);
+      $(`return-value-${id}`).textContent=brl(value,0)+"/ha";
+    }
+    svg.append(svgElement("path",{d:curve,fill:"none",stroke:"#377354","stroke-width":2.5,"stroke-linejoin":"round","stroke-linecap":"round"}));
+    for(let i=0;i<=4;i++){
+      const value=minimum+(maximum-minimum)*i/4,x=xAt(value);
+      svg.append(svgElement("line",{x1:x,y1:bottom,x2:x,y2:bottom+5,stroke:"#9caf9e"}));
+      const tick=svgElement("text",{x,y:bottom+21,"text-anchor":"middle",fill:"#455c50","font-size":12});
+      tick.textContent=chartMoney(value);svg.append(tick);
+    }
+    const axis=svgElement("text",{x:width/2,y:height-6,"text-anchor":"middle",fill:"#455c50","font-size":12});
+    axis.textContent="Net present value (R$/ha)";svg.append(axis);
+    svg.setAttribute("aria-label",`Smoothed net present value distribution for ${routeLabel(best)}, based on ${n} valid scenarios. `+metrics.map(({id,label})=>`${label}: ${brl(best[id],0)} per hectare`).join("; "));
+    $("return-chart-summary").textContent=`Shaded area: lower tail up to the 5th percentile. CVaR₅ averages the ${best.tailCount.toLocaleString("en-US")} lowest valid outcomes; P95 is the 95th percentile.`+(n<rankingSupportSettings.full_score_vpl_samples?" Small sample; the tail estimates can vary substantially.":"");
+  }
+
+  function renderEnvironmentOutcomeChart(frames,config) {
+    const svg=$(config.svgId),detail=$(config.detailId),width=640,height=260,left=42,right=12,top=20,bottom=216,plotWidth=width-left-right,plotHeight=bottom-top;
+    svg.replaceChildren();detail.textContent="";
+    if(frames.length<2)return;
+    const counts=frames.map(frame=>frame?.[config.dimension]||{}),totals=counts.map(row=>config.series.reduce((sum,item)=>sum+Number(row[item.id]||0),0)),last=counts.length-1;
+    const xAt=index=>left+plotWidth*index/last,yAt=fraction=>bottom-plotHeight*fraction;
+    svg.setAttribute("viewBox",`0 0 ${width} ${height}`);
+    let lower=Array(counts.length).fill(0);
+    for(const item of config.series) {
+      const upper=counts.map((row,index)=>lower[index]+Number(row[item.id]||0)/Math.max(1,totals[index]));
+      const topPath=upper.map((value,index)=>(index?"L":"M")+xAt(index).toFixed(2)+" "+yAt(value).toFixed(2)).join(" ");
+      const bottomPath=lower.map((value,index)=>({value,index})).reverse().map(({value,index})=>"L"+xAt(index).toFixed(2)+" "+yAt(value).toFixed(2)).join(" ");
+      svg.append(svgElement("path",{d:topPath+" "+bottomPath+" Z",fill:item.color,"fill-opacity":.9,stroke:"#fff","stroke-width":.45}));lower=upper;
+    }
+    for(const value of [0,.25,.5,.75,1]) {
+      const y=yAt(value);svg.append(svgElement("line",{x1:left,y1:y,x2:width-right,y2:y,stroke:"#fff","stroke-width":1,"stroke-opacity":.8}));
+      const label=svgElement("text",{x:left-7,y:y+3,"text-anchor":"end",fill:"#68756c","font-size":9});label.textContent=Math.round(value*100)+"%";svg.append(label);
+    }
+    for(let year=0;year<=horizon;year++) {
+      const index=Math.round(last*year/horizon),x=xAt(index);svg.append(svgElement("line",{x1:x,y1:top,x2:x,y2:bottom,stroke:"#fff","stroke-width":1,"stroke-opacity":.65}));
+      const label=svgElement("text",{x,y:bottom+19,"text-anchor":"middle",fill:"#68756c","font-size":9});label.textContent=year===horizon?"60 mo":String(year*12);svg.append(label);
+    }
+    const axis=svgElement("text",{x:width-right,y:11,"text-anchor":"end",fill:"#68756c","font-size":9});axis.textContent="% of scenarios";svg.append(axis);
+    const cursor=svgElement("line",{x1:xAt(last),y1:top,x2:xAt(last),y2:bottom,stroke:"#263e31","stroke-width":1.2,"stroke-dasharray":"3 3","pointer-events":"none"});svg.append(cursor);
+    const showPeriod=index=>{
+      const selected=clamp(Math.round(index),0,last),row=counts[selected],total=Math.max(1,totals[selected]),month=selected*horizonMonths/last;
+      svg.dataset.period=String(selected);
+      cursor.setAttribute("x1",xAt(selected));cursor.setAttribute("x2",xAt(selected));
+      detail.textContent=`Month ${fmt(month,1)} · ${totals[selected].toLocaleString("en-US")} scenarios · `+config.series.map(item=>`${item.label} ${pct(Number(row[item.id]||0)/total)}`).join(" · ");
+    };
+    const overlay=svgElement("rect",{x:left,y:top,width:plotWidth,height:plotHeight,fill:"transparent",style:"cursor:crosshair"});svg.append(overlay);
+    const fromPointer=event=>{const rect=svg.getBoundingClientRect(),x=(event.clientX-rect.left)*width/Math.max(1,rect.width);showPeriod((x-left)/plotWidth*last);};
+    overlay.addEventListener("pointermove",fromPointer);overlay.addEventListener("pointerdown",fromPointer);
+    svg.onkeydown=event=>{
+      const current=Number(svg.dataset.period||last);let next=current;
+      if(event.key==="ArrowLeft")next=current-1;else if(event.key==="ArrowRight")next=current+1;else if(event.key==="Home")next=0;else if(event.key==="End")next=last;else return;
+      event.preventDefault();next=clamp(next,0,last);svg.dataset.period=String(next);showPeriod(next);
+    };
+    showPeriod(last);
+  }
+
+  function renderFarmerResultCharts(run,best) {
+    const sample=run.rotationSamples.get(best.key),frames=rotationEnvironmentFrames(sample);
+    renderReturnChart(best,sample.values);
+    for(const id of ["water","soil"])$(`farmer-${id}-badge`).textContent=`${best.frequency.toLocaleString("en-US")} scenarios`;
+    renderEnvironmentOutcomeChart(frames,{svgId:"farmer-water-chart",detailId:"farmer-water-period",dimension:"water",series:[{id:"water_high",label:"Good",color:"#4b91ad"},{id:"water_medium",label:"Fair",color:"#d6ad51"},{id:"water_low",label:"Bad",color:"#cf7b6b"}]});
+    renderEnvironmentOutcomeChart(frames,{svgId:"farmer-soil-chart",detailId:"farmer-soil-period",dimension:"soil",series:[{id:"soil_good",label:"Good",color:"#5c8d5a"},{id:"soil_regular",label:"Fair",color:"#c59a50"},{id:"soil_degraded",label:"Bad",color:"#b97657"}]});
+  }
 
   function showFarmerResult() {
-    const run=simulationSession,best=run?.routeResults?.[0];
-    if(!best) { showFarmerError("We couldn't find a sequence with all the required economic data. Open the settings to review the assumptions."); return; }
+    const run=simulationSession,best=run?.recommendedRoute;
+    if(!best) {
+      showFarmerError(`A recommendation needs at least ${minimumRecommendedVplSamples} valid NPVs for one sequence. Try more scenarios or explore the results under Settings → Advanced.`);
+      return;
+    }
     const city=selectedCityData(),environment=Number($("farmer-priority").value),finance=100-environment;
     const path=$("farmer-rotation-path"); path.replaceChildren();
     const crops=best.routeEvents.crops||[];
@@ -114,12 +220,11 @@
     crops.forEach((crop,index)=>{
       streak=crop===crops[index-1]?streak+1:1;
       const penalty=1-repeatedCropYieldMultiplier(crop,streak);
-      if(index) { const arrow=document.createElement("span"); arrow.className="rotation-arrow"; arrow.style.animationDelay=`${index*.22}s`; arrow.innerHTML=icon("arrow"); path.append(arrow); }
       const item=document.createElement("div"); item.className="rotation-crop"+(index===0?" is-current":""); item.style.animationDelay=`${index*.22}s`;
       item.innerHTML=`${cropArtwork(crop)}<strong>${farmerCropName(crop)}</strong><small>${index===0?"Current crop":`Planting ${index+1}`}</small>${penalty>0?`<small>−${pct(penalty)} yield at harvest</small>`:""}`; path.append(item);
     });
     $("result-income").innerHTML=`${brl(best.median,0)} <small>/ha</small>`;
-    $("result-income-detail").textContent=`Median present value over five years · ${best.count.toLocaleString("en-US")} ${best.count===1?"scenario":"scenarios"} with complete calculations${best.count<100?" · rare sample":""}.`;
+    $("result-income-detail").textContent=`Median present value over five years · ${best.count.toLocaleString("en-US")} ${best.count===1?"scenario":"scenarios"} with complete calculations${best.count<rankingSupportSettings.full_score_vpl_samples?" · small sample":""}.`;
     $("result-soil").textContent=soilFriendly(best.finalSocMean);
     $("result-soil-detail").textContent=`${fmt(best.finalSocMean,1)} g/kg of estimated organic carbon at the end of the cycle.`;
     const waterEntries=Object.entries(best.finalWaterCounts||{}).sort((a,b)=>b[1]-a[1]),waterId=waterEntries[0]?.[0]||"water_medium",waterShare=Number(waterEntries[0]?.[1]||0)/Math.max(1,best.finalEnvironmentCount);
@@ -127,14 +232,17 @@
     $("result-water-detail").textContent=`Most frequent final condition, seen in ${pct(waterShare)} of trajectories. Mean final water: ${pct(best.finalWaterFractionMean)} of capacity.`;
     const facts=[
       `${city.municipality} (${city.uf}): historical climate, soil, and municipal planting calendar.`,
-      `Starting with ${farmerCropName(farmerUI.crop).toLowerCase()}, with ${finance}% priority on returns and ${environment}% on soil and water.`,
-      `${run.completed.toLocaleString("en-US")} scenarios simulated using NASA POWER, SoilGrids, IBGE, MAPA, and CONAB data.`
+      `Starting with ${farmerCropName(farmerUI.crop).toLowerCase()}, with priorities split ${finance}% returns and ${environment}% soil and water before fixed sample support.`,
+      `${best.frequency.toLocaleString("en-US")} of ${run.completed.toLocaleString("en-US")} simulated scenarios followed this sequence; ${best.count.toLocaleString("en-US")} had a valid NPV.`,
+      `Sample support: ${fmt(best.supportScore10,1)}/10, worth ${fmt(100*rankingSupportSettings.weight,0)}% of the ranking score. Full support takes ${rankingSupportSettings.full_score_vpl_samples} valid NPVs.`
     ];
     if(run.start==="sugarcane")facts.push(`Sugarcane starts at cut ${run.initialSugarcaneCut} of the modeled ${cycleRule("sugarcane").modeled_harvest_cuts} cuts.`);
     $("result-facts").innerHTML=facts.map(text=>`<li>${icon("check")}<span>${text}</span></li>`).join("");
-    const alternatives=run.routeResults.slice(1,4),alternativeRoot=$("result-alternatives"); alternativeRoot.replaceChildren();
-    if(!alternatives.length) alternativeRoot.textContent="No other sequence with complete data appeared in this sample.";
+    const alternatives=run.routeResults.filter(route=>route!==best&&route.count>=minimumRecommendedVplSamples).slice(0,3);
+    const alternativeRoot=$("result-alternatives"); alternativeRoot.replaceChildren();
+    if(!alternatives.length) alternativeRoot.textContent=`No other sequence reached ${minimumRecommendedVplSamples} valid NPVs.`;
     alternatives.forEach(route=>{ const item=document.createElement("div"); item.className="alternative-route"; const name=document.createElement("strong"); name.textContent=routeLabel(route); const value=document.createElement("span"); value.textContent=`${brl(route.median,0)}/ha`; item.append(name,value); alternativeRoot.append(item); });
+    renderFarmerResultCharts(run,best);
     farmerUI.running=false; showFarmerScreen("result");
   }
 
@@ -194,8 +302,37 @@
   $("retry-simulation").addEventListener("click",runFarmerAnalysis);
   $("adjust-priority").addEventListener("click",()=>showFarmerScreen("priority"));
   $("restart-analysis").addEventListener("click",()=>{ farmerUI.crop=null; $("farmer-sugarcane-cut-field").hidden=true; $("farmer-sugarcane-cut").value="1"; document.querySelectorAll(".crop-choice").forEach(node=>{node.classList.remove("is-selected");node.setAttribute("aria-pressed","false");}); $("crop-next").disabled=true; showFarmerScreen("location"); });
-  $("brand-home").addEventListener("click",event=>{ event.preventDefault(); if(farmerUI.running){farmerUI.runToken++;farmerUI.running=false;simulationRunId++;if(simulationSession)simulationSession.running=false;} showFarmerScreen("location"); });
-  $("open-settings").addEventListener("click",()=>{ $("config-seed").value=$("simulation-seed").value; $("settings-dialog").showModal(); });
+  function showMethodLevel(level) {
+    const technical=level==="technical";
+    for(const name of ["simple","technical"]) {
+      const selected=name===level,tab=$(`method-tab-${name}`);
+      $(`method-panel-${name}`).hidden=!selected;
+      tab.setAttribute("aria-selected",String(selected));tab.tabIndex=selected?0:-1;
+    }
+    $("methodology-title").textContent=technical?"The decision engine, end to end.":"A simple answer. A deeper model.";
+    $("methodology-intro").textContent=technical?"Climate, crops, constraints, and cash flow—connected in one stochastic simulation.":"Five ideas work together to turn local data into your recommendation.";
+  }
+  for(const level of ["simple","technical"]) $(`method-tab-${level}`).addEventListener("click",()=>showMethodLevel(level));
+  document.querySelector(".method-tabs").addEventListener("keydown",event=>{
+    if(!["ArrowLeft","ArrowRight","Home","End"].includes(event.key))return;
+    event.preventDefault();const current=$("method-tab-technical").getAttribute("aria-selected")==="true";
+    const next=event.key==="Home"?"simple":event.key==="End"?"technical":current?"simple":"technical";
+    showMethodLevel(next);$(`method-tab-${next}`).focus();
+  });
+  $("open-methodology").addEventListener("click",()=>{
+    const count=farmerUI.target.toLocaleString("en-US"),routes=simulationSession?.routeResults?.length||0;
+    $("method-scenario-count").textContent=`${count} futures`;$("underhood-scenarios").textContent=`${count} trajectories`;
+    $("underhood-routes").textContent=`${routes.toLocaleString("en-US")} ranked routes`;
+    $("underhood-priority").textContent=`λ = ${(Number($("farmer-priority").value)/100).toFixed(2)}`;
+    $("underhood-support-rule").textContent=`A recommendation requires at least ${minimumRecommendedVplSamples} valid NPVs per route. Sample support is worth ${fmt(100*rankingSupportSettings.weight,0)}% of the score and reaches its maximum at ${rankingSupportSettings.full_score_vpl_samples} valid NPVs.`;
+    showMethodLevel("simple");$("methodology-dialog").showModal();
+  });
+  $("close-methodology").addEventListener("click",()=>$("methodology-dialog").close());
+  $("methodology-dialog").addEventListener("click",event=>{ if(event.target===$("methodology-dialog")) $("methodology-dialog").close(); });
+  $("open-settings").addEventListener("click",()=>{
+    $("config-seed").value=$("simulation-seed").value;
+    $("settings-dialog").showModal();
+  });
   $("close-settings").addEventListener("click",()=>$("settings-dialog").close());
   $("settings-dialog").addEventListener("click",event=>{ if(event.target===$("settings-dialog")) $("settings-dialog").close(); });
   $("config-trajectories").addEventListener("change",()=>{ farmerUI.target=Number($("config-trajectories").value); $("simulation-count-summary").textContent=`${farmerUI.target.toLocaleString("en-US")} scenarios`; });

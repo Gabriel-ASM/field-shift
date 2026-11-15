@@ -24,18 +24,7 @@
     <symbol id="i-spark" viewBox="0 0 24 24"><path d="m12 2 1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2Zm7 14 .8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
   </defs>
 </svg>
-<header class="farmer-header">
-  <div class="farmer-header-inner">
-    <a class="farmer-brand" href="#" id="brand-home" aria-label="Field Shift — home">
-      <span class="brand-mark"><svg><use href="#i-leaf"/></svg></span>
-      <span><span class="brand-name">Field Shift</span><span class="brand-tagline">Decisions that grow the future</span></span>
-    </a>
-    <div class="header-actions">
-      <span class="data-status">Local data available</span>
-      <button class="icon-button" id="open-settings" type="button" aria-label="Open settings" title="Settings"><svg><use href="#i-gear"/></svg></button>
-    </div>
-  </div>
-</header>
+<button class="icon-button settings-launcher" id="open-settings" type="button" aria-label="Open settings" title="Settings"><svg><use href="#i-gear"/></svg></button>
 <div id="farmer-app">
   <nav class="journey-steps" aria-label="Analysis steps">
     <div class="journey-step is-active" data-step="1"><span class="journey-number">1</span><span>Your region</span></div>
@@ -137,7 +126,7 @@
         <div class="priority-side"><span class="priority-icon"><svg><use href="#i-water"/></svg></span><span><strong>More soil and water</strong><small>Prioritize the conservation of natural resources.</small></span></div>
       </div>
       <input id="farmer-priority" type="range" min="0" max="50" step="5" value="20" aria-label="Weight of soil and water conservation">
-      <div class="priority-value"><strong id="priority-value-title">Balanced, with a focus on returns</strong><span id="priority-value-copy">80% financial return · 20% soil and water</span></div>
+      <div class="priority-value"><strong id="priority-value-title">Balanced, with a focus on returns</strong><span id="priority-value-copy">80% financial return · 20% soil and water · excluding fixed sample support</span></div>
     </div>
     <div class="simulation-summary"><span><svg><use href="#i-pin"/></svg><span data-selected-city></span></span><span><svg><use href="#i-leaf"/></svg><span data-selected-crop></span></span><span><svg><use href="#i-spark"/></svg><span id="simulation-count-summary">100,000 scenarios</span></span></div>
     <div class="screen-actions priority-actions"><button class="text-button button-with-icon" type="button" data-go="crop"><svg><use href="#i-back"/></svg> Adjust crop</button><button class="primary-button button-with-icon" id="run-farmer-simulation" type="button">Find my crop rotation <svg><use href="#i-spark"/></svg></button></div>
@@ -153,7 +142,7 @@
         <div class="simulation-progress-meta"><span id="farmer-progress-count">0 of 100,000 scenarios</span><span id="farmer-progress-percent">0%</span></div>
       </div>
     </div>
-    <p class="simulation-footnote">There's nothing else you need to do. Your recommendation will appear here as soon as it's ready.</p>
+    <p class="simulation-footnote">Your result will appear here as soon as it's ready.</p>
   </section>
 
   <section class="farmer-screen" id="screen-result" aria-labelledby="result-title" hidden>
@@ -161,6 +150,7 @@
       <span class="screen-kicker">Your plan is ready</span>
       <h2 id="result-title">A crop rotation to grow more and care for the land</h2>
       <p>This is the sequence that best balances the priorities you chose.</p>
+      <button class="method-trigger" id="open-methodology" type="button" aria-haspopup="dialog" aria-controls="methodology-dialog"><span class="method-question" aria-hidden="true">?</span><span>Wanna know how it was calculated?</span><svg aria-hidden="true"><use href="#i-arrow"/></svg></button>
     </div>
     <div class="result-hero">
       <article class="recommendation-card">
@@ -175,6 +165,32 @@
         <article class="metric-card"><span class="metric-label"><svg><use href="#i-water"/></svg> Available water</span><strong class="metric-value" id="result-water">—</strong><span class="metric-detail" id="result-water-detail"></span></article>
       </div>
     </div>
+    <section class="result-analytics" aria-label="Simulation outcome graphs">
+      <article class="result-chart-card">
+        <div class="result-chart-heading"><h3>Return distribution for the recommended sequence</h3><span class="chart-badge" id="return-chart-badge"></span><p>Five-year net present value per hectare, based on all valid calculations for this sequence. The curve smooths the simulated outcomes.</p></div>
+        <svg id="return-distribution-chart" class="result-chart" role="img" aria-label="Net present value distribution for the recommended sequence"></svg>
+        <div class="return-metrics" aria-label="Net present value statistics">
+          <span class="return-tail"><strong>CVaR₅</strong><b id="return-value-cvar5"></b><small>Average of the worst outcomes</small></span>
+          <span class="return-median"><strong>Median</strong><b id="return-value-median"></b><small>Middle outcome</small></span>
+          <span class="return-p95"><strong>P95</strong><b id="return-value-p95"></b><small>95th percentile</small></span>
+        </div>
+        <p class="result-chart-summary" id="return-chart-summary"></p>
+      </article>
+      <div class="environment-results-grid">
+        <article class="result-chart-card">
+          <div class="result-chart-heading"><h3>Water along the recommended sequence</h3><span class="chart-badge" id="farmer-water-badge"></span><p>Share of matching scenarios in each water condition, measured every ~15 days.</p></div>
+          <div class="result-chart-legend" aria-label="Water chart legend"><span><i style="background:#4b91ad"></i>Good</span><span><i style="background:#d6ad51"></i>Fair</span><span><i style="background:#cf7b6b"></i>Bad</span></div>
+          <svg id="farmer-water-chart" class="result-chart" role="img" tabindex="0" aria-label="Continuous distribution of good, fair and bad water conditions over 60 months"></svg>
+          <p class="chart-period-detail" id="farmer-water-period"></p><p class="chart-interaction-hint">Hover, touch, or focus and use the arrow keys to inspect a period.</p>
+        </article>
+        <article class="result-chart-card">
+          <div class="result-chart-heading"><h3>Soil along the recommended sequence</h3><span class="chart-badge" id="farmer-soil-badge"></span><p>Share of matching scenarios in each soil-carbon class, measured every ~15 days.</p></div>
+          <div class="result-chart-legend" aria-label="Soil chart legend"><span><i style="background:#5c8d5a"></i>Good</span><span><i style="background:#c59a50"></i>Fair</span><span><i style="background:#b97657"></i>Bad</span></div>
+          <svg id="farmer-soil-chart" class="result-chart" role="img" tabindex="0" aria-label="Continuous distribution of good, fair and bad soil conditions over 60 months"></svg>
+          <p class="chart-period-detail" id="farmer-soil-period"></p><p class="chart-interaction-hint">Hover, touch, or focus and use the arrow keys to inspect a period.</p>
+        </article>
+      </div>
+    </section>
     <div class="result-info">
       <article class="result-panel">
         <h3>What we considered</h3>
@@ -192,6 +208,150 @@
   </section>
   <div class="farmer-error" id="farmer-error" role="alert" hidden><h2>We couldn't complete the analysis</h2><p id="farmer-error-message">Review the settings and try again.</p><button class="primary-button" id="retry-simulation" type="button">Try again</button></div>
 </div>
+
+<dialog class="method-dialog" id="methodology-dialog" aria-labelledby="methodology-title" aria-describedby="methodology-intro">
+  <header class="method-header">
+    <div><span class="screen-kicker">Behind your estimate</span><h2 id="methodology-title">A simple answer. A deeper model.</h2><p id="methodology-intro">Five ideas work together to turn local data into your recommendation.</p></div>
+    <button class="icon-button" id="close-methodology" type="button" aria-label="Close explanation"><svg><use href="#i-close"/></svg></button>
+  </header>
+  <div class="method-tabs" role="tablist" aria-label="Explanation detail">
+    <button class="method-tab" id="method-tab-simple" type="button" role="tab" aria-selected="true" aria-controls="method-panel-simple" tabindex="0"><span aria-hidden="true">01</span><span><strong>How it works</strong><small>The intuitive version</small></span></button>
+    <button class="method-tab" id="method-tab-technical" type="button" role="tab" aria-selected="false" aria-controls="method-panel-technical" tabindex="-1"><span aria-hidden="true">02</span><span><strong>Under the hood</strong><small>The decision engine</small></span></button>
+  </div>
+  <div class="method-body method-panel" id="method-panel-simple" role="tabpanel" aria-labelledby="method-tab-simple">
+    <div class="method-grid">
+      <article class="method-card">
+        <div class="method-visual">
+          <svg viewBox="0 0 300 126" role="img" aria-label="Animated transitions between three crop states">
+            <path class="markov-link" d="M70 66C91 29 109 29 130 66"/><path class="markov-link" d="M170 66C191 29 209 29 230 66"/><path class="markov-link" d="M230 91C190 116 110 116 70 91"/>
+            <circle class="markov-halo" cx="50" cy="73" r="28"/><circle class="markov-halo delay-one" cx="150" cy="73" r="28"/><circle class="markov-halo delay-two" cx="250" cy="73" r="28"/>
+            <circle class="markov-node" cx="50" cy="73" r="23"/><circle class="markov-node" cx="150" cy="73" r="23"/><circle class="markov-node" cx="250" cy="73" r="23"/>
+            <text class="method-svg-label" x="50" y="76">Crop A</text><text class="method-svg-label" x="150" y="76">Crop B</text><text class="method-svg-label" x="250" y="76">Crop C</text>
+          </svg>
+        </div>
+        <div class="method-copy"><span class="method-step">01 · States and transitions</span><h3>Markov chain</h3><p>Each crop is a state. Regional history, water, and soil guide the odds of the next crop.</p></div>
+      </article>
+      <article class="method-card">
+        <div class="method-visual">
+          <span class="method-count" id="method-scenario-count">100,000 futures</span>
+          <svg viewBox="0 0 300 126" role="img" aria-label="Animated lines representing many possible climate futures">
+            <line x1="25" y1="105" x2="280" y2="105" stroke="#d9e3d8"/><path class="mc-line" d="M22 92C62 83 62 43 105 57S161 96 194 65 241 25 280 42" stroke="#2c7b51"/><path class="mc-line" d="M22 92C57 99 85 63 115 72S161 37 199 54 239 85 280 60" stroke="#7fa489"/><path class="mc-line" d="M22 92C62 63 85 94 120 63S172 72 201 88 247 52 280 72" stroke="#b1a56c"/><path class="mc-line" d="M22 92C53 78 89 33 124 52S171 84 208 43 248 68 280 28" stroke="#87a9b2"/>
+          </svg>
+        </div>
+        <div class="method-copy"><span class="method-step">02 · Many possible futures</span><h3>Monte Carlo</h3><p>We simulate many plausible climate and crop futures—not just one forecast.</p></div>
+      </article>
+      <article class="method-card">
+        <div class="method-visual">
+          <svg viewBox="0 0 300 126" role="img" aria-label="Animated cash-flow bars discounted to present value">
+            <line x1="27" y1="102" x2="278" y2="102" stroke="#cbd8cc"/><line x1="27" y1="25" x2="27" y2="102" stroke="#cbd8cc"/>
+            <rect class="npv-bar" x="48" y="65" width="27" height="37" rx="4" fill="#9dbaa4"/><rect class="npv-bar" x="91" y="48" width="27" height="54" rx="4" fill="#80a78b"/><rect class="npv-bar" x="134" y="33" width="27" height="69" rx="4" fill="#5b9270"/><rect class="npv-bar" x="177" y="52" width="27" height="50" rx="4" fill="#80a78b"/><rect class="npv-bar" x="220" y="22" width="27" height="80" rx="4" fill="#2c7b51"/>
+            <text class="method-svg-label" x="150" y="119" style="font-size:9px;font-weight:600">Five years → today's value</text>
+          </svg>
+        </div>
+        <div class="method-copy"><span class="method-step">03 · Value over time</span><h3>NPV</h3><p>Income and costs over five years are discounted to today for a fair comparison in R$/ha.</p></div>
+      </article>
+    </div>
+    <div class="environment-methods">
+      <article class="environment-method">
+        <svg viewBox="0 0 80 70" role="img" aria-label="Rain feeding an animated water reserve">
+          <path d="M22 23h34a9 9 0 0 0 0-18 14 14 0 0 0-26-3A11 11 0 0 0 22 23Z" fill="#fff" stroke="#87a9b2" stroke-width="1.6"/>
+          <path class="rain-drop" d="M29 27v6" stroke="#5b91ad" stroke-width="2" stroke-linecap="round"/><path class="rain-drop drop-two" d="M40 27v6" stroke="#5b91ad" stroke-width="2" stroke-linecap="round"/><path class="rain-drop drop-three" d="M51 27v6" stroke="#5b91ad" stroke-width="2" stroke-linecap="round"/>
+          <path d="M17 45h47l-5 20H22Z" fill="#dcecf0" stroke="#87a9b2" stroke-width="1.4"/><path class="water-wave" d="M21 52q5-4 10 0t10 0 10 0 9 0" fill="none" stroke="#5b91ad" stroke-width="2"/>
+        </svg>
+        <div><h3>Water</h3><p>NASA POWER rain and evaporation update water storage every half month, adjusted for crop demand.</p></div>
+      </article>
+      <article class="environment-method">
+        <svg viewBox="0 0 80 70" role="img" aria-label="Soil layers with animated organic carbon and a growing plant">
+          <path d="M12 43h56v19H12Z" fill="#e6ddcb"/><path d="M12 51h56M12 57h56" stroke="#c2ae8d"/><path d="M40 45V25m0 10c-9 0-13-5-13-12 9 0 13 5 13 12Zm0-5c0-9 5-14 14-14 0 9-5 14-14 14Z" fill="#f5f8f3" stroke="#5b9270" stroke-width="1.8" stroke-linejoin="round"/>
+          <circle class="carbon-dot" cx="23" cy="49" r="2" fill="#8b7657"/><circle class="carbon-dot dot-two" cx="48" cy="54" r="2" fill="#8b7657"/><circle class="carbon-dot dot-three" cx="59" cy="47" r="2" fill="#8b7657"/>
+        </svg>
+        <div><h3>Soil</h3><p>SoilGrids sets the starting organic carbon. Each crop then changes it through explicit, exploratory assumptions.</p></div>
+      </article>
+    </div>
+    <div class="method-resilience"><svg aria-hidden="true"><use href="#i-spark"/></svg><div><strong>Why this matters for a changing climate</strong><p>Testing many futures helps reveal rotations that remain viable when conditions change. This supports more resilient decisions—it does not guarantee outcomes.</p></div></div>
+  </div>
+  <div class="method-body method-panel" id="method-panel-technical" role="tabpanel" aria-labelledby="method-tab-technical" hidden>
+    <div class="engine-status">
+      <span class="engine-live"><i></i> COUPLED DECISION ENGINE</span>
+      <div class="engine-metrics"><span>T = 60 months</span><span>120 environment steps</span><span id="underhood-scenarios">100,000 trajectories</span><span id="underhood-routes">— ranked routes</span></div>
+    </div>
+    <div class="engine-map" aria-label="Data, simulation, and decision pipeline">
+      <section class="engine-column">
+        <span class="engine-column-title">Data & priors</span>
+        <div class="engine-node"><strong>Climate history</strong><small>NASA POWER · historical year blocks</small><code>rain, ETo → environment</code></div>
+        <div class="engine-node"><strong>Regional crop prior</strong><small>IBGE PAM · top-5 area shares</small><code>P₀ + Dirichlet(α = 0.5)</code></div>
+        <div class="engine-node"><strong>Initial soil</strong><small>SoilGrids · 0–30 cm</small><code>SOC₀, available water capacity</code></div>
+        <div class="engine-node"><strong>Agronomy & economics</strong><small>MAPA ZARC · PAM / CONAB</small><code>windows, cycles, yield, price, cost</code></div>
+      </section>
+      <div class="engine-link" aria-hidden="true"></div>
+      <section class="engine-column">
+        <span class="engine-column-title">Monte Carlo kernel · one trajectory</span>
+        <div class="engine-node is-core"><strong>1 · Sample an exogenous future</strong><small>Climate blocks + posterior transition rows</small><code>ω⁽ᵏ⁾ ~ historical + posterior draws</code></div>
+        <div class="engine-node is-core"><strong>2 · Propagate the state</strong><small>Water every half month; carbon by crop</small><code>xₜ = [cₜ, wₜ, sₜ, τₜ]</code></div>
+        <div class="engine-node is-core"><strong>3 · Draw a constrained transition</strong><small>Environment reweights the regional prior</small><code>P(c′) ∝ P₀(c′) · Fw · Fs, c′ ∈ Ωₜ</code></div>
+        <div class="engine-node is-core"><strong>4 · Resolve events & cash flow</strong><small>Plant, wait, harvest, form perennial, discount</small><code>NPV⁽ᵏ⁾ = Σ CFₜ / (1+r)^(dayₜ/365)</code></div>
+      </section>
+      <div class="engine-link delay" aria-hidden="true"></div>
+      <section class="engine-column">
+        <span class="engine-column-title">Decision layer · N trajectories</span>
+        <div class="engine-node is-output"><strong>Aggregate realized routes</strong><small>Group identical crop sequences</small><code>{route⁽ʲ⁾, NPV⁽ʲ⁾, w, s}</code></div>
+        <div class="engine-node is-output"><strong>Measure return & downside</strong><small>Distribution, not a point forecast</small><code>median · P95 · CVaR₅ · P(NPV &lt; 0)</code></div>
+        <div class="engine-node is-output"><strong>Rank by your priorities</strong><small>Economics, final soil and water, and sample support</small><code>arg maxⱼ Jⱼ → recommendation</code></div>
+      </section>
+      <div class="engine-feedback"><svg aria-hidden="true"><use href="#i-arrow"/></svg><span>Feedback: crop demand changes water; water and carbon change transition probabilities and yield.</span></div>
+    </div>
+    <section class="horizon-card">
+      <div class="tech-card-heading"><div><h3>60-month event horizon</h3><p>One illustrative trajectory: the environment advances in half-month steps; Markov decisions occur only at eligible planting events.</p></div><span class="tech-tag">Δt ≈ 15.2 days</span></div>
+      <div class="horizon-view" tabindex="0" aria-label="Scrollable 60-month model timeline">
+        <svg viewBox="0 0 760 145" role="img" aria-label="Crop events, environmental updates, and planting decisions across sixty months">
+          <text class="method-svg-label" x="55" y="15" style="font-size:8px;text-anchor:start">CROP / EVENT CLOCK</text>
+          <rect x="55" y="29" width="155" height="27" rx="5" fill="#dce9d9"/><rect x="210" y="29" width="185" height="27" rx="5" fill="#b9d1ba"/><rect x="395" y="29" width="105" height="27" rx="5" fill="#ece8dc"/><rect x="500" y="29" width="205" height="27" rx="5" fill="#82aa8c"/>
+          <text class="method-svg-label" x="132" y="46" style="font-size:8px">initial crop</text><text class="method-svg-label" x="302" y="46" style="font-size:8px">next crop</text><text class="method-svg-label" x="447" y="46" style="font-size:8px">fallow</text><text class="method-svg-label" x="602" y="46" style="font-size:8px;fill:#fff">next eligible crop</text>
+          <line x1="55" y1="75" x2="705" y2="75" stroke="#b8cbc0" stroke-dasharray="2 5"/>
+          <circle cx="210" cy="75" r="5" fill="#b6a66f"/><circle cx="395" cy="75" r="5" fill="#b6a66f"/><circle cx="500" cy="75" r="5" fill="#2c7b51"/>
+          <text class="method-svg-label" x="210" y="91" style="font-size:7px">harvest</text><text class="method-svg-label" x="395" y="91" style="font-size:7px">harvest</text><text class="method-svg-label" x="500" y="91" style="font-size:7px">plant</text>
+          <line x1="55" y1="108" x2="705" y2="108" stroke="#cad6ca"/>
+          <g stroke="#cad6ca"><line x1="55" y1="103" x2="55" y2="113"/><line x1="185" y1="103" x2="185" y2="113"/><line x1="315" y1="103" x2="315" y2="113"/><line x1="445" y1="103" x2="445" y2="113"/><line x1="575" y1="103" x2="575" y2="113"/><line x1="705" y1="103" x2="705" y2="113"/></g>
+          <text class="method-svg-label" x="55" y="130" style="font-size:8px">0</text><text class="method-svg-label" x="185" y="130" style="font-size:8px">12</text><text class="method-svg-label" x="315" y="130" style="font-size:8px">24</text><text class="method-svg-label" x="445" y="130" style="font-size:8px">36</text><text class="method-svg-label" x="575" y="130" style="font-size:8px">48</text><text class="method-svg-label" x="705" y="130" style="font-size:8px">60 mo</text>
+          <path class="horizon-cursor" d="M55 21V113" stroke="#2c7b51" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div class="horizon-caption"><span><i></i> Crop state / event</span><span><i></i> 24 environment updates per year</span><span><i></i> Harvest or decision</span><span>36 decêndios per year · ZARC eligibility</span></div>
+    </section>
+    <div class="tech-grid">
+      <section class="tech-card">
+        <div class="tech-card-heading"><div><h3>State vector & feasible set</h3><p>Every simulated decision sees the current state and its constraints.</p></div><span class="tech-tag">xₜ → Ωₜ</span></div>
+        <div class="state-vector">xₜ = [ cₜ, wₜ, sₜ, τₜ ]</div>
+        <div class="state-list">
+          <div class="state-item"><code>cₜ</code><strong>Crop / fallow</strong><small>Current state and consecutive plantings</small></div>
+          <div class="state-item"><code>wₜ</code><strong>Water</strong><small>Storage fraction and low / medium / high class</small></div>
+          <div class="state-item"><code>sₜ</code><strong>Soil carbon</strong><small>SOC in g/kg, updated by crop hypothesis</small></div>
+          <div class="state-item"><code>τₜ</code><strong>Event clock</strong><small>Cycle, maturation, calendar, pending planting</small></div>
+        </div>
+        <div class="constraint-title">Feasible destinations Ωₜ</div>
+        <div class="constraint-list"><span>MAPA ZARC windows</span><span>one main crop</span><span>perennial maturation</span><span>fallow intervals</span></div>
+      </section>
+      <section class="tech-card">
+        <div class="tech-card-heading"><div><h3>Risk & multi-objective ranking</h3><p>Upside and downside are evaluated over each route’s NPV distribution.</p></div><span class="tech-tag" id="underhood-priority">λ = 0.20</span></div>
+        <div class="risk-visual">
+          <svg viewBox="0 0 360 112" role="img" aria-label="NPV distribution showing worst five percent tail, median, and ninety-fifth percentile">
+            <line x1="20" y1="88" x2="342" y2="88" stroke="#d5dfd4"/>
+            <path d="M25 88C45 86 53 72 70 62S93 27 127 23 174 33 197 49 238 72 270 78 319 84 338 88Z" fill="#e9f0e6"/>
+            <path d="M25 88C45 86 53 72 70 62L76 88Z" fill="#e7d6bd"/>
+            <path class="risk-curve" d="M25 88C45 86 53 72 70 62S93 27 127 23 174 33 197 49 238 72 270 78 319 84 338 88" fill="none" stroke="#548466" stroke-width="2"/>
+            <line x1="72" y1="54" x2="72" y2="93" stroke="#b28c58"/><line x1="164" y1="28" x2="164" y2="93" stroke="#2c7b51" stroke-dasharray="3 3"/><line x1="302" y1="73" x2="302" y2="93" stroke="#739ba8"/>
+            <text class="method-svg-label" x="72" y="105" style="font-size:7px">CVaR₅</text><text class="method-svg-label" x="164" y="105" style="font-size:7px">median</text><text class="method-svg-label" x="302" y="105" style="font-size:7px">P95</text>
+          </svg>
+        </div>
+        <div class="risk-legend"><span><i></i> worst 5% mean</span><span><i></i> typical outcome</span><span><i></i> high return</span></div>
+        <div class="risk-formula">CVaR₅ = mean of the lowest ⌈0.05 × n⌉ NPVs</div>
+        <div class="objective-formula">E = α·P95 + (1−α)·CVaR₅ → E₁₀<br>J = (1−w)[(1−λ)E₁₀ + λ(⅔S₁₀ + ⅓W₁₀)] + w·A₁₀</div>
+        <p class="objective-meta">α = 0.50 by default · all component scores use a 0–10 scale. The curve here is illustrative. <span id="underhood-support-rule"></span></p>
+      </section>
+    </div>
+    <p class="engine-footnote">Simulation-based search and ranking—not a claim of global agronomic optimality. Historical resampling explores variability; it is not a climate forecast. Hypotheses remain explicit and editable in Settings.</p>
+  </div>
+</dialog>
 
 <dialog class="settings-dialog" id="settings-dialog" aria-labelledby="settings-title">
   <div class="settings-shell">
@@ -304,8 +464,8 @@
       <button id="complete-simulation" type="button" disabled>Completar até 100.000</button>
       <span id="simulation-refinement-status" class="small-muted">A prévia será atualizada após a primeira amostra.</span>
     </div>
-    <h3 style="margin-top:19px">Como as simulações distribuem solo e água ao longo do ciclo</h3>
-    <p class="small-muted">Cada faixa mostra a porcentagem das trajetórias em cada estado; em A0–A5, as faixas somam 100%. A0 é a condição inicial e A1–A5 são os fechamentos anuais. Passe o cursor sobre uma faixa para ver os percentuais por ano.</p>
+    <h3 style="margin-top:19px">Como solo e água evoluem na rotação recomendada</h3>
+    <p class="small-muted">Cada faixa mostra a porcentagem das trajetórias da rotação recomendada em cada estado; em A0–A5, as faixas somam 100%. A0 é a condição inicial e A1–A5 são os fechamentos anuais. Passe o cursor sobre uma faixa para ver os percentuais por ano.</p>
     <div class="environment-distribution-grid">
       <article class="environment-distribution-card">
         <h3>Estados de carbono do solo</h3>
@@ -327,13 +487,13 @@
     <div class="section-head">
       <div>
         <h2 id="vpl-title">Decisão econômica e ambiental · rotação</h2>
-        <p>A nota de 0 a 10 divide o peso entre economia e solo/água finais. O CVaR5 pode compor a parte econômica junto ao P95. A contagem de trajetórias aparece como informação de suporte, sem peso na nota.</p>
+        <p>A nota de 0 a 10 combina economia, solo/água finais e suporte amostral. O CVaR5 mede o desempenho nos piores cenários e compõe a nota econômica junto ao P95.</p>
       </div>
     </div>
     <p class="data-note" id="vpl-status"></p>
     <h3>Conferência da simulação e do ranking</h3>
     <div class="audit-grid" id="ranking-audit" aria-live="polite"><div class="audit-card">A conferência aparece após a prévia.</div></div>
-    <p class="small-muted">Fluxo: cultura inicial → Monte Carlo gera clima, água e carbono → o ambiente altera a cadeia completa → cada trajetória percorre os nós Markov → as rotações simuladas são ordenadas pelo VPL. Premissas de rendimento, preço e custo são editáveis abaixo.</p>
+    <p class="small-muted">Fluxo: cultura inicial → Monte Carlo gera clima, água e carbono → o ambiente altera a cadeia completa → cada trajetória percorre os nós Markov → as rotações simuladas são ordenadas pela nota combinada. Premissas de rendimento, preço e custo são editáveis abaixo.</p>
     <p class="small-muted" id="economic-method"></p>
     <h3>Ranking de rotações ajustável</h3>
     <div class="controls ranking-preference">
@@ -343,13 +503,13 @@
       <strong id="ranking-return-weight-value">50% P95 · 50% CVaR5</strong>
     </div>
     <div class="controls ranking-preference">
-      <label for="ranking-environment-weight">Peso do solo e da água finais
+      <label for="ranking-environment-weight">Prioridade para solo e água na parcela ajustável
         <input id="ranking-environment-weight" type="range" min="0" max="50" step="5" value="20" disabled>
       </label>
-      <strong id="ranking-environment-weight-value">20% ambiente · 80% economia</strong>
+      <strong id="ranking-environment-weight-value">20% ambiente · 80% economia (entre as prioridades)</strong>
     </div>
     <p class="small-muted" id="ranking-component-summary">Peso combinado: economia, solo e água.</p>
-    <p class="small-muted">A nota total divide o peso entre economia e ambiente final (solo/água). Dentro da economia, o controle permite combinar P95 e CVaR5; CVaR5 representa resiliência econômica. Por padrão, ambiente pesa 20%: dois terços para solo e um terço para água. A contagem de trajetórias não altera a nota; ela informa o suporte e a incerteza de cada rotação. O carbono final usa referência de 20 g/kg; a nota hídrica usa a classe final e os multiplicadores de rendimento do modelo. Mediana, CVaR5 e P95 seguem em R$/ha. As regras estão em visualization-run-settings.json e os multiplicadores hídricos em soil-crop-response-hypotheses.json.</p>
+    <p class="small-muted">A parcela ajustável combina economia (P95 e CVaR5) e ambiente final (dois terços solo e um terço água). A parcela fixa de suporte cresce proporcionalmente ao número de VPLs válidos da rotação até atingir a nota máxima. O carbono final usa referência de 20 g/kg; a nota hídrica usa a classe final e os multiplicadores de rendimento do modelo. Mediana, CVaR5 e P95 seguem em R$/ha. As regras estão em visualization-run-settings.json e os multiplicadores hídricos em soil-crop-response-hypotheses.json.</p>
     <p class="small-muted" id="ranking-score-reference"></p>
     <div class="ranking-pager"><span id="rotation-ranking-page-info"></span><div class="ranking-pager-controls"><button id="rotation-ranking-previous" type="button">Anterior</button><button id="rotation-ranking-next" type="button">Próxima</button></div></div>
     <div class="matrix-wrap"><table id="rotation-path-ranking" class="change-table" aria-label="Ranking de sequências de plantio pela nota econômica e ambiental ajustável de 0 a 10"></table></div>

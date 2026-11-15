@@ -27823,7 +27823,7 @@
           "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
-            "Mediana/valor unitário PAM nacional usado como proxy; recorte regional sem colheita identificável.",
+            "Série municipal sem rendimento 2021–2025 e preço real 2017–2025 completos; proxy PAM Brazil usado para ambos, sem misturar recortes.",
             "Custo CONAB: painel nacional; confira a localidade e edite o valor se necessário."
           ],
           "missing_inputs": []
@@ -27935,23 +27935,78 @@
         "peanut": {
           "label": "Amendoim",
           "pam_product": "amendoim_em_casca",
-          "yield_kg_ha_median_2021_2025": null,
-          "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
+          "yield_kg_ha_median_2021_2025": 1454.5454545454545,
+          "yield_source": "IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
           "price": {
-            "brl_per_tonne": 1500.0,
+            "brl_per_tonne": 10236.904998707858,
             "price_basis": "median_real_history",
             "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
-            "scope": "municipality",
-            "observed_year": 2009,
-            "observed_nominal_brl_per_tonne": 1500.0,
-            "history_start_year": 2009,
-            "history_end_year": 2009,
-            "history_real_brl_per_tonne": [],
-            "historical_median_real_brl_per_tonne": 1500.0,
-            "recent_trend_raw_annual_fraction": 0.0,
-            "trend_annual_fraction": 0.0,
+            "scope": "state",
+            "observed_year": 2025,
+            "observed_nominal_brl_per_tonne": 9816.51376146789,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 3664.3835616438355,
+                "real_brl_per_tonne": 5824.688779888549,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 3622.377622377622,
+                "real_brl_per_tonne": 5554.359642115083,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 4855.670103092783,
+                "real_brl_per_tonne": 7177.490210204915,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 3573.96449704142,
+                "real_brl_per_tonne": 5118.52056229684,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 7835.365853658536,
+                "real_brl_per_tonne": 10361.398703133327,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 9511.278195488721,
+                "real_brl_per_tonne": 11509.5112697099,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 8848.214285714286,
+                "real_brl_per_tonne": 10236.904998707858,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 9783.783783783783,
+                "real_brl_per_tonne": 10845.629304390286,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 9816.51376146789,
+                "real_brl_per_tonne": 10362.071969646078,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 10236.904998707858,
+            "recent_trend_raw_annual_fraction": 0.07466160989036474,
+            "trend_annual_fraction": 0.05,
             "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
-            "editable_hypothesis": false
+            "editable_hypothesis": true
           },
           "cost_panel": {
             "source_file": "data/raw/conab/costs/serie-historica-custos-amendoim-2005-a-2024.xls",
@@ -27972,21 +28027,20 @@
             "proxy": false,
             "source_note": "Custo total CONAB do produto no painel; localidade, ano e sistema estão identificados."
           },
-          "eligible_for_economic_comparison": false,
-          "include_in_vpl": false,
+          "eligible_for_economic_comparison": true,
+          "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
+            "Série municipal sem rendimento 2021–2025 e preço real 2017–2025 completos; proxy PAM state usado para ambos, sem misturar recortes.",
             "Custo CONAB: painel nacional; confira a localidade e edite o valor se necessário."
           ],
-          "missing_inputs": [
-            "PAM yield or explicit zero-harvest case"
-          ]
+          "missing_inputs": []
         },
         "oat": {
           "label": "Aveia em grão (proxy; não equivale a aveia-preta de cobertura)",
           "pam_product": "aveia_em_grao",
           "yield_kg_ha_median_2021_2025": 2177.850562866182,
-          "yield_source": "Mediana/valor unitário PAM nacional usado como proxy; recorte regional sem colheita identificável.A PAM mede aveia em grão; esta é uma aproximação da aveia-preta de cobertura e pode ser editada. IBGE PAM; mediana 2021–2025 em Brazil; proxy regional editável, não é rendimento municipal/talhão.",
+          "yield_source": "Série municipal sem rendimento 2021–2025 e preço real 2017–2025 completos; proxy PAM Brazil usado para ambos, sem misturar recortes.A PAM mede aveia em grão; esta é uma aproximação da aveia-preta de cobertura e pode ser editada. IBGE PAM; mediana 2021–2025 em Brazil; proxy regional editável, não é rendimento municipal/talhão.",
           "price": {
             "brl_per_tonne": 975.7313229528074,
             "price_basis": "median_real_history",
@@ -28081,7 +28135,7 @@
           "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
-            "Mediana/valor unitário PAM nacional usado como proxy; recorte regional sem colheita identificável.",
+            "Série municipal sem rendimento 2021–2025 e preço real 2017–2025 completos; proxy PAM Brazil usado para ambos, sem misturar recortes.",
             "A PAM mede aveia em grão; esta é uma aproximação da aveia-preta de cobertura e pode ser editada.",
             "Custo CONAB: painel nacional; confira a localidade e edite o valor se necessário."
           ],
@@ -28098,32 +28152,27 @@
             "scope": "editable zero-harvest base case"
           },
           "cost_panel": {
-            "source_file": "data/raw/conab/costs/serie-historica-custos-aveia-2012-a-2023.xls",
-            "source_url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/serie-historica-custos-aveia-2012-a-2023.xls/view",
-            "sheet": "Passo Fundo-RS-2023",
-            "municipality": "Passo Fundo",
-            "uf": "RS",
-            "match_level": "painel nacional",
-            "cost_date": "2023-11",
-            "panel_productivity_kg_ha": 2600.0,
-            "total_cost_brl_ha_nominal": 5314.75,
-            "operational_cost_brl_ha_nominal": 3562.27,
-            "total_cost_brl_ha_reference_month": 6080.958377934987,
-            "deflator_factor": 1.1441664006651275,
-            "cost_definition": "CONAB CUSTO TOTAL por hectare; se a cultura/UF não tem painel, usa proxy explicitamente identificado e editável.",
-            "panel_title": "Custo de Produção - Resumo AGRICULTURA EMPRESARIAL - AVEIA - PLANTIO DIRETO - ALTA TECNOLOGIA SAFRA DE INVERNO - 2023/23 - Passo Fundo - RS Ciclo de Cultura: ANUAL Tipo do Relatório: Estimado Mês/Ano: Novembro/2023 Produtividade Média: 2600,00 kg/ha Ex-Post",
-            "source_crop_id": "oat",
+            "source_file": "data/reference/cover-management.json",
+            "source_url": "https://www.uricer.edu.br/site/publicacoes/257.pdf",
+            "cost_date": "2025-06",
+            "match_level": "hipótese transferida; orçamento para cobertura",
+            "panel_title": "Sementes, semeadura e encerramento de cobertura",
             "proxy": true,
-            "source_note": "Hipótese editável de custo: painel CONAB de Aveia em grão (proxy; não equivale a aveia-preta de cobertura) usado como proxy para Nabo forrageiro."
+            "total_cost_brl_ha_reference_month": 282.85,
+            "total_cost_brl_ha_nominal": 268.4,
+            "deflator_factor": 1.053824916552372,
+            "source_note": "URI Erechim, tabela 2: implantação de nabo-forrageiro e primeira aplicação no pousio como referência de manejo de encerramento. Orçamento exploratório de cobertura solteira de entressafra, sem venda, pastejo, colheita de grãos ou adubação dedicada. Referências transferidas entre regiões; substituir por orçamento do talhão.",
+            "cover_management": {
+              "planting_share": 0.6520119225037259,
+              "soybean_residual": null
+            }
           },
           "eligible_for_economic_comparison": true,
           "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
             "receita zero por falta de colheita comercial",
-            "Hipótese editável de custo: painel CONAB de Aveia em grão (proxy; não equivale a aveia-preta de cobertura) usado como proxy para Nabo forrageiro.",
-            "Custo CONAB: painel nacional; confira a localidade e edite o valor se necessário.",
-            "Receita inicial zero: trata a cultura como cobertura sem colheita comercial; altere rendimento/preço para testar um uso comercial."
+            "Cobertura sem venda. Orçamento editável; o desembolso é dividido entre implantação e encerramento."
           ],
           "missing_inputs": []
         },
@@ -28138,90 +28187,72 @@
             "scope": "editable zero-harvest base case"
           },
           "cost_panel": {
-            "source_file": "data/raw/conab/costs/seriehistoricacustossorgo2013a2026.xls",
-            "source_url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/seriehistoricacustossorgo2013a2026.xls/view",
-            "sheet": "Pedro Afonso-TO-2025",
-            "municipality": "Pedro Afonso",
-            "uf": "TO",
-            "match_level": "mesma macrorregião",
-            "cost_date": "2025-03",
-            "panel_productivity_kg_ha": 1950.0,
-            "total_cost_brl_ha_nominal": 2308.98,
-            "operational_cost_brl_ha_nominal": 1884.26,
-            "total_cost_brl_ha_reference_month": 2455.9598224247725,
-            "deflator_factor": 1.0636557364831105,
-            "cost_definition": "CONAB CUSTO TOTAL por hectare; se a cultura/UF não tem painel, usa proxy explicitamente identificado e editável.",
-            "panel_title": "Custo de Produção - Resumo AGRICULTURA EMPRESARIAL - SORGO GRANÍFERO - PLANTIO DIRETO - ALTA TECNOLOGIA 2ª SAFRA - 2025/25 - Pedro Afonso - TO Ciclo de Cultura: ANUAL Tipo do Relatório: Estimado Mês/Ano: Março/2025 Produtividade Média: 1950,00 kg/ha Ex-Ant",
-            "source_crop_id": "sorghum_grain",
+            "source_file": "data/reference/cover-management.json",
+            "source_url": "https://ainfo.cnptia.embrapa.br/digital/bitstream/item/282908/1/Sistemas-de-integracao-lavoura-pecuaria-floresta.2024.pdf",
+            "cost_date": "2024-09",
+            "match_level": "hipótese transferida; orçamento para cobertura",
+            "panel_title": "Sementes, semeadura e encerramento de cobertura",
             "proxy": true,
-            "source_note": "Hipótese editável de custo: painel CONAB de Sorgo usado como proxy para Braquiária."
+            "total_cost_brl_ha_reference_month": 501.13,
+            "total_cost_brl_ha_nominal": 455,
+            "deflator_factor": 1.10138985158243,
+            "source_note": "Embrapa, tabela 8: sementes (250) mais semeadura (50); defensivo (105) e aplicação (50) usados como aproximação para um manejo de encerramento. Exclui adubação do sistema ILPF. Orçamento exploratório de cobertura solteira de entressafra, sem venda, pastejo, colheita de grãos ou adubação dedicada. Referências transferidas entre regiões; substituir por orçamento do talhão.",
+            "cover_management": {
+              "planting_share": 0.6593406593406593,
+              "soybean_residual": {
+                "max_yield_gain_fraction": 0.06,
+                "max_days_to_planting": 120,
+                "source": "soybean_grasses",
+                "source_url": "https://doi.org/10.3390/agronomy16070751"
+              }
+            }
           },
           "eligible_for_economic_comparison": true,
           "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
             "receita zero por falta de colheita comercial",
-            "Hipótese editável de custo: painel CONAB de Sorgo usado como proxy para Braquiária.",
-            "Custo CONAB: mesma macrorregião; confira a localidade e edite o valor se necessário.",
-            "Receita inicial zero: trata a cultura como cobertura sem colheita comercial; altere rendimento/preço para testar um uso comercial."
+            "Cobertura sem venda. Orçamento editável; o desembolso é dividido entre implantação e encerramento."
           ],
           "missing_inputs": []
         },
         "millet": {
           "label": "Milheto",
           "pam_product": null,
-          "yield_kg_ha_median_2021_2025": 3000.0,
-          "yield_source": "Proxy de colheita: dados de sorgo em grão aplicados ao milheto; rendimento e preço são editáveis. IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
+          "yield_kg_ha_median_2021_2025": 0.0,
+          "yield_source": "Hipótese editável: cultura de cobertura sem colheita comercial valorada na PAM; receita inicial zero.",
           "price": {
-            "brl_per_tonne": 794.1949419726069,
-            "price_basis": "median_real_history",
-            "source": "Proxy sorgo em grão → milheto; IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
-            "scope": "municipality",
-            "observed_year": 2025,
-            "observed_nominal_brl_per_tonne": 752.3809523809524,
-            "history_start_year": 2025,
-            "history_end_year": 2025,
-            "history_real_brl_per_tonne": [
-              {
-                "year": 2025,
-                "nominal_brl_per_tonne": 752.3809523809524,
-                "real_brl_per_tonne": 794.1949419726069,
-                "ipca_deflator": 1.0555755557863762
-              }
-            ],
-            "historical_median_real_brl_per_tonne": 794.1949419726069,
-            "recent_trend_raw_annual_fraction": 0.0,
-            "trend_annual_fraction": 0.0,
-            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
-            "editable_hypothesis": true,
-            "proxy_crop_id": "sorghum_grain"
+            "brl_per_tonne": 0.0,
+            "source": "Hipótese editável: cultura de cobertura sem colheita comercial valorada na PAM; receita inicial zero.",
+            "scope": "editable zero-harvest base case"
           },
           "cost_panel": {
-            "source_file": "data/raw/conab/costs/seriehistoricacustossorgo2013a2026.xls",
-            "source_url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/seriehistoricacustossorgo2013a2026.xls/view",
-            "sheet": "Pedro Afonso-TO-2025",
-            "municipality": "Pedro Afonso",
-            "uf": "TO",
-            "match_level": "mesma macrorregião",
-            "cost_date": "2025-03",
-            "panel_productivity_kg_ha": 1950.0,
-            "total_cost_brl_ha_nominal": 2308.98,
-            "operational_cost_brl_ha_nominal": 1884.26,
-            "total_cost_brl_ha_reference_month": 2455.9598224247725,
-            "deflator_factor": 1.0636557364831105,
-            "cost_definition": "CONAB CUSTO TOTAL por hectare; se a cultura/UF não tem painel, usa proxy explicitamente identificado e editável.",
-            "panel_title": "Custo de Produção - Resumo AGRICULTURA EMPRESARIAL - SORGO GRANÍFERO - PLANTIO DIRETO - ALTA TECNOLOGIA 2ª SAFRA - 2025/25 - Pedro Afonso - TO Ciclo de Cultura: ANUAL Tipo do Relatório: Estimado Mês/Ano: Março/2025 Produtividade Média: 1950,00 kg/ha Ex-Ant",
-            "source_crop_id": "sorghum_grain",
+            "source_file": "data/reference/cover-management.json",
+            "source_url": "https://www.uricer.edu.br/site/publicacoes/257.pdf",
+            "cost_date": "2025-06",
+            "match_level": "hipótese transferida; orçamento para cobertura",
+            "panel_title": "Sementes, semeadura e encerramento de cobertura",
             "proxy": true,
-            "source_note": "Hipótese editável de custo: painel CONAB de Sorgo usado como proxy para Milheto."
+            "total_cost_brl_ha_reference_month": 216.98,
+            "total_cost_brl_ha_nominal": 205.9,
+            "deflator_factor": 1.053824916552372,
+            "source_note": "URI Erechim, tabela 2: implantação do mix capim-sudão + milheto como aproximação para milheto solteiro; primeira aplicação no pousio usada como referência de um manejo de encerramento. Orçamento exploratório de cobertura solteira de entressafra, sem venda, pastejo, colheita de grãos ou adubação dedicada. Referências transferidas entre regiões; substituir por orçamento do talhão.",
+            "cover_management": {
+              "planting_share": 0.5463817387081107,
+              "soybean_residual": {
+                "max_yield_gain_fraction": 0.03,
+                "max_days_to_planting": 90,
+                "source": "soybean_cover",
+                "source_url": "https://doi.org/10.1016/j.fcr.2026.110733"
+              }
+            }
           },
           "eligible_for_economic_comparison": true,
           "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
-            "Proxy de colheita: dados de sorgo em grão aplicados ao milheto; rendimento e preço são editáveis.",
-            "Hipótese editável de custo: painel CONAB de Sorgo usado como proxy para Milheto.",
-            "Custo CONAB: mesma macrorregião; confira a localidade e edite o valor se necessário."
+            "receita zero por falta de colheita comercial",
+            "Cobertura sem venda. Orçamento editável; o desembolso é dividido entre implantação e encerramento."
           ],
           "missing_inputs": []
         },
@@ -28236,32 +28267,27 @@
             "scope": "editable zero-harvest base case"
           },
           "cost_panel": {
-            "source_file": "data/raw/conab/costs/serie-historica-custos-soja-1997-a-2026.xls",
-            "source_url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/serie-historica-custos-soja-1997-a-2026.xls/view",
-            "sheet": "Pedro Afonso-TO-2026",
-            "municipality": "Pedro Afonso",
-            "uf": "TO",
-            "match_level": "mesma macrorregião",
-            "cost_date": "2026-03",
-            "panel_productivity_kg_ha": 2880.0,
-            "total_cost_brl_ha_nominal": 5714.98,
-            "operational_cost_brl_ha_nominal": 5277.04,
-            "total_cost_brl_ha_reference_month": 5836.966749612022,
-            "deflator_factor": 1.0213450877539418,
-            "cost_definition": "CONAB CUSTO TOTAL por hectare; se a cultura/UF não tem painel, usa proxy explicitamente identificado e editável.",
-            "panel_title": "Custo de Produção - Resumo AGRICULTURA EMPRESARIAL - SOJA - PLANTIO DIRETO - ALTA TECNOLOGIA - OGM 1ª SAFRA - 2026/27 - Pedro Afonso - TO Ciclo de Cultura: ANUAL Tipo do Relatório: Estimado Mês/Ano: Março/2026 Produtividade Média: 2880,00 kg/ha Ex-Ant",
-            "source_crop_id": "soybean",
+            "source_file": "data/reference/cover-management.json",
+            "source_url": "https://www.uricer.edu.br/site/publicacoes/257.pdf",
+            "cost_date": "2025-06",
+            "match_level": "hipótese transferida; orçamento para cobertura",
+            "panel_title": "Sementes, semeadura e encerramento de cobertura",
             "proxy": true,
-            "source_note": "Hipótese editável de custo: painel CONAB de Soja usado como proxy para Crotalária."
+            "total_cost_brl_ha_reference_month": 351.35,
+            "total_cost_brl_ha_nominal": 333.4,
+            "deflator_factor": 1.053824916552372,
+            "source_note": "Sem orçamento específico compatível: usa provisoriamente o custo de implantação de um mix comercial de cobertura da tabela 2 da URI e uma aplicação. Não é observação de crotalária. Orçamento exploratório de cobertura solteira de entressafra, sem venda, pastejo, colheita de grãos ou adubação dedicada. Referências transferidas entre regiões; substituir por orçamento do talhão.",
+            "cover_management": {
+              "planting_share": 0.7198560287942412,
+              "soybean_residual": null
+            }
           },
           "eligible_for_economic_comparison": true,
           "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
             "receita zero por falta de colheita comercial",
-            "Hipótese editável de custo: painel CONAB de Soja usado como proxy para Crotalária.",
-            "Custo CONAB: mesma macrorregião; confira a localidade e edite o valor se necessário.",
-            "Receita inicial zero: trata a cultura como cobertura sem colheita comercial; altere rendimento/preço para testar um uso comercial."
+            "Cobertura sem venda. Orçamento editável; o desembolso é dividido entre implantação e encerramento."
           ],
           "missing_inputs": []
         },
@@ -28276,32 +28302,27 @@
             "scope": "editable zero-harvest base case"
           },
           "cost_panel": {
-            "source_file": "data/raw/conab/costs/serie-historica-custos-soja-1997-a-2026.xls",
-            "source_url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/serie-historica-custos-soja-1997-a-2026.xls/view",
-            "sheet": "Pedro Afonso-TO-2026",
-            "municipality": "Pedro Afonso",
-            "uf": "TO",
-            "match_level": "mesma macrorregião",
-            "cost_date": "2026-03",
-            "panel_productivity_kg_ha": 2880.0,
-            "total_cost_brl_ha_nominal": 5714.98,
-            "operational_cost_brl_ha_nominal": 5277.04,
-            "total_cost_brl_ha_reference_month": 5836.966749612022,
-            "deflator_factor": 1.0213450877539418,
-            "cost_definition": "CONAB CUSTO TOTAL por hectare; se a cultura/UF não tem painel, usa proxy explicitamente identificado e editável.",
-            "panel_title": "Custo de Produção - Resumo AGRICULTURA EMPRESARIAL - SOJA - PLANTIO DIRETO - ALTA TECNOLOGIA - OGM 1ª SAFRA - 2026/27 - Pedro Afonso - TO Ciclo de Cultura: ANUAL Tipo do Relatório: Estimado Mês/Ano: Março/2026 Produtividade Média: 2880,00 kg/ha Ex-Ant",
-            "source_crop_id": "soybean",
+            "source_file": "data/reference/cover-management.json",
+            "source_url": "https://www.uricer.edu.br/site/publicacoes/257.pdf",
+            "cost_date": "2025-06",
+            "match_level": "hipótese transferida; orçamento para cobertura",
+            "panel_title": "Sementes, semeadura e encerramento de cobertura",
             "proxy": true,
-            "source_note": "Hipótese editável de custo: painel CONAB de Soja usado como proxy para Mucuna."
+            "total_cost_brl_ha_reference_month": 351.35,
+            "total_cost_brl_ha_nominal": 333.4,
+            "deflator_factor": 1.053824916552372,
+            "source_note": "Sem orçamento específico compatível: usa provisoriamente o custo de implantação de um mix comercial de cobertura da tabela 2 da URI e uma aplicação. Não é observação de mucuna. Orçamento exploratório de cobertura solteira de entressafra, sem venda, pastejo, colheita de grãos ou adubação dedicada. Referências transferidas entre regiões; substituir por orçamento do talhão.",
+            "cover_management": {
+              "planting_share": 0.7198560287942412,
+              "soybean_residual": null
+            }
           },
           "eligible_for_economic_comparison": true,
           "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
             "receita zero por falta de colheita comercial",
-            "Hipótese editável de custo: painel CONAB de Soja usado como proxy para Mucuna.",
-            "Custo CONAB: mesma macrorregião; confira a localidade e edite o valor se necessário.",
-            "Receita inicial zero: trata a cultura como cobertura sem colheita comercial; altere rendimento/preço para testar um uso comercial."
+            "Cobertura sem venda. Orçamento editável; o desembolso é dividido entre implantação e encerramento."
           ],
           "missing_inputs": []
         }
@@ -28314,6 +28335,7 @@
         "sorghum_grain",
         "wheat",
         "dry_bean",
+        "peanut",
         "oat",
         "forage_radish",
         "brachiaria",
@@ -28321,9 +28343,7 @@
         "crotalaria",
         "mucuna"
       ],
-      "economic_exclusions": [
-        "peanut"
-      ]
+      "economic_exclusions": []
     },
     "franca-sp": {
       "municipality": "Franca",
@@ -28758,30 +28778,78 @@
         "sorghum_grain": {
           "label": "Sorgo",
           "pam_product": "sorgo_em_grao",
-          "yield_kg_ha_median_2021_2025": null,
-          "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
+          "yield_kg_ha_median_2021_2025": 3281.2850997096657,
+          "yield_source": "IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
           "price": {
-            "brl_per_tonne": 1087.8950644129982,
+            "brl_per_tonne": 872.3115393361821,
             "price_basis": "median_real_history",
             "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
-            "scope": "municipality",
-            "observed_year": 2018,
-            "observed_nominal_brl_per_tonne": 709.4907407407408,
-            "history_start_year": 2018,
-            "history_end_year": 2018,
+            "scope": "state",
+            "observed_year": 2025,
+            "observed_nominal_brl_per_tonne": 826.38474768993,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
             "history_real_brl_per_tonne": [
               {
+                "year": 2017,
+                "nominal_brl_per_tonne": 299.4891737039508,
+                "real_brl_per_tonne": 476.0503916759594,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
                 "year": 2018,
-                "nominal_brl_per_tonne": 709.4907407407408,
-                "real_brl_per_tonne": 1087.8950644129982,
+                "nominal_brl_per_tonne": 436.92275288294456,
+                "real_brl_per_tonne": 669.9539248318213,
                 "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 420.9930539956042,
+                "real_brl_per_tonne": 622.297944354392,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 684.0448617407559,
+                "real_brl_per_tonne": 979.6677312413101,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 1064.2248554641196,
+                "real_brl_per_tonne": 1407.3188467771997,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 1038.4024180735498,
+                "real_brl_per_tonne": 1256.5613251623984,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 697.3877749504686,
+                "real_brl_per_tonne": 806.8399079071228,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 799.9326584301706,
+                "real_brl_per_tonne": 886.7502873672269,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 826.38474768993,
+                "real_brl_per_tonne": 872.3115393361821,
+                "ipca_deflator": 1.0555755557863762
               }
             ],
-            "historical_median_real_brl_per_tonne": 1087.8950644129982,
-            "recent_trend_raw_annual_fraction": 0.0,
-            "trend_annual_fraction": 0.0,
+            "historical_median_real_brl_per_tonne": 872.3115393361821,
+            "recent_trend_raw_annual_fraction": 0.04311972157215793,
+            "trend_annual_fraction": 0.04311972157215793,
             "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
-            "editable_hypothesis": false
+            "editable_hypothesis": true
           },
           "cost_panel": {
             "source_file": "data/raw/conab/costs/seriehistoricacustossorgo2013a2026.xls",
@@ -28802,15 +28870,14 @@
             "proxy": false,
             "source_note": "Custo total CONAB do produto no painel; localidade, ano e sistema estão identificados."
           },
-          "eligible_for_economic_comparison": false,
-          "include_in_vpl": false,
+          "eligible_for_economic_comparison": true,
+          "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
+            "Série municipal sem rendimento 2021–2025 e preço real 2017–2025 completos; proxy PAM state usado para ambos, sem misturar recortes.",
             "Custo CONAB: mesma macrorregião; confira a localidade e edite o valor se necessário."
           ],
-          "missing_inputs": [
-            "PAM yield or explicit zero-harvest case"
-          ]
+          "missing_inputs": []
         },
         "wheat": {
           "label": "Trigo",
@@ -28911,7 +28978,7 @@
           "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
-            "Rendimento/preço PAM estadual usado como proxy quando falta série municipal.",
+            "Série municipal sem rendimento 2021–2025 e preço real 2017–2025 completos; proxy PAM state usado para ambos, sem misturar recortes.",
             "Custo CONAB: mesma UF · outro município; confira a localidade e edite o valor se necessário."
           ],
           "missing_inputs": []
@@ -28919,42 +28986,78 @@
         "dry_bean": {
           "label": "Feijão",
           "pam_product": "feijao_em_grao",
-          "yield_kg_ha_median_2021_2025": null,
-          "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
+          "yield_kg_ha_median_2021_2025": 2829.418702132799,
+          "yield_source": "IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
           "price": {
-            "brl_per_tonne": 3938.4642902772457,
+            "brl_per_tonne": 5258.685838305574,
             "price_basis": "median_real_history",
             "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
-            "scope": "municipality",
-            "observed_year": 2020,
-            "observed_nominal_brl_per_tonne": 2750.0,
+            "scope": "state",
+            "observed_year": 2025,
+            "observed_nominal_brl_per_tonne": 4014.940332633821,
             "history_start_year": 2017,
-            "history_end_year": 2020,
+            "history_end_year": 2025,
             "history_real_brl_per_tonne": [
               {
                 "year": 2017,
-                "nominal_brl_per_tonne": 1375.0,
-                "real_brl_per_tonne": 2185.619201051638,
+                "nominal_brl_per_tonne": 2074.6110165534487,
+                "real_brl_per_tonne": 3297.679761812709,
                 "ipca_deflator": 1.5895412371284638
               },
               {
+                "year": 2018,
+                "nominal_brl_per_tonne": 2049.7921892828163,
+                "real_brl_per_tonne": 3143.0414489481723,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
                 "year": 2019,
-                "nominal_brl_per_tonne": 3395.8333333333335,
-                "real_brl_per_tonne": 5019.608002191698,
+                "nominal_brl_per_tonne": 3013.901736395592,
+                "real_brl_per_tonne": 4455.049405790655,
                 "ipca_deflator": 1.478166773651543
               },
               {
                 "year": 2020,
-                "nominal_brl_per_tonne": 2750.0,
-                "real_brl_per_tonne": 3938.4642902772457,
+                "nominal_brl_per_tonne": 4102.923793494853,
+                "real_brl_per_tonne": 5876.079580512121,
                 "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 4376.5522946965075,
+                "real_brl_per_tonne": 5787.502985491072,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 4847.136524482939,
+                "real_brl_per_tonne": 5865.475839074885,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 4545.317082111437,
+                "real_brl_per_tonne": 5258.685838305574,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 4980.032743087291,
+                "real_brl_per_tonne": 5520.521533271477,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 4014.940332633821,
+                "real_brl_per_tonne": 4238.0728730690835,
+                "ipca_deflator": 1.0555755557863762
               }
             ],
-            "historical_median_real_brl_per_tonne": 3938.4642902772457,
-            "recent_trend_raw_annual_fraction": 0.0,
-            "trend_annual_fraction": 0.0,
+            "historical_median_real_brl_per_tonne": 5258.685838305574,
+            "recent_trend_raw_annual_fraction": 0.060067679346792247,
+            "trend_annual_fraction": 0.05,
             "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
-            "editable_hypothesis": false
+            "editable_hypothesis": true
           },
           "cost_panel": {
             "source_file": "data/raw/conab/costs/serie-historica-custos-soja-1997-a-2026.xls",
@@ -28975,16 +29078,15 @@
             "proxy": true,
             "source_note": "Hipótese editável de custo: painel CONAB de Soja usado como proxy para Feijão."
           },
-          "eligible_for_economic_comparison": false,
-          "include_in_vpl": false,
+          "eligible_for_economic_comparison": true,
+          "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
+            "Série municipal sem rendimento 2021–2025 e preço real 2017–2025 completos; proxy PAM state usado para ambos, sem misturar recortes.",
             "Hipótese editável de custo: painel CONAB de Soja usado como proxy para Feijão.",
             "Custo CONAB: mesma UF · outro município; confira a localidade e edite o valor se necessário."
           ],
-          "missing_inputs": [
-            "PAM yield or explicit zero-harvest case"
-          ]
+          "missing_inputs": []
         },
         "peanut": {
           "label": "Amendoim",
@@ -29085,7 +29187,7 @@
           "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
-            "Rendimento/preço PAM estadual usado como proxy quando falta série municipal.",
+            "Série municipal sem rendimento 2021–2025 e preço real 2017–2025 completos; proxy PAM state usado para ambos, sem misturar recortes.",
             "Custo CONAB: mesma UF · outro município; confira a localidade e edite o valor se necessário."
           ],
           "missing_inputs": []
@@ -29094,7 +29196,7 @@
           "label": "Aveia em grão (proxy; não equivale a aveia-preta de cobertura)",
           "pam_product": "aveia_em_grao",
           "yield_kg_ha_median_2021_2025": 2147.750395659055,
-          "yield_source": "Rendimento/preço PAM estadual usado como proxy quando falta série municipal.A PAM mede aveia em grão; esta é uma aproximação da aveia-preta de cobertura e pode ser editada. IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
+          "yield_source": "Série municipal sem rendimento 2021–2025 e preço real 2017–2025 completos; proxy PAM state usado para ambos, sem misturar recortes.A PAM mede aveia em grão; esta é uma aproximação da aveia-preta de cobertura e pode ser editada. IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
           "price": {
             "brl_per_tonne": 1145.434063350431,
             "price_basis": "median_real_history",
@@ -29189,7 +29291,7 @@
           "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
-            "Rendimento/preço PAM estadual usado como proxy quando falta série municipal.",
+            "Série municipal sem rendimento 2021–2025 e preço real 2017–2025 completos; proxy PAM state usado para ambos, sem misturar recortes.",
             "A PAM mede aveia em grão; esta é uma aproximação da aveia-preta de cobertura e pode ser editada.",
             "Custo CONAB: painel nacional; confira a localidade e edite o valor se necessário."
           ],
@@ -29206,32 +29308,27 @@
             "scope": "editable zero-harvest base case"
           },
           "cost_panel": {
-            "source_file": "data/raw/conab/costs/serie-historica-custos-aveia-2012-a-2023.xls",
-            "source_url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/serie-historica-custos-aveia-2012-a-2023.xls/view",
-            "sheet": "Passo Fundo-RS-2023",
-            "municipality": "Passo Fundo",
-            "uf": "RS",
-            "match_level": "painel nacional",
-            "cost_date": "2023-11",
-            "panel_productivity_kg_ha": 2600.0,
-            "total_cost_brl_ha_nominal": 5314.75,
-            "operational_cost_brl_ha_nominal": 3562.27,
-            "total_cost_brl_ha_reference_month": 6080.958377934987,
-            "deflator_factor": 1.1441664006651275,
-            "cost_definition": "CONAB CUSTO TOTAL por hectare; se a cultura/UF não tem painel, usa proxy explicitamente identificado e editável.",
-            "panel_title": "Custo de Produção - Resumo AGRICULTURA EMPRESARIAL - AVEIA - PLANTIO DIRETO - ALTA TECNOLOGIA SAFRA DE INVERNO - 2023/23 - Passo Fundo - RS Ciclo de Cultura: ANUAL Tipo do Relatório: Estimado Mês/Ano: Novembro/2023 Produtividade Média: 2600,00 kg/ha Ex-Post",
-            "source_crop_id": "oat",
+            "source_file": "data/reference/cover-management.json",
+            "source_url": "https://www.uricer.edu.br/site/publicacoes/257.pdf",
+            "cost_date": "2025-06",
+            "match_level": "hipótese transferida; orçamento para cobertura",
+            "panel_title": "Sementes, semeadura e encerramento de cobertura",
             "proxy": true,
-            "source_note": "Hipótese editável de custo: painel CONAB de Aveia em grão (proxy; não equivale a aveia-preta de cobertura) usado como proxy para Nabo forrageiro."
+            "total_cost_brl_ha_reference_month": 282.85,
+            "total_cost_brl_ha_nominal": 268.4,
+            "deflator_factor": 1.053824916552372,
+            "source_note": "URI Erechim, tabela 2: implantação de nabo-forrageiro e primeira aplicação no pousio como referência de manejo de encerramento. Orçamento exploratório de cobertura solteira de entressafra, sem venda, pastejo, colheita de grãos ou adubação dedicada. Referências transferidas entre regiões; substituir por orçamento do talhão.",
+            "cover_management": {
+              "planting_share": 0.6520119225037259,
+              "soybean_residual": null
+            }
           },
           "eligible_for_economic_comparison": true,
           "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
             "receita zero por falta de colheita comercial",
-            "Hipótese editável de custo: painel CONAB de Aveia em grão (proxy; não equivale a aveia-preta de cobertura) usado como proxy para Nabo forrageiro.",
-            "Custo CONAB: painel nacional; confira a localidade e edite o valor se necessário.",
-            "Receita inicial zero: trata a cultura como cobertura sem colheita comercial; altere rendimento/preço para testar um uso comercial."
+            "Cobertura sem venda. Orçamento editável; o desembolso é dividido entre implantação e encerramento."
           ],
           "missing_inputs": []
         },
@@ -29246,94 +29343,74 @@
             "scope": "editable zero-harvest base case"
           },
           "cost_panel": {
-            "source_file": "data/raw/conab/costs/seriehistoricacustossorgo2013a2026.xls",
-            "source_url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/seriehistoricacustossorgo2013a2026.xls/view",
-            "sheet": "Uberaba-MG-2026",
-            "municipality": "Uberaba",
-            "uf": "MG",
-            "match_level": "mesma macrorregião",
-            "cost_date": "2026-03",
-            "panel_productivity_kg_ha": 4000.0,
-            "total_cost_brl_ha_nominal": 3599.47,
-            "operational_cost_brl_ha_nominal": 2499.8199999999997,
-            "total_cost_brl_ha_reference_month": 3676.3010030176806,
-            "deflator_factor": 1.0213450877539418,
-            "cost_definition": "CONAB CUSTO TOTAL por hectare; se a cultura/UF não tem painel, usa proxy explicitamente identificado e editável.",
-            "panel_title": "Custo de Produção - Resumo AGRICULTURA EMPRESARIAL - SORGO GRANÍFERO - PLANTIO DIRETO - ALTA TECNOLOGIA 2ª SAFRA - 2026/26 - Uberaba - MG Ciclo de Cultura: ANUAL Tipo do Relatório: Estimado Mês/Ano: Março/2026 Produtividade Média: 4000,00 kg/ha Ex-Ant",
-            "source_crop_id": "sorghum_grain",
+            "source_file": "data/reference/cover-management.json",
+            "source_url": "https://ainfo.cnptia.embrapa.br/digital/bitstream/item/282908/1/Sistemas-de-integracao-lavoura-pecuaria-floresta.2024.pdf",
+            "cost_date": "2024-09",
+            "match_level": "hipótese transferida; orçamento para cobertura",
+            "panel_title": "Sementes, semeadura e encerramento de cobertura",
             "proxy": true,
-            "source_note": "Hipótese editável de custo: painel CONAB de Sorgo usado como proxy para Braquiária."
+            "total_cost_brl_ha_reference_month": 501.13,
+            "total_cost_brl_ha_nominal": 455,
+            "deflator_factor": 1.10138985158243,
+            "source_note": "Embrapa, tabela 8: sementes (250) mais semeadura (50); defensivo (105) e aplicação (50) usados como aproximação para um manejo de encerramento. Exclui adubação do sistema ILPF. Orçamento exploratório de cobertura solteira de entressafra, sem venda, pastejo, colheita de grãos ou adubação dedicada. Referências transferidas entre regiões; substituir por orçamento do talhão.",
+            "cover_management": {
+              "planting_share": 0.6593406593406593,
+              "soybean_residual": {
+                "max_yield_gain_fraction": 0.06,
+                "max_days_to_planting": 120,
+                "source": "soybean_grasses",
+                "source_url": "https://doi.org/10.3390/agronomy16070751"
+              }
+            }
           },
           "eligible_for_economic_comparison": true,
           "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
             "receita zero por falta de colheita comercial",
-            "Hipótese editável de custo: painel CONAB de Sorgo usado como proxy para Braquiária.",
-            "Custo CONAB: mesma macrorregião; confira a localidade e edite o valor se necessário.",
-            "Receita inicial zero: trata a cultura como cobertura sem colheita comercial; altere rendimento/preço para testar um uso comercial."
+            "Cobertura sem venda. Orçamento editável; o desembolso é dividido entre implantação e encerramento."
           ],
           "missing_inputs": []
         },
         "millet": {
           "label": "Milheto",
           "pam_product": null,
-          "yield_kg_ha_median_2021_2025": null,
-          "yield_source": "Proxy de colheita: dados de sorgo em grão aplicados ao milheto; rendimento e preço são editáveis. IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
+          "yield_kg_ha_median_2021_2025": 0.0,
+          "yield_source": "Hipótese editável: cultura de cobertura sem colheita comercial valorada na PAM; receita inicial zero.",
           "price": {
-            "brl_per_tonne": 1087.8950644129982,
-            "price_basis": "median_real_history",
-            "source": "Proxy sorgo em grão → milheto; IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
-            "scope": "municipality",
-            "observed_year": 2018,
-            "observed_nominal_brl_per_tonne": 709.4907407407408,
-            "history_start_year": 2018,
-            "history_end_year": 2018,
-            "history_real_brl_per_tonne": [
-              {
-                "year": 2018,
-                "nominal_brl_per_tonne": 709.4907407407408,
-                "real_brl_per_tonne": 1087.8950644129982,
-                "ipca_deflator": 1.5333463876881408
-              }
-            ],
-            "historical_median_real_brl_per_tonne": 1087.8950644129982,
-            "recent_trend_raw_annual_fraction": 0.0,
-            "trend_annual_fraction": 0.0,
-            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
-            "editable_hypothesis": true,
-            "proxy_crop_id": "sorghum_grain"
+            "brl_per_tonne": 0.0,
+            "source": "Hipótese editável: cultura de cobertura sem colheita comercial valorada na PAM; receita inicial zero.",
+            "scope": "editable zero-harvest base case"
           },
           "cost_panel": {
-            "source_file": "data/raw/conab/costs/seriehistoricacustossorgo2013a2026.xls",
-            "source_url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/seriehistoricacustossorgo2013a2026.xls/view",
-            "sheet": "Uberaba-MG-2026",
-            "municipality": "Uberaba",
-            "uf": "MG",
-            "match_level": "mesma macrorregião",
-            "cost_date": "2026-03",
-            "panel_productivity_kg_ha": 4000.0,
-            "total_cost_brl_ha_nominal": 3599.47,
-            "operational_cost_brl_ha_nominal": 2499.8199999999997,
-            "total_cost_brl_ha_reference_month": 3676.3010030176806,
-            "deflator_factor": 1.0213450877539418,
-            "cost_definition": "CONAB CUSTO TOTAL por hectare; se a cultura/UF não tem painel, usa proxy explicitamente identificado e editável.",
-            "panel_title": "Custo de Produção - Resumo AGRICULTURA EMPRESARIAL - SORGO GRANÍFERO - PLANTIO DIRETO - ALTA TECNOLOGIA 2ª SAFRA - 2026/26 - Uberaba - MG Ciclo de Cultura: ANUAL Tipo do Relatório: Estimado Mês/Ano: Março/2026 Produtividade Média: 4000,00 kg/ha Ex-Ant",
-            "source_crop_id": "sorghum_grain",
+            "source_file": "data/reference/cover-management.json",
+            "source_url": "https://www.uricer.edu.br/site/publicacoes/257.pdf",
+            "cost_date": "2025-06",
+            "match_level": "hipótese transferida; orçamento para cobertura",
+            "panel_title": "Sementes, semeadura e encerramento de cobertura",
             "proxy": true,
-            "source_note": "Hipótese editável de custo: painel CONAB de Sorgo usado como proxy para Milheto."
+            "total_cost_brl_ha_reference_month": 216.98,
+            "total_cost_brl_ha_nominal": 205.9,
+            "deflator_factor": 1.053824916552372,
+            "source_note": "URI Erechim, tabela 2: implantação do mix capim-sudão + milheto como aproximação para milheto solteiro; primeira aplicação no pousio usada como referência de um manejo de encerramento. Orçamento exploratório de cobertura solteira de entressafra, sem venda, pastejo, colheita de grãos ou adubação dedicada. Referências transferidas entre regiões; substituir por orçamento do talhão.",
+            "cover_management": {
+              "planting_share": 0.5463817387081107,
+              "soybean_residual": {
+                "max_yield_gain_fraction": 0.03,
+                "max_days_to_planting": 90,
+                "source": "soybean_cover",
+                "source_url": "https://doi.org/10.1016/j.fcr.2026.110733"
+              }
+            }
           },
-          "eligible_for_economic_comparison": false,
-          "include_in_vpl": false,
+          "eligible_for_economic_comparison": true,
+          "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
-            "Proxy de colheita: dados de sorgo em grão aplicados ao milheto; rendimento e preço são editáveis.",
-            "Hipótese editável de custo: painel CONAB de Sorgo usado como proxy para Milheto.",
-            "Custo CONAB: mesma macrorregião; confira a localidade e edite o valor se necessário."
+            "receita zero por falta de colheita comercial",
+            "Cobertura sem venda. Orçamento editável; o desembolso é dividido entre implantação e encerramento."
           ],
-          "missing_inputs": [
-            "PAM yield or explicit zero-harvest case"
-          ]
+          "missing_inputs": []
         },
         "crotalaria": {
           "label": "Crotalária",
@@ -29346,32 +29423,27 @@
             "scope": "editable zero-harvest base case"
           },
           "cost_panel": {
-            "source_file": "data/raw/conab/costs/serie-historica-custos-soja-1997-a-2026.xls",
-            "source_url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/serie-historica-custos-soja-1997-a-2026.xls/view",
-            "sheet": "Assis-SP-2021",
-            "municipality": "Assis",
-            "uf": "SP",
-            "match_level": "mesma UF · outro município",
-            "cost_date": "2021-03",
-            "panel_productivity_kg_ha": 3000.0,
-            "total_cost_brl_ha_nominal": 3417.9700000000003,
-            "operational_cost_brl_ha_nominal": 3278.84,
-            "total_cost_brl_ha_reference_month": 4641.796145413342,
-            "deflator_factor": 1.3580564327402938,
-            "cost_definition": "CONAB CUSTO TOTAL por hectare; se a cultura/UF não tem painel, usa proxy explicitamente identificado e editável.",
-            "panel_title": "Custo de Produção - Resumo AGRICULTURA FAMILIAR - SOJA - PLANTIO DIRETO - ALTA TECNOLOGIA - OGM 1ª SAFRA - 2021/22 - Assis - SP Ciclo de Cultura: ANUAL Tipo do Relatório: Estimado Mês/Ano: Março/2021 Produtividade Média: 3000,00 kg/ha Ex-Ant A partir de 2022 esse custo foi inativado.",
-            "source_crop_id": "soybean",
+            "source_file": "data/reference/cover-management.json",
+            "source_url": "https://www.uricer.edu.br/site/publicacoes/257.pdf",
+            "cost_date": "2025-06",
+            "match_level": "hipótese transferida; orçamento para cobertura",
+            "panel_title": "Sementes, semeadura e encerramento de cobertura",
             "proxy": true,
-            "source_note": "Hipótese editável de custo: painel CONAB de Soja usado como proxy para Crotalária."
+            "total_cost_brl_ha_reference_month": 351.35,
+            "total_cost_brl_ha_nominal": 333.4,
+            "deflator_factor": 1.053824916552372,
+            "source_note": "Sem orçamento específico compatível: usa provisoriamente o custo de implantação de um mix comercial de cobertura da tabela 2 da URI e uma aplicação. Não é observação de crotalária. Orçamento exploratório de cobertura solteira de entressafra, sem venda, pastejo, colheita de grãos ou adubação dedicada. Referências transferidas entre regiões; substituir por orçamento do talhão.",
+            "cover_management": {
+              "planting_share": 0.7198560287942412,
+              "soybean_residual": null
+            }
           },
           "eligible_for_economic_comparison": true,
           "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
             "receita zero por falta de colheita comercial",
-            "Hipótese editável de custo: painel CONAB de Soja usado como proxy para Crotalária.",
-            "Custo CONAB: mesma UF · outro município; confira a localidade e edite o valor se necessário.",
-            "Receita inicial zero: trata a cultura como cobertura sem colheita comercial; altere rendimento/preço para testar um uso comercial."
+            "Cobertura sem venda. Orçamento editável; o desembolso é dividido entre implantação e encerramento."
           ],
           "missing_inputs": []
         },
@@ -29386,32 +29458,27 @@
             "scope": "editable zero-harvest base case"
           },
           "cost_panel": {
-            "source_file": "data/raw/conab/costs/serie-historica-custos-soja-1997-a-2026.xls",
-            "source_url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/serie-historica-custos-soja-1997-a-2026.xls/view",
-            "sheet": "Assis-SP-2021",
-            "municipality": "Assis",
-            "uf": "SP",
-            "match_level": "mesma UF · outro município",
-            "cost_date": "2021-03",
-            "panel_productivity_kg_ha": 3000.0,
-            "total_cost_brl_ha_nominal": 3417.9700000000003,
-            "operational_cost_brl_ha_nominal": 3278.84,
-            "total_cost_brl_ha_reference_month": 4641.796145413342,
-            "deflator_factor": 1.3580564327402938,
-            "cost_definition": "CONAB CUSTO TOTAL por hectare; se a cultura/UF não tem painel, usa proxy explicitamente identificado e editável.",
-            "panel_title": "Custo de Produção - Resumo AGRICULTURA FAMILIAR - SOJA - PLANTIO DIRETO - ALTA TECNOLOGIA - OGM 1ª SAFRA - 2021/22 - Assis - SP Ciclo de Cultura: ANUAL Tipo do Relatório: Estimado Mês/Ano: Março/2021 Produtividade Média: 3000,00 kg/ha Ex-Ant A partir de 2022 esse custo foi inativado.",
-            "source_crop_id": "soybean",
+            "source_file": "data/reference/cover-management.json",
+            "source_url": "https://www.uricer.edu.br/site/publicacoes/257.pdf",
+            "cost_date": "2025-06",
+            "match_level": "hipótese transferida; orçamento para cobertura",
+            "panel_title": "Sementes, semeadura e encerramento de cobertura",
             "proxy": true,
-            "source_note": "Hipótese editável de custo: painel CONAB de Soja usado como proxy para Mucuna."
+            "total_cost_brl_ha_reference_month": 351.35,
+            "total_cost_brl_ha_nominal": 333.4,
+            "deflator_factor": 1.053824916552372,
+            "source_note": "Sem orçamento específico compatível: usa provisoriamente o custo de implantação de um mix comercial de cobertura da tabela 2 da URI e uma aplicação. Não é observação de mucuna. Orçamento exploratório de cobertura solteira de entressafra, sem venda, pastejo, colheita de grãos ou adubação dedicada. Referências transferidas entre regiões; substituir por orçamento do talhão.",
+            "cover_management": {
+              "planting_share": 0.7198560287942412,
+              "soybean_residual": null
+            }
           },
           "eligible_for_economic_comparison": true,
           "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
             "receita zero por falta de colheita comercial",
-            "Hipótese editável de custo: painel CONAB de Soja usado como proxy para Mucuna.",
-            "Custo CONAB: mesma UF · outro município; confira a localidade e edite o valor se necessário.",
-            "Receita inicial zero: trata a cultura como cobertura sem colheita comercial; altere rendimento/preço para testar um uso comercial."
+            "Cobertura sem venda. Orçamento editável; o desembolso é dividido entre implantação e encerramento."
           ],
           "missing_inputs": []
         }
@@ -29421,19 +29488,18 @@
         "maize_grain",
         "sugarcane",
         "coffee",
+        "sorghum_grain",
         "wheat",
+        "dry_bean",
         "peanut",
         "oat",
         "forage_radish",
         "brachiaria",
+        "millet",
         "crotalaria",
         "mucuna"
       ],
-      "economic_exclusions": [
-        "sorghum_grain",
-        "dry_bean",
-        "millet"
-      ]
+      "economic_exclusions": []
     },
     "varginha-mg": {
       "municipality": "Varginha",
@@ -29870,23 +29936,78 @@
         "sorghum_grain": {
           "label": "Sorgo",
           "pam_product": "sorgo_em_grao",
-          "yield_kg_ha_median_2021_2025": null,
-          "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
+          "yield_kg_ha_median_2021_2025": 3306.5794490664634,
+          "yield_source": "IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
           "price": {
-            "brl_per_tonne": 6000.0,
+            "brl_per_tonne": 701.394735215651,
             "price_basis": "median_real_history",
             "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
-            "scope": "municipality",
-            "observed_year": 1993,
-            "observed_nominal_brl_per_tonne": 6000.0,
-            "history_start_year": 1993,
-            "history_end_year": 1993,
-            "history_real_brl_per_tonne": [],
-            "historical_median_real_brl_per_tonne": 6000.0,
-            "recent_trend_raw_annual_fraction": 0.0,
-            "trend_annual_fraction": 0.0,
+            "scope": "state",
+            "observed_year": 2025,
+            "observed_nominal_brl_per_tonne": 702.5071497333342,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 279.9513097881253,
+                "real_brl_per_tonne": 444.9941512963505,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 305.3110007365676,
+                "real_brl_per_tonne": 468.14752010086727,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 392.3361123882019,
+                "real_brl_per_tonne": 579.9382054358575,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 501.6217807825353,
+                "real_brl_per_tonne": 718.4070803044713,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 1172.633743763462,
+                "real_brl_per_tonne": 1550.677527866539,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 1016.2284458821041,
+                "real_brl_per_tonne": 1229.728803014878,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 575.4963772637026,
+                "real_brl_per_tonne": 665.8181584346062,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 632.7244131104837,
+                "real_brl_per_tonne": 701.394735215651,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 702.5071497333342,
+                "real_brl_per_tonne": 741.5493750236673,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 701.394735215651,
+            "recent_trend_raw_annual_fraction": 0.051834646079782054,
+            "trend_annual_fraction": 0.05,
             "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
-            "editable_hypothesis": false
+            "editable_hypothesis": true
           },
           "cost_panel": {
             "source_file": "data/raw/conab/costs/seriehistoricacustossorgo2013a2026.xls",
@@ -29907,36 +30028,90 @@
             "proxy": false,
             "source_note": "Custo total CONAB do produto no painel; localidade, ano e sistema estão identificados."
           },
-          "eligible_for_economic_comparison": false,
-          "include_in_vpl": false,
+          "eligible_for_economic_comparison": true,
+          "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
+            "Série municipal sem rendimento 2021–2025 e preço real 2017–2025 completos; proxy PAM state usado para ambos, sem misturar recortes.",
             "Custo CONAB: mesma UF · outro município; confira a localidade e edite o valor se necessário."
           ],
-          "missing_inputs": [
-            "PAM yield or explicit zero-harvest case"
-          ]
+          "missing_inputs": []
         },
         "wheat": {
           "label": "Trigo",
           "pam_product": "trigo_em_grao",
-          "yield_kg_ha_median_2021_2025": null,
-          "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
+          "yield_kg_ha_median_2021_2025": 3168.6533121777074,
+          "yield_source": "IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
           "price": {
-            "brl_per_tonne": 583.3333333333334,
+            "brl_per_tonne": 1428.6389333459185,
             "price_basis": "median_real_history",
             "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
-            "scope": "municipality",
-            "observed_year": 2014,
-            "observed_nominal_brl_per_tonne": 583.3333333333334,
-            "history_start_year": 2014,
-            "history_end_year": 2014,
-            "history_real_brl_per_tonne": [],
-            "historical_median_real_brl_per_tonne": 583.3333333333334,
-            "recent_trend_raw_annual_fraction": 0.0,
-            "trend_annual_fraction": 0.0,
+            "scope": "state",
+            "observed_year": 2025,
+            "observed_nominal_brl_per_tonne": 1353.4217664614448,
+            "history_start_year": 2017,
+            "history_end_year": 2025,
+            "history_real_brl_per_tonne": [
+              {
+                "year": 2017,
+                "nominal_brl_per_tonne": 694.6967565612315,
+                "real_brl_per_tonne": 1104.2491418534712,
+                "ipca_deflator": 1.5895412371284638
+              },
+              {
+                "year": 2018,
+                "nominal_brl_per_tonne": 711.5553923319566,
+                "real_brl_per_tonne": 1091.0608904722235,
+                "ipca_deflator": 1.5333463876881408
+              },
+              {
+                "year": 2019,
+                "nominal_brl_per_tonne": 843.5678124497147,
+                "real_brl_per_tonne": 1246.9339116850847,
+                "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 1201.08838494457,
+                "real_brl_per_tonne": 1720.1613503894396,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 1453.561193079291,
+                "real_brl_per_tonne": 1922.1727922078273,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 1871.084446697775,
+                "real_brl_per_tonne": 2264.182277421063,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 1287.5537041432488,
+                "real_brl_per_tonne": 1489.6299439005754,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 1213.6902901204246,
+                "real_brl_per_tonne": 1345.4135197469861,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 1353.4217664614448,
+                "real_brl_per_tonne": 1428.6389333459185,
+                "ipca_deflator": 1.0555755557863762
+              }
+            ],
+            "historical_median_real_brl_per_tonne": 1428.6389333459185,
+            "recent_trend_raw_annual_fraction": 0.03271842717772522,
+            "trend_annual_fraction": 0.03271842717772522,
             "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
-            "editable_hypothesis": false
+            "editable_hypothesis": true
           },
           "cost_panel": {
             "source_file": "data/raw/conab/costs/seriehistoricacustostrigo1998a2025.xls",
@@ -29957,15 +30132,14 @@
             "proxy": false,
             "source_note": "Custo total CONAB do produto no painel; localidade, ano e sistema estão identificados."
           },
-          "eligible_for_economic_comparison": false,
-          "include_in_vpl": false,
+          "eligible_for_economic_comparison": true,
+          "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
+            "Série municipal sem rendimento 2021–2025 e preço real 2017–2025 completos; proxy PAM state usado para ambos, sem misturar recortes.",
             "Custo CONAB: mesma UF · outro município; confira a localidade e edite o valor se necessário."
           ],
-          "missing_inputs": [
-            "PAM yield or explicit zero-harvest case"
-          ]
+          "missing_inputs": []
         },
         "dry_bean": {
           "label": "Feijão",
@@ -30074,42 +30248,78 @@
         "peanut": {
           "label": "Amendoim",
           "pam_product": "amendoim_em_casca",
-          "yield_kg_ha_median_2021_2025": null,
-          "yield_source": "IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
+          "yield_kg_ha_median_2021_2025": 3388.5544722339973,
+          "yield_source": "IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
           "price": {
-            "brl_per_tonne": 4768.623711385391,
+            "brl_per_tonne": 4168.716122061081,
             "price_basis": "median_real_history",
             "source": "IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
-            "scope": "municipality",
-            "observed_year": 2019,
-            "observed_nominal_brl_per_tonne": 4000.0,
+            "scope": "state",
+            "observed_year": 2025,
+            "observed_nominal_brl_per_tonne": 3631.5434585971548,
             "history_start_year": 2017,
-            "history_end_year": 2019,
+            "history_end_year": 2025,
             "history_real_brl_per_tonne": [
               {
                 "year": 2017,
-                "nominal_brl_per_tonne": 3000.0,
-                "real_brl_per_tonne": 4768.623711385391,
+                "nominal_brl_per_tonne": 2474.892162448116,
+                "real_brl_per_tonne": 3933.943149657317,
                 "ipca_deflator": 1.5895412371284638
               },
               {
                 "year": 2018,
-                "nominal_brl_per_tonne": 3000.0,
-                "real_brl_per_tonne": 4600.039163064423,
+                "nominal_brl_per_tonne": 2146.795084689472,
+                "real_brl_per_tonne": 3291.780488215258,
                 "ipca_deflator": 1.5333463876881408
               },
               {
                 "year": 2019,
-                "nominal_brl_per_tonne": 4000.0,
-                "real_brl_per_tonne": 5912.667094606171,
+                "nominal_brl_per_tonne": 2972.2450095706863,
+                "real_brl_per_tonne": 4393.473816299001,
                 "ipca_deflator": 1.478166773651543
+              },
+              {
+                "year": 2020,
+                "nominal_brl_per_tonne": 2912.221417652265,
+                "real_brl_per_tonne": 4170.7927486560075,
+                "ipca_deflator": 1.4321688328280893
+              },
+              {
+                "year": 2021,
+                "nominal_brl_per_tonne": 3941.850634100517,
+                "real_brl_per_tonne": 5212.658452833275,
+                "ipca_deflator": 1.3223886282598176
+              },
+              {
+                "year": 2022,
+                "nominal_brl_per_tonne": 2637.2285130870614,
+                "real_brl_per_tonne": 3191.286246529157,
+                "ipca_deflator": 1.2100909081987483
+              },
+              {
+                "year": 2023,
+                "nominal_brl_per_tonne": 3603.207566052842,
+                "real_brl_per_tonne": 4168.716122061081,
+                "ipca_deflator": 1.156945872709667
+              },
+              {
+                "year": 2024,
+                "nominal_brl_per_tonne": 4246.478002965892,
+                "real_brl_per_tonne": 4707.353237481708,
+                "ipca_deflator": 1.1085311719956923
+              },
+              {
+                "year": 2025,
+                "nominal_brl_per_tonne": 3631.5434585971548,
+                "real_brl_per_tonne": 3833.3685046710702,
+                "ipca_deflator": 1.0555755557863762
               }
             ],
-            "historical_median_real_brl_per_tonne": 4768.623711385391,
-            "recent_trend_raw_annual_fraction": 0.0,
-            "trend_annual_fraction": 0.0,
+            "historical_median_real_brl_per_tonne": 4168.716122061081,
+            "recent_trend_raw_annual_fraction": 0.007272043209598289,
+            "trend_annual_fraction": 0.007272043209598289,
             "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
-            "editable_hypothesis": false
+            "editable_hypothesis": true
           },
           "cost_panel": {
             "source_file": "data/raw/conab/costs/serie-historica-custos-amendoim-2005-a-2024.xls",
@@ -30130,21 +30340,20 @@
             "proxy": false,
             "source_note": "Custo total CONAB do produto no painel; localidade, ano e sistema estão identificados."
           },
-          "eligible_for_economic_comparison": false,
-          "include_in_vpl": false,
+          "eligible_for_economic_comparison": true,
+          "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
+            "Série municipal sem rendimento 2021–2025 e preço real 2017–2025 completos; proxy PAM state usado para ambos, sem misturar recortes.",
             "Custo CONAB: mesma macrorregião; confira a localidade e edite o valor se necessário."
           ],
-          "missing_inputs": [
-            "PAM yield or explicit zero-harvest case"
-          ]
+          "missing_inputs": []
         },
         "oat": {
           "label": "Aveia em grão (proxy; não equivale a aveia-preta de cobertura)",
           "pam_product": "aveia_em_grao",
           "yield_kg_ha_median_2021_2025": 1488.0572037121558,
-          "yield_source": "Rendimento/preço PAM estadual usado como proxy quando falta série municipal.A PAM mede aveia em grão; esta é uma aproximação da aveia-preta de cobertura e pode ser editada. IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
+          "yield_source": "Série municipal sem rendimento 2021–2025 e preço real 2017–2025 completos; proxy PAM state usado para ambos, sem misturar recortes.A PAM mede aveia em grão; esta é uma aproximação da aveia-preta de cobertura e pode ser editada. IBGE PAM; mediana 2021–2025 em state; proxy regional editável, não é rendimento municipal/talhão.",
           "price": {
             "brl_per_tonne": 742.218884166382,
             "price_basis": "median_real_history",
@@ -30239,7 +30448,7 @@
           "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
-            "Rendimento/preço PAM estadual usado como proxy quando falta série municipal.",
+            "Série municipal sem rendimento 2021–2025 e preço real 2017–2025 completos; proxy PAM state usado para ambos, sem misturar recortes.",
             "A PAM mede aveia em grão; esta é uma aproximação da aveia-preta de cobertura e pode ser editada.",
             "Custo CONAB: painel nacional; confira a localidade e edite o valor se necessário."
           ],
@@ -30256,32 +30465,27 @@
             "scope": "editable zero-harvest base case"
           },
           "cost_panel": {
-            "source_file": "data/raw/conab/costs/serie-historica-custos-aveia-2012-a-2023.xls",
-            "source_url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/serie-historica-custos-aveia-2012-a-2023.xls/view",
-            "sheet": "Passo Fundo-RS-2023",
-            "municipality": "Passo Fundo",
-            "uf": "RS",
-            "match_level": "painel nacional",
-            "cost_date": "2023-11",
-            "panel_productivity_kg_ha": 2600.0,
-            "total_cost_brl_ha_nominal": 5314.75,
-            "operational_cost_brl_ha_nominal": 3562.27,
-            "total_cost_brl_ha_reference_month": 6080.958377934987,
-            "deflator_factor": 1.1441664006651275,
-            "cost_definition": "CONAB CUSTO TOTAL por hectare; se a cultura/UF não tem painel, usa proxy explicitamente identificado e editável.",
-            "panel_title": "Custo de Produção - Resumo AGRICULTURA EMPRESARIAL - AVEIA - PLANTIO DIRETO - ALTA TECNOLOGIA SAFRA DE INVERNO - 2023/23 - Passo Fundo - RS Ciclo de Cultura: ANUAL Tipo do Relatório: Estimado Mês/Ano: Novembro/2023 Produtividade Média: 2600,00 kg/ha Ex-Post",
-            "source_crop_id": "oat",
+            "source_file": "data/reference/cover-management.json",
+            "source_url": "https://www.uricer.edu.br/site/publicacoes/257.pdf",
+            "cost_date": "2025-06",
+            "match_level": "hipótese transferida; orçamento para cobertura",
+            "panel_title": "Sementes, semeadura e encerramento de cobertura",
             "proxy": true,
-            "source_note": "Hipótese editável de custo: painel CONAB de Aveia em grão (proxy; não equivale a aveia-preta de cobertura) usado como proxy para Nabo forrageiro."
+            "total_cost_brl_ha_reference_month": 282.85,
+            "total_cost_brl_ha_nominal": 268.4,
+            "deflator_factor": 1.053824916552372,
+            "source_note": "URI Erechim, tabela 2: implantação de nabo-forrageiro e primeira aplicação no pousio como referência de manejo de encerramento. Orçamento exploratório de cobertura solteira de entressafra, sem venda, pastejo, colheita de grãos ou adubação dedicada. Referências transferidas entre regiões; substituir por orçamento do talhão.",
+            "cover_management": {
+              "planting_share": 0.6520119225037259,
+              "soybean_residual": null
+            }
           },
           "eligible_for_economic_comparison": true,
           "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
             "receita zero por falta de colheita comercial",
-            "Hipótese editável de custo: painel CONAB de Aveia em grão (proxy; não equivale a aveia-preta de cobertura) usado como proxy para Nabo forrageiro.",
-            "Custo CONAB: painel nacional; confira a localidade e edite o valor se necessário.",
-            "Receita inicial zero: trata a cultura como cobertura sem colheita comercial; altere rendimento/preço para testar um uso comercial."
+            "Cobertura sem venda. Orçamento editável; o desembolso é dividido entre implantação e encerramento."
           ],
           "missing_inputs": []
         },
@@ -30296,87 +30500,74 @@
             "scope": "editable zero-harvest base case"
           },
           "cost_panel": {
-            "source_file": "data/raw/conab/costs/seriehistoricacustossorgo2013a2026.xls",
-            "source_url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/seriehistoricacustossorgo2013a2026.xls/view",
-            "sheet": "Uberaba-MG-2026",
-            "municipality": "Uberaba",
-            "uf": "MG",
-            "match_level": "mesma UF · outro município",
-            "cost_date": "2026-03",
-            "panel_productivity_kg_ha": 4000.0,
-            "total_cost_brl_ha_nominal": 3599.47,
-            "operational_cost_brl_ha_nominal": 2499.8199999999997,
-            "total_cost_brl_ha_reference_month": 3676.3010030176806,
-            "deflator_factor": 1.0213450877539418,
-            "cost_definition": "CONAB CUSTO TOTAL por hectare; se a cultura/UF não tem painel, usa proxy explicitamente identificado e editável.",
-            "panel_title": "Custo de Produção - Resumo AGRICULTURA EMPRESARIAL - SORGO GRANÍFERO - PLANTIO DIRETO - ALTA TECNOLOGIA 2ª SAFRA - 2026/26 - Uberaba - MG Ciclo de Cultura: ANUAL Tipo do Relatório: Estimado Mês/Ano: Março/2026 Produtividade Média: 4000,00 kg/ha Ex-Ant",
-            "source_crop_id": "sorghum_grain",
+            "source_file": "data/reference/cover-management.json",
+            "source_url": "https://ainfo.cnptia.embrapa.br/digital/bitstream/item/282908/1/Sistemas-de-integracao-lavoura-pecuaria-floresta.2024.pdf",
+            "cost_date": "2024-09",
+            "match_level": "hipótese transferida; orçamento para cobertura",
+            "panel_title": "Sementes, semeadura e encerramento de cobertura",
             "proxy": true,
-            "source_note": "Hipótese editável de custo: painel CONAB de Sorgo usado como proxy para Braquiária."
+            "total_cost_brl_ha_reference_month": 501.13,
+            "total_cost_brl_ha_nominal": 455,
+            "deflator_factor": 1.10138985158243,
+            "source_note": "Embrapa, tabela 8: sementes (250) mais semeadura (50); defensivo (105) e aplicação (50) usados como aproximação para um manejo de encerramento. Exclui adubação do sistema ILPF. Orçamento exploratório de cobertura solteira de entressafra, sem venda, pastejo, colheita de grãos ou adubação dedicada. Referências transferidas entre regiões; substituir por orçamento do talhão.",
+            "cover_management": {
+              "planting_share": 0.6593406593406593,
+              "soybean_residual": {
+                "max_yield_gain_fraction": 0.06,
+                "max_days_to_planting": 120,
+                "source": "soybean_grasses",
+                "source_url": "https://doi.org/10.3390/agronomy16070751"
+              }
+            }
           },
           "eligible_for_economic_comparison": true,
           "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
             "receita zero por falta de colheita comercial",
-            "Hipótese editável de custo: painel CONAB de Sorgo usado como proxy para Braquiária.",
-            "Custo CONAB: mesma UF · outro município; confira a localidade e edite o valor se necessário.",
-            "Receita inicial zero: trata a cultura como cobertura sem colheita comercial; altere rendimento/preço para testar um uso comercial."
+            "Cobertura sem venda. Orçamento editável; o desembolso é dividido entre implantação e encerramento."
           ],
           "missing_inputs": []
         },
         "millet": {
           "label": "Milheto",
           "pam_product": null,
-          "yield_kg_ha_median_2021_2025": null,
-          "yield_source": "Proxy de colheita: dados de sorgo em grão aplicados ao milheto; rendimento e preço são editáveis. IBGE PAM; mediana 2021–2025 em municipality; não é previsão do talhão.",
+          "yield_kg_ha_median_2021_2025": 0.0,
+          "yield_source": "Hipótese editável: cultura de cobertura sem colheita comercial valorada na PAM; receita inicial zero.",
           "price": {
-            "brl_per_tonne": 6000.0,
-            "price_basis": "median_real_history",
-            "source": "Proxy sorgo em grão → milheto; IBGE PAM; mediana de preços unitários anuais reais de 2017–2025 (valor da produção / toneladas), todos deflacionados por IPCA até a moeda-base.",
-            "scope": "municipality",
-            "observed_year": 1993,
-            "observed_nominal_brl_per_tonne": 6000.0,
-            "history_start_year": 1993,
-            "history_end_year": 1993,
-            "history_real_brl_per_tonne": [],
-            "historical_median_real_brl_per_tonne": 6000.0,
-            "recent_trend_raw_annual_fraction": 0.0,
-            "trend_annual_fraction": 0.0,
-            "trend_method": "CAGR entre as medianas dos três primeiros e dos três últimos anos observados; limitada a −5%/+5% ao ano para reduzir extrapolação de picos.",
-            "editable_hypothesis": true,
-            "proxy_crop_id": "sorghum_grain"
+            "brl_per_tonne": 0.0,
+            "source": "Hipótese editável: cultura de cobertura sem colheita comercial valorada na PAM; receita inicial zero.",
+            "scope": "editable zero-harvest base case"
           },
           "cost_panel": {
-            "source_file": "data/raw/conab/costs/seriehistoricacustossorgo2013a2026.xls",
-            "source_url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/seriehistoricacustossorgo2013a2026.xls/view",
-            "sheet": "Uberaba-MG-2026",
-            "municipality": "Uberaba",
-            "uf": "MG",
-            "match_level": "mesma UF · outro município",
-            "cost_date": "2026-03",
-            "panel_productivity_kg_ha": 4000.0,
-            "total_cost_brl_ha_nominal": 3599.47,
-            "operational_cost_brl_ha_nominal": 2499.8199999999997,
-            "total_cost_brl_ha_reference_month": 3676.3010030176806,
-            "deflator_factor": 1.0213450877539418,
-            "cost_definition": "CONAB CUSTO TOTAL por hectare; se a cultura/UF não tem painel, usa proxy explicitamente identificado e editável.",
-            "panel_title": "Custo de Produção - Resumo AGRICULTURA EMPRESARIAL - SORGO GRANÍFERO - PLANTIO DIRETO - ALTA TECNOLOGIA 2ª SAFRA - 2026/26 - Uberaba - MG Ciclo de Cultura: ANUAL Tipo do Relatório: Estimado Mês/Ano: Março/2026 Produtividade Média: 4000,00 kg/ha Ex-Ant",
-            "source_crop_id": "sorghum_grain",
+            "source_file": "data/reference/cover-management.json",
+            "source_url": "https://www.uricer.edu.br/site/publicacoes/257.pdf",
+            "cost_date": "2025-06",
+            "match_level": "hipótese transferida; orçamento para cobertura",
+            "panel_title": "Sementes, semeadura e encerramento de cobertura",
             "proxy": true,
-            "source_note": "Hipótese editável de custo: painel CONAB de Sorgo usado como proxy para Milheto."
+            "total_cost_brl_ha_reference_month": 216.98,
+            "total_cost_brl_ha_nominal": 205.9,
+            "deflator_factor": 1.053824916552372,
+            "source_note": "URI Erechim, tabela 2: implantação do mix capim-sudão + milheto como aproximação para milheto solteiro; primeira aplicação no pousio usada como referência de um manejo de encerramento. Orçamento exploratório de cobertura solteira de entressafra, sem venda, pastejo, colheita de grãos ou adubação dedicada. Referências transferidas entre regiões; substituir por orçamento do talhão.",
+            "cover_management": {
+              "planting_share": 0.5463817387081107,
+              "soybean_residual": {
+                "max_yield_gain_fraction": 0.03,
+                "max_days_to_planting": 90,
+                "source": "soybean_cover",
+                "source_url": "https://doi.org/10.1016/j.fcr.2026.110733"
+              }
+            }
           },
-          "eligible_for_economic_comparison": false,
-          "include_in_vpl": false,
+          "eligible_for_economic_comparison": true,
+          "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
-            "Proxy de colheita: dados de sorgo em grão aplicados ao milheto; rendimento e preço são editáveis.",
-            "Hipótese editável de custo: painel CONAB de Sorgo usado como proxy para Milheto.",
-            "Custo CONAB: mesma UF · outro município; confira a localidade e edite o valor se necessário."
+            "receita zero por falta de colheita comercial",
+            "Cobertura sem venda. Orçamento editável; o desembolso é dividido entre implantação e encerramento."
           ],
-          "missing_inputs": [
-            "PAM yield or explicit zero-harvest case"
-          ]
+          "missing_inputs": []
         },
         "crotalaria": {
           "label": "Crotalária",
@@ -30389,32 +30580,27 @@
             "scope": "editable zero-harvest base case"
           },
           "cost_panel": {
-            "source_file": "data/raw/conab/costs/serie-historica-custos-soja-1997-a-2026.xls",
-            "source_url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/serie-historica-custos-soja-1997-a-2026.xls/view",
-            "sheet": "Unaí-MG-2026",
-            "municipality": "Unaí",
-            "uf": "MG",
-            "match_level": "mesma UF · outro município",
-            "cost_date": "2026-03",
-            "panel_productivity_kg_ha": 3300.0,
-            "total_cost_brl_ha_nominal": 7291.41,
-            "operational_cost_brl_ha_nominal": 6246.65,
-            "total_cost_brl_ha_reference_month": 7447.045786299969,
-            "deflator_factor": 1.0213450877539418,
-            "cost_definition": "CONAB CUSTO TOTAL por hectare; se a cultura/UF não tem painel, usa proxy explicitamente identificado e editável.",
-            "panel_title": "Custo de Produção - Resumo AGRICULTURA EMPRESARIAL - SOJA - PLANTIO DIRETO - ALTA TECNOLOGIA - OGM 1ª SAFRA - 2026/27 - Unaí - MG Ciclo de Cultura: ANUAL Tipo do Relatório: Estimado Mês/Ano: Março/2026 Produtividade Média: 3300,00 kg/ha Ex-Ant",
-            "source_crop_id": "soybean",
+            "source_file": "data/reference/cover-management.json",
+            "source_url": "https://www.uricer.edu.br/site/publicacoes/257.pdf",
+            "cost_date": "2025-06",
+            "match_level": "hipótese transferida; orçamento para cobertura",
+            "panel_title": "Sementes, semeadura e encerramento de cobertura",
             "proxy": true,
-            "source_note": "Hipótese editável de custo: painel CONAB de Soja usado como proxy para Crotalária."
+            "total_cost_brl_ha_reference_month": 351.35,
+            "total_cost_brl_ha_nominal": 333.4,
+            "deflator_factor": 1.053824916552372,
+            "source_note": "Sem orçamento específico compatível: usa provisoriamente o custo de implantação de um mix comercial de cobertura da tabela 2 da URI e uma aplicação. Não é observação de crotalária. Orçamento exploratório de cobertura solteira de entressafra, sem venda, pastejo, colheita de grãos ou adubação dedicada. Referências transferidas entre regiões; substituir por orçamento do talhão.",
+            "cover_management": {
+              "planting_share": 0.7198560287942412,
+              "soybean_residual": null
+            }
           },
           "eligible_for_economic_comparison": true,
           "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
             "receita zero por falta de colheita comercial",
-            "Hipótese editável de custo: painel CONAB de Soja usado como proxy para Crotalária.",
-            "Custo CONAB: mesma UF · outro município; confira a localidade e edite o valor se necessário.",
-            "Receita inicial zero: trata a cultura como cobertura sem colheita comercial; altere rendimento/preço para testar um uso comercial."
+            "Cobertura sem venda. Orçamento editável; o desembolso é dividido entre implantação e encerramento."
           ],
           "missing_inputs": []
         },
@@ -30429,32 +30615,27 @@
             "scope": "editable zero-harvest base case"
           },
           "cost_panel": {
-            "source_file": "data/raw/conab/costs/serie-historica-custos-soja-1997-a-2026.xls",
-            "source_url": "https://www.gov.br/conab/pt-br/atuacao/informacoes-agropecuarias/custos-de-producao/arquivos-custo-de-producao/agricolas/serie-historica-custos-soja-1997-a-2026.xls/view",
-            "sheet": "Unaí-MG-2026",
-            "municipality": "Unaí",
-            "uf": "MG",
-            "match_level": "mesma UF · outro município",
-            "cost_date": "2026-03",
-            "panel_productivity_kg_ha": 3300.0,
-            "total_cost_brl_ha_nominal": 7291.41,
-            "operational_cost_brl_ha_nominal": 6246.65,
-            "total_cost_brl_ha_reference_month": 7447.045786299969,
-            "deflator_factor": 1.0213450877539418,
-            "cost_definition": "CONAB CUSTO TOTAL por hectare; se a cultura/UF não tem painel, usa proxy explicitamente identificado e editável.",
-            "panel_title": "Custo de Produção - Resumo AGRICULTURA EMPRESARIAL - SOJA - PLANTIO DIRETO - ALTA TECNOLOGIA - OGM 1ª SAFRA - 2026/27 - Unaí - MG Ciclo de Cultura: ANUAL Tipo do Relatório: Estimado Mês/Ano: Março/2026 Produtividade Média: 3300,00 kg/ha Ex-Ant",
-            "source_crop_id": "soybean",
+            "source_file": "data/reference/cover-management.json",
+            "source_url": "https://www.uricer.edu.br/site/publicacoes/257.pdf",
+            "cost_date": "2025-06",
+            "match_level": "hipótese transferida; orçamento para cobertura",
+            "panel_title": "Sementes, semeadura e encerramento de cobertura",
             "proxy": true,
-            "source_note": "Hipótese editável de custo: painel CONAB de Soja usado como proxy para Mucuna."
+            "total_cost_brl_ha_reference_month": 351.35,
+            "total_cost_brl_ha_nominal": 333.4,
+            "deflator_factor": 1.053824916552372,
+            "source_note": "Sem orçamento específico compatível: usa provisoriamente o custo de implantação de um mix comercial de cobertura da tabela 2 da URI e uma aplicação. Não é observação de mucuna. Orçamento exploratório de cobertura solteira de entressafra, sem venda, pastejo, colheita de grãos ou adubação dedicada. Referências transferidas entre regiões; substituir por orçamento do talhão.",
+            "cover_management": {
+              "planting_share": 0.7198560287942412,
+              "soybean_residual": null
+            }
           },
           "eligible_for_economic_comparison": true,
           "include_in_vpl": true,
           "editable": true,
           "assumption_notes": [
             "receita zero por falta de colheita comercial",
-            "Hipótese editável de custo: painel CONAB de Soja usado como proxy para Mucuna.",
-            "Custo CONAB: mesma UF · outro município; confira a localidade e edite o valor se necessário.",
-            "Receita inicial zero: trata a cultura como cobertura sem colheita comercial; altere rendimento/preço para testar um uso comercial."
+            "Cobertura sem venda. Orçamento editável; o desembolso é dividido entre implantação e encerramento."
           ],
           "missing_inputs": []
         }
@@ -30464,25 +30645,24 @@
         "maize_grain",
         "sugarcane",
         "coffee",
+        "sorghum_grain",
+        "wheat",
         "dry_bean",
+        "peanut",
         "oat",
         "forage_radish",
         "brachiaria",
+        "millet",
         "crotalaria",
         "mucuna"
       ],
-      "economic_exclusions": [
-        "sorghum_grain",
-        "wheat",
-        "peanut",
-        "millet"
-      ]
+      "economic_exclusions": []
     }
   },
   "limitations": [
     "O IPCA geral equaliza datas monetárias, mas não mede inflação de insumos agropecuários.",
     "Painéis CONAB não são sempre do mesmo município, safra, sistema tecnológico ou tipo de empreendimento dos exemplos; a localidade e o nível de correspondência ficam visíveis.",
-    "O VPL inclui as 14 culturas do catálogo com valores iniciais rastreáveis ou hipóteses/proxies explicitamente marcados e editáveis. Nabo, braquiária, crotalária e mucuna começam sem receita comercial e com custo proxy; feijão, milheto e aveia-preta também usam proxies identificados. Esses valores não são observações dessas culturas.",
+    "Nabo, braquiária, milheto, crotalária e mucuna são coberturas sem venda, com orçamento separado de implantação e encerramento. Feijão e aveia-preta também usam proxies identificados.",
     "Preço-base é a mediana real da série histórica PAM; a tendência recente é limitada a ±5% ao ano e pode ser editada. Yahoo CBOT é mostrado apenas como referência, não como preço local nem previsão garantida.",
     "Café e cana são perenes/semi-perenes; atraso e manutenção de formação são hipóteses explícitas, mas os painéis CONAB não medem o investimento de implantação do cafezal/canavial.",
     "A resposta de produtividade a água e carbono é hipótese explícita não calibrada; resultados VPL são exploratórios e não provam superioridade agronômica nem causal.",

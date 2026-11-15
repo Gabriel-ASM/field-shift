@@ -182,7 +182,14 @@
     "payment_timing": "Cobrar uma parcela no plantio e uma no início de cada ano de formação; prorratear a última parcela pelo número de dias restantes até a maturação. A receita começa apenas na primeira colheita após maturar.",
     "interpretation": "Frações editáveis do custo anual de produção cobradas durante a formação. Não são custos CONAB medidos para implantação; custos de plantio/reforma podem estar subestimados."
   },
+  "sequence_constraints": {
+    "break_required_between_crop_groups": [["maize_grain", "soybean"]],
+    "scope": "adjacent_completed_crop_cycles",
+    "basis": "Política exploratória do projeto: a troca direta entre milho e soja exige um ciclo completo de outra cultura; após essa quebra, ambos voltam a ser elegíveis. Pousio não conta como quebra. Não é uma incompatibilidade agronômica universal nem garantia de rotação adequada. Sem destino elegível, manter pousio."
+  },
   "repeated_crop_effect": {
+    "block_replant_after_penalty_cap": true,
+    "replant_guard_basis": "Hipótese de manejo do projeto, não limite agronômico calibrado: após colher no teto de perda de rendimento por repetição, exigir outra cultura. Sem destino elegível, permanecer em pousio. Não se aplica a cortes de culturas perenes. Não certifica rotação diversificada nem mede prejuízo financeiro.",
     "status": "uncalibrated_editable_hypothesis",
     "applies_to_classes": [
       "annual",

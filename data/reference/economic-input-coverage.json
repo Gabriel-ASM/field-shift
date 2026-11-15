@@ -14,6 +14,7 @@
         "sorghum_grain",
         "wheat",
         "dry_bean",
+        "peanut",
         "oat",
         "forage_radish",
         "brachiaria",
@@ -21,9 +22,7 @@
         "crotalaria",
         "mucuna"
       ],
-      "excluded_crop_ids": [
-        "peanut"
-      ]
+      "excluded_crop_ids": []
     },
     "franca-sp": {
       "included_crop_ids": [
@@ -31,19 +30,18 @@
         "maize_grain",
         "sugarcane",
         "coffee",
+        "sorghum_grain",
         "wheat",
+        "dry_bean",
         "peanut",
         "oat",
         "forage_radish",
         "brachiaria",
+        "millet",
         "crotalaria",
         "mucuna"
       ],
-      "excluded_crop_ids": [
-        "sorghum_grain",
-        "dry_bean",
-        "millet"
-      ]
+      "excluded_crop_ids": []
     },
     "varginha-mg": {
       "included_crop_ids": [
@@ -51,19 +49,18 @@
         "maize_grain",
         "sugarcane",
         "coffee",
+        "sorghum_grain",
+        "wheat",
         "dry_bean",
+        "peanut",
         "oat",
         "forage_radish",
         "brachiaria",
+        "millet",
         "crotalaria",
         "mucuna"
       ],
-      "excluded_crop_ids": [
-        "sorghum_grain",
-        "wheat",
-        "peanut",
-        "millet"
-      ]
+      "excluded_crop_ids": []
     }
   },
   "markov_states": "Todas as 14 culturas são destinos Markov e têm uma linha econômica inicial editável nos três perfis. Valores observados, proxies e hipóteses de receita zero para coberturas estão diferenciados nos campos de fonte; a inclusão de cada cultura no ranking pode ser alterada na página.",
@@ -71,11 +68,11 @@
     "all_crops": "mediana real dos preços unitários anuais PAM 2017–2025 (valor da produção / toneladas), deflacionada por IPCA; curva futura aplica tendência recente limitada ±5%/ano",
     "soybean_and_maize": "Yahoo CBOT May-2027, snapshot 2026-11-13, convertido por PTAX; mantido como referência de bolsa lado a lado, não substitui a série local PAM"
   },
-  "cost_source": "Custo total CONAB por hectare quando há painel direto; para culturas sem painel, proxy de custo por cultura indicada, localidade, ano, sistema produtivo e fator IPCA constam em economic-benchmarks.json. Todos os valores podem ser editados na interface.",
+  "cost_source": "Custo total CONAB por hectare para cultivos comerciais ou proxy identificado. Coberturas usam orçamento de sementes, semeadura e encerramento de cover-management.json. Valores em reais da mesma data-base, editáveis na interface.",
   "known_limits": [
     "O IPCA geral equaliza datas monetárias, mas não mede inflação de insumos agropecuários.",
     "Painéis CONAB não são sempre do mesmo município, safra, sistema tecnológico ou tipo de empreendimento dos exemplos; a localidade e o nível de correspondência ficam visíveis.",
-    "O VPL inclui as 14 culturas do catálogo com valores iniciais rastreáveis ou hipóteses/proxies explicitamente marcados e editáveis. Nabo, braquiária, crotalária e mucuna começam sem receita comercial e com custo proxy; feijão, milheto e aveia-preta também usam proxies identificados. Esses valores não são observações dessas culturas.",
+    "Nabo, braquiária, milheto, crotalária e mucuna são coberturas sem venda, com orçamento separado de implantação e encerramento. Feijão e aveia-preta também usam proxies identificados.",
     "Preço-base é a mediana real da série histórica PAM; a tendência recente é limitada a ±5% ao ano e pode ser editada. Yahoo CBOT é mostrado apenas como referência, não como preço local nem previsão garantida.",
     "Café e cana são perenes/semi-perenes; atraso e manutenção de formação são hipóteses explícitas, mas os painéis CONAB não medem o investimento de implantação do cafezal/canavial.",
     "A resposta de produtividade a água e carbono é hipótese explícita não calibrada; resultados VPL são exploratórios e não provam superioridade agronômica nem causal.",

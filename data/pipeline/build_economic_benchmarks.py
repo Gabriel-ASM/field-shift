@@ -89,14 +89,10 @@ COST_FILES_BY_CROP = {
 }
 COST_PROXY_CROP = {
     "dry_bean": "soybean",
-    "forage_radish": "oat",
-    "brachiaria": "sorghum_grain",
-    "millet": "sorghum_grain",
-    "crotalaria": "soybean",
-    "mucuna": "soybean",
 }
-HARVESTLESS_CROPS = {"forage_radish", "brachiaria", "crotalaria", "mucuna"}
-INCOME_PROXY_CROP = {"millet": "sorghum_grain"}
+COVER_PATH = ROOT / "data" / "reference" / "cover-management.json"
+COVER_MANAGEMENT = json.loads(COVER_PATH.read_text(encoding="utf-8"))
+HARVESTLESS_CROPS = set(COVER_MANAGEMENT["crops"])
 CROP_LABELS = {
     "soybean": "Soja",
     "maize_grain": "Milho",
@@ -341,52 +337,42 @@ def pam_crop_values(
     indices: dict[str, float], annual_indices: dict[str, float],
 ) -> tuple[float | None, dict[str, object] | None, str, list[str]]:
     info = PROFILE_INFO[profile_id]
-    proxy_id = INCOME_PROXY_CROP.get(crop_id, crop_id)
     if crop_id in HARVESTLESS_CROPS:
         source = "Hipótese editável: cultura de cobertura sem colheita comercial valorada na PAM; receita inicial zero."
         return 0.0, {"brl_per_tonne": 0.0, "source": source, "scope": "editable zero-harvest base case"}, source, (["receita zero por falta de colheita comercial"] if crop_id else [])
-    pam_product = info["coffee_pam"] if proxy_id == "coffee" else PAM_CROPS.get(proxy_id)
+    pam_product = info["coffee_pam"] if crop_id == "coffee" else PAM_CROPS.get(crop_id)
     product_id = PAM_PRODUCT_IDS.get(pam_product or "")
     if not product_id:
         return 0.0, {"brl_per_tonne": 0.0, "source": "Hipótese editável: sem produto PAM diretamente identificável; receita inicial zero.", "scope": "editable zero-harvest base case"}, "Sem produto PAM direto; receita inicial zero, editável.", ["produto colhido sem PAM"]
 
     municipal_rows = [
-        row for row in municipal_pam.get("records", [])
-        if row.get("crop") == pam_product
-        and number(row.get("unit_value_brl_per_tonne_nominal"))
+        {"year": int(row["year"]), "yield_kg_ha": number(row.get("yield_kg_ha")),
+         "unit_value_brl_per_tonne_nominal": number(row.get("unit_value_brl_per_tonne_nominal"))}
+        for row in municipal_pam.get("records", []) if row.get("crop") == pam_product
     ]
-    scope = "municipality"
+    uf_code = next((code for code, uf in UF_CODES.items() if uf == info["uf"]), None)
+    region_states = {code for code, uf in UF_CODES.items() if macroregion(uf) == macroregion(info["uf"])}
+    candidates = [
+        ("municipality", municipal_rows),
+        ("state", aggregate_state_harvests([r for r in state_rows if r["uf_code"] == uf_code and r["product_id"] == product_id])),
+        ("macroregion", aggregate_state_harvests([r for r in state_rows if r["uf_code"] in region_states and r["product_id"] == product_id])),
+        ("Brazil", aggregate_state_harvests([r for r in state_rows if r["product_id"] == product_id])),
+    ]
     source_notes = []
-    annual = []
-    if municipal_rows:
-        annual = [{"year": int(row["year"]), "yield_kg_ha": number(row.get("yield_kg_ha")), "unit_value_brl_per_tonne_nominal": number(row.get("unit_value_brl_per_tonne_nominal"))} for row in municipal_rows]
-    else:
-        uf_code = next((code for code, uf in UF_CODES.items() if uf == info["uf"]), None)
-        local_state = [row for row in state_rows if row["uf_code"] == uf_code and row["product_id"] == product_id]
-        if local_state:
-            annual = aggregate_state_harvests(local_state)
-            scope = "state"
-            source_notes.append("Rendimento/preço PAM estadual usado como proxy quando falta série municipal.")
-        else:
-            region_states = {code for code, uf in UF_CODES.items() if macroregion(uf) == macroregion(info["uf"])}
-            regional = [row for row in state_rows if row["uf_code"] in region_states and row["product_id"] == product_id]
-            if regional:
-                annual = aggregate_state_harvests(regional)
-                scope = "macroregion"
-                source_notes.append("Mediana/valor unitário PAM da macrorregião usado como proxy; dado municipal/estadual ausente.")
-            else:
-                national = [row for row in state_rows if row["product_id"] == product_id]
-                annual = aggregate_state_harvests(national)
-                scope = "Brazil"
-                source_notes.append("Mediana/valor unitário PAM nacional usado como proxy; recorte regional sem colheita identificável.")
-    valid_yields = [float(row["yield_kg_ha"]) for row in annual if 2021 <= int(row["year"]) <= 2025 and row.get("yield_kg_ha") is not None and float(row["yield_kg_ha"]) > 0]
-    valid_prices = [row for row in annual if row.get("unit_value_brl_per_tonne_nominal") is not None and float(row["unit_value_brl_per_tonne_nominal"]) > 0]
-    if not valid_prices and scope != "Brazil":
-        national = [row for row in state_rows if row["product_id"] == product_id]
-        valid_prices = [row for row in aggregate_state_harvests(national) if row.get("unit_value_brl_per_tonne_nominal") is not None and float(row["unit_value_brl_per_tonne_nominal"]) > 0]
-        if valid_prices:
-            scope = "Brazil"
-            source_notes.append("Preço unitário PAM nacional substitui preço local sem comercialização informada.")
+    valid_yields, valid_prices = [], []
+    scope = "unavailable"
+    for candidate_scope, annual in candidates:
+        yields = [float(r["yield_kg_ha"]) for r in annual
+                  if 2021 <= int(r["year"]) <= 2025 and r.get("yield_kg_ha") is not None and float(r["yield_kg_ha"]) > 0]
+        prices = [r for r in annual if 2017 <= int(r["year"]) <= 2025
+                  and r.get("unit_value_brl_per_tonne_nominal") is not None
+                  and float(r["unit_value_brl_per_tonne_nominal"]) > 0
+                  and deflator(indices, annual_indices, int(r["year"]), None)]
+        if yields and prices:
+            scope, valid_yields, valid_prices = candidate_scope, yields, prices
+            if scope != "municipality":
+                source_notes.append("Série municipal sem rendimento 2021–2025 e preço real 2017–2025 completos; proxy PAM " + scope + " usado para ambos, sem misturar recortes.")
+            break
     yield_value = median(valid_yields) if valid_yields else None
     if valid_prices:
         history = []
@@ -402,7 +388,7 @@ def pam_crop_values(
         latest = max(valid_prices, key=lambda row: int(row["year"]))
         latest_year = int(latest["year"])
         nominal_price = float(latest["unit_value_brl_per_tonne_nominal"])
-        robust_history = history or [{"year": latest_year, "real_brl_per_tonne": nominal_price}]
+        robust_history = history
         base_price = median([item["real_brl_per_tonne"] for item in robust_history])
         first = robust_history[:3]
         last = robust_history[-3:]
@@ -429,21 +415,39 @@ def pam_crop_values(
         }
     else:
         price = None
-    if proxy_id != crop_id:
-        source_notes.append("Proxy de colheita: dados de sorgo em grão aplicados ao milheto; rendimento e preço são editáveis.")
-        if price:
-            price["source"] = "Proxy sorgo em grão → milheto; " + price["source"]
-            price["proxy_crop_id"] = proxy_id
-            price["editable_hypothesis"] = True
     if crop_id == "oat":
         source_notes.append("A PAM mede aveia em grão; esta é uma aproximação da aveia-preta de cobertura e pode ser editada.")
         if price:
             price["source"] = "Aveia em grão usada como proxy para aveia-preta; " + price["source"]
             price["editable_hypothesis"] = True
     yield_source = "IBGE PAM; mediana 2021–2025 em " + scope + ("; não é previsão do talhão." if scope == "municipality" else "; proxy regional editável, não é rendimento municipal/talhão.")
-    if proxy_id != crop_id or crop_id == "oat":
+    if crop_id == "oat":
         yield_source = "".join(source_notes) + " " + yield_source
     return yield_value, price, yield_source, source_notes
+
+
+def cover_cost_panel(crop_id: str, indices: dict[str, float], annual_indices: dict[str, float]) -> dict[str, object]:
+    cover = COVER_MANAGEMENT["crops"][crop_id]
+    year, month = map(int, cover["reference_date"].split("-"))
+    factor = deflator(indices, annual_indices, year, month)
+    if factor is None:
+        raise ValueError(f"Missing IPCA for cover budget {crop_id}: {cover['reference_date']}")
+    planting, termination = cover["seed_and_sowing_brl_ha"], cover["termination_brl_ha"]
+    total = planting + termination
+    source = COVER_MANAGEMENT["sources"][cover["source"]]
+    residual = cover.get("soybean_residual")
+    return {
+        "source_file": "data/reference/cover-management.json", "source_url": source,
+        "cost_date": cover["reference_date"], "match_level": "hipótese transferida; orçamento para cobertura",
+        "panel_title": "Sementes, semeadura e encerramento de cobertura", "proxy": True,
+        "total_cost_brl_ha_reference_month": round(total * factor, 2),
+        "total_cost_brl_ha_nominal": total, "deflator_factor": factor,
+        "source_note": cover["basis"] + " " + COVER_MANAGEMENT["scope"],
+        "cover_management": {
+            "planting_share": planting / total,
+            "soybean_residual": {**residual, "source_url": COVER_MANAGEMENT["sources"][residual["source"]]} if residual else None,
+        },
+    }
 
 
 def cost_file_keys(crop_id: str, profile_info: dict[str, str]) -> tuple[str, ...]:
@@ -531,18 +535,19 @@ def economic_inputs(
                     "quote_date": quote["quote_date"], "symbol": quote["symbol"], "contract": quote["contract_name"],
                     "unit": "BRL/metric tonne",
                 }
-            cost = choose_cost_panel(profile_id, crop_id, profiles, panels, lookup, source_urls, indices, annual_indices)
+            cost = (cover_cost_panel(crop_id, indices, annual_indices) if crop_id in HARVESTLESS_CROPS
+                    else choose_cost_panel(profile_id, crop_id, profiles, panels, lookup, source_urls, indices, annual_indices))
             cost_complete = bool(cost and cost.get("total_cost_brl_ha_reference_month") is not None)
             yield_complete = yield_value is not None and float(yield_value) >= 0
             price_complete = bool(price and price.get("brl_per_tonne") is not None and float(price["brl_per_tonne"]) >= 0)
             complete = yield_complete and price_complete and cost_complete
             notes = list(assumption_notes)
-            if cost and cost.get("proxy"):
+            if cost and cost.get("proxy") and crop_id not in HARVESTLESS_CROPS:
                 notes.append(str(cost["source_note"]))
-            if cost and cost.get("match_level") != "mesmo município":
+            if cost and crop_id not in HARVESTLESS_CROPS and cost.get("match_level") != "mesmo município":
                 notes.append("Custo CONAB: " + str(cost["match_level"]) + "; confira a localidade e edite o valor se necessário.")
             if crop_id in HARVESTLESS_CROPS:
-                notes.append("Receita inicial zero: trata a cultura como cobertura sem colheita comercial; altere rendimento/preço para testar um uso comercial.")
+                notes.append("Cobertura sem venda. Orçamento editável; o desembolso é dividido entre implantação e encerramento.")
             crop_inputs[crop_id] = {
                 "label": CROP_LABELS[crop_id],
                 "pam_product": pam_id,
@@ -603,7 +608,7 @@ def economic_inputs(
         "limitations": [
             "O IPCA geral equaliza datas monetárias, mas não mede inflação de insumos agropecuários.",
             "Painéis CONAB não são sempre do mesmo município, safra, sistema tecnológico ou tipo de empreendimento dos exemplos; a localidade e o nível de correspondência ficam visíveis.",
-            "O VPL inclui as 14 culturas do catálogo com valores iniciais rastreáveis ou hipóteses/proxies explicitamente marcados e editáveis. Nabo, braquiária, crotalária e mucuna começam sem receita comercial e com custo proxy; feijão, milheto e aveia-preta também usam proxies identificados. Esses valores não são observações dessas culturas.",
+            "Nabo, braquiária, milheto, crotalária e mucuna são coberturas sem venda, com orçamento separado de implantação e encerramento. Feijão e aveia-preta também usam proxies identificados.",
             "Preço-base é a mediana real da série histórica PAM; a tendência recente é limitada a ±5% ao ano e pode ser editada. Yahoo CBOT é mostrado apenas como referência, não como preço local nem previsão garantida.",
             "Café e cana são perenes/semi-perenes; atraso e manutenção de formação são hipóteses explícitas, mas os painéis CONAB não medem o investimento de implantação do cafezal/canavial.",
             "A resposta de produtividade a água e carbono é hipótese explícita não calibrada; resultados VPL são exploratórios e não provam superioridade agronômica nem causal.",
@@ -635,7 +640,7 @@ def main() -> None:
             "all_crops": "mediana real dos preços unitários anuais PAM 2017–2025 (valor da produção / toneladas), deflacionada por IPCA; curva futura aplica tendência recente limitada ±5%/ano",
             "soybean_and_maize": "Yahoo CBOT May-2027, snapshot 2026-11-13, convertido por PTAX; mantido como referência de bolsa lado a lado, não substitui a série local PAM",
         },
-        "cost_source": "Custo total CONAB por hectare quando há painel direto; para culturas sem painel, proxy de custo por cultura indicada, localidade, ano, sistema produtivo e fator IPCA constam em economic-benchmarks.json. Todos os valores podem ser editados na interface.",
+        "cost_source": "Custo total CONAB por hectare para cultivos comerciais ou proxy identificado. Coberturas usam orçamento de sementes, semeadura e encerramento de cover-management.json. Valores em reais da mesma data-base, editáveis na interface.",
         "known_limits": payload["limitations"],
     }
     COVERAGE_OUTPUT.write_text(json.dumps(coverage, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

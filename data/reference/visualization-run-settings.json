@@ -22,8 +22,15 @@
     "normalization_scale": "max(abs(common_reference_cvar5), abs(common_reference_p95), minimum_scale_brl_per_ha)",
     "minimum_scale_brl_per_ha": 1,
     "formula": "clamp(break_even + weighted_score_brl_per_ha / normalization_scale * (weighted_score_brl_per_ha < 0 ? break_even - minimum : maximum - break_even), minimum, maximum)",
-    "sample_count_role": "informational_only; trajectory and valid VPL counts do not change or weight any score",
-    "interpretation": "The total score is a direct weighted combination of the economic subscore and final soil/water subscores. CVaR5 is an optional resilience measure inside economics. Sample count is informational only.",
+    "support": {
+      "weight": 0.15,
+      "minimum_ranked_vpl_samples": 2,
+      "minimum_recommended_vpl_samples": 20,
+      "full_score_vpl_samples": 100,
+      "description": "Valid NPV samples for this rotation. The support score rises linearly from zero to the maximum at 100 samples and stays capped thereafter."
+    },
+    "interpretation": "Support has a fixed share of the total score. The remaining weight follows the preference between economics and final soil/water. CVaR5 describes economic downside; support describes the amount of simulated evidence.",
+    "total_score_formula": "(1 - support_weight) * ((1 - environment_weight) * economic_score10 + environment_weight * environment_score10) + support_weight * support_score10",
     "environment": {
       "default_weight": 0.2,
       "maximum_weight": 0.5,
@@ -34,7 +41,7 @@
       "soil_score_formula": "clamp(mean_final_soc_g_kg / soil_reference_g_kg * 10, 0, 10)",
       "water_multiplier_source": "soilHypotheses.economic_yield_response.water_multiplier_by_class",
       "water_score_formula": "clamp(5 + (mean_final_water_multiplier - 1) / max(abs(low_multiplier - 1), abs(high_multiplier - 1)) * 5, 0, 10)",
-      "total_score_formula": "(1 - environment_weight) * economic_score10 + environment_weight * (soil_share * soil_score10 + water_share * water_score10)"
+      "environment_score_formula": "soil_share * soil_score10 + water_share * water_score10"
     }
   }
 }

@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "scope": "Orçamento exploratório de cobertura solteira de entressafra, sem venda, pastejo, colheita de grãos ou adubação dedicada. Referências transferidas entre regiões; substituir por orçamento do talhão.",
+  "sources": {
+    "ilpf": "https://ainfo.cnptia.embrapa.br/digital/bitstream/item/282908/1/Sistemas-de-integracao-lavoura-pecuaria-floresta.2024.pdf",
+    "erechim": "https://www.uricer.edu.br/site/publicacoes/257.pdf",
+    "soybean_grasses": "https://doi.org/10.3390/agronomy16070751",
+    "soybean_cover": "https://doi.org/10.1016/j.fcr.2026.110733"
+  },
+  "crops": {
+    "brachiaria": {
+      "reference_date": "2024-09",
+      "source": "ilpf",
+      "seed_and_sowing_brl_ha": 300,
+      "termination_brl_ha": 155,
+      "basis": "Embrapa, tabela 8: sementes (250) mais semeadura (50); defensivo (105) e aplicação (50) usados como aproximação para um manejo de encerramento. Exclui adubação do sistema ILPF.",
+      "soybean_residual": {"max_yield_gain_fraction": 0.06, "max_days_to_planting": 120, "source": "soybean_grasses"}
+    },
+    "millet": {
+      "reference_date": "2025-06",
+      "source": "erechim",
+      "seed_and_sowing_brl_ha": 112.5,
+      "termination_brl_ha": 93.4,
+      "basis": "URI Erechim, tabela 2: implantação do mix capim-sudão + milheto como aproximação para milheto solteiro; primeira aplicação no pousio usada como referência de um manejo de encerramento.",
+      "soybean_residual": {"max_yield_gain_fraction": 0.03, "max_days_to_planting": 90, "source": "soybean_cover"}
+    },
+    "forage_radish": {
+      "reference_date": "2025-06",
+      "source": "erechim",
+      "seed_and_sowing_brl_ha": 175,
+      "termination_brl_ha": 93.4,
+      "basis": "URI Erechim, tabela 2: implantação de nabo-forrageiro e primeira aplicação no pousio como referência de manejo de encerramento."
+    },
+    "crotalaria": {
+      "reference_date": "2025-06",
+      "source": "erechim",
+      "seed_and_sowing_brl_ha": 240,
+      "termination_brl_ha": 93.4,
+      "basis": "Sem orçamento específico compatível: usa provisoriamente o custo de implantação de um mix comercial de cobertura da tabela 2 da URI e uma aplicação. Não é observação de crotalária."
+    },
+    "mucuna": {
+      "reference_date": "2025-06",
+      "source": "erechim",
+      "seed_and_sowing_brl_ha": 240,
+      "termination_brl_ha": 93.4,
+      "basis": "Sem orçamento específico compatível: usa provisoriamente o custo de implantação de um mix comercial de cobertura da tabela 2 da URI e uma aplicação. Não é observação de mucuna."
+    }
+  },
+  "residual_basis": "Hipótese conservadora não calibrada: apenas a primeira soja, plantada imediatamente depois da cobertura concluída (pousio pode decorrer), recebe ganho sobre a produtividade. O ganho máximo decai linearmente com a espera. Tetos e prazos são parâmetros exploratórios, não estimativas publicadas por espécie ou município. Não soma créditos de herbicidas, carbono, pastejo ou fertilizante."
+}
