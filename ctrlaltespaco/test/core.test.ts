@@ -1,8 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { tilePlacement, tilesCovering, tileUrl, toWorld } from "../src/geo/mercator.ts";
 import { rank, scoreOnTen } from "../src/ranking.ts";
-import { sharesAt } from "../src/scene/occupancy.ts";
 import { regionScenario } from "../src/scenarios.ts";
 import type { RankingSettings, Route } from "../src/types.ts";
 
@@ -16,23 +14,6 @@ function route(crops: string[], median: number, carbon: number, samples = 500): 
   const value = { mean: median, p5: median - 1000, p50: median, p95: median + 1000, cvar5: median - 2000, count: samples };
   return { crops, share: 0.1, value, final_carbon: carbon, final_water_multiplier: 1 };
 }
-
-test("mercator puts the equator and Greenwich in the middle of the world", () => {
-  assert.deepEqual(toWorld([0, 0]), [16, 16]);
-  assert.ok(toWorld([-47, -20])[1] > 16, "south of the equator is further down");
-});
-
-test("tiles cover a box and know where they lie", () => {
-  assert.equal(tilesCovering([-84, 14], [-28, -42], 5).length, 6 * 7);
-  assert.deepEqual(tilePlacement({ x: 80, y: 136, zoom: 8 }), { size: 0.125, centre: [10.0625, 17.0625] });
-  assert.equal(tileUrl("t/{z}/{y}/{x}.jpeg", { x: 1, y: 2, zoom: 3 }), "t/3/2/1.jpeg");
-});
-
-test("occupancy is interpolated between periods", () => {
-  const occupancy: Record<string, number>[] = [{ soybean: 1 }, { soybean: 0.5, maize_grain: 0.5 }];
-  assert.deepEqual(sharesAt(occupancy, ["soybean", "maize_grain"], 0.5), [0.75, 0.25]);
-  assert.deepEqual(sharesAt(occupancy, ["soybean", "maize_grain"], 9), [0.5, 0.5]);
-});
 
 test("the journey simulates the region from the farmer's crop", () => {
   assert.deepEqual(regionScenario("maize_grain"), {

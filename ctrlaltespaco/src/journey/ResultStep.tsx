@@ -78,21 +78,33 @@ export function ResultStep({ journey }: { journey: Journey }) {
   );
   if (!best) return <section><h2>We couldn't rank a rotation</h2><p className="note">No simulated sequence has complete price and cost data.</p>{actions}</section>;
   return (
-    <section>
-      <h2>A crop rotation to grow more and care for the land</h2>
-      <p className="lead">The sequence that best balances the priorities you chose.</p>
-      <h3>Your suggested sequence</h3>
-      <Sequence crops={best.route.crops} />
+    <section className="result">
+      <div className="result-heading">
+        <p className="kicker">Your plan is ready</p>
+        <h2>A crop rotation to grow more and care for the land</h2>
+        <p className="lead">The sequence that best balances the priorities you chose.</p>
+      </div>
+      <article className="recommendation">
+        <h3>Your suggested sequence</h3>
+        <Sequence crops={best.route.crops} />
+        <p className="note">Planned by crop cycles over a five-year horizon.</p>
+      </article>
       <Metrics best={best} />
-      <h3>What we considered</h3>
-      <Considered run={run} scenario={scenario} best={best} weight={journey.weight} />
-      <h3>Other good options</h3>
-      <Others ranked={rest.slice(0, OTHERS)} />
-      <h3>How the scenarios unfolded</h3>
-      <Timebar periodsPerYear={run.clock.periods / run.clock.horizon_years} />
-      <Legend crops={run.crops.filter((crop) => scenario.occupancy.some((period) => crop in period))} />
-      <TrackStrips tracks={scenario.tracks} />
-      <EnvironmentChart water={scenario.water} carbon={scenario.carbon} />
+      <article className="card">
+        <h3>What we considered</h3>
+        <Considered run={run} scenario={scenario} best={best} weight={journey.weight} />
+      </article>
+      <article className="card">
+        <h3>Other good options</h3>
+        <Others ranked={rest.slice(0, OTHERS)} />
+      </article>
+      <article className="card unfolded">
+        <h3>How the scenarios unfolded</h3>
+        <Timebar periodsPerYear={run.clock.periods / run.clock.horizon_years} />
+        <Legend crops={run.crops.filter((crop) => scenario.occupancy.some((period) => crop in period))} />
+        <TrackStrips tracks={scenario.tracks} />
+        <EnvironmentChart water={scenario.water} carbon={scenario.carbon} />
+      </article>
       <p className="note">An exploratory study based on municipal data and model assumptions. These values do not guarantee income and do not replace an agronomist's assessment of your field.</p>
       {actions}
     </section>

@@ -1,15 +1,19 @@
+import gsap from "gsap";
+import { useEffect, useRef, useState } from "react";
 import { CropStep } from "./journey/CropStep.tsx";
 import { LocationStep } from "./journey/LocationStep.tsx";
 import { PriorityStep } from "./journey/PriorityStep.tsx";
 import { ResultStep } from "./journey/ResultStep.tsx";
 import { SimulationStep } from "./journey/SimulationStep.tsx";
 import { Steps } from "./journey/Steps.tsx";
-import { MapScene } from "./scene/MapScene.tsx";
+import { FieldMap } from "./map/FieldMap.tsx";
 import { useJourney, useWorld, type Journey, type World } from "./useFieldShift.ts";
 
-function Screen({ journey, world }: { journey: Journey; world: World }) {
+const PANEL_WIDTH = "min(460px, 100vw)";
+
+function Screen({ journey, world, area }: { journey: Journey; world: World; area: number | null }) {
   switch (journey.step) {
-    case "location": return <LocationStep journey={journey} world={world} />;
+    case "location": return <LocationStep journey={journey} world={world} area={area} />;
     case "crop": return <CropStep journey={journey} />;
     case "priority": return <PriorityStep journey={journey} world={world} />;
     case "simulation": return <SimulationStep journey={journey} world={world} />;
@@ -17,9 +21,22 @@ function Screen({ journey, world }: { journey: Journey; world: World }) {
   }
 }
 
+/** The side panel grows from the right edge over the map when the plan is ready, and shrinks back afterwards. */
+function usePanelWidth(wide: boolean) {
+  const panel = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const tween = gsap.to(panel.current, { width: wide ? "100vw" : PANEL_WIDTH, duration: 0.9, ease: "power3.inOut" });
+    return () => void tween.kill();
+  }, [wide]);
+  return panel;
+}
+
 export function App() {
   const { world, error } = useWorld();
   const journey = useJourney(world);
+  const [area, setArea] = useState<number | null>(null);
+  const wide = journey.step === "result";
+  const panel = usePanelWidth(wide);
   if (error) return <p className="error fatal">Could not reach the Field Shift API: {error}</p>;
   if (!world) return <p className="loading">Loading…</p>;
   const choosePlace = (id: string) => {
@@ -28,18 +45,16 @@ export function App() {
   };
   return (
     <div className="app">
-      <MapScene config={world.config} states={world.states} municipality={journey.place?.municipality ?? null}
-        profiles={world.profiles} selected={journey.place?.profile ?? null} run={journey.run} onSelect={choosePlace} />
-      <header>
-        <h1>Field Shift</h1>
-        <p>A crop rotation plan from NASA climate data and your priorities</p>
-      </header>
-      <aside className="panel">
-        <Steps current={journey.step} />
-        <Screen journey={journey} world={world} />
+      <FieldMap config={world.config} states={world.states} profiles={world.profiles} selected={journey.place?.profile ?? null}
+        municipality={journey.place?.municipality ?? null} onSelect={choosePlace} onArea={setArea} />
+      <aside ref={panel} className={wide ? "panel wide" : "panel"}>
+        <header>
+          <strong>Field Shift</strong>
+          <Steps current={journey.step} />
+        </header>
+        <Screen journey={journey} world={world} area={area} />
         {journey.step !== "simulation" && journey.error && <p className="error">{journey.error}</p>}
       </aside>
-      <footer>Basemap: {world.config.basemap.attribution} · Boundaries: IBGE</footer>
     </div>
   );
 }
