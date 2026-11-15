@@ -8,7 +8,7 @@ from functools import lru_cache
 
 from .backend import array_module
 from .calendar import DAYS_PER_YEAR
-from .batches import simulate_batches
+from .batches import batch_for, simulate_batches
 from .monte_carlo import Policy
 from .payload import profile_payload, reference_payload
 from .summary import Support, summarize
@@ -142,7 +142,7 @@ def run(request: dict, default_state: str, device: str = "auto", tracks: int = 0
     for index, (scenario, policy) in enumerate(zip(request["scenarios"], policies)):
         before = index * request["trajectories"]
         result = simulate_batches(xp, on_device, policy, request["seed"], request["trajectories"], min(tracks, MAX_TRACKS),
-                                  paths=raw is not None, progress=lambda done: progress(before + done))
+                                  paths=raw is not None, batch=batch_for(xp), progress=lambda done: progress(before + done))
         if raw is not None:
             raw.append(result)
         scenarios.append({"id": scenario["id"], "label": scenario.get("label", scenario["id"]),

@@ -15,7 +15,13 @@ from .backend import to_numpy
 from .monte_carlo import Policy, simulate
 from .tables import Tables
 
-BATCH = 10_000
+BATCH = 10_000           # on the CPU: about 1.4 s each for 10,000 trajectories, so progress moves visibly
+GPU_BATCH = 250_000      # on a GPU the 120-step Python loop costs the same for 10,000 or 250,000 trajectories
+
+
+def batch_for(xp) -> int:
+    """Trajectories per batch on the array module `xp`."""
+    return GPU_BATCH if xp.__name__ == "cupy" else BATCH
 
 TRAJECTORY_AXIS = {"value": 0, "priced": 0, "route": 0, "water_fraction": 0, "total_nitrogen": 0, "crop": 1, "water_class": 1, "carbon": 1}
 PATH_AXIS = 1
