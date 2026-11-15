@@ -96,6 +96,7 @@ def export_page(output: Path, seed: int) -> None:
         crop_ids = {state["id"]: state["crop"] for state in chain["states"] if state["crop"] != "fallow"}
         crops = set(crop_ids.values())
         history = chain["pam_history"]
+        initial_crops = [crop for crop in crop_markov["initial_crop_ids"] if crop in crops]
         # The browser groups v2 states by crop for its one-node-per-crop UI.
         # Keep v1 sources for display metadata, calendar and the climate calibration.
         crop_view = {
@@ -103,8 +104,14 @@ def export_page(output: Path, seed: int) -> None:
                                                 "area_weighted_transition_pair_count")},
             **history,
             "alpha_per_destination": chain["alpha_per_destination"],
-            "states": [state for state in crop_markov["states"] if state["id"] in crops],
-            "initial_crop_ids": [crop for crop in crop_markov["initial_crop_ids"] if crop in crops],
+            "states": [{**state, "initial_selectable": state["id"] in initial_crops}
+                       for state in crop_markov["states"] if state["id"] in crops],
+            "initial_crop_ids": initial_crops,
+            "sugarcane_reform_pam_mass": {
+                edge["to_state"]: edge["area_weighted_count"]
+                for edge in crop_markov["transitions"]
+                if edge["from_state"] == "sugarcane" and edge["to_state"] in crops
+            },
             "lifecycle_rules": {crop: rule for crop, rule in crop_markov["lifecycle_rules"].items() if crop in crops},
             "transitions": [
                 {**edge, "from": crop_ids[edge["from"]], "to": crop_ids[edge["to"]]}

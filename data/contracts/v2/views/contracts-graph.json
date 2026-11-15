@@ -833,6 +833,12 @@
           "description": "Overrides chain.initial_state."
         },
         {
+          "path": "scenario.initial_sugarcane_cut",
+          "type": "integer 1..5",
+          "required": false,
+          "description": "Ordinal of the next harvest of standing sugarcane in the modeled five-cut cycle. Applies only when the effective initial state is sugarcane. This is a scenario input, not a measured field age."
+        },
+        {
           "path": "scenario.policy",
           "type": "number or distribution",
           "required": true,

@@ -326,6 +326,7 @@
               "id *": "string",
               "label": "string",
               "initial_state": "string",
+              "initial_sugarcane_cut": "integer 1..5",
               "policy *": "number or distribution"
             }
           }

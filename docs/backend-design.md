@@ -125,7 +125,7 @@ Same seed and trajectory give the same environment and parameters in every scena
 Run `python -m field_shift.ingest` to write the v2 documents and the [ingestion report](../data/v2/ingestion-report.json). Each crop has a `<crop>:skip_stages` state; `fallow:skip_stages` is reserved for waiting and is not a PAM destination. The browser projects the v2 state IDs to crop IDs for the UI and consumes `from`, `to` and raw `mass`.
 
 - **Probability.** Every allowed destination receives Dirichlet alpha 0.5. The API reports the mean `(mass + alpha) / (outgoing_mass + alpha × destinations)`; there is no minimum mass or probability cutoff. The browser samples a row per trajectory, restricts it to the current planting calendar, applies water/carbon factors and normalizes. A prior edge represents an assumption, not municipal or field evidence.
-- **Crop lifecycle.** Coffee and its interrow simulation are excluded. Sugarcane remains a crop and, once established, stays in place through the horizon; renewal would require data on age and cuts. Its self-transition is 100% under that lifecycle rule even if the row has no PAM mass.
+- **Crop lifecycle.** Coffee and its interrow simulation are excluded. The regional Markov chain keeps the sugarcane self-transition. In the browser, `initial_sugarcane_cut` identifies the next harvest of standing cane. Newly planted cane starts at cut 1 after maturation. After cut 5, the browser samples annual crops with eligible calendars using regional PAM mass as a prior. The five-cut cycle is a modeling assumption. The current inputs do not split yield, price or costs by cut, and the simulation has no separate stool-removal cost.
 - **PAM audit.** `pam_history` preserves the original annual top five, including coffee when reported. Shares retain their historical denominator. Counts of consecutive rank-one crops are a separate diagnostic, not observed field transitions.
 - **Water.** The profile keeps a continuous fraction of available water capacity and documents how to present it as low, medium or high (thirds). The browser estimates the fraction each period from the historical water classes and the crop demand adjustment. It uses the continuous fraction to reweight crop transitions and the classes for the existing yield and chart rules.
 - **Economics.** The v2 profile retains v1 yield, price, trend, costs, eligibility, discount rate and currency month. The browser retains the v1 ranking rules (P95/CVaR5 within economics, and the weight on final soil and water). Editing assumptions applies to the browser session.
@@ -247,6 +247,6 @@ MongoDB, the API and the front ship in one image (`Dockerfile`, based on `mongo:
 
 ## Open questions
 
-- Sugarcane renewal after several cuts: model it when crop age and renewal inputs are available.
+- Sugarcane reform costs and yield by cut still need field or panel data. The browser uses the aggregate PAM and CONAB benchmarks at every cut.
 - Climate model: see the seasons proposal discussed with the project owner (rainy-season onset and climate regime as environment variables).
 - Crop ingestion: map ZARC rows (crop x soil group x cultivar cycle) to `crop.planting_windows`.
