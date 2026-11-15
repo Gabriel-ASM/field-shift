@@ -41,12 +41,17 @@ def decode_route(key: int, names: list[str]) -> list[str]:
     return crops[::-1]
 
 
-def routes(route: np.ndarray, value: np.ndarray, priced: np.ndarray, names: list[str], limit: int) -> list[dict]:
-    """The most frequent crop sequences, each with its share and present-value summary."""
+def routes(route: np.ndarray, value: np.ndarray, priced: np.ndarray, final: dict, names: list[str], limit: int) -> list[dict]:
+    """The most frequent crop sequences, each with its share, present-value summary and final soil state.
+
+    `final` holds, per trajectory, the soil carbon and the water yield multiplier at the end of the horizon.
+    """
     keys, inverse, counts = np.unique(route, return_inverse=True, return_counts=True)
     top = np.argsort(-counts)[:limit]
     return [{"crops": decode_route(int(keys[i]), names), "share": float(counts[i] / route.size),
-             "value": value_summary(value[(inverse == i) & priced])} for i in top]
+             "value": value_summary(value[(inverse == i) & priced]),
+             "final_carbon": float(final["carbon"][inverse == i].mean()),
+             "final_water_multiplier": float(final["water_multiplier"][inverse == i].mean())} for i in top]
 
 
 def tracks(track: dict, climate: np.ndarray, tables: Tables, names: list[str]) -> list[dict]:
@@ -60,18 +65,21 @@ def tracks(track: dict, climate: np.ndarray, tables: Tables, names: list[str]) -
             for i in range(crop.shape[1])]
 
 
-def summarize(result: dict, tables: Tables, route_limit: int = 10) -> dict:
+def summarize(result: dict, tables: Tables, route_limit: int = 40) -> dict:
     names = [*tables.crops, "fallow"]
     value, priced = to_numpy(result["value"]), to_numpy(result["priced"])
-    carbon = to_numpy(result["carbon"])
+    carbon, water_class = to_numpy(result["carbon"]), to_numpy(result["water_class"])
+    final = {"carbon": carbon[-1], "water_multiplier": to_numpy(tables.water_yield)[water_class[-1]]}
     return {
         "trajectories": int(value.size),
         "priced_share": float(priced.mean()),
         "value": value_summary(value[priced]),
         "occupancy": occupancy(to_numpy(result["crop_count"]), names),
-        "water": [dict(zip(WATER_STATES, shares(year, 3))) for year in to_numpy(result["water_class"])],
+        "water": [dict(zip(WATER_STATES, shares(year, 3))) for year in water_class],
         "carbon": [dict(zip(("p5", "p50", "p95"), np.quantile(year, QUANTILES).round(4).tolist())) for year in carbon],
-        "routes": routes(to_numpy(result["route"]), value, priced, names, route_limit),
+        "final_carbon": float(final["carbon"].mean()),
+        "final_water_multiplier": float(final["water_multiplier"].mean()),
+        "routes": routes(to_numpy(result["route"]), value, priced, final, names, route_limit),
         "tracks": tracks(result["track"], result["climate"], tables, names),
     }
 

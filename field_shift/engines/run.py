@@ -49,7 +49,23 @@ def options(profile_id: str) -> dict:
     tables = tables_for(profile_id)
     selectable = profile_payload(profile_id)["crop_markov"]["initial_crop_ids"]
     return {"profile": profile_id, "crops": list(tables.crops), "initial_crops": [c for c in selectable if c in tables.crops],
-            "max_trajectories": MAX_TRAJECTORIES, "horizon_days": tables.horizon_years * DAYS_PER_YEAR}
+            "ranking": ranking_settings(tables), "max_trajectories": MAX_TRAJECTORIES, "horizon_days": tables.horizon_years * DAYS_PER_YEAR}
+
+
+def ranking_settings(tables: Tables) -> dict:
+    """How a client turns route results into a 0-10 score: the team's ranking rules, with their sources."""
+    settings = reference_payload()["run_settings"]
+    score, environment = settings["ranking_score"], settings["ranking_score"]["environment"]
+    water = [float(m) for m in tables.water_yield]
+    return {
+        "minimum": score["minimum"], "maximum": score["maximum"], "break_even": score["break_even"],
+        "minimum_scale": score["minimum_scale_brl_per_ha"],
+        "minimum_samples": settings["monte_carlo"]["minimum_leader_vpl_samples"],
+        "environment_weight": {key: environment[key] for key in ("default_weight", "maximum_weight", "weight_step")},
+        "soil_share": environment["soil_share"], "water_share": environment["water_share"],
+        "soil_reference": environment["soil_reference_g_kg"],
+        "water_scale": max(abs(m - 1) for m in water) or 1e-9,
+    }
 
 
 def check_request(tables: Tables, request: dict) -> None:
@@ -78,5 +94,5 @@ def run(request: dict, default_state: str, device: str = "auto", tracks: int = 0
         "profile": request["profile"], "seed": request["seed"], "device": "gpu" if xp.__name__ == "cupy" else "cpu",
         "seconds": round(time.perf_counter() - started, 3),
         "clock": {"period_days": tables.period_days, "periods": tables.periods, "horizon_years": tables.horizon_years},
-        "crops": [*tables.crops, "fallow"], "scenarios": scenarios,
+        "crops": [*tables.crops, "fallow"], "ranking": ranking_settings(tables), "scenarios": scenarios,
     }

@@ -66,6 +66,9 @@ def test_run_summary_is_consistent():
     assert all(sum(year.values()) == pytest.approx(1, abs=1e-4) for year in region["occupancy"])
     assert region["occupancy"][0] == {"soybean": 1.0}
     assert len(region["tracks"][0]["crop"]) == result["clock"]["periods"] + 1
+    route = region["routes"][0]
+    assert route["final_carbon"] > 0 and 0 < route["final_water_multiplier"] < 2
+    assert result["ranking"]["environment_weight"]["default_weight"] == 0.2
     value = region["value"]
     assert value["cvar5"] <= value["p5"] <= value["p50"] <= value["p95"]
     assert 0 < region["priced_share"] <= 1

@@ -26,5 +26,5 @@ def runtime_config() -> dict[str, Any]:
             "attribution": _env("BASEMAP_ATTRIBUTION", "NASA EOSDIS GIBS, Blue Marble"),
         },
         "cms": {"url": _env("CMS_URL"), "token": _env("CMS_PUBLIC_TOKEN")},
-        "run": {"trajectories": int(_env("RUN_TRAJECTORIES", "20000")), "tracks": int(_env("RUN_TRACKS", "40"))},
+        "run": {"trajectories": int(_env("RUN_TRAJECTORIES", "100000")), "tracks": int(_env("RUN_TRACKS", "40"))},
     }
