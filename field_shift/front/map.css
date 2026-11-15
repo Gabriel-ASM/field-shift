@@ -1,0 +1,62 @@
+/*
+ * map.css - styles for the map area selector (docs/visualizacao2.html only).
+ *
+ * Injected into <head> by `python -m field_shift.front --variant map` (slot MAP_HEAD); it is NOT
+ * part of the classic page. It reuses the --fs-* design tokens defined in styles.css, so colours
+ * stay consistent with the rest of the journey.
+ *
+ * Scope: only things that exist because of the Leaflet map. Selectors are prefixed `aoi-` or
+ * hang off `.map-card.has-leaflet`, a class map.js adds ONLY after Leaflet initialised. If
+ * Leaflet fails to load the class is never added and the classic SVG map keeps working.
+ */
+
+/* --- swap the SVG map for Leaflet ------------------------------------------------------- */
+.map-card.has-leaflet { background: #dfe6df; }
+.map-card.has-leaflet #brazil-map,
+.map-card.has-leaflet .map-card-top,
+.map-card.has-leaflet .map-legend,
+.map-card.has-leaflet .map-source { display: none; }
+
+/* z-index 1 + own stacking context keeps Leaflet's internal z-indexes (up to 1000) inside the card. */
+.aoi-map { position: absolute; inset: 0; z-index: 1; isolation: isolate; }
+.aoi-map[hidden] { display: none; }
+.aoi-map.leaflet-container { font-family: inherit; }
+
+/* --- live readout on the map ------------------------------------------------------------- */
+.aoi-status {
+  padding: 6px 10px; border-radius: 8px; background: rgba(255, 255, 255, .95);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, .25); color: var(--fs-ink); font-size: .72rem; font-weight: 650;
+}
+.aoi-status.is-over { color: #a2392a; }
+
+/* Permanent municipality labels (Leaflet tooltips). */
+.leaflet-tooltip.aoi-label {
+  padding: 2px 7px; border: 1px solid #cfe0d4; border-radius: 999px; background: rgba(255, 255, 255, .94);
+  box-shadow: none; color: var(--fs-green-dark); font-size: .68rem; font-weight: 700;
+}
+.leaflet-tooltip.aoi-label::before { display: none; }
+
+/* --- side panel (inside .choice-panel) --------------------------------------------------- */
+.aoi-panel {
+  margin: 0 0 14px; padding: 13px 14px; border: 1px solid var(--fs-line); border-radius: 12px;
+  background: var(--fs-canvas); color: var(--fs-muted); font-size: .72rem; line-height: 1.5;
+}
+.aoi-limit strong { color: var(--fs-ink); }
+.aoi-area { margin-top: 8px; color: var(--fs-ink); font-size: 1.45rem; font-weight: 720; letter-spacing: -.03em; }
+.aoi-area small { color: var(--fs-muted); font-size: .72rem; font-weight: 600; letter-spacing: 0; }
+.aoi-meter { height: 6px; margin-top: 8px; border-radius: 999px; background: #e3ebe5; overflow: hidden; }
+.aoi-meter i { display: block; width: 0; height: 100%; background: var(--fs-green); transition: width .15s ease; }
+.aoi-meter.is-over i { background: #b3402f; }
+.aoi-message { min-height: 1.5em; margin: 8px 0 0; }
+.aoi-message.is-error { color: #a2392a; font-weight: 650; }
+.aoi-message.is-ok { color: var(--fs-green-dark); font-weight: 650; }
+.aoi-download {
+  margin-top: 8px; padding: 7px 11px; border: 1px solid var(--fs-line); border-radius: 9px;
+  background: #fff; color: var(--fs-green-dark); font: inherit; font-weight: 700; cursor: pointer;
+}
+.aoi-download:hover { border-color: var(--fs-green); background: var(--fs-green-soft); }
+.aoi-download[hidden] { display: none; }
+
+@media (max-width: 720px) {
+  .map-card.has-leaflet { min-height: 420px; }
+}

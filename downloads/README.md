@@ -1,17 +1,20 @@
 - Soil (ISRIC SoilGrids 2.0) - via API
-- [ ] phh20_mean 
-- [ ] sand/slid/clay_mean
-- [ ] soc_mean (carbono orgânico)
-- [ ] cec_mean (CTC)
-- [ ] nitrogen_mean 
+  - [ ] phh20_mean 
+  - [ ] sand/slid/clay_mean
+  - [ ] soc_mean (carbono orgânico)
+  - [ ] cec_mean (CTC)
+  - [ ] nitrogen_mean 
+- FAO-56
+  - [ ] ET0
+  - [x] KC
 - Temperature
-- [ ] API
+  - [ ] API
 - Window
-- [x] ZARC
+  - [x] ZARC
 - Finance
-- [ ]
+  - [ ] PAM
 - Phenology
-- [x] effect of temperature
+  - [x] effect of temperature
 
 OBS: 
 FAO 
