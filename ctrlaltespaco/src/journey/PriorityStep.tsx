@@ -71,9 +71,9 @@ export function PriorityStep({ journey, world }: { journey: Journey; world: Worl
       <Balance journey={journey} settings={settings} />
       {/* <ReturnMix journey={journey} settings={settings} /> */}
       <SupportNote settings={settings} />
-      <label className="seed">Random seed
+      {/* <label className="seed">Random seed
         <input type="number" min={0} value={journey.seed} onChange={(event) => journey.setSeed(Number(event.target.value) || 0)} />
-      </label>
+      </label> */}
       <p className="note">{count(world.config.run.trajectories)} scenarios. The same seed reproduces a result exactly.</p>
       <div className="actions">
         <button type="button" onClick={() => journey.go("crop")}>Adjust crop</button>
