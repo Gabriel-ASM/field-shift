@@ -71,7 +71,12 @@ input[type="range"] { width: 100%; padding: 0; accent-color: var(--green); }
 .choices-summary dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 12px 0; font-size: 0.86rem; }
 .choices-summary dt { color: var(--muted); }
 .choices-summary dd { margin: 0; }
-.tracks { display: block; width: 100%; margin: 0 0 14px; image-rendering: pixelated; border-radius: 6px; background: var(--soft); }
+.tracks { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: stretch; margin: 0 0 14px; }
+.tracks svg { display: block; width: 100%; height: auto; min-height: 22px; border-radius: 6px; background: var(--soft); }
+.tracks svg rect[fill]:hover { opacity: 0.8; }
+.tracks-counts { display: grid; margin: 0; padding: 0; list-style: none; font-size: 0.78rem; color: var(--muted, #5b6b5b); }
+.tracks-counts li { display: flex; align-items: center; white-space: nowrap; }
+.tracks-summary { margin: 4px 0 8px; }
 h4 { margin: 12px 0 6px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 
 /* The plan, once the panel has grown over the map. Cards and charts come from reference.css. */

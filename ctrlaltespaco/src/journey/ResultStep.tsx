@@ -90,7 +90,7 @@ function Unfolded({ run, detail, cuts }: { run: RunResult; detail: RouteDetail |
       <h3>How the scenarios of this sequence unfolded</h3>
       <Timebar periodsPerYear={run.clock.periods / run.clock.horizon_years} />
       <Legend crops={crops} />
-      <TrackStrips tracks={detail.tracks} cuts={cuts} />
+      <TrackStrips tracks={detail.tracks} cuts={cuts} periodsPerYear={run.clock.periods / run.clock.horizon_years} />
     </article>
   );
 }

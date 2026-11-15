@@ -3,6 +3,7 @@ import { test } from "node:test";
 import { preference, rank, recommended, scoreOnTen, supportScore, weights } from "../src/ranking.ts";
 import { bandwidth, density } from "../src/ui/density.ts";
 import { regionScenario } from "../src/scenarios.ts";
+import { groupTracks, segments } from "../src/ui/tracks.ts";
 import type { RankingReference, RankingSettings, Route } from "../src/types.ts";
 
 const SETTINGS: RankingSettings = {
@@ -115,4 +116,13 @@ test("a candidate is re-simulated as a fixed rotation and used once every candid
   assert.equal(refinedRoutes(ranked, partial), null);
   partial.refined.set("soybean,brachiaria", own(["soybean", "brachiaria"]));
   assert.deepEqual(refinedRoutes(ranked, partial)!.map((item) => item.value!.count), [10000, 10000]);
+});
+
+test("identical trajectories form one group and consecutive periods merge into stretches", () => {
+  const same = { crop: ["soybean", "soybean", "fallow", "sugarcane", "sugarcane"], cane_cut: [0, 0, 0, 1, 2] };
+  const other = { crop: ["soybean", "fallow", "fallow", "sugarcane", "sugarcane"], cane_cut: [0, 0, 0, 1, 1] };
+  const groups = groupTracks([same, { ...same }, other]);
+  assert.deepEqual(groups.map((group) => group.count), [2, 1]);
+  assert.deepEqual(segments(same).map(({ crop, cut, start, end }) => [crop, cut, start, end]), [
+    ["soybean", 0, 0, 2], ["fallow", 0, 2, 3], ["sugarcane", 1, 3, 4], ["sugarcane", 2, 4, 5]]);
 });
