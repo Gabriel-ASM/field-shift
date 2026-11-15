@@ -8,6 +8,8 @@ from typing import Any
 
 from fastapi import APIRouter
 
+from ..version import server_version
+
 router = APIRouter(tags=["service"])
 
 GIBS = "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/BlueMarble_ShadedRelief_Bathymetry/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.jpeg"
@@ -20,6 +22,7 @@ def _env(name: str, default: str | None = None) -> str | None:
 @router.get("/config")
 def runtime_config() -> dict[str, Any]:
     return {
+        "version": server_version(),
         "basemap": {
             "tiles": _env("BASEMAP_TILES", GIBS),
             "max_zoom": int(_env("BASEMAP_MAX_ZOOM", "8")),

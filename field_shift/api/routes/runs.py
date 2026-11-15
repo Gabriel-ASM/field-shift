@@ -4,15 +4,16 @@ from __future__ import annotations
 
 from typing import Any, Literal
 
-from fastapi import APIRouter, Body, HTTPException, Query, Request
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request
 
 from ...contracts import validate
 from ...db import find_one
 from ...engines.run import MAX_TRACKS, RunError, options, prepare, run, tables_for
 from ...engines.summary import route_detail
 from ..jobs import Jobs
+from ..version import same_version
 
-router = APIRouter(prefix="/runs", tags=["runs"])
+router = APIRouter(prefix="/runs", tags=["runs"], dependencies=[Depends(same_version)])
 jobs = Jobs()
 
 

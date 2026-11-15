@@ -108,6 +108,29 @@ def test_runtime_config_comes_from_the_environment(client, monkeypatch):
     assert client.get("/config").json()["cms"]["url"] == "http://cms.local"
 
 
+
+def test_config_reports_the_build_and_defaults_to_dev(client, monkeypatch):
+    assert client.get("/config").json()["version"] == "dev"
+    monkeypatch.setenv("FIELD_SHIFT_VERSION", "abc1234")
+    assert client.get("/config").json()["version"] == "abc1234"
+
+
+def test_runs_refuse_a_front_built_from_another_commit(client, monkeypatch):
+    monkeypatch.setenv("FIELD_SHIFT_VERSION", "abc1234")
+    stale = client.get("/runs/options/franca-sp", headers={"X-Field-Shift-Version": "0000000"})
+    assert stale.status_code == 409
+    assert "reload the page" in stale.json()["detail"] and stale.headers["X-Field-Shift-Version"] == "abc1234"
+    refused = client.post("/runs/jobs", headers={"X-Field-Shift-Version": "0000000"}, json={"profile": "franca-sp"})
+    assert refused.status_code == 409
+    for version in ("abc1234", "dev", None):
+        headers = {"X-Field-Shift-Version": version} if version else {}
+        assert client.get("/runs/options/franca-sp", headers=headers).status_code == 200
+
+
+def test_a_dev_server_accepts_any_front(client):
+    assert client.get("/runs/options/franca-sp", headers={"X-Field-Shift-Version": "0000000"}).status_code == 200
+
+
 def test_reference_is_only_served_when_configured(client, generated, tmp_path, monkeypatch):
     import mongomock
     from fastapi.testclient import TestClient
