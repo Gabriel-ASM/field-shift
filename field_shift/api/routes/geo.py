@@ -1,21 +1,21 @@
 """Boundaries and places for the map: Brazilian states, the municipality of each profile, and (experimental) a
-search over every Brazilian municipality with its boundary fetched live from IBGE."""
+search over every Brazilian municipality with its IBGE boundary, all from files written by the geo ingest."""
 
 from __future__ import annotations
 
+import gzip
 import json
 import unicodedata
 from functools import lru_cache
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Response
 
-from ...ingest.geo import GEO, MUNICIPALITY_URL, fetch_geojson
+from ...ingest.geo import ALL_BOUNDARIES, GEO
 
 router = APIRouter(prefix="/geo", tags=["geo"])
 
 SEARCH_LIMIT = 12
-BOUNDARY_TIMEOUT = 20       # seconds; the IBGE API is usually well under one
 
 
 def _read(name: str) -> dict[str, Any]:
@@ -68,17 +68,23 @@ def municipalities(q: str = Query("", max_length=60), limit: int = Query(SEARCH_
     return search(q, limit)
 
 
-@lru_cache(maxsize=256)
-def _boundary(code: str) -> str:
-    return json.dumps(fetch_geojson(MUNICIPALITY_URL.format(code=code), BOUNDARY_TIMEOUT))
+@lru_cache(maxsize=1)
+def _boundaries() -> dict[str, bytes]:
+    """IBGE code -> GeoJSON of that municipality, ready to send (about 12 MB in memory for 5,570)."""
+    if not ALL_BOUNDARIES.is_file():
+        raise HTTPException(503, "The municipal boundaries are not stored; run python -m field_shift.ingest.geo")
+    document = json.loads(gzip.decompress(ALL_BOUNDARIES.read_bytes()))
+    return {str(feature["properties"]["codarea"]): json.dumps(
+                {"type": "FeatureCollection", "features": [feature], "source": document["source"]},
+                separators=(",", ":")).encode("utf-8")
+            for feature in document["features"]}
 
 
 @router.get("/municipalities/{code}")
-def boundary(code: str) -> dict[str, Any]:
-    """Experimental: the boundary of any municipality, fetched live from the IBGE malhas API and kept in memory."""
-    if not (code.isdigit() and len(code) == 7) or code not in {row["code"] for _, row in _municipalities()}:
-        raise HTTPException(404, f"Unknown municipality {code!r}")
-    try:
-        return json.loads(_boundary(code))
-    except (OSError, ValueError) as failure:
-        raise HTTPException(502, f"IBGE did not return the boundary of {code}: {failure}") from failure
+def boundary(code: str) -> Response:
+    """Experimental: the IBGE boundary of any municipality."""
+    body = _boundaries().get(code)
+    if body is None:
+        listed = any(row["code"] == code for _, row in _municipalities())
+        raise HTTPException(404, "IBGE has no boundary for this municipality yet" if listed else f"Unknown municipality {code!r}")
+    return Response(body, media_type="application/json")

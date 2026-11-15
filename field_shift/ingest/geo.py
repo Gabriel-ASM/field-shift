@@ -19,6 +19,8 @@ FORMAT = "formato=application/vnd.geo%2Bjson"
 STATES_URL = f"{API}/paises/BR?{FORMAT}&qualidade=minima&intrarregiao=UF"
 MUNICIPALITY_URL = API + "/municipios/{code}?" + FORMAT + "&qualidade=intermediaria"
 LIST_URL = "https://servicodados.ibge.gov.br/api/v1/localidades/municipios?view=nivelado"
+ALL_BOUNDARIES_URL = f"{API}/paises/BR?{FORMAT}&qualidade=intermediaria&intrarregiao=municipio"
+ALL_BOUNDARIES = GEO / "municipality-boundaries.json.gz"
 
 
 def fetch_json(url: str, timeout: float = 60) -> object:
@@ -64,8 +66,18 @@ def write_municipality_list() -> None:
     print(f"wrote {path.relative_to(DATA.parent)} ({len(rows)} municipalities)")
 
 
+def write_all_boundaries() -> None:
+    """Every municipal boundary in one gzip file (about 3 MB), so the search needs no call to IBGE at run time."""
+    document = fetch_geojson(ALL_BOUNDARIES_URL, timeout=300)
+    body = json.dumps({**document, "source": ALL_BOUNDARIES_URL}, separators=(",", ":")).encode("utf-8")
+    ALL_BOUNDARIES.write_bytes(gzip.compress(body, compresslevel=9, mtime=0))
+    print(f"wrote {ALL_BOUNDARIES.relative_to(DATA.parent)} ({len(document['features'])} municipalities, "
+          f"{ALL_BOUNDARIES.stat().st_size // 1024} KiB)")
+
+
 def main() -> int:
     write_municipality_list()
+    write_all_boundaries()
     write_geojson("brazil-states", fetch_geojson(STATES_URL), STATES_URL)
     for profile, code in municipalities().items():
         url = MUNICIPALITY_URL.format(code=code)

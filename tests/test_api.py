@@ -189,10 +189,12 @@ def test_municipality_search_is_accent_insensitive_and_prefix_first():
     assert search("   ", 5) == []
 
 
-def test_unknown_municipality_code_is_404_without_calling_ibge():
+def test_any_municipal_boundary_comes_from_the_stored_file():
     import mongomock
     from fastapi.testclient import TestClient
     from field_shift.api import create_app
     client = TestClient(create_app(mongomock.MongoClient()["x"]))
     assert client.get("/geo/municipalities/9999999").status_code == 404
+    rio_verde = client.get("/geo/municipalities/5218805").json()
+    assert rio_verde["features"][0]["properties"]["codarea"] == "5218805"
     assert client.get("/geo/municipalities?q=vargin").json()[0]["name"] == "Varginha"
