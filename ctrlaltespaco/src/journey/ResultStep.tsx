@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { MethodDialog } from "../method/MethodDialog.tsx";
-import { options, rank, recommended, selectRoute, type RankedRoute } from "../ranking.ts";
+import { options, rank, recommended, routeKey, selectRoute, type RankedRoute } from "../ranking.ts";
+import { CompareRoutes } from "../result/CompareRoutes.tsx";
 import { wellFormed } from "../resultShape.ts";
 import { Facts } from "../result/Facts.tsx";
 import { RouteOptions } from "../result/RouteOptions.tsx";
@@ -100,6 +101,7 @@ function Unfolded({ run, detail, cuts }: { run: RunResult; detail: RouteDetail |
 export function ResultStep({ journey }: { journey: Journey }) {
   const [explaining, setExplaining] = useState(false);
   const [chosen, choose] = useState<string | null>(null);
+  const [comparing, setComparing] = useState<string | null>(null);
   const run = journey.run!;
   const scenario = wellFormed(run) ? run.scenarios[0]! : null;
   const ranked = scenario ? rank(scenario.routes, scenario.ranking_reference, run.ranking, journey) : [];
@@ -115,6 +117,8 @@ export function ResultStep({ journey }: { journey: Journey }) {
   }
   if (!best || !selected) return <Exploratory ranked={ranked} run={run} journey={journey} />;
   const single = selected.route.crops.length < 2;
+  const choices = options(ranked, run.ranking, OPTIONS);
+  const compared = choices.find((item) => routeKey(item.route) === comparing) ?? choices.find((item) => item !== best);
   const facts = { model: run.model, ranking: run.ranking, periods: run.clock.periods, trajectories: scenario.trajectories,
     rankedRoutes: scenario.ranking_reference?.routes ?? 0, weight: journey.weight, returnWeight: journey.returnWeight };
   return (
@@ -131,11 +135,13 @@ export function ResultStep({ journey }: { journey: Journey }) {
         </article>
         <ResultMetrics ranked={selected} settings={run.ranking} />
       </div>
+      <CompareRoutes best={best} compared={compared} settings={run.ranking} confirmed={compared !== undefined && selected === compared}
+        onConfirm={() => compared && choose(routeKey(compared.route))} />
       <Frames detail={detail} error={error} years={run.clock.horizon_years} recommended={selected === best} />
       <ReturnChart value={selected.route.value!} fullSupport={run.ranking.support.full_score} />
       <div className="result-info">
         <Facts journey={journey} run={run} scenario={scenario} best={selected} />
-        <RouteOptions options={options(ranked, run.ranking, OPTIONS)} best={best} selected={selected} choose={choose} />
+        <RouteOptions options={choices} best={best} compared={compared} pick={setComparing} />
       </div>
       <Unfolded run={run} detail={detail} cuts={journey.place!.choices.sugarcane_cuts} />
       <YourChoices journey={journey} trajectories={scenario.trajectories} />
