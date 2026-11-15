@@ -6,210 +6,7 @@
         1988,
         2025
       ],
-      "rules": {
-        "excluded_crops": [
-          "coffee"
-        ],
-        "min_row_mass": 1.0,
-        "min_probability": 0.02
-      },
-      "dead_ends": [],
-      "absorbing": [],
-      "excluded_crops": [
-        "coffee"
-      ],
-      "rows": [
-        {
-          "from": "soybean",
-          "v1_mass": 9.6227,
-          "eligible_mass": 8.9089,
-          "rule": "",
-          "kept": [
-            {
-              "to": "soybean",
-              "probability": 0.738853
-            },
-            {
-              "to": "maize_grain",
-              "probability": 0.261147
-            }
-          ],
-          "dropped": [
-            "dry_bean",
-            "peanut",
-            "sorghum_grain",
-            "sugarcane"
-          ],
-          "status": "edges kept",
-          "kept_mass_share": 0.9793
-        },
-        {
-          "from": "maize_grain",
-          "v1_mass": 19.4997,
-          "eligible_mass": 19.1127,
-          "rule": "",
-          "kept": [
-            {
-              "to": "maize_grain",
-              "probability": 0.658399
-            },
-            {
-              "to": "dry_bean",
-              "probability": 0.213837
-            },
-            {
-              "to": "soybean",
-              "probability": 0.127764
-            }
-          ],
-          "dropped": [
-            "peanut",
-            "sorghum_grain",
-            "sugarcane"
-          ],
-          "status": "edges kept",
-          "kept_mass_share": 0.9933
-        },
-        {
-          "from": "sugarcane",
-          "v1_mass": 0.211,
-          "eligible_mass": 0.0027,
-          "rule": "lifecycle: sugarcane",
-          "kept": [],
-          "dropped": [
-            "sugarcane"
-          ],
-          "status": "no edges: row mass below minimum"
-        },
-        {
-          "from": "sorghum_grain",
-          "v1_mass": 0,
-          "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
-        },
-        {
-          "from": "wheat",
-          "v1_mass": 0,
-          "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
-        },
-        {
-          "from": "dry_bean",
-          "v1_mass": 6.0946,
-          "eligible_mass": 5.8609,
-          "rule": "",
-          "kept": [
-            {
-              "to": "maize_grain",
-              "probability": 0.694644
-            },
-            {
-              "to": "dry_bean",
-              "probability": 0.249395
-            },
-            {
-              "to": "soybean",
-              "probability": 0.05596
-            }
-          ],
-          "dropped": [
-            "peanut",
-            "sorghum_grain",
-            "sugarcane"
-          ],
-          "status": "edges kept",
-          "kept_mass_share": 0.992
-        },
-        {
-          "from": "peanut",
-          "v1_mass": 0.0029,
-          "eligible_mass": 0.0029,
-          "rule": "",
-          "kept": [],
-          "dropped": [
-            "dry_bean",
-            "maize_grain",
-            "peanut",
-            "soybean",
-            "sugarcane"
-          ],
-          "status": "no edges: row mass below minimum"
-        },
-        {
-          "from": "oat",
-          "v1_mass": 0,
-          "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
-        },
-        {
-          "from": "forage_radish",
-          "v1_mass": 0,
-          "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
-        },
-        {
-          "from": "brachiaria",
-          "v1_mass": 0,
-          "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
-        },
-        {
-          "from": "millet",
-          "v1_mass": 0,
-          "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
-        },
-        {
-          "from": "crotalaria",
-          "v1_mass": 0,
-          "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
-        },
-        {
-          "from": "mucuna",
-          "v1_mass": 0,
-          "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
-        }
-      ]
-    },
-    {
-      "profile": "franca-sp",
-      "period": [
-        1988,
-        2025
-      ],
-      "rules": {
-        "excluded_crops": [
-          "coffee"
-        ],
-        "min_row_mass": 1.0,
-        "min_probability": 0.02
-      },
+      "alpha_per_destination": 0.5,
       "dead_ends": [],
       "absorbing": [
         "sugarcane:skip_stages"
@@ -220,172 +17,1746 @@
       "rows": [
         {
           "from": "soybean",
-          "v1_mass": 5.9479,
-          "eligible_mass": 5.1483,
-          "rule": "",
+          "eligible_mass": 8.908930388158,
           "kept": [
             {
+              "to": "soybean",
+              "probability": 0.45076972811253757,
+              "support": "derived"
+            },
+            {
               "to": "maize_grain",
-              "probability": 0.474039
+              "probability": 0.1803041775279978,
+              "support": "derived"
             },
             {
               "to": "sugarcane",
-              "probability": 0.300217
+              "probability": 0.03372924015513898,
+              "support": "derived"
             },
             {
-              "to": "soybean",
-              "probability": 0.225744
+              "to": "sorghum_grain",
+              "probability": 0.032561483860592495,
+              "support": "derived"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.032448715608726336,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.04304467492407747,
+              "support": "derived"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.03244968615857135,
+              "support": "derived"
+            },
+            {
+              "to": "oat",
+              "probability": 0.032448715608726336,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.032448715608726336,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.032448715608726336,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.032448715608726336,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.032448715608726336,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.032448715608726336,
+              "support": "prior"
             }
-          ],
-          "dropped": [
-            "dry_bean",
-            "sorghum_grain"
-          ],
-          "status": "edges kept",
-          "kept_mass_share": 0.9791
+          ]
         },
         {
           "from": "maize_grain",
-          "v1_mass": 13.4443,
-          "eligible_mass": 12.9777,
-          "rule": "",
+          "eligible_mass": 19.112700190256998,
           "kept": [
             {
-              "to": "maize_grain",
-              "probability": 0.595262
+              "to": "soybean",
+              "probability": 0.11422021196257345,
+              "support": "derived"
             },
             {
-              "to": "soybean",
-              "probability": 0.208042
+              "to": "maize_grain",
+              "probability": 0.5075279386269803,
+              "support": "derived"
             },
             {
               "to": "sugarcane",
-              "probability": 0.196695
+              "probability": 0.02441982262752298,
+              "support": "derived"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.019554998514234135,
+              "support": "derived"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.019521565328367785,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.1780175600421632,
+              "support": "derived"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.019608510927951506,
+              "support": "derived"
+            },
+            {
+              "to": "oat",
+              "probability": 0.019521565328367785,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.019521565328367785,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.019521565328367785,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.019521565328367785,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.019521565328367785,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.019521565328367785,
+              "support": "prior"
             }
-          ],
-          "dropped": [
-            "dry_bean",
-            "sorghum_grain"
-          ],
-          "status": "edges kept",
-          "kept_mass_share": 0.9764
+          ]
         },
         {
           "from": "sugarcane",
-          "v1_mass": 8.9265,
-          "eligible_mass": 3.1642,
-          "rule": "lifecycle: sugarcane",
+          "eligible_mass": 0.002742066679,
           "kept": [
             {
               "to": "sugarcane",
-              "probability": 1.0
+              "probability": 1.0,
+              "support": "derived"
             }
-          ],
-          "dropped": [],
-          "status": "edges kept",
-          "kept_mass_share": 1.0
+          ]
         },
         {
           "from": "sorghum_grain",
-          "v1_mass": 0.261,
-          "eligible_mass": 0.1671,
-          "rule": "",
-          "kept": [],
-          "dropped": [
-            "dry_bean",
-            "maize_grain",
-            "sorghum_grain",
-            "soybean",
-            "sugarcane"
-          ],
-          "status": "no edges: row mass below minimum"
+          "eligible_mass": 0.0,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
         },
         {
           "from": "wheat",
-          "v1_mass": 0,
           "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
         },
         {
           "from": "dry_bean",
-          "v1_mass": 0.3913,
-          "eligible_mass": 0.3852,
-          "rule": "",
-          "kept": [],
-          "dropped": [
-            "dry_bean",
-            "maize_grain",
-            "sorghum_grain",
-            "soybean",
-            "sugarcane"
-          ],
-          "status": "no edges: row mass below minimum"
+          "eligible_mass": 5.86093576817,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.06677030279967143,
+              "support": "derived"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.367166931995628,
+              "support": "derived"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.044208868086036676,
+              "support": "derived"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.040450038378366526,
+              "support": "derived"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.040450011987565204,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.15774993339923182,
+              "support": "derived"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.04050384142810913,
+              "support": "derived"
+            },
+            {
+              "to": "oat",
+              "probability": 0.040450011987565204,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.040450011987565204,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.040450011987565204,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.040450011987565204,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.040450011987565204,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.040450011987565204,
+              "support": "prior"
+            }
+          ]
         },
         {
           "from": "peanut",
-          "v1_mass": 0,
-          "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
+          "eligible_mass": 0.002915590726,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07691147181677661,
+              "support": "derived"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07719569443557177,
+              "support": "derived"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07688948473467395,
+              "support": "derived"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07688858836074464,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07688858836074464,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07700578485412783,
+              "support": "derived"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07688885727289267,
+              "support": "derived"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07688858836074464,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07688858836074464,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07688858836074464,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07688858836074464,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07688858836074464,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07688858836074464,
+              "support": "prior"
+            }
+          ]
         },
         {
           "from": "oat",
-          "v1_mass": 0,
           "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
         },
         {
           "from": "forage_radish",
-          "v1_mass": 0,
           "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
         },
         {
           "from": "brachiaria",
-          "v1_mass": 0,
           "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
         },
         {
           "from": "millet",
-          "v1_mass": 0,
           "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
         },
         {
           "from": "crotalaria",
-          "v1_mass": 0,
           "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
         },
         {
           "from": "mucuna",
-          "v1_mass": 0,
           "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "profile": "franca-sp",
+      "period": [
+        1988,
+        2025
+      ],
+      "alpha_per_destination": 0.5,
+      "dead_ends": [],
+      "absorbing": [
+        "sugarcane:skip_stages"
+      ],
+      "excluded_crops": [
+        "coffee"
+      ],
+      "rows": [
+        {
+          "from": "soybean",
+          "eligible_mass": 5.1483362696,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.140615320603742,
+              "support": "derived"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.24806467047128147,
+              "support": "derived"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.17284339855945258,
+              "support": "derived"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.046979081056937204,
+              "support": "derived"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.042924584973126796,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.04810084952357238,
+              "support": "derived"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.042924584973126796,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.042924584973126796,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.042924584973126796,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.042924584973126796,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.042924584973126796,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.042924584973126796,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.042924584973126796,
+              "support": "prior"
+            }
+          ]
+        },
+        {
+          "from": "maize_grain",
+          "eligible_mass": 12.977685505665,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.16101280767162313,
+              "support": "derived"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.4129195503808093,
+              "support": "derived"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.15363106422144868,
+              "support": "derived"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.029354350315991477,
+              "support": "derived"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.02567040112926031,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.03771901837604482,
+              "support": "derived"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.02567040112926031,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.02567040112926031,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.02567040112926031,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.02567040112926031,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.02567040112926031,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.02567040112926031,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.02567040112926031,
+              "support": "prior"
+            }
+          ]
+        },
+        {
+          "from": "sugarcane",
+          "eligible_mass": 3.164177746683,
+          "kept": [
+            {
+              "to": "sugarcane",
+              "probability": 1.0,
+              "support": "derived"
+            }
+          ]
+        },
+        {
+          "from": "sorghum_grain",
+          "eligible_mass": 0.167075849458,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.08026976806668643,
+              "support": "derived"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.08436704655095936,
+              "support": "derived"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.08482483663358578,
+              "support": "derived"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07540805772696754,
+              "support": "derived"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07499539697611923,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07516711521284712,
+              "support": "derived"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07499539697611923,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07499539697611923,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07499539697611923,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07499539697611923,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07499539697611923,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07499539697611923,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07499539697611923,
+              "support": "prior"
+            }
+          ]
+        },
+        {
+          "from": "wheat",
+          "eligible_mass": 0.0,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
+        },
+        {
+          "from": "dry_bean",
+          "eligible_mass": 0.385211667414,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.08308741327379758,
+              "support": "derived"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.11165948096287816,
+              "support": "derived"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07708657581130632,
+              "support": "derived"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07282220027497255,
+              "support": "derived"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07261940869100308,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07438906014902083,
+              "support": "derived"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07261940869100308,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07261940869100308,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07261940869100308,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07261940869100308,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07261940869100308,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07261940869100308,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07261940869100308,
+              "support": "prior"
+            }
+          ]
+        },
+        {
+          "from": "peanut",
+          "eligible_mass": 0.0,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
+        },
+        {
+          "from": "oat",
+          "eligible_mass": 0.0,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
+        },
+        {
+          "from": "forage_radish",
+          "eligible_mass": 0.0,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
+        },
+        {
+          "from": "brachiaria",
+          "eligible_mass": 0.0,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
+        },
+        {
+          "from": "millet",
+          "eligible_mass": 0.0,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
+        },
+        {
+          "from": "crotalaria",
+          "eligible_mass": 0.0,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
+        },
+        {
+          "from": "mucuna",
+          "eligible_mass": 0.0,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
         }
       ]
     },
@@ -395,195 +1766,877 @@
         1988,
         2025
       ],
-      "rules": {
-        "excluded_crops": [
-          "coffee"
-        ],
-        "min_row_mass": 1.0,
-        "min_probability": 0.02
-      },
-      "dead_ends": [
+      "alpha_per_destination": 0.5,
+      "dead_ends": [],
+      "absorbing": [
         "sugarcane:skip_stages"
       ],
-      "absorbing": [],
       "excluded_crops": [
         "coffee"
       ],
       "rows": [
         {
           "from": "soybean",
-          "v1_mass": 0.1062,
-          "eligible_mass": 0.0097,
-          "rule": "",
-          "kept": [],
-          "dropped": [
-            "dry_bean",
-            "maize_grain",
-            "soybean",
-            "sugarcane"
-          ],
-          "status": "no edges: row mass below minimum"
-        },
-        {
-          "from": "maize_grain",
-          "v1_mass": 14.4026,
-          "eligible_mass": 13.4907,
-          "rule": "",
+          "eligible_mass": 0.009735940437,
           "kept": [
             {
-              "to": "maize_grain",
-              "probability": 0.612032
+              "to": "soybean",
+              "probability": 0.07708343358706414,
+              "support": "derived"
             },
             {
-              "to": "dry_bean",
-              "probability": 0.387968
-            }
-          ],
-          "dropped": [
-            "peanut",
-            "sorghum_grain",
-            "soybean",
-            "sugarcane",
-            "wheat"
-          ],
-          "status": "edges kept",
-          "kept_mass_share": 0.9817
-        },
-        {
-          "from": "sugarcane",
-          "v1_mass": 0.5045,
-          "eligible_mass": 0.0107,
-          "rule": "lifecycle: sugarcane",
-          "kept": [],
-          "dropped": [
-            "sugarcane"
-          ],
-          "status": "no edges: row mass below minimum"
-        },
-        {
-          "from": "sorghum_grain",
-          "v1_mass": 0.0018,
-          "eligible_mass": 0.0018,
-          "rule": "",
-          "kept": [],
-          "dropped": [
-            "dry_bean",
-            "maize_grain",
-            "peanut",
-            "sorghum_grain",
-            "sugarcane"
-          ],
-          "status": "no edges: row mass below minimum"
-        },
-        {
-          "from": "wheat",
-          "v1_mass": 0.006,
-          "eligible_mass": 0.001,
-          "rule": "",
-          "kept": [],
-          "dropped": [
-            "dry_bean",
-            "maize_grain",
-            "sugarcane"
-          ],
-          "status": "no edges: row mass below minimum"
-        },
-        {
-          "from": "dry_bean",
-          "v1_mass": 10.6305,
-          "eligible_mass": 9.4921,
-          "rule": "",
-          "kept": [
-            {
               "to": "maize_grain",
-              "probability": 0.508312
-            },
-            {
-              "to": "dry_bean",
-              "probability": 0.469059
+              "probability": 0.07766305771368373,
+              "support": "derived"
             },
             {
               "to": "sugarcane",
-              "probability": 0.022629
+              "probability": 0.0768266792109584,
+              "support": "derived"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07680803101307283,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07680803101307283,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07715455037063815,
+              "support": "derived"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07680803101307283,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07680803101307283,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07680803101307283,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07680803101307283,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07680803101307283,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07680803101307283,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07680803101307283,
+              "support": "prior"
             }
-          ],
-          "dropped": [
-            "peanut",
-            "sorghum_grain",
-            "soybean",
-            "wheat"
-          ],
-          "status": "edges kept",
-          "kept_mass_share": 0.999
+          ]
+        },
+        {
+          "from": "maize_grain",
+          "eligible_mass": 13.490718555191002,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.025385817385099554,
+              "support": "derived"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.4304655445390908,
+              "support": "derived"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.036644242421980354,
+              "support": "derived"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.02507813642425671,
+              "support": "derived"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.025028939586419958,
+              "support": "derived"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.282029340285719,
+              "support": "derived"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.025298336201910875,
+              "support": "derived"
+            },
+            {
+              "to": "oat",
+              "probability": 0.025011607192587118,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.025011607192587118,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.025011607192587118,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.025011607192587118,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.025011607192587118,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.025011607192587118,
+              "support": "prior"
+            }
+          ]
+        },
+        {
+          "from": "sugarcane",
+          "eligible_mass": 0.010730166739,
+          "kept": [
+            {
+              "to": "sugarcane",
+              "probability": 1.0,
+              "support": "derived"
+            }
+          ]
+        },
+        {
+          "from": "sorghum_grain",
+          "eligible_mass": 0.0018201172479999999,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07690154310384598,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07711836421110181,
+              "support": "derived"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07690545181856612,
+              "support": "derived"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07690165929577168,
+              "support": "derived"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07690154310384598,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07696051297798674,
+              "support": "derived"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07690166686580578,
+              "support": "derived"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07690154310384598,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07690154310384598,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07690154310384598,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07690154310384598,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07690154310384598,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07690154310384598,
+              "support": "prior"
+            }
+          ]
+        },
+        {
+          "from": "wheat",
+          "eligible_mass": 0.0009667300379999999,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07691163803219116,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.0769555039854935,
+              "support": "derived"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07691777926558888,
+              "support": "derived"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07691163803219116,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07691163803219116,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07701033642700608,
+              "support": "derived"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07691163803219116,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07691163803219116,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07691163803219116,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07691163803219116,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07691163803219116,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07691163803219116,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07691163803219116,
+              "support": "prior"
+            }
+          ]
+        },
+        {
+          "from": "dry_bean",
+          "eligible_mass": 9.492133501016001,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.031534113114611094,
+              "support": "derived"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.33265975881861026,
+              "support": "derived"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.044683044242946196,
+              "support": "derived"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.03129397300111366,
+              "support": "derived"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.03132314805395888,
+              "support": "derived"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.3093855150308534,
+              "support": "derived"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.03152821685705458,
+              "support": "derived"
+            },
+            {
+              "to": "oat",
+              "probability": 0.031265371813475315,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.031265371813475315,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.031265371813475315,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.031265371813475315,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.031265371813475315,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.031265371813475315,
+              "support": "prior"
+            }
+          ]
         },
         {
           "from": "peanut",
-          "v1_mass": 0.0104,
-          "eligible_mass": 0.0104,
-          "rule": "",
-          "kept": [],
-          "dropped": [
-            "dry_bean",
-            "maize_grain",
-            "peanut",
-            "sorghum_grain",
-            "sugarcane"
-          ],
-          "status": "no edges: row mass below minimum"
+          "eligible_mass": 0.010421949149,
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07679993768535336,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07764432374157795,
+              "support": "derived"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.0768348306315824,
+              "support": "derived"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07680001560703095,
+              "support": "derived"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07679993768535336,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07752023542544269,
+              "support": "derived"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07680109311153906,
+              "support": "derived"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07679993768535336,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07679993768535336,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07679993768535336,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07679993768535336,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07679993768535336,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07679993768535336,
+              "support": "prior"
+            }
+          ]
         },
         {
           "from": "oat",
-          "v1_mass": 0,
           "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
         },
         {
           "from": "forage_radish",
-          "v1_mass": 0,
           "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
         },
         {
           "from": "brachiaria",
-          "v1_mass": 0,
           "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
         },
         {
           "from": "millet",
-          "v1_mass": 0,
           "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
         },
         {
           "from": "crotalaria",
-          "v1_mass": 0,
           "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
         },
         {
           "from": "mucuna",
-          "v1_mass": 0,
           "eligible_mass": 0.0,
-          "rule": "",
-          "kept": [],
-          "dropped": [],
-          "status": "no edges: row mass below minimum"
+          "kept": [
+            {
+              "to": "soybean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "maize_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sugarcane",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "sorghum_grain",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "wheat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "dry_bean",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "peanut",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "oat",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "forage_radish",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "brachiaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "millet",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "crotalaria",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            },
+            {
+              "to": "mucuna",
+              "probability": 0.07692307692307693,
+              "support": "prior"
+            }
+          ]
         }
       ]
     }

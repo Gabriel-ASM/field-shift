@@ -1,5 +1,9 @@
 # Dados do Field Shift
 
+## Diretório canônico
+
+O único diretório-fonte de dados é `data/` na raiz do repositório. Pipelines, ingestão v2, Docker e o gerador da visualização leem daqui. `docs/visualizacao.html` é um artefato autossuficiente: o gerador embute os seis payloads necessários, portanto não precisa de uma cópia em `docs/data/`. A fonte HTML é `field_shift/front/index.html`; edite-a e regenere a página com `python -m field_shift.front --output docs/visualizacao.html --seed 2026`.
+
 ## O que está disponível
 
 A síntese mais recente da coleta está em [`research/field_shift_cerne_dos_dados_2026-11-14.md`](../research/field_shift_cerne_dos_dados_2026-11-14.md); ela descreve 55 arquivos do computador de origem, que continuam ausentes deste checkout. O inventário abaixo lista o que está disponível aqui. Para os exemplos pedidos, foram baixados NASA POWER Daily e SoilGrids, malhas municipais IBGE, tábuas abertas CSV do SISZARC/MAPA e série municipal PAM/SIDRA do IBGE para Ariquemes (RO), Franca (SP) e Varginha (MG). Os parâmetros de água FAO‑56 foram extraídos para as culturas listadas e mantêm as incompatibilidades/ausências da fonte.
@@ -105,7 +109,7 @@ python data/pipeline/build_crop_transition_markov.py
 python -m field_shift.legacy.demo
 python -m field_shift.legacy.crop_demo --profile data/profiles/franca-sp --crop peanut --planting-decendio 1 --risk 20
 python -m field_shift.legacy --profile data/profiles/ariquemes-ro --policy data/policies/balanco-hidrico-referencia.json --initial-state water_medium
-python -m field_shift.legacy.visualize --output docs/visualizacao.html --seed 2026
+python -m field_shift.front --output docs/visualizacao.html --seed 2026
 ```
 
 Os pipelines de transformação leem `raw/`; não baixam dados por conta própria. `fetch_pam.py` e `fetch_zarc_municipal_extracts.py` baixam as tábuas abertas MAPA e os dados PAM usados nesta entrega; `fetch_zarc_examples.py` consulta relatórios SISZARC filtrados para auditoria. A página gerada empacota ZARC, PAM, Kc, modelos e história ambiental para abrir localmente sem API externa. A origem, o período, as unidades, a resolução, o hash e a qualidade de cada conjunto estão no manifesto de cada perfil.

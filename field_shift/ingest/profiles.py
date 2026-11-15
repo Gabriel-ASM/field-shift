@@ -67,6 +67,8 @@ def build_profile(profile: str, initial_state: str) -> dict[str, Any]:
         {"pointer": "/climate/lat", "support": "derived", "provenance": point["basis"]},
         {"pointer": "/climate/long", "support": "derived", "provenance": point["basis"]},
     ]
+    benchmarks = _read(DATA / "reference" / "economic-benchmarks.json")
+    thresholds = _read(DATA / "reference" / "soil-crop-response-hypotheses.json")["soil_carbon"]["water_state_bin_thresholds_fraction"]
     climate_file = directory / "climate-daily.csv"
     return {
         "id": profile,
@@ -75,6 +77,16 @@ def build_profile(profile: str, initial_state: str) -> dict[str, Any]:
         "scope": soil["scope"],
         "initial_node": node,
         "values": values,
+        "economics": {
+            **benchmarks["profiles"][profile],
+            "discount_rate": benchmarks["discount_rate"],
+            "reference_currency_month": benchmarks["reference_currency_month"],
+        },
+        "water_classes": {
+            "low_max_inclusive": thresholds["water_low_max_inclusive"],
+            "medium_max_inclusive": thresholds["water_medium_max_inclusive"],
+            "provenance": "Exploratory thirds of available water capacity; not crop-specific stress thresholds.",
+        },
         "climate_history": {
             "file": climate_file.relative_to(DATA.parent).as_posix(),
             "period": _climate_period(climate_file),

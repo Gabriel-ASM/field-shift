@@ -10,6 +10,119 @@
         "transitions"
     ],
     "properties": {
+    "alpha_per_destination": {
+      "type": "number",
+      "minimum": 0,
+      "exclusiveMinimum": 0,
+      "description": "Symmetric Dirichlet prior for the eligible crop destinations. Edge probability is the posterior mean before calendar and environmental adjustment."
+    },
+    "pam_history": {
+      "type": "object",
+      "description": "Municipal statistics for audit; includes historical crops excluded from the simulation. The annual shares are preserved without renormalization.",
+      "required": [
+        "source",
+        "period",
+        "top_crop_limit",
+        "annual_sequence"
+      ],
+      "properties": {
+        "source": {
+          "type": "object"
+        },
+        "period": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "top_crop_limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "annual_sequence": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "year",
+              "state_id",
+              "crop_name",
+              "harvested_area_ha",
+              "top5_area_total_ha",
+              "top5_crops",
+              "reported_crop_areas_ha"
+            ],
+            "properties": {
+              "year": {
+                "type": "integer"
+              },
+              "state_id": {
+                "type": "string"
+              },
+              "crop_name": {
+                "type": "string"
+              },
+              "harvested_area_ha": {
+                "type": "number",
+                "minimum": 0
+              },
+              "top5_area_total_ha": {
+                "type": "number",
+                "minimum": 0
+              },
+              "top5_crops": {
+                "type": "array",
+                "minItems": 1,
+                "maxItems": 5,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "rank",
+                    "state_id",
+                    "crop_name",
+                    "harvested_area_ha",
+                    "area_share_within_top5"
+                  ],
+                  "properties": {
+                    "rank": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 5
+                    },
+                    "state_id": {
+                      "type": "string"
+                    },
+                    "crop_name": {
+                      "type": "string"
+                    },
+                    "harvested_area_ha": {
+                      "type": "number",
+                      "minimum": 0
+                    },
+                    "area_share_within_top5": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    }
+                  }
+                }
+              },
+              "reported_crop_areas_ha": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
         "id": {
             "type": "string",
             "description": "Chain id. Generated chains use the profile id."
@@ -195,7 +308,7 @@
                 "outgoing_mass": {
                     "type": "number",
                     "minimum": 0,
-                    "description": "Total mass leaving 'from' over the destinations kept in the chain. probability = mass / outgoing_mass."
+                    "description": "Raw PAM mass over eligible destinations before adding the prior. With alpha, the posterior mean is (mass + alpha) / (outgoing_mass + alpha * number of destinations)."
                 },
                 "when": {
                     "type": "array",

@@ -36,6 +36,7 @@ def chain_matrix(chain: dict[str, Any]) -> dict[str, Any]:
         rows.append({"from": origin, "has_edges": origin in with_edges, "outgoing_mass": outgoing, "cells": cells})
     return {
         "profile": chain.get("profile"), "initial_state": chain["initial_state"], "states": states, "rows": rows,
+        "alpha_per_destination": chain.get("alpha_per_destination"),
         "dead_ends": sorted({destination for _, destination in edges} - with_edges),
     }
 

@@ -49,7 +49,7 @@ The sections below describe the v1 research app (`field_shift/legacy`).
 
 Para executar a simulação de referência nos três perfis, rode `python -m field_shift.legacy.demo`. Para um perfil isolado, use `python -m field_shift.legacy --profile data/profiles/ariquemes-ro --policy data/policies/balanco-hidrico-referencia.json --initial-state water_medium`. Os dados brutos estão em `data/raw/`, os normalizados e as contagens Markov em `data/profiles/`, e as fontes/gaps estão em `data/README.md`.
 
-Abra a [demonstração interativa](docs/visualizacao.html) para escolher o município, definir a cultura principal inicial, inspecionar a matriz Markov completa e comparar o VPL em 60 meses. Regenere custos/entradas econômicas com `python data/pipeline/build_economic_benchmarks.py`, a cadeia com `python data/pipeline/build_crop_transition_markov.py` e a página com `python -m field_shift.legacy.visualize --output docs/visualizacao.html --seed 2026`.
+Abra a [demonstração interativa](docs/visualizacao.html) para escolher o município, definir a cultura principal inicial, inspecionar a matriz Markov completa e comparar o VPL em 60 meses. As fontes e o gerador ficam em `field_shift/front/`; edite os arquivos dessa pasta e regenere a página. Regenere custos/entradas econômicas com `python data/pipeline/build_economic_benchmarks.py`, a cadeia com `python data/pipeline/build_crop_transition_markov.py` e a página com `python -m field_shift.front --output docs/visualizacao.html --seed 2026`. O gerador lê apenas `data/` na raiz e embute o necessário no HTML, sem usar `docs/data/`.
 
 ## Ideia em uma figura
 

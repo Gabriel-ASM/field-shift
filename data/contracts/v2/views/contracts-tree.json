@@ -104,6 +104,10 @@
         }
       },
       "monte_carlo.json": {
+        "ranking_preferences": {
+          "environment_weight *": "number 0..0.5",
+          "return_weight *": "number 0..1"
+        },
         "seed *": "integer 0..",
         "trajectories *": "integer 1..",
         "horizon_days *": "integer 1..",
@@ -178,6 +182,33 @@
         },
         "chain *": {
           "-> markov.json": {
+            "alpha_per_destination": "number 0..",
+            "pam_history": {
+              "source *": "object",
+              "period *": {
+                "[ ] each item": "integer"
+              },
+              "top_crop_limit *": "integer 1..5",
+              "annual_sequence *": {
+                "[ ] each item": {
+                  "year *": "integer",
+                  "state_id *": "string",
+                  "crop_name *": "string",
+                  "harvested_area_ha *": "number 0..",
+                  "top5_area_total_ha *": "number 0..",
+                  "top5_crops *": {
+                    "[ ] each item": {
+                      "rank *": "integer 1..5",
+                      "state_id *": "string",
+                      "crop_name *": "string",
+                      "harvested_area_ha *": "number 0..",
+                      "area_share_within_top5 *": "number 0..1"
+                    }
+                  },
+                  "reported_crop_areas_ha *": "object"
+                }
+              }
+            },
             "id": "string",
             "profile": "string",
             "description": "string",
@@ -301,6 +332,26 @@
         }
       },
       "profile.json": {
+        "economics": {
+          "municipality": "string",
+          "uf": "string",
+          "crop_inputs *": "object",
+          "economically_supported_crop_ids": {
+            "[ ] each item": "string"
+          },
+          "economic_exclusions": {
+            "[ ] each item": "string"
+          },
+          "discount_rate *": {
+            "real_annual_rate_approx *": "number"
+          },
+          "reference_currency_month *": "string"
+        },
+        "water_classes": {
+          "low_max_inclusive *": "number 0..1",
+          "medium_max_inclusive *": "number 0..1",
+          "provenance *": "string"
+        },
         "id *": "string",
         "label *": "string",
         "municipality": {

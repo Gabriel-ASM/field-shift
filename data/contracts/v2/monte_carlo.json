@@ -6,6 +6,31 @@
     "type": "object",
     "required": ["seed", "trajectories", "horizon_days", "profile", "chain", "scenarios"],
     "properties": {
+    "ranking_preferences": {
+      "type": "object",
+      "description": "Optional browser ranking preferences inherited from v1. These weights rank the simulated results, not the transitions.",
+      "properties": {
+        "environment_weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 0.5,
+          "default": 0.2,
+          "description": "Share of the total score for final soil and water."
+        },
+        "return_weight": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "default": 0.5,
+          "description": "Share of the economic score for P95. The remaining weight goes to CVaR5."
+        }
+      },
+      "required": [
+        "environment_weight",
+        "return_weight"
+      ],
+      "additionalProperties": false
+    },
         "seed": {"type": "integer", "minimum": 0, "description": "Master seed. Same seed + same trajectory index = same environment in every scenario."},
         "trajectories": {"type": "integer", "minimum": 1, "description": "Trajectories per scenario."},
         "horizon_days": {"type": "integer", "minimum": 1, "examples": [1825]},

@@ -119,7 +119,7 @@ O multiplicador de rendimento combina classe hídrica e carbono do solo: água b
 python data/pipeline/build_profiles.py
 python data/pipeline/build_crop_transition_markov.py
 python data/pipeline/build_economic_benchmarks.py
-python -m field_shift.legacy.visualize --output docs/visualizacao.html --seed 2026
+python -m field_shift.front --output docs/visualizacao.html --seed 2026
 ```
 
 Os pipelines resolvem os contratos ativos por nome lógico em `data/contracts/registry.json`; instale os requisitos de `data/pipeline/requirements.txt` antes de reconstruir os perfis.

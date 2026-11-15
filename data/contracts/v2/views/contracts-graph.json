@@ -418,6 +418,114 @@
       ],
       "fields": [
         {
+          "path": "alpha_per_destination",
+          "type": "number 0..",
+          "required": false,
+          "description": "Symmetric Dirichlet prior for the eligible crop destinations. Edge probability is the posterior mean before calendar and environmental adjustment."
+        },
+        {
+          "path": "pam_history",
+          "type": "object",
+          "required": false,
+          "description": "Municipal statistics for audit; includes historical crops excluded from the simulation. The annual shares are preserved without renormalization."
+        },
+        {
+          "path": "pam_history.source",
+          "type": "object",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "pam_history.period",
+          "type": "array of integer",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "pam_history.top_crop_limit",
+          "type": "integer 1..5",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "pam_history.annual_sequence",
+          "type": "array of object",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "pam_history.annual_sequence[].year",
+          "type": "integer",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "pam_history.annual_sequence[].state_id",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "pam_history.annual_sequence[].crop_name",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "pam_history.annual_sequence[].harvested_area_ha",
+          "type": "number 0..",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "pam_history.annual_sequence[].top5_area_total_ha",
+          "type": "number 0..",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "pam_history.annual_sequence[].top5_crops",
+          "type": "array of object",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "pam_history.annual_sequence[].top5_crops[].rank",
+          "type": "integer 1..5",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "pam_history.annual_sequence[].top5_crops[].state_id",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "pam_history.annual_sequence[].top5_crops[].crop_name",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "pam_history.annual_sequence[].top5_crops[].harvested_area_ha",
+          "type": "number 0..",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "pam_history.annual_sequence[].top5_crops[].area_share_within_top5",
+          "type": "number 0..1",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "pam_history.annual_sequence[].reported_crop_areas_ha",
+          "type": "object",
+          "required": true,
+          "description": ""
+        },
+        {
           "path": "id",
           "type": "string",
           "required": false,
@@ -595,7 +703,7 @@
           "path": "transition.outgoing_mass",
           "type": "number 0..",
           "required": false,
-          "description": "Total mass leaving 'from' over the destinations kept in the chain. probability = mass / outgoing_mass."
+          "description": "Raw PAM mass over eligible destinations before adding the prior. With alpha, the posterior mean is (mass + alpha) / (outgoing_mass + alpha * number of destinations)."
         },
         {
           "path": "transition.when",
@@ -634,6 +742,24 @@
         "markov_policy"
       ],
       "fields": [
+        {
+          "path": "ranking_preferences",
+          "type": "object",
+          "required": false,
+          "description": "Optional browser ranking preferences inherited from v1. These weights rank the simulated results, not the transitions."
+        },
+        {
+          "path": "ranking_preferences.environment_weight",
+          "type": "number 0..0.5",
+          "required": true,
+          "description": "Share of the total score for final soil and water."
+        },
+        {
+          "path": "ranking_preferences.return_weight",
+          "type": "number 0..1",
+          "required": true,
+          "description": "Share of the economic score for P95. The remaining weight goes to CVaR5."
+        },
         {
           "path": "seed",
           "type": "integer 0..",
@@ -745,6 +871,144 @@
       "comment": "One place the simulation can run for. Holds the node every trajectory starts from and says, value by value, where it came from.",
       "definitions": [],
       "fields": [
+        {
+          "path": "economics",
+          "type": "object",
+          "required": false,
+          "description": "Existing municipal PAM/CONAB benchmark shape; price and cost retain source and proxy metadata. Session edits are applied by the browser."
+        },
+        {
+          "path": "economics.municipality",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "path": "economics.uf",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "path": "economics.crop_inputs",
+          "type": "object",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "economics.crop_inputs.{key}.label",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "path": "economics.crop_inputs.{key}.pam_product",
+          "type": "string or null",
+          "required": false,
+          "description": ""
+        },
+        {
+          "path": "economics.crop_inputs.{key}.yield_source",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "path": "economics.crop_inputs.{key}.yield_kg_ha_median_2021_2025",
+          "type": "number or null 0..",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "economics.crop_inputs.{key}.price.brl_per_tonne",
+          "type": "number 0..",
+          "required": false,
+          "description": ""
+        },
+        {
+          "path": "economics.crop_inputs.{key}.price.trend_annual_fraction",
+          "type": "number -1..",
+          "required": false,
+          "description": ""
+        },
+        {
+          "path": "economics.crop_inputs.{key}.cost_panel.total_cost_brl_ha_reference_month",
+          "type": "number 0..",
+          "required": false,
+          "description": ""
+        },
+        {
+          "path": "economics.crop_inputs.{key}.eligible_for_economic_comparison",
+          "type": "boolean",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "economics.crop_inputs.{key}.include_in_vpl",
+          "type": "boolean",
+          "required": false,
+          "description": ""
+        },
+        {
+          "path": "economics.crop_inputs.{key}.editable",
+          "type": "boolean",
+          "required": false,
+          "description": ""
+        },
+        {
+          "path": "economics.crop_inputs.{key}.missing_inputs",
+          "type": "array of string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "path": "economics.crop_inputs.{key}.assumption_notes",
+          "type": "array of string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "path": "economics.economically_supported_crop_ids",
+          "type": "array of string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "path": "economics.economic_exclusions",
+          "type": "array of string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "path": "economics.discount_rate.real_annual_rate_approx",
+          "type": "number",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "economics.reference_currency_month",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "water_classes.low_max_inclusive",
+          "type": "number 0..1",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "water_classes.medium_max_inclusive",
+          "type": "number 0..1",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "water_classes.provenance",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
         {
           "path": "id",
           "type": "string",

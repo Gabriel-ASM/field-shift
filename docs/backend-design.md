@@ -10,18 +10,18 @@ Turn the research app into a backend for a web application:
 - `markov.py` and `monte_carlo.py` engines that implement contracts v2 (`data/contracts/v2/`).
 - MongoDB collections validated by the same contracts.
 
-Today the crop model (Markov, water, carbon, NPV, 100,000 trajectories) runs in JavaScript inside `field_shift/legacy/replay.html`. The Python engines only cover the v1 water-state model. The engine phase ports the JavaScript model to Python.
+The crop model runs in the browser. The sources and generator live in `field_shift/front/`, and `python -m field_shift.front` builds the self-contained `docs/visualizacao.html`. Running the visualizer requires no API or MongoDB. A server-side simulation engine is a separate future step.
 
 Out of scope: the geographic map overlay of simulations.
 
 ## Decisions taken
 
 - FastAPI.
-- Restructure `field_shift/` in place. v1 modules move to `field_shift/legacy/` so `docs/visualizacao.html` can still be rebuilt, and are removed when the new engine reproduces v1.
+- Keep the browser simulation and the Python legacy water model in separate packages.
 - A run separates environment (random, shared by all scenarios), choice (scenario policy) and outcomes (deterministic). See `data/contracts/v2/monte_carlo.json`.
-- Generated edges are `derived`; no prior. Edges exist only where PAM gives mass.
+- Generated edges with PAM mass are `derived`; edges supported only by the Dirichlet prior are `prior`.
 - Coffee is out of the model: its profitable cycle (about 3 years) is too long for the horizon.
-- The v1 reweighting of Markov probabilities by simulated water and carbon is dropped for now. If needed later it returns as optional `weight_modifiers` on transitions.
+- The browser keeps the v1 calendar gates and water/carbon reweighting. The API matrix reports the baseline before these adjustments.
 
 ## G1. Module map
 
@@ -37,7 +37,8 @@ flowchart TD
   engines --> contracts["contracts<br/>registry, loader, bundle, checks"]
   db --> contracts
   views --> contracts
-  legacy["legacy<br/>v1 engine + replay.html, removed at parity"]
+  front["front<br/>offline browser simulation"] --> ingest
+  legacy["legacy<br/>v1 water engine"]
 ```
 
 ## G2. Data lineage
@@ -121,110 +122,13 @@ Same seed and trajectory give the same environment and parameters in every scena
 
 ## G4. Chains generated from v1, per profile
 
-Output of `python -m field_shift.ingest`, stored in `data/v2/chains/` with the audit trail in `data/v2/ingestion-report.json`. One state per catalog crop (`<crop>:skip_stages`) plus `fallow:skip_stages`; probability = mass / mass kept in the row.
+Run `python -m field_shift.ingest` to write the v2 documents and the [ingestion report](../data/v2/ingestion-report.json). Each crop has a `<crop>:skip_stages` state; `fallow:skip_stages` is reserved for waiting and is not a PAM destination. The browser projects the v2 state IDs to crop IDs for the UI and consumes `from`, `to` and raw `mass`.
 
-### Findings to audit
-
-1. **Rules applied.** Edges exist only where PAM gives mass and are labelled `derived`; there is no Dirichlet prior. Coffee is removed with its mass. A row needs at least 1.0 of mass to produce edges, and edges below 0.02 are dropped before renormalizing. Parameters live in `ChainRules` (`field_shift/ingest/chains.py`).
-2. **Few crops carry the baseline.** Ariquemes: 8 edges from dry_bean, maize_grain, soybean. Franca: 7 edges from maize_grain, soybean, sugarcane. Varginha: 5 edges from dry_bean, maize_grain. Every other crop has no baseline edge and is reachable only through rotation scenarios.
-3. **Sugarcane traps the baseline.** The v1 lifecycle rule keeps only sugarcane to sugarcane. In Franca it is absorbing: soybean goes there with 0.30 and maize with 0.20, and nothing leaves. In Varginha it is a dead end (dry_bean to sugarcane 0.02, no edge out). Open decision: remove sugarcane like coffee (semi-perennial, about five cuts) or keep it.
-4. **Removing coffee changes Varginha.** Coffee was its dominant crop (mass 10 of the coffee row alone). The Varginha baseline now describes only maize and dry bean.
-5. **The planting calendar is not in the chain.** In v2 it is an engine rule: after an edge is chosen the field waits in `fallow:skip_stages` until the crop's ZARC window opens.
-
-### ariquemes-ro (1988-2025)
-
-```mermaid
-flowchart LR
-  soybean -->|0.74| soybean
-  soybean -->|0.26| maize_grain
-  maize_grain -->|0.66| maize_grain
-  maize_grain -->|0.21| dry_bean
-  maize_grain -->|0.13| soybean
-  dry_bean -->|0.69| maize_grain
-  dry_bean -->|0.25| dry_bean
-  dry_bean -->|0.06| soybean
-  start(["start"]) --> soybean
-  alone["11 states without baseline edges:<br/>sugarcane, sorghum_grain, wheat, peanut, oat, forage_radish ...<br/>reachable only through rotation scenarios"]
-```
-
-| From | Eligible PAM mass | Mass kept | Note | Destinations |
-|---|---|---|---|---|
-| soybean | 8.91 | 98% | - | soybean 0.74, maize_grain 0.26 |
-| maize_grain | 19.11 | 99% | - | maize_grain 0.66, dry_bean 0.21, soybean 0.13 |
-| sugarcane | 0.00 | 0% | lifecycle: sugarcane |  |
-| sorghum_grain | 0.00 | 0% | no edges |  |
-| wheat | 0.00 | 0% | no edges |  |
-| dry_bean | 5.86 | 99% | - | maize_grain 0.69, dry_bean 0.25, soybean 0.06 |
-| peanut | 0.00 | 0% | no edges |  |
-| oat | 0.00 | 0% | no edges |  |
-| forage_radish | 0.00 | 0% | no edges |  |
-| brachiaria | 0.00 | 0% | no edges |  |
-| millet | 0.00 | 0% | no edges |  |
-| crotalaria | 0.00 | 0% | no edges |  |
-| mucuna | 0.00 | 0% | no edges |  |
-| fallow | 0.00 | 0% | engine state |  |
-
-### franca-sp (1988-2025)
-
-```mermaid
-flowchart LR
-  soybean -->|0.47| maize_grain
-  soybean -->|0.30| sugarcane
-  soybean -->|0.23| soybean
-  maize_grain -->|0.60| maize_grain
-  maize_grain -->|0.21| soybean
-  maize_grain -->|0.20| sugarcane
-  sugarcane -->|1.00| sugarcane
-  start(["start"]) --> soybean
-  alone["11 states without baseline edges:<br/>sorghum_grain, wheat, dry_bean, peanut, oat, forage_radish ...<br/>reachable only through rotation scenarios"]
-```
-
-| From | Eligible PAM mass | Mass kept | Note | Destinations |
-|---|---|---|---|---|
-| soybean | 5.15 | 98% | - | maize_grain 0.47, sugarcane 0.30, soybean 0.23 |
-| maize_grain | 12.98 | 98% | - | maize_grain 0.60, soybean 0.21, sugarcane 0.20 |
-| sugarcane | 3.16 | 100% | lifecycle: sugarcane | sugarcane 1.00 |
-| sorghum_grain | 0.17 | 0% | no edges |  |
-| wheat | 0.00 | 0% | no edges |  |
-| dry_bean | 0.39 | 0% | no edges |  |
-| peanut | 0.00 | 0% | no edges |  |
-| oat | 0.00 | 0% | no edges |  |
-| forage_radish | 0.00 | 0% | no edges |  |
-| brachiaria | 0.00 | 0% | no edges |  |
-| millet | 0.00 | 0% | no edges |  |
-| crotalaria | 0.00 | 0% | no edges |  |
-| mucuna | 0.00 | 0% | no edges |  |
-| fallow | 0.00 | 0% | engine state |  |
-
-### varginha-mg (1988-2025)
-
-```mermaid
-flowchart LR
-  maize_grain -->|0.61| maize_grain
-  maize_grain -->|0.39| dry_bean
-  dry_bean -->|0.51| maize_grain
-  dry_bean -->|0.47| dry_bean
-  dry_bean -->|0.02| sugarcane
-  start(["start"]) --> maize_grain
-  alone["11 states without baseline edges:<br/>soybean, sorghum_grain, wheat, peanut, oat, forage_radish ...<br/>reachable only through rotation scenarios"]
-```
-
-| From | Eligible PAM mass | Mass kept | Note | Destinations |
-|---|---|---|---|---|
-| soybean | 0.01 | 0% | no edges |  |
-| maize_grain | 13.49 | 98% | - | maize_grain 0.61, dry_bean 0.39 |
-| sugarcane | 0.01 | 0% | lifecycle: sugarcane |  |
-| sorghum_grain | 0.00 | 0% | no edges |  |
-| wheat | 0.00 | 0% | no edges |  |
-| dry_bean | 9.49 | 100% | - | maize_grain 0.51, dry_bean 0.47, sugarcane 0.02 |
-| peanut | 0.01 | 0% | no edges |  |
-| oat | 0.00 | 0% | no edges |  |
-| forage_radish | 0.00 | 0% | no edges |  |
-| brachiaria | 0.00 | 0% | no edges |  |
-| millet | 0.00 | 0% | no edges |  |
-| crotalaria | 0.00 | 0% | no edges |  |
-| mucuna | 0.00 | 0% | no edges |  |
-| fallow | 0.00 | 0% | engine state |  |
+- **Probability.** Every allowed destination receives Dirichlet alpha 0.5. The API reports the mean `(mass + alpha) / (outgoing_mass + alpha × destinations)`; there is no minimum mass or probability cutoff. The browser samples a row per trajectory, restricts it to the current planting calendar, applies water/carbon factors and normalizes. A prior edge represents an assumption, not municipal or field evidence.
+- **Crop lifecycle.** Coffee and its interrow simulation are excluded. Sugarcane remains a crop and, once established, stays in place through the horizon; renewal would require data on age and cuts. Its self-transition is 100% under that lifecycle rule even if the row has no PAM mass.
+- **PAM audit.** `pam_history` preserves the original annual top five, including coffee when reported. Shares retain their historical denominator. Counts of consecutive rank-one crops are a separate diagnostic, not observed field transitions.
+- **Water.** The profile keeps a continuous fraction of available water capacity and documents how to present it as low, medium or high (thirds). The browser estimates the fraction each period from the historical water classes and the crop demand adjustment. It uses the continuous fraction to reweight crop transitions and the classes for the existing yield and chart rules.
+- **Economics.** The v2 profile retains v1 yield, price, trend, costs, eligibility, discount rate and currency month. The browser retains the v1 ranking rules (P95/CVaR5 within economics, and the weight on final soil and water). Editing assumptions applies to the browser session.
 
 ## G5. Collections and validators
 
@@ -313,7 +217,8 @@ field_shift/
   db/          client, collections, validators, repositories
   api/         factory and routes: contracts, views, profiles, chains (runs with the engines)
   views/       contract graph and tree
-  legacy/      v1 modules and replay.html
+  front/       HTML, styles, browser simulation, producer flow and offline generator
+  legacy/      v1 water model and compatibility entry point
 web/           front served at / (placeholder landing page until the real build lands)
 docker/        entrypoint of the single image
 tests/         unit per module, MongoDB integration, API
@@ -333,8 +238,6 @@ MongoDB, the API and the front ship in one image (`Dockerfile`, based on `mongo:
 | former `data/pipeline/build_contract_views.py` | moved to `views/` and `python -m field_shift.views` |
 | `field_shift/markov.py` (`Distribution`) | markov policy draw |
 | `field_shift/monte_carlo.py` (`FinancialSummary`, `SeasonalHistory`) | NPV summary, climate resampling |
-| `field_shift/visualize.py` (`topsoil_carbon_g_kg`) | profile ingestion |
-| `field_shift/legacy/replay.html` JS (`nextPlantingOpportunity`, `cycleDays`, `maturationDays`, `advanceWaterForCrop`, `soilDelta`, `repeatedCropYieldMultiplier`, `economicCashflow`, `scoreTrajectoryVpl`) | ported to `engines/` |
 
 ## Phases
 
@@ -344,6 +247,6 @@ MongoDB, the API and the front ship in one image (`Dockerfile`, based on `mongo:
 
 ## Open questions
 
-- Sugarcane: remove it like coffee, or keep it with a renewal rule (finding 3)?
+- Sugarcane renewal after several cuts: model it when crop age and renewal inputs are available.
 - Climate model: see the seasons proposal discussed with the project owner (rainy-season onset and climate regime as environment variables).
 - Crop ingestion: map ZARC rows (crop x soil group x cultivar cycle) to `crop.planting_windows`.

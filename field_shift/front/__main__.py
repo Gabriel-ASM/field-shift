@@ -1,0 +1,190 @@
+"""Generate the offline crop Markov and Monte Carlo demonstration."""
+
+from argparse import ArgumentParser
+import json
+from pathlib import Path
+from random import Random
+
+from ..ingest import build_chain, build_profile
+from ..ingest.profiles import topsoil_mean
+
+
+ROOT = Path(__file__).resolve().parents[2]
+DATA_ROOT = ROOT / "data"
+FRONT = Path(__file__).parent
+TEMPLATE = FRONT / "index.html"
+STATE_NAMES = {"RO": "Rondônia", "SP": "São Paulo", "MG": "Minas Gerais"}
+
+
+def read_json(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def payload_json(value: object) -> str:
+    return json.dumps(value, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
+
+
+def topsoil_carbon_g_kg(soil: dict) -> float:
+    return topsoil_mean(soil["layers"], "organic_carbon_g_kg")
+
+
+def water_markov(profile_dir: Path) -> dict:
+    states = read_json(profile_dir / "states.json")
+    transitions = read_json(profile_dir / "transitions.json")
+    environment_history = read_json(profile_dir / "environment.json")
+    labels = {"water_low": "Baixa", "water_medium": "Média", "water_high": "Alta"}
+    return {
+        "states": [
+            {"id": state["id"], "water_class": state["water"], "label": labels[state["id"]]}
+            for state in states
+        ],
+        "transitions": [
+            {
+                "from": row["state"],
+                "environment": row["environment"],
+                "counts": row["counts"],
+                "sample_size": int(row["sample_size"]),
+                "effective_sample_size": int(row.get("effective_sample_size", sum(row["counts"].values()))),
+                "support": row["support"],
+                "pooling": row.get("pooling"),
+                "provenance": row["provenance"],
+            }
+            for row in transitions
+        ],
+        "environment_years": {
+            year: labels
+            for year, labels in sorted(environment_history.items())
+            if 1983 <= int(year) <= 2025
+        },
+        "years": [1983, 2025],
+        "periods_per_year": 24,
+        "initial_state_id": "water_medium",
+        "initial_storage_fraction": 0.5,
+        "provenance": (
+            "Transições derivadas de balanço hídrico quinzenal com chuva e ETo da NASA POWER, "
+            "AWC SoilGrids/Saxton–Rawls e demanda de referência Kc=1. Não são medições de água no talhão."
+        ),
+    }
+
+
+def export_page(output: Path, seed: int) -> None:
+    if not DATA_ROOT.is_dir():
+        raise FileNotFoundError(f"Canonical data directory not found: {DATA_ROOT}")
+    catalog = read_json(DATA_ROOT / "catalog" / "perfis-exemplo.json")
+    soil_hypotheses = read_json(DATA_ROOT / "reference" / "soil-crop-response-hypotheses.json")
+    crop_cycles = read_json(DATA_ROOT / "reference" / "crop-cycle-assumptions.json")
+    run_settings = read_json(DATA_ROOT / "reference" / "visualization-run-settings.json")
+    economic_prices = read_json(DATA_ROOT / "reference" / "yahoo-harvest-futures.json")
+    rng = Random(seed)
+    by_uf = {}
+    for profile in catalog["profiles"]:
+        by_uf.setdefault(profile["uf"], []).append(profile)
+
+    cases = []
+    profile_data = {}
+    for uf in ("RO", "SP", "MG"):
+        selected = rng.choice(by_uf[uf])
+        profile_id = selected["profile"]
+        profile_dir = DATA_ROOT / "profiles" / profile_id
+        soil = read_json(profile_dir / "soil-profile.json")
+        climate_summary = read_json(profile_dir / "climate-summary.json")
+        crop_markov = read_json(profile_dir / "crop-transition-markov.json")
+        zarc_planting_windows = read_json(profile_dir / "zarc-planting-windows.json")
+        chain, _ = build_chain(profile_id)
+        profile = build_profile(profile_id, chain["initial_state"])
+        node = profile["initial_node"]
+        crop_ids = {state["id"]: state["crop"] for state in chain["states"] if state["crop"] != "fallow"}
+        crops = set(crop_ids.values())
+        history = chain["pam_history"]
+        # The browser groups v2 states by crop for its one-node-per-crop UI.
+        # Keep v1 sources for display metadata, calendar and the climate calibration.
+        crop_view = {
+            **{key: crop_markov[key] for key in ("annual_observation_count", "adjacent_year_transition_count",
+                                                "area_weighted_transition_pair_count")},
+            **history,
+            "alpha_per_destination": chain["alpha_per_destination"],
+            "states": [state for state in crop_markov["states"] if state["id"] in crops],
+            "initial_crop_ids": [crop for crop in crop_markov["initial_crop_ids"] if crop in crops],
+            "lifecycle_rules": {crop: rule for crop, rule in crop_markov["lifecycle_rules"].items() if crop in crops},
+            "transitions": [
+                {**edge, "from": crop_ids[edge["from"]], "to": crop_ids[edge["to"]]}
+                for edge in chain["transitions"]
+            ],
+        }
+        water = water_markov(profile_dir)
+        water["initial_storage_fraction"] = node["soil"]["available_water_fraction"]
+        economics = profile["economics"]
+        crop_economics = {
+            **economics,
+            "crop_inputs": {crop: entry for crop, entry in economics["crop_inputs"].items() if crop in crops},
+            "economically_supported_crop_ids": [crop for crop in economics["economically_supported_crop_ids"] if crop in crops],
+            "economic_exclusions": [crop for crop in economics["economic_exclusions"] if crop in crops],
+        }
+
+        profile_data[profile_id] = {
+            "location": {
+                "municipality": profile["municipality"]["name"],
+                "uf": profile["municipality"]["uf"],
+                "ibge_code": profile["municipality"]["ibge_code"],
+            },
+            "soil": {
+                "organic_carbon_top_0_30_g_kg": node["soil"]["organic_carbon"],
+                "available_water_capacity_mm": node["soil"]["available_water_capacity"],
+                "source": soil["source"],
+                "scope": profile["scope"],
+                "sample_point_basis": soil["sample_point"]["basis"],
+            },
+            "crop_markov": crop_view,
+            "zarc_planting_windows": zarc_planting_windows,
+            "water_markov": water,
+            "water_classes": profile["water_classes"],
+            "climate_summary": climate_summary,
+            "economics": crop_economics,
+        }
+        cases.append(
+            {
+                "profile": profile_id,
+                "municipality": selected["municipality"],
+                "uf": uf,
+                "state_name": STATE_NAMES[uf],
+            }
+        )
+
+    html = TEMPLATE.read_text(encoding="utf-8")
+    replacements = {
+        "<!-- FRONT_CSS -->": (FRONT / "styles.css").read_text(encoding="utf-8"),
+        "<!-- ANALYSIS_JS -->": (FRONT / "analysis.js").read_text(encoding="utf-8"),
+        "<!-- PRODUCER_JS -->": (FRONT / "producer.js").read_text(encoding="utf-8"),
+        "<!-- CASE_DATA -->": payload_json({"seed": seed, "cases": cases}),
+        "<!-- PROFILE_DATA -->": payload_json(profile_data),
+        "<!-- SOIL_HYPOTHESES -->": payload_json(soil_hypotheses),
+        "<!-- CROP_CYCLES -->": payload_json(crop_cycles),
+        "<!-- RUN_SETTINGS -->": payload_json(run_settings),
+        "<!-- ECONOMIC_DATA -->": payload_json({
+            "price_snapshot": economic_prices,
+        }),
+    }
+    for marker, value in replacements.items():
+        marker_count = html.count(marker)
+        if marker_count != 1:
+            raise ValueError(
+                f"Expected exactly one {marker!r} placeholder in {TEMPLATE}, found {marker_count}"
+            )
+        html = html.replace(marker, value, 1)
+    unresolved = [marker for marker in replacements if marker in html]
+    if unresolved:
+        raise ValueError(f"Unresolved data placeholders in {TEMPLATE}: {', '.join(unresolved)}")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(html, encoding="utf-8")
+
+
+def main() -> None:
+    parser = ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path, default=Path("docs/visualizacao.html"))
+    parser.add_argument("--seed", type=int, default=2026)
+    options = parser.parse_args()
+    export_page(options.output, options.seed)
+
+
+if __name__ == "__main__":
+    main()

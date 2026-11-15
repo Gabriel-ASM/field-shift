@@ -11,6 +11,153 @@
         "values"
     ],
     "properties": {
+    "economics": {
+      "type": "object",
+      "properties": {
+        "municipality": {
+          "type": "string"
+        },
+        "uf": {
+          "type": "string"
+        },
+        "crop_inputs": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string"
+              },
+              "pam_product": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "yield_source": {
+                "type": "string"
+              },
+              "yield_kg_ha_median_2021_2025": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0
+              },
+              "price": {
+                "type": "object",
+                "properties": {
+                  "brl_per_tonne": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "trend_annual_fraction": {
+                    "type": "number",
+                    "minimum": -1,
+                    "exclusiveMinimum": -1
+                  }
+                }
+              },
+              "cost_panel": {
+                "type": "object",
+                "properties": {
+                  "total_cost_brl_ha_reference_month": {
+                    "type": "number",
+                    "minimum": 0
+                  }
+                }
+              },
+              "eligible_for_economic_comparison": {
+                "type": "boolean"
+              },
+              "include_in_vpl": {
+                "type": "boolean"
+              },
+              "editable": {
+                "type": "boolean"
+              },
+              "missing_inputs": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "assumption_notes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "yield_kg_ha_median_2021_2025",
+              "price",
+              "cost_panel",
+              "eligible_for_economic_comparison"
+            ]
+          }
+        },
+        "economically_supported_crop_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "economic_exclusions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "discount_rate": {
+          "type": "object",
+          "properties": {
+            "real_annual_rate_approx": {
+              "type": "number",
+              "exclusiveMinimum": -1
+            }
+          },
+          "required": [
+            "real_annual_rate_approx"
+          ]
+        },
+        "reference_currency_month": {
+          "type": "string",
+          "pattern": "^[0-9]{6}$"
+        }
+      },
+      "required": [
+        "crop_inputs",
+        "discount_rate",
+        "reference_currency_month"
+      ],
+      "additionalProperties": false,
+      "description": "Existing municipal PAM/CONAB benchmark shape; price and cost retain source and proxy metadata. Session edits are applied by the browser."
+    },
+    "water_classes": {
+      "type": "object",
+      "properties": {
+        "low_max_inclusive": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "medium_max_inclusive": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "provenance": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "low_max_inclusive",
+        "medium_max_inclusive",
+        "provenance"
+      ],
+      "additionalProperties": false
+    },
         "id": {
             "type": "string",
             "examples": [
