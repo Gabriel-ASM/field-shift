@@ -25,6 +25,7 @@ function Screen({ journey, world, area }: { journey: Journey; world: World; area
 function usePanelWidth(wide: boolean) {
   const panel = useRef<HTMLElement>(null);
   useEffect(() => {
+    if (!panel.current) return; // still loading: the panel is not on the page yet
     const tween = gsap.to(panel.current, { width: wide ? "100vw" : PANEL_WIDTH, duration: 0.9, ease: "power3.inOut" });
     return () => void tween.kill();
   }, [wide]);

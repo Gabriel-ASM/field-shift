@@ -60,23 +60,6 @@ input[type="range"] { width: 100%; padding: 0; accent-color: var(--green); }
 .growth-badge i { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
 .growth-copy { padding: 20px 22px 22px; }
 .growth-copy h2 { margin-top: 0; }
-.card, .metric { padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
-.recommendation { padding: 24px; border: 1px solid #cfded1; border-radius: 20px; background: linear-gradient(135deg, #fbfefb, #f2f8f1); }
-.result { display: grid; gap: 14px; }
-.sequence { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
-.sequence li { display: flex; align-items: center; gap: 6px; padding: 6px 12px 6px 6px; border-left: 5px solid; border-radius: 8px; background: var(--surface); text-transform: capitalize; font-weight: 600; }
-.sequence small { display: block; color: var(--muted); font-size: 0.7rem; font-weight: 400; text-transform: none; }
-.metrics { display: grid; gap: 14px; }
-.metric { display: grid; }
-.metric span, .metric small { color: var(--muted); font-size: 0.82rem; }
-.metric strong { font-size: 1.8rem; font-variant-numeric: tabular-nums; line-height: 1.25; }
-.metric:first-child strong { color: var(--green); }
-.considered { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 0.9rem; color: var(--muted); }
-.others { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
-.others li { display: grid; grid-template-columns: 1fr auto 2.5em; gap: 10px; align-items: center; }
-.others li span:last-child { text-align: right; color: var(--muted); }
-.others .tag { margin-left: 6px; color: var(--muted); font-size: 0.72rem; }
-.route i, .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 3px; }
 .timebar { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
 .timebar input { flex: 1; }
 .timebar output { min-width: 4.5em; text-align: right; font-variant-numeric: tabular-nums; }
@@ -90,15 +73,19 @@ h4 { margin: 12px 0 6px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0
 .environment figure { margin: 0; }
 .environment figcaption { font-size: 0.76rem; color: var(--muted); margin-top: 4px; }
 
-/* The plan, once the panel has grown over the map. */
-.panel.wide .result { max-width: 1120px; margin: 0 auto; grid-template-columns: repeat(6, 1fr); }
-.panel.wide .result > * { grid-column: 1 / -1; }
-.panel.wide .recommendation { grid-column: span 3; }
-.panel.wide .metrics { grid-column: span 3; }
-.panel.wide .card { grid-column: span 3; }
-.panel.wide .unfolded { grid-column: 1 / -1; }
+/* The plan, once the panel has grown over the map. Cards and charts come from reference.css. */
+.card { padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
+.legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 3px; }
+.result { display: grid; gap: 20px; max-width: 1120px; margin: 0 auto; }
+.result-heading { display: grid; justify-items: center; text-align: center; }
+.result-heading h2 { max-width: 760px; margin: 0 0 8px; font-size: clamp(1.6rem, 3.4vw, 2.6rem); line-height: 1.08; letter-spacing: -0.04em; }
+.result-heading .lead { margin: 0; }
+.result-facts li > span:first-child { color: var(--fs-green); }
+.setting { margin-bottom: 6px; }
+.method-close { width: 42px; height: 42px; padding: 0; border-radius: 50%; font-size: 1.4rem; line-height: 1; }
+.method-resilience > span { font-size: 1rem; line-height: 1.2; }
+.engine-feedback > span:first-child { color: var(--fs-green); }
 @media (max-width: 760px) {
   .panel { top: 46vh; width: 100vw; border-left: 0; border-top: 1px solid var(--line); }
   .panel.wide { top: 0; }
-  .panel.wide .result > * { grid-column: 1 / -1 !important; }
 }

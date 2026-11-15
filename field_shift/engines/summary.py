@@ -136,7 +136,8 @@ def routes(route: np.ndarray, value: np.ndarray, priced: np.ndarray, final: dict
                  for i in ordered]
     rankable = [members[i][priced[members[i]]] for i in np.flatnonzero(priced_count >= support.ranked)]
     pooled = np.sort(value[np.concatenate(rankable)]) if rankable else np.array([])
-    reference = {"cvar5": tail_mean(pooled), "p95": float(np.quantile(pooled, 0.95)), "count": int(pooled.size)} if pooled.size else None
+    reference = ({"cvar5": tail_mean(pooled), "p95": float(np.quantile(pooled, 0.95)), "count": int(pooled.size),
+                  "routes": len(rankable)} if pooled.size else None)
     return summaries, reference
 
 

@@ -23,6 +23,13 @@ export function cropColor(crop: string): string {
   return CROP_COLORS[crop] ?? UNKNOWN;
 }
 
+/** Names the farmer reads: farmerCropNames of field_shift/front/producer.js. */
+const CROP_NAMES: Record<string, string> = {
+  soybean: "Soybean", maize_grain: "Corn", sugarcane: "Sugarcane", sorghum_grain: "Sorghum", wheat: "Wheat",
+  dry_bean: "Dry bean", peanut: "Peanut", oat: "Black oat", forage_radish: "Forage radish", brachiaria: "Brachiaria",
+  millet: "Millet", crotalaria: "Crotalaria", mucuna: "Mucuna", fallow: "Fallow",
+};
+
 export function cropLabel(crop: string): string {
-  return crop.replace(/_/g, " ");
+  return CROP_NAMES[crop] ?? crop.replace(/_/g, " ");
 }
