@@ -28,6 +28,8 @@ export interface RankingSettings {
   break_even: number;
   minimum_scale: number;
   minimum_samples: number;
+  /** Evidence behind a sequence: its count of priced scenarios (data/reference/visualization-run-settings.json). */
+  support: { weight: number; minimum_ranked: number; minimum_recommended: number; full_score: number };
   environment_weight: { default_weight: number; maximum_weight: number; weight_step: number };
   soil_share: number;
   water_share: number;

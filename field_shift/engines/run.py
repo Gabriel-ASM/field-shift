@@ -55,12 +55,15 @@ def options(profile_id: str) -> dict:
 def ranking_settings(tables: Tables) -> dict:
     """How a client turns route results into a 0-10 score: the team's ranking rules, with their sources."""
     settings = reference_payload()["run_settings"]
-    score, environment = settings["ranking_score"], settings["ranking_score"]["environment"]
+    score, environment, support = settings["ranking_score"], settings["ranking_score"]["environment"], settings["ranking_score"]["support"]
     water = [float(m) for m in tables.water_yield]
     return {
         "minimum": score["minimum"], "maximum": score["maximum"], "break_even": score["break_even"],
         "minimum_scale": score["minimum_scale_brl_per_ha"],
         "minimum_samples": settings["monte_carlo"]["minimum_leader_vpl_samples"],
+        "support": {"weight": support["weight"], "minimum_ranked": support["minimum_ranked_vpl_samples"],
+                    "minimum_recommended": support["minimum_recommended_vpl_samples"],
+                    "full_score": support["full_score_vpl_samples"]},
         "environment_weight": {key: environment[key] for key in ("default_weight", "maximum_weight", "weight_step")},
         "soil_share": environment["soil_share"], "water_share": environment["water_share"],
         "soil_reference": environment["soil_reference_g_kg"],

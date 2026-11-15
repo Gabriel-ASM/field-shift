@@ -1,4 +1,4 @@
-import { rank, type RankedRoute } from "../ranking.ts";
+import { exploratory, rank, recommended, weights, type RankedRoute } from "../ranking.ts";
 import type { RunResult, ScenarioResult } from "../types.ts";
 import type { Journey } from "../useFieldShift.ts";
 import { cropColor, cropLabel } from "../ui/colors.ts";
@@ -31,6 +31,7 @@ function Metrics({ best }: { best: RankedRoute }) {
   const value = best.route.value!;
   return (
     <div className="metrics">
+      <Metric label="Scenarios behind it" value={percent(best.route.share)} note={`${count(value.count)} priced scenarios followed this sequence. Evidence score ${best.support.toFixed(1)} / 10.`} />
       <Metric label="Estimated net income" value={money(value.p50)} note="Median present value over five years, per hectare." />
       <Metric label="Final soil condition" value={`${best.soil.toFixed(1)} / 10`} note={`${best.route.final_carbon.toFixed(1)} g/kg of organic carbon at the end.`} />
       <Metric label="Available water" value={`${best.water.toFixed(1)} / 10`} note="From the soil water classes at the end of the horizon." />
@@ -43,7 +44,7 @@ function Considered({ run, scenario, best, weight }: { run: RunResult; scenario:
   return (
     <ul className="considered">
       <li>{count(scenario.trajectories)} scenarios, each with climate years resampled from the NASA POWER record of the municipality.</li>
-      <li>Your priorities: {percent(1 - weight)} financial return, {percent(weight)} soil and water. Score {best.total.toFixed(1)} of 10.</li>
+      <li>Your priorities: {percent(1 - weight)} financial return, {percent(weight)} soil and water. {percent(weights(weight, run.ranking).support)} of the score is the number of scenarios behind the sequence, up to {count(run.ranking.support.full_score)}. Score {best.total.toFixed(1)} of 10.</li>
       <li>{percent(best.route.share)} of the scenarios followed this sequence; in 90% of them the income stayed between {money(value.p5)} and {money(value.p95)}.</li>
       <li>Planting dates follow the MAPA ZARC windows; prices and costs come from IBGE and CONAB.</li>
       <li>Simulated on the {run.device.toUpperCase()} in {run.seconds} s, seed {run.seed}.</li>
@@ -51,15 +52,18 @@ function Considered({ run, scenario, best, weight }: { run: RunResult; scenario:
   );
 }
 
-function Others({ ranked }: { ranked: RankedRoute[] }) {
+function Others({ ranked, run }: { ranked: RankedRoute[]; run: RunResult }) {
   if (!ranked.length) return <p className="note">No other sequence had enough scenarios to compare.</p>;
   return (
     <ol className="others">
-      {ranked.map(({ route, total }, index) => (
+      {ranked.map((item, index) => (
         <li key={index}>
-          <span className="route">{route.crops.map((crop, position) => <i key={position} style={{ background: cropColor(crop) }} title={cropLabel(crop)} />)}</span>
-          <span>{money(route.value!.p50)}</span>
-          <span>{total.toFixed(1)}</span>
+          <span className="route">
+            {item.route.crops.map((crop, position) => <i key={position} style={{ background: cropColor(crop) }} title={cropLabel(crop)} />)}
+            {exploratory(item, run.ranking) && <small className="tag">exploratory · {count(item.route.value!.count)} scenarios</small>}
+          </span>
+          <span>{money(item.route.value!.p50)}</span>
+          <span>{item.total.toFixed(1)}</span>
         </li>
       ))}
     </ol>
@@ -69,14 +73,26 @@ function Others({ ranked }: { ranked: RankedRoute[] }) {
 export function ResultStep({ journey }: { journey: Journey }) {
   const run = journey.run!;
   const scenario = run.scenarios[0]!;
-  const [best, ...rest] = rank(scenario.routes, run.ranking, journey.weight);
+  const ranked = rank(scenario.routes, run.ranking, journey.weight);
+  const best = recommended(ranked, run.ranking);
+  const rest = ranked.filter((item) => item !== best);
   const actions = (
     <div className="actions">
       <button type="button" onClick={journey.restart}>Explore another scenario</button>
       <button type="button" className="primary" onClick={() => journey.go("priority")}>Adjust my priorities</button>
     </div>
   );
-  if (!best) return <section><h2>We couldn't rank a rotation</h2><p className="note">No simulated sequence has complete price and cost data.</p>{actions}</section>;
+  if (!ranked.length) return <section><h2>We couldn't rank a rotation</h2><p className="note">No simulated sequence has complete price and cost data from at least {count(run.ranking.support.minimum_ranked)} scenarios.</p>{actions}</section>;
+  if (!best) {
+    return (
+      <section>
+        <h2>No sequence has enough scenarios for a recommendation</h2>
+        <p className="note">A recommendation needs at least {count(run.ranking.support.minimum_recommended)} priced scenarios. These sequences are exploratory; run more scenarios to firm them up.</p>
+        <Others ranked={rest.slice(0, OTHERS)} run={run} />
+        {actions}
+      </section>
+    );
+  }
   return (
     <section className="result">
       <div className="result-heading">
@@ -96,7 +112,7 @@ export function ResultStep({ journey }: { journey: Journey }) {
       </article>
       <article className="card">
         <h3>Other good options</h3>
-        <Others ranked={rest.slice(0, OTHERS)} />
+        <Others ranked={rest.slice(0, OTHERS)} run={run} />
       </article>
       <article className="card unfolded">
         <h3>How the scenarios unfolded</h3>
