@@ -177,6 +177,26 @@ def test_cane_cut_is_checked_against_the_modeled_cuts():
     assert options("franca-sp")["sugarcane_cuts"] == 5
 
 
+def test_routes_carry_what_the_result_page_shows(tables):
+    """Distribution of recommendable routes, final water and soil, yield loss by planting, ranking reference."""
+    from field_shift.engines.summary import Support, summarize, yield_penalties
+    result = simulate(np, tables, Policy(tables.crops.index("soybean")), 4, 6000)
+    summary = summarize(result, tables, Support(ranked=2, recommended=20))
+    routes = summary["routes"]
+    assert summary["ranking_reference"]["cvar5"] <= summary["ranking_reference"]["p95"]
+    for route in routes:
+        assert sum(route["final_water"].values()) == pytest.approx(1, abs=1e-5)
+        assert route["final_carbon_class"] in ("low", "medium", "high") and len(route["yield_penalty"]) == len(route["crops"])
+        value = route["value"]
+        if value and value["count"] >= 20:
+            assert sum(value["distribution"]["counts"]) == value["count"]
+        elif value:
+            assert "distribution" not in value
+    assert any(route["value"] and route["value"]["count"] >= 20 for route in routes)
+    # maize: 0.022 per replanting, capped at 0.043 (crop-cycle-assumptions.json)
+    assert yield_penalties(["soybean", "maize_grain", "maize_grain", "maize_grain"], tables) == [0, 0, 0.022, 0.043]
+
+
 def test_route_key_round_trip():
     names = ["a", "b", "c", "fallow"]
     key = 0

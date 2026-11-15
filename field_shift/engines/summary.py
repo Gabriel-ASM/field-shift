@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import numpy as np
 
 from .backend import to_numpy
@@ -9,6 +11,16 @@ from .tables import WATER_STATES, Tables
 
 TAIL = 0.05
 QUANTILES = (0.05, 0.5, 0.95)
+BINS = 120              # histogram of a route's present values, for the return distribution chart
+TOP_ROUTES = 40         # most frequent routes always listed, recommendable or not
+CARBON_CLASSES = ("low", "medium", "high")
+
+
+@dataclass(frozen=True)
+class Support:
+    """Priced trajectories a route needs to be ranked, and to be recommended (visualization-run-settings.json)."""
+    ranked: int
+    recommended: int
 
 
 def value_summary(values: np.ndarray) -> dict | None:
@@ -17,9 +29,24 @@ def value_summary(values: np.ndarray) -> dict | None:
         return None
     ordered = np.sort(values)
     p5, p50, p95 = np.quantile(ordered, QUANTILES)
-    worst = ordered[: max(1, int(np.ceil(TAIL * ordered.size)))]
     return {"mean": float(ordered.mean()), "p5": float(p5), "p50": float(p50), "p95": float(p95),
-            "cvar5": float(worst.mean()), "count": int(ordered.size)}
+            "cvar5": float(tail_mean(ordered)), "count": int(ordered.size)}
+
+
+def tail_mean(ordered: np.ndarray) -> float:
+    """Mean of the lowest 5% (at least one value) of sorted values."""
+    return float(ordered[: max(1, int(np.ceil(TAIL * ordered.size)))].mean())
+
+
+def distribution(values: np.ndarray) -> dict:
+    """Fixed-bin histogram of present values, with the spread statistics the chart's smoothing uses
+    (standard deviation and quartiles, as renderReturnChart in producer.js computes them)."""
+    low, high = float(values.min()), float(values.max())
+    width = (high - low) / BINS
+    counts = np.histogram(values, bins=BINS, range=(low, high))[0] if width > 0 else np.array([values.size])
+    q25, q75 = np.quantile(values, (0.25, 0.75))
+    return {"start": low, "width": width, "counts": counts.tolist(), "sd": float(values.std()),
+            "q25": float(q25), "q75": float(q75)}
 
 
 def shares(labels: np.ndarray, size: int) -> list[float]:
@@ -41,17 +68,76 @@ def decode_route(key: int, names: list[str]) -> list[str]:
     return crops[::-1]
 
 
-def routes(route: np.ndarray, value: np.ndarray, priced: np.ndarray, final: dict, names: list[str], limit: int) -> list[dict]:
-    """The most frequent crop sequences, each with its share, present-value summary and final soil state.
+def yield_penalties(crops: list[str], tables: Tables) -> list[float] | None:
+    """Yield lost at each planting's harvest by replanting the same crop (repeated_crop_effect), as the result page of
+    producer.js shows it. None when the profile has nitrogen parameters: then the loss depends on the soil's N."""
+    if tables.nitrogen:
+        return None
+    penalties, streak = [], 0
+    for index, crop in enumerate(crops):
+        streak = streak + 1 if index and crop == crops[index - 1] else 1
+        if crop not in tables.crops:
+            penalties.append(0.0)
+            continue
+        i = tables.crops.index(crop)
+        multiplier = max(float(tables.repeat_floor[i]), 1 - (streak - 1) * float(tables.repeat_penalty[i]))
+        penalties.append(round(1 - multiplier, 6))
+    return penalties
 
-    `final` holds, per trajectory, the soil carbon and the water yield multiplier at the end of the horizon.
-    """
-    keys, inverse, counts = np.unique(route, return_inverse=True, return_counts=True)
-    top = np.argsort(-counts)[:limit]
-    return [{"crops": decode_route(int(keys[i]), names), "share": float(counts[i] / route.size),
-             "value": value_summary(value[(inverse == i) & priced]),
-             "final_carbon": float(final["carbon"][inverse == i].mean()),
-             "final_water_multiplier": float(final["water_multiplier"][inverse == i].mean())} for i in top]
+
+def carbon_class(tables: Tables, carbon: float) -> str:
+    limits = to_numpy(tables.carbon_class_limits)
+    return CARBON_CLASSES[int(carbon >= limits[0]) + int(carbon >= limits[1])]
+
+
+def final_state(result: dict, tables: Tables) -> dict:
+    """Per trajectory, the state at the end of the horizon."""
+    water_class = to_numpy(result["water_class"])[-1]
+    return {"carbon": to_numpy(result["carbon"])[-1], "water_class": water_class,
+            "water_fraction": to_numpy(result["water_fraction"]),
+            "water_multiplier": to_numpy(tables.water_yield)[water_class]}
+
+
+def route_summary(crops: list[str], members: np.ndarray, priced: np.ndarray, value: np.ndarray, final: dict,
+                  total: int, tables: Tables, support: Support) -> dict:
+    """One crop sequence: its share, present values, final soil and water, and yield losses by planting."""
+    values = value[members[priced[members]]]
+    summary = value_summary(values)
+    if summary and values.size >= support.recommended:
+        summary["distribution"] = distribution(values)
+    carbon = float(final["carbon"][members].mean())
+    return {"crops": crops, "share": float(members.size / total), "trajectories": int(members.size), "value": summary,
+            "final_carbon": carbon, "final_carbon_class": carbon_class(tables, carbon),
+            "final_water_multiplier": float(final["water_multiplier"][members].mean()),
+            "final_water": dict(zip(WATER_STATES, shares(final["water_class"][members], 3))),
+            "final_water_fraction": float(final["water_fraction"][members].mean()),
+            "yield_penalty": yield_penalties(crops, tables)}
+
+
+def groups(route: np.ndarray) -> tuple[np.ndarray, list[np.ndarray]]:
+    """Distinct route keys, and the trajectory indices of each."""
+    keys, inverse = np.unique(route, return_inverse=True)
+    order = np.argsort(inverse, kind="stable")
+    bounds = np.cumsum(np.bincount(inverse, minlength=keys.size))[:-1]
+    return keys, np.split(order, bounds)
+
+
+def routes(route: np.ndarray, value: np.ndarray, priced: np.ndarray, final: dict, tables: Tables,
+           support: Support) -> tuple[list[dict], dict | None]:
+    """The most frequent routes plus every route that can be recommended, and the money reference of the ranking:
+    CVaR5 and P95 of all priced trajectories in routes that can be ranked (analysis.js, referenceCvar5/referenceP95)."""
+    names = [*tables.crops, "fallow"]
+    keys, members = groups(route)
+    frequency = np.array([m.size for m in members])
+    priced_count = np.array([int(priced[m].sum()) for m in members])
+    listed = set(np.argsort(-frequency, kind="stable")[:TOP_ROUTES].tolist()) | set(np.flatnonzero(priced_count >= support.recommended).tolist())
+    ordered = sorted(listed, key=lambda i: (-frequency[i], int(keys[i])))
+    summaries = [route_summary(decode_route(int(keys[i]), names), members[i], priced, value, final, route.size, tables, support)
+                 for i in ordered]
+    rankable = [members[i][priced[members[i]]] for i in np.flatnonzero(priced_count >= support.ranked)]
+    pooled = np.sort(value[np.concatenate(rankable)]) if rankable else np.array([])
+    reference = {"cvar5": tail_mean(pooled), "p95": float(np.quantile(pooled, 0.95)), "count": int(pooled.size)} if pooled.size else None
+    return summaries, reference
 
 
 def tracks(track: dict, climate: np.ndarray, tables: Tables, names: list[str]) -> list[dict]:
@@ -65,11 +151,12 @@ def tracks(track: dict, climate: np.ndarray, tables: Tables, names: list[str]) -
             for i in range(crop.shape[1])]
 
 
-def summarize(result: dict, tables: Tables, route_limit: int = 40) -> dict:
+def summarize(result: dict, tables: Tables, support: Support) -> dict:
     names = [*tables.crops, "fallow"]
     value, priced = to_numpy(result["value"]), to_numpy(result["priced"])
     carbon, water_class = to_numpy(result["carbon"]), to_numpy(result["water_class"])
-    final = {"carbon": carbon[-1], "water_multiplier": to_numpy(tables.water_yield)[water_class[-1]]}
+    final = final_state(result, tables)
+    route_list, reference = routes(to_numpy(result["route"]), value, priced, final, tables, support)
     return {
         "trajectories": int(value.size),
         "priced_share": float(priced.mean()),
@@ -79,7 +166,7 @@ def summarize(result: dict, tables: Tables, route_limit: int = 40) -> dict:
         "carbon": [dict(zip(("p5", "p50", "p95"), np.quantile(year, QUANTILES).round(4).tolist())) for year in carbon],
         "final_carbon": float(final["carbon"].mean()),
         "final_water_multiplier": float(final["water_multiplier"].mean()),
-        "routes": routes(to_numpy(result["route"]), value, priced, final, names, route_limit),
+        "routes": route_list,
+        "ranking_reference": reference,
         "tracks": tracks(result["track"], result["climate"], tables, names),
     }
-

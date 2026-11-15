@@ -339,5 +339,6 @@ class Recorder:
 
     def result(self, state: State, climate) -> dict:
         return {"value": state.value, "priced": state.priced, "route": state.route, "crop": self.crop, "crop_count": self.crop_count,
+                "water_fraction": state.water_fraction,
                 "water_class": self.water_class, "carbon": self.carbon, "track": self.track,
                 "climate": climate[: self.keep]}

@@ -9,11 +9,15 @@ from .backend import array_module
 from .calendar import DAYS_PER_YEAR
 from .monte_carlo import Policy, simulate
 from .payload import profile_payload, reference_payload
-from .summary import summarize
+from .summary import Support, summarize
 from .tables import Tables, build_tables
 
 MAX_TRAJECTORIES = 1_000_000
 MAX_TRACKS = 200
+DECENDIOS_PER_YEAR = 36
+# Share of P95 (against CVaR5) in the economic score: the slider #ranking-return-weight of field_shift/front/index.html
+# (0-100%, step 5, starts at 50). The team keeps it in the page, not in visualization-run-settings.json.
+RETURN_WEIGHT = {"default": 0.5, "step": 0.05}
 
 
 class RunError(ValueError):
@@ -62,7 +66,20 @@ def options(profile_id: str) -> dict:
     tables = tables_for(profile_id)
     selectable = profile_payload(profile_id)["crop_markov"]["initial_crop_ids"]
     return {"profile": profile_id, "crops": list(tables.crops), "initial_crops": [c for c in selectable if c in tables.crops],
-            "sugarcane_cuts": sugarcane_cuts(tables), "ranking": ranking_settings(tables), "max_trajectories": MAX_TRAJECTORIES, "horizon_days": tables.horizon_years * DAYS_PER_YEAR}
+            "sugarcane_cuts": sugarcane_cuts(tables), "ranking": ranking_settings(tables), "model": model_settings(tables),
+            "max_trajectories": MAX_TRAJECTORIES, "horizon_days": tables.horizon_years * DAYS_PER_YEAR}
+
+
+def model_settings(tables: Tables) -> dict:
+    """The model's own numbers, for the explanation of how a result was computed."""
+    return {"dirichlet_alpha": tables.alpha, "discount_rate": tables.discount_rate, "period_days": tables.period_days,
+            "periods_per_year": tables.periods_per_year, "decision_steps_per_year": DECENDIOS_PER_YEAR,
+            "horizon_years": tables.horizon_years}
+
+
+def support_of(tables: Tables) -> Support:
+    support = ranking_settings(tables)["support"]
+    return Support(ranked=int(support["minimum_ranked"]), recommended=int(support["minimum_recommended"]))
 
 
 def ranking_settings(tables: Tables) -> dict:
@@ -74,6 +91,7 @@ def ranking_settings(tables: Tables) -> dict:
         "minimum": score["minimum"], "maximum": score["maximum"], "break_even": score["break_even"],
         "minimum_scale": score["minimum_scale_brl_per_ha"],
         "minimum_samples": settings["monte_carlo"]["minimum_leader_vpl_samples"],
+        "return_weight": RETURN_WEIGHT,
         "support": {"weight": support["weight"], "minimum_ranked": support["minimum_ranked_vpl_samples"],
                     "minimum_recommended": support["minimum_recommended_vpl_samples"],
                     "full_score": support["full_score_vpl_samples"]},
@@ -105,10 +123,11 @@ def run(request: dict, default_state: str, device: str = "auto", tracks: int = 0
         policy = policy_of(tables, scenario, default_state)
         result = simulate(xp, on_device, policy, request["seed"], request["trajectories"], min(tracks, MAX_TRACKS))
         scenarios.append({"id": scenario["id"], "label": scenario.get("label", scenario["id"]),
-                          "initial_crop": tables.crops[policy.initial_crop], **summarize(result, tables)})
+                          "initial_crop": tables.crops[policy.initial_crop], **summarize(result, tables, support_of(tables))})
     return {
         "profile": request["profile"], "seed": request["seed"], "device": "gpu" if xp.__name__ == "cupy" else "cpu",
         "seconds": round(time.perf_counter() - started, 3),
         "clock": {"period_days": tables.period_days, "periods": tables.periods, "horizon_years": tables.horizon_years},
-        "crops": [*tables.crops, "fallow"], "ranking": ranking_settings(tables), "scenarios": scenarios,
+        "crops": [*tables.crops, "fallow"], "ranking": ranking_settings(tables), "model": model_settings(tables),
+        "scenarios": scenarios,
     }
