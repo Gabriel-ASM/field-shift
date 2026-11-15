@@ -1,12 +1,10 @@
-/** "What we considered" and "Other good options" (showFarmerResult in producer.js). */
+/** "What we considered" (showFarmerResult in producer.js), about the sequence on screen. */
 
 import type { RankedRoute } from "../ranking.ts";
 import type { RunResult, ScenarioResult } from "../types.ts";
 import type { Journey } from "../useFieldShift.ts";
 import { cropLabel } from "../ui/colors.ts";
-import { count, money, percent } from "../ui/format.ts";
-
-const ALTERNATIVES = 3;
+import { count, percent } from "../ui/format.ts";
 
 function facts(journey: Journey, run: RunResult, scenario: ScenarioResult, best: RankedRoute): string[] {
   const { name, uf } = journey.place!.profile.municipality;
@@ -28,21 +26,6 @@ export function Facts({ journey, run, scenario, best }: { journey: Journey; run:
     <article className="result-panel">
       <h3>What we considered</h3>
       <ul className="result-facts">{facts(journey, run, scenario, best).map((line) => <li key={line}><span aria-hidden="true">✓</span><span>{line}</span></li>)}</ul>
-    </article>
-  );
-}
-
-/** The next sequences in the ranking that could also be recommended. */
-export function Alternatives({ ranked, minimum }: { ranked: RankedRoute[]; minimum: number }) {
-  const shown = ranked.filter(({ route }) => route.value!.count >= minimum).slice(0, ALTERNATIVES);
-  return (
-    <article className="result-panel">
-      <h3>Other good options</h3>
-      <div className="alternatives">
-        {shown.length ? shown.map(({ route }) => (
-          <div key={route.crops.join()} className="alternative-route"><strong>{route.crops.map(cropLabel).join(" → ")}</strong><span>{money(route.value!.p50)}/ha</span></div>
-        )) : <p className="note">No other sequence reached {count(minimum)} valid NPVs.</p>}
-      </div>
     </article>
   );
 }

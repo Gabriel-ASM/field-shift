@@ -2,15 +2,18 @@
 
 import { useState } from "react";
 import { MethodDialog } from "../method/MethodDialog.tsx";
-import { rank, recommended, type RankedRoute } from "../ranking.ts";
-import { Alternatives, Facts } from "../result/Facts.tsx";
+import { options, rank, recommended, selectRoute, type RankedRoute } from "../ranking.ts";
+import { Facts } from "../result/Facts.tsx";
+import { RouteOptions } from "../result/RouteOptions.tsx";
+import { useRouteDetail } from "../result/useRouteDetail.ts";
 import { ResultMetrics } from "../result/ResultMetrics.tsx";
 import { RotationPath } from "../result/RotationPath.tsx";
 import { YourChoices } from "../result/YourChoices.tsx";
-import type { RunResult, ScenarioResult } from "../types.ts";
+import type { RouteDetail, RunResult } from "../types.ts";
 import type { Journey } from "../useFieldShift.ts";
 import { cropLabel } from "../ui/colors.ts";
 import { EnvironmentChart } from "../ui/EnvironmentChart.tsx";
+import { EnvironmentFrames, SOIL_SERIES, WATER_SERIES } from "../ui/EnvironmentFrames.tsx";
 import { count, money } from "../ui/format.ts";
 import { Legend } from "../ui/Legend.tsx";
 import { ReturnChart } from "../ui/ReturnChart.tsx";
@@ -18,6 +21,7 @@ import { Timebar } from "../ui/Timebar.tsx";
 import { TrackStrips } from "../ui/TrackStrips.tsx";
 
 const EXPLORATORY = 4;
+const OPTIONS = 6;
 
 function Actions({ journey }: { journey: Journey }) {
   return (
@@ -57,29 +61,53 @@ function Heading({ single, explain }: { single: boolean; explain: () => void }) 
   );
 }
 
-function Unfolded({ run, scenario, cuts }: { run: RunResult; scenario: ScenarioResult; cuts: number | null }) {
+/** Soil and water of the sequence on screen, every half month: the main charts of the result. */
+function Frames({ detail, error, years }: { detail: RouteDetail | null; error: string | null; years: number }) {
+  return (
+    <article className="result-chart-card">
+      <div className="result-chart-heading">
+        <h3>Soil and water along this sequence</h3>
+        {detail && <span className="chart-badge">{count(detail.trajectories)} scenarios</span>}
+        <p>Share of the scenarios that followed this sequence in each condition, every half month. Move over a chart to read a month.</p>
+      </div>
+      {error ? <p className="error">{error}</p> : !detail ? <p className="note">Loading the scenarios of this sequence…</p> : (
+        <div className="environment-results-grid">
+          <EnvironmentFrames title="Water in the soil" frames={detail.frames.water} series={WATER_SERIES} years={years} />
+          <EnvironmentFrames title="Soil organic carbon" frames={detail.frames.soil} series={SOIL_SERIES} years={years} />
+        </div>
+      )}
+    </article>
+  );
+}
+
+function Unfolded({ run, detail, cuts }: { run: RunResult; detail: RouteDetail | null; cuts: number | null }) {
+  if (!detail) return null;
+  const crops = run.crops.filter((crop) => detail.tracks.some((track) => track.crop.includes(crop)));
   return (
     <article className="card unfolded">
-      <h3>How the scenarios unfolded</h3>
+      <h3>How the scenarios of this sequence unfolded</h3>
       <Timebar periodsPerYear={run.clock.periods / run.clock.horizon_years} />
-      <Legend crops={run.crops.filter((crop) => scenario.occupancy.some((period) => crop in period))} />
-      <TrackStrips tracks={scenario.tracks} cuts={cuts} />
-      <EnvironmentChart water={scenario.water} carbon={scenario.carbon} />
+      <Legend crops={crops} />
+      <TrackStrips tracks={detail.tracks} cuts={cuts} />
+      <EnvironmentChart water={detail.water} carbon={detail.carbon} />
     </article>
   );
 }
 
 export function ResultStep({ journey }: { journey: Journey }) {
   const [explaining, setExplaining] = useState(false);
+  const [chosen, choose] = useState<string | null>(null);
   const run = journey.run!;
   const scenario = run.scenarios[0]!;
   const ranked = rank(scenario.routes, scenario.ranking_reference, run.ranking, journey);
   const best = recommended(ranked, run.ranking);
+  const selected = selectRoute(ranked, run.ranking, chosen);
+  const { detail, error } = useRouteDetail(journey.job, selected?.route.crops ?? []);
   if (!ranked.length) {
     return <section><h2>We couldn't rank a rotation</h2><p className="note">No simulated sequence has complete price and cost data from at least {count(run.ranking.support.minimum_ranked)} scenarios.</p><Actions journey={journey} /></section>;
   }
-  if (!best) return <Exploratory ranked={ranked} run={run} journey={journey} />;
-  const single = best.route.crops.length < 2;
+  if (!best || !selected) return <Exploratory ranked={ranked} run={run} journey={journey} />;
+  const single = selected.route.crops.length < 2;
   const facts = { model: run.model, ranking: run.ranking, periods: run.clock.periods, trajectories: scenario.trajectories,
     rankedRoutes: scenario.ranking_reference?.routes ?? 0, weight: journey.weight, returnWeight: journey.returnWeight };
   return (
@@ -87,19 +115,22 @@ export function ResultStep({ journey }: { journey: Journey }) {
       <Heading single={single} explain={() => setExplaining(true)} />
       <div className="result-hero">
         <article className="recommendation-card">
-          <span className="result-eyebrow">✦ Best combination found</span>
-          <h2>{single ? "Your suggested management plan" : "Your suggested sequence"}</h2>
+          {selected === best
+            ? <span className="result-eyebrow">✦ Best combination found</span>
+            : <span className="result-eyebrow is-option">Another good option · score {selected.total.toFixed(1)} of 10 <button type="button" onClick={() => choose(null)}>Back to the recommended sequence</button></span>}
+          <h2>{single ? "Your suggested management plan" : selected === best ? "Your suggested sequence" : "This sequence"}</h2>
           <p>Planned by crop cycles over a five-year horizon.</p>
-          <RotationPath route={best.route} caneCut={journey.caneCut} />
+          <RotationPath route={selected.route} caneCut={journey.caneCut} />
         </article>
-        <ResultMetrics route={best.route} settings={run.ranking} />
+        <ResultMetrics route={selected.route} settings={run.ranking} />
       </div>
-      <ReturnChart value={best.route.value!} fullSupport={run.ranking.support.full_score} />
+      <Frames detail={detail} error={error} years={run.clock.horizon_years} />
+      <ReturnChart value={selected.route.value!} fullSupport={run.ranking.support.full_score} />
       <div className="result-info">
-        <Facts journey={journey} run={run} scenario={scenario} best={best} />
-        <Alternatives ranked={ranked.filter((item) => item !== best)} minimum={run.ranking.support.minimum_recommended} />
+        <Facts journey={journey} run={run} scenario={scenario} best={selected} />
+        <RouteOptions options={options(ranked, run.ranking, OPTIONS)} best={best} selected={selected} choose={choose} />
       </div>
-      <Unfolded run={run} scenario={scenario} cuts={journey.place!.choices.sugarcane_cuts} />
+      <Unfolded run={run} detail={detail} cuts={journey.place!.choices.sugarcane_cuts} />
       <YourChoices journey={journey} trajectories={scenario.trajectories} />
       <p className="note">An exploratory study based on municipal data and model assumptions. These values do not guarantee income and do not replace an agronomist's assessment of your field.</p>
       <Actions journey={journey} />

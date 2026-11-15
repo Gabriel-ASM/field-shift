@@ -1,4 +1,4 @@
-import type { Boundary, ChainMatrix, Profile, ProfileSummary, RunChoices, RunResult, RuntimeConfig, ScenarioRequest } from "./types.ts";
+import type { Boundary, ChainMatrix, JobView, Profile, ProfileSummary, RouteDetail, RunChoices, RunResult, RuntimeConfig, ScenarioRequest } from "./types.ts";
 
 const HORIZON_DAYS = 1825;
 
@@ -33,11 +33,25 @@ export interface RunOptions {
   scenarios: ScenarioRequest[];
 }
 
-export function createRun({ profile, seed, trajectories, tracks, scenarios }: RunOptions): Promise<RunResult> {
-  const body = { profile, seed, trajectories, horizon_days: HORIZON_DAYS, scenarios };
-  return request<RunResult>(`/runs?tracks=${tracks}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+function runBody({ profile, seed, trajectories, scenarios }: RunOptions): string {
+  return JSON.stringify({ profile, seed, trajectories, horizon_days: HORIZON_DAYS, scenarios });
+}
+
+export function createRun(options: RunOptions): Promise<RunResult> {
+  return request<RunResult>(`/runs?tracks=${options.tracks}`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: runBody(options),
   });
 }
+
+/** Starts the run in the background; poll getJob for the trajectories done and, at the end, the result. */
+export function startJob(options: RunOptions): Promise<{ id: string; total: number }> {
+  return request(`/runs/jobs?tracks=${options.tracks}`, {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: runBody(options),
+  });
+}
+
+export const getJob = (id: string) => request<JobView>(`/runs/jobs/${encodeURIComponent(id)}`);
+
+/** Water and soil every period, year-end charts and some trajectories of one route of a finished job. */
+export const getRoute = (job: string, crops: string[], scenario = 0) =>
+  request<RouteDetail>(`/runs/jobs/${encodeURIComponent(job)}/route?scenario=${scenario}&crops=${encodeURIComponent(crops.join(","))}`);

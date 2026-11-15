@@ -95,3 +95,15 @@ h4 { margin: 12px 0 6px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0
   .panel { top: 46vh; width: 100vw; border-left: 0; border-top: 1px solid var(--line); }
   .panel.wide { top: 0; }
 }
+.run-progress { margin: 4px 0 8px; }
+.run-progress-track { height: 8px; overflow: hidden; border-radius: 99px; background: #e8eee8; }
+.run-progress-track div { height: 100%; border-radius: inherit; background: var(--green); transition: width 0.3s ease; }
+.run-progress p { display: flex; gap: 6px; margin: 8px 0 0; color: var(--muted); font-size: 0.82rem; font-variant-numeric: tabular-nums; }
+.run-progress p strong { color: var(--ink); }
+.run-progress p span { margin-left: auto; }
+.result-eyebrow.is-option { color: var(--fs-muted); flex-wrap: wrap; }
+.result-eyebrow.is-option button { margin-left: 6px; padding: 4px 10px; font-size: 0.7rem; letter-spacing: 0; text-transform: none; }
+button.alternative-route { width: 100%; border: 1px solid transparent; text-align: left; cursor: pointer; }
+button.alternative-route[aria-pressed="true"] { border-color: var(--fs-green); background: var(--fs-green-soft); }
+.frames-chart { margin: 0; }
+.frames-chart figcaption { margin-top: 12px; color: var(--ink); font-size: 0.85rem; font-weight: 700; }

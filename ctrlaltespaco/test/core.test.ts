@@ -80,3 +80,14 @@ test("the return curve smooths the histogram with the producer.js bandwidth and 
   const peak = curve.points.reduce((best, point) => (point.density > best.density ? point : best));
   assert.ok(Math.abs(peak.value - 25) < 2 && curve.points.length === 151);
 });
+
+test("the result view starts on the first recommendable sequence and can switch to another option", async () => {
+  const { options, routeKey, selectRoute } = await import("../src/ranking.ts");
+  const first = route(["soybean", "maize_grain"], 9000, 20), second = route(["soybean", "brachiaria"], 8000, 20);
+  const thin = route(["maize_grain"], 99999, 20, 3);
+  const ranked = rank([second, thin, first], REFERENCE, SETTINGS, balance(0.2));
+  assert.equal(selectRoute(ranked, SETTINGS, null)!.route, recommended(ranked, SETTINGS)!.route);
+  assert.equal(selectRoute(ranked, SETTINGS, routeKey(second))!.route, second);
+  assert.equal(selectRoute(ranked, SETTINGS, routeKey(thin))!.route, recommended(ranked, SETTINGS)!.route, "exploratory ones are not options");
+  assert.deepEqual(options(ranked, SETTINGS, 5).map(({ route: item }) => item).includes(thin), false);
+});

@@ -1,18 +1,20 @@
 import { useEffect, useRef } from "react";
 import { playhead } from "../state/playhead.ts";
 import type { Track } from "../types.ts";
+
+type StripTrack = Pick<Track, "crop" | "cane_cut">;
 import { caneShade } from "./caneShade.ts";
 import { cropColor } from "./colors.ts";
 
 const ROW_HEIGHT = 3;
 const ROW_GAP = 1;
 
-function cellColor(track: Track, step: number, cuts: number | null): string {
+function cellColor(track: StripTrack, step: number, cuts: number | null): string {
   const cut = track.cane_cut[step] ?? 0;
   return cut > 0 && cuts ? caneShade(cut, cuts) : cropColor(track.crop[step]!);
 }
 
-function drawTracks(canvas: HTMLCanvasElement, tracks: Track[], period: number, cuts: number | null): void {
+function drawTracks(canvas: HTMLCanvasElement, tracks: StripTrack[], period: number, cuts: number | null): void {
   const context = canvas.getContext("2d");
   const steps = tracks[0]?.crop.length ?? 0;
   if (!context || !steps) return;
@@ -37,7 +39,7 @@ function CaneCuts({ cuts }: { cuts: number }) {
 }
 
 /** Simulated trajectories, one thin row each, revealed up to the playhead. Cane is shaded by its cut. */
-export function TrackStrips({ tracks, cuts }: { tracks: Track[]; cuts: number | null }) {
+export function TrackStrips({ tracks, cuts }: { tracks: StripTrack[]; cuts: number | null }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   useEffect(() => {
     const draw = () => canvas.current && drawTracks(canvas.current, tracks, Math.floor(playhead.period), cuts);

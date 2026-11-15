@@ -95,3 +95,17 @@ export function recommended(ranked: RankedRoute[], settings: RankingSettings): R
 export function exploratory(ranked: RankedRoute, settings: RankingSettings): boolean {
   return ranked.route.value!.count < settings.support.minimum_recommended;
 }
+
+/** Key of a route, stable across re-rankings. */
+export const routeKey = (route: Route) => route.crops.join(",");
+
+/** The sequence the result view shows: the chosen one if it can be recommended, else the recommendation. */
+export function selectRoute(ranked: RankedRoute[], settings: RankingSettings, key: string | null): RankedRoute | undefined {
+  const chosen = key === null ? undefined : ranked.find((item) => routeKey(item.route) === key && !exploratory(item, settings));
+  return chosen ?? recommended(ranked, settings);
+}
+
+/** The options the farmer can switch between: every sequence that could be recommended, best first. */
+export function options(ranked: RankedRoute[], settings: RankingSettings, limit: number): RankedRoute[] {
+  return ranked.filter((item) => !exploratory(item, settings)).slice(0, limit);
+}

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { createRun, getConfig, getMunicipality, getProfile, getRunChoices, getStates, listProfiles } from "./api.ts";
+import { getConfig, getMunicipality, getProfile, getRunChoices, getStates, listProfiles } from "./api.ts";
+import { runJob, type Progress } from "./runJob.ts";
 import { regionScenario } from "./scenarios.ts";
 import { playhead } from "./state/playhead.ts";
 import type { Boundary, Profile, RunChoices, RunResult, RuntimeConfig } from "./types.ts";
@@ -47,6 +48,10 @@ export interface Journey {
   returnWeight: number;
   seed: number;
   run: RunResult | null;
+  /** Job that produced `run`; route details are asked from it. */
+  job: string | null;
+  /** Trajectories simulated so far, while the engine runs. */
+  progress: Progress | null;
   error: string | null;
   go: (step: Step) => void;
   choosePlace: (profile: Profile) => void;
@@ -69,6 +74,8 @@ export function useJourney(world: World | null): Journey {
   const [returnWeight, setReturnWeight] = useState(0.5);
   const [seed, setSeed] = useState(2026);
   const [run, setRun] = useState<RunResult | null>(null);
+  const [job, setJob] = useState<string | null>(null);
+  const [progress, setProgress] = useState<Progress | null>(null);
   const [simulated, setSimulated] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -100,9 +107,11 @@ export function useJourney(world: World | null): Journey {
     if (run && simulated === key) return go("result");
     go("simulation");
     setError(null);
-    createRun({ profile: place.profile.id, seed, scenarios: [regionScenario(crop, caneCut)], ...world.config.run }).then((result) => {
+    setProgress(null);
+    runJob({ profile: place.profile.id, seed, scenarios: [regionScenario(crop, caneCut)], ...world.config.run }, setProgress).then(({ job: id, result }) => {
       playhead.reset(result.clock.periods);
       setRun(result);
+      setJob(id);
       setSimulated(key);
       go("result");
     }, (failure) => setError(message(failure)));
@@ -116,5 +125,5 @@ export function useJourney(world: World | null): Journey {
     go("location");
   }, []);
 
-  return { step, place, crop, caneCut, weight, returnWeight, seed, run, error, go, choosePlace, chooseCrop, chooseCaneCut, setWeight, setReturnWeight, setSeed, simulate, restart };
+  return { step, place, crop, caneCut, weight, returnWeight, seed, run, job, progress, error, go, choosePlace, chooseCrop, chooseCaneCut, setWeight, setReturnWeight, setSeed, simulate, restart };
 }

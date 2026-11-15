@@ -141,6 +141,25 @@ export interface ScenarioResult {
   tracks: Track[];
 }
 
+export interface JobView {
+  id: string;
+  status: "running" | "done" | "failed";
+  done: number;
+  total: number;
+  result: RunResult | null;
+  error: string | null;
+}
+
+/** One route of a finished job, beyond its summary. Class counts are [low, medium, high] per period. */
+export interface RouteDetail {
+  crops: string[];
+  trajectories: number;
+  frames: { water: number[][]; soil: number[][] };
+  water: Record<string, number>[];
+  carbon: { p5: number; p50: number; p95: number }[];
+  tracks: Pick<Track, "crop" | "cane_cut">[];
+}
+
 export interface RunResult {
   profile: string;
   seed: number;
