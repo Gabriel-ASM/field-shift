@@ -30,7 +30,8 @@ def value_summary(values: np.ndarray) -> dict | None:
     ordered = np.sort(values)
     p5, p50, p95 = np.quantile(ordered, QUANTILES)
     return {"mean": float(ordered.mean()), "p5": float(p5), "p50": float(p50), "p95": float(p95),
-            "cvar5": float(tail_mean(ordered)), "count": int(ordered.size)}
+            "cvar5": float(tail_mean(ordered)), "count": int(ordered.size),
+            "loss_probability": float((ordered < 0).mean())}
 
 
 def tail_mean(ordered: np.ndarray) -> float:

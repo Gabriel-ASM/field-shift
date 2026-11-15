@@ -48,6 +48,9 @@
 .compare-tag { color:var(--fs-muted); font-size:.6rem; font-weight:750; letter-spacing:.06em; text-transform:uppercase; }
 .compare-name { font-size:.78rem; overflow-wrap:anywhere; }
 .compare .result-metrics { grid-template-rows:none; grid-template-columns:1fr; }
+.compare-others { margin:0; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:6px 12px; font-size:.66rem; line-height:1.45; }
+.compare-others dt { color:var(--fs-muted); }
+.compare-others dd { margin:0; font-weight:700; text-align:right; font-variant-numeric:tabular-nums; }
 .compare-actions { margin-top:16px; display:flex; justify-content:flex-end; }
 .compare-actions button:disabled { opacity:.5; cursor:default; }
 .result-analytics { margin-top:20px; display:grid; gap:20px; }

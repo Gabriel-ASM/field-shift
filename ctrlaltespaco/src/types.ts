@@ -126,6 +126,8 @@ export interface ValueSummary {
   p95: number;
   cvar5: number;
   count: number;
+  /** Share of the valid present values below zero (a loss over the horizon). */
+  loss_probability: number;
   /** Only on routes with enough priced scenarios to be recommended. */
   distribution?: Distribution;
 }

@@ -15,7 +15,7 @@ const SETTINGS: RankingSettings = {
 };
 
 function route(crops: string[], median: number, carbon: number, samples = 500): Route {
-  const value = { mean: median, p5: median - 1000, p50: median, p95: median + 1000, cvar5: median - 2000, count: samples };
+  const value = { mean: median, p5: median - 1000, p50: median, p95: median + 1000, cvar5: median - 2000, count: samples, loss_probability: 0.1 };
   return { crops, share: 0.1, trajectories: samples, value, final_carbon: carbon, final_carbon_class: "medium", final_water_multiplier: 1,
     final_water: { water_low: 0.2, water_medium: 0.5, water_high: 0.3 }, final_water_fraction: 0.5, final_total_nitrogen: carbon * 300, yield_penalty: crops.map(() => 0) };
 }
