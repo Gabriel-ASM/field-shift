@@ -35,6 +35,12 @@ export interface RankingSettings {
   environment_weight: { default_weight: number; maximum_weight: number; weight_step: number };
   soil_share: number;
   water_share: number;
+  /** Soil score = carbon share × carbon score + N share × total-N score (visualization-run-settings.json). */
+  carbon_share_within_soil: number;
+  nitrogen_share_within_soil: number;
+  /** C:N target of total N, kg N/ha per g/kg of soil carbon, and the stock/target ratios bounding low and near. */
+  nitrogen_target_per_carbon: number;
+  nitrogen_ratio_limits: [number, number];
   soil_reference: number;
   water_scale: number;
 }
@@ -72,6 +78,8 @@ export interface Route {
   final_water: Record<WaterClass, number>;
   /** Mean final water storage, as a fraction of the soil's capacity. */
   final_water_fraction: number;
+  /** Mean final total-N stock, kg N/ha (not available N). */
+  final_total_nitrogen: number;
   /** Yield lost at the harvest of each planting by replanting the same crop; null when nitrogen decides it. */
   yield_penalty: number[] | null;
 }
@@ -154,7 +162,7 @@ export interface JobView {
 export interface RouteDetail {
   crops: string[];
   trajectories: number;
-  frames: { water: number[][]; soil: number[][] };
+  frames: { water: number[][]; soil: number[][]; nitrogen: number[][] };
   water: Record<string, number>[];
   carbon: { p5: number; p50: number; p95: number }[];
   tracks: Pick<Track, "crop" | "cane_cut">[];

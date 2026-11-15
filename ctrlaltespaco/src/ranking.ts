@@ -57,9 +57,24 @@ export function preference(route: Route, returnWeight: number): number {
   return returnWeight * route.value!.p95 + (1 - returnWeight) * route.value!.cvar5;
 }
 
+/** Total-N stock against the C:N target for the route's final carbon (nitrogenScoreOnTen of analysis.js). */
+export function nitrogenScore(route: Route, settings: RankingSettings): number {
+  const target = settings.nitrogen_target_per_carbon * route.final_carbon;
+  return target > 0 ? clamp((route.final_total_nitrogen / target) * settings.maximum, settings.minimum, settings.maximum) : 0;
+}
+
+/** below / near / above the C:N target (soilNitrogenClass). */
+export function nitrogenClass(route: Route, settings: RankingSettings): "low" | "medium" | "high" {
+  const target = settings.nitrogen_target_per_carbon * route.final_carbon;
+  const ratio = target > 0 ? route.final_total_nitrogen / target : 0;
+  const [low, near] = settings.nitrogen_ratio_limits;
+  return ratio < low ? "low" : ratio < near ? "medium" : "high";
+}
+
 function scored(route: Route, scale: number, settings: RankingSettings, share: Weights, returnWeight: number): RankedRoute {
   const economic = scoreOnTen(preference(route, returnWeight), scale, settings);
-  const soil = clamp((route.final_carbon / settings.soil_reference) * settings.maximum, settings.minimum, settings.maximum);
+  const carbon = clamp((route.final_carbon / settings.soil_reference) * settings.maximum, settings.minimum, settings.maximum);
+  const soil = settings.carbon_share_within_soil * carbon + settings.nitrogen_share_within_soil * nitrogenScore(route, settings);
   const water = scoreOnTen(route.final_water_multiplier - 1, settings.water_scale, settings);
   const environment = settings.soil_share * soil + settings.water_share * water;
   const support = supportScore(route.value!.count, settings);

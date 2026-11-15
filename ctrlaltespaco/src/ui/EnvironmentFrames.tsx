@@ -20,6 +20,9 @@ export const WATER_SERIES: Series[] = [
 export const SOIL_SERIES: Series[] = [
   { index: 2, label: "Good", color: "#5c8d5a" }, { index: 1, label: "Fair", color: "#c59a50" }, { index: 0, label: "Bad", color: "#b97657" },
 ];
+export const NITROGEN_SERIES: Series[] = [
+  { index: 2, label: "Above target", color: "#5c8d5a" }, { index: 1, label: "Near target", color: "#c59a50" }, { index: 0, label: "Below target", color: "#b97657" },
+];
 
 const x = (period: number, last: number) => LEFT + (PLOT_WIDTH * period) / last;
 const y = (fraction: number) => BOTTOM - PLOT_HEIGHT * fraction;

@@ -12,7 +12,7 @@ import { YourChoices } from "../result/YourChoices.tsx";
 import type { RouteDetail, RunResult } from "../types.ts";
 import type { Journey } from "../useFieldShift.ts";
 import { cropLabel } from "../ui/colors.ts";
-import { EnvironmentFrames, SOIL_SERIES, WATER_SERIES } from "../ui/EnvironmentFrames.tsx";
+import { EnvironmentFrames, NITROGEN_SERIES, SOIL_SERIES, WATER_SERIES } from "../ui/EnvironmentFrames.tsx";
 import { count, money } from "../ui/format.ts";
 import { Legend } from "../ui/Legend.tsx";
 import { ReturnChart } from "../ui/ReturnChart.tsx";
@@ -73,6 +73,10 @@ function Frames({ detail, error, years, recommended }: { detail: RouteDetail | n
       <EnvironmentFrames frames={detail.frames.soil} series={SOIL_SERIES} years={years} text={{
         title: `Soil ${along}`, description: "Share of matching scenarios in each soil-carbon class, measured every ~15 days.",
         label: `Continuous distribution of good, fair and bad soil conditions over ${years * 12} months` }} />
+      <EnvironmentFrames frames={detail.frames.nitrogen} series={NITROGEN_SERIES} years={years} text={{
+        title: `Total N ${along}`, description: "Share of matching scenarios relative to the carbon-derived stock target (C:N 12:1).",
+        label: `Distribution of total nitrogen stock relative to the carbon-derived target over ${years * 12} months`,
+        hint: "Total nitrogen is not mineral or directly available nitrogen." }} />
     </div>
   );
 }
@@ -118,7 +122,7 @@ export function ResultStep({ journey }: { journey: Journey }) {
           <p>Planned by crop cycles over a five-year horizon.</p>
           <RotationPath route={selected.route} caneCut={journey.caneCut} />
         </article>
-        <ResultMetrics route={selected.route} settings={run.ranking} />
+        <ResultMetrics ranked={selected} settings={run.ranking} />
       </div>
       <Frames detail={detail} error={error} years={run.clock.horizon_years} recommended={selected === best} />
       <ReturnChart value={selected.route.value!} fullSupport={run.ranking.support.full_score} />

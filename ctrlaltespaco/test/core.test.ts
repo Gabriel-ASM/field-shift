@@ -10,12 +10,13 @@ const SETTINGS: RankingSettings = {
   support: { weight: 0.15, minimum_ranked: 2, minimum_recommended: 20, full_score: 100 },
   environment_weight: { default_weight: 0.2, maximum_weight: 0.5, weight_step: 0.05 },
   soil_share: 2 / 3, water_share: 1 / 3, soil_reference: 20, water_scale: 0.2,
+  carbon_share_within_soil: 0.67, nitrogen_share_within_soil: 0.33, nitrogen_target_per_carbon: 300, nitrogen_ratio_limits: [0.8, 1.2],
 };
 
 function route(crops: string[], median: number, carbon: number, samples = 500): Route {
   const value = { mean: median, p5: median - 1000, p50: median, p95: median + 1000, cvar5: median - 2000, count: samples };
   return { crops, share: 0.1, trajectories: samples, value, final_carbon: carbon, final_carbon_class: "medium", final_water_multiplier: 1,
-    final_water: { water_low: 0.2, water_medium: 0.5, water_high: 0.3 }, final_water_fraction: 0.5, yield_penalty: crops.map(() => 0) };
+    final_water: { water_low: 0.2, water_medium: 0.5, water_high: 0.3 }, final_water_fraction: 0.5, final_total_nitrogen: carbon * 300, yield_penalty: crops.map(() => 0) };
 }
 
 const REFERENCE: RankingReference = { cvar5: -1000, p95: 10000, count: 1000, routes: 3 };
@@ -90,4 +91,12 @@ test("the result view starts on the first recommendable sequence and can switch 
   assert.equal(selectRoute(ranked, SETTINGS, routeKey(second))!.route, second);
   assert.equal(selectRoute(ranked, SETTINGS, routeKey(thin))!.route, recommended(ranked, SETTINGS)!.route, "exploratory ones are not options");
   assert.deepEqual(options(ranked, SETTINGS, 5).map(({ route: item }) => item).includes(thin), false);
+});
+
+test("total N scores against the C:N target of the route's final carbon", async () => {
+  const { nitrogenClass, nitrogenScore } = await import("../src/ranking.ts");
+  const at = (ratio: number) => ({ ...route(["soybean"], 1000, 20), final_total_nitrogen: 20 * 300 * ratio });
+  assert.equal(nitrogenScore(at(0.5), SETTINGS), 5);
+  assert.equal(nitrogenScore(at(2), SETTINGS), 10);
+  assert.deepEqual([0.5, 1, 1.3].map((ratio) => nitrogenClass(at(ratio), SETTINGS)), ["low", "medium", "high"]);
 });

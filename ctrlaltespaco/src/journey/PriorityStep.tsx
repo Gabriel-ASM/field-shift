@@ -20,13 +20,13 @@ function Balance({ journey, settings }: { journey: Journey; settings: RankingSet
     <div className="setting">
       <div className="poles">
         <span><strong>Higher returns</strong><small>The financial return of the rotation.</small></span>
-        <span><strong>More soil and water</strong><small>The conservation of natural resources.</small></span>
+        <span><strong>More soil and water</strong><small>Carbon, total nitrogen, and water in the ranking.</small></span>
       </div>
       <input type="range" min={0} max={limits.maximum_weight} step={limits.weight_step} value={journey.weight}
         aria-label="Weight of soil and water" onChange={(event) => journey.setWeight(Number(event.target.value))} />
       <p className="balance">
         <strong>{emphasis(journey.weight)}</strong>
-        <span>{percent(1 - journey.weight)} financial return · {percent(journey.weight)} soil and water · excluding fixed sample support</span>
+        <span>{percent(1 - journey.weight)} financial return · {percent(journey.weight)} carbon, total nitrogen, and water · excluding fixed sample support</span>
       </p>
     </div>
   );
