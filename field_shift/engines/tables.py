@@ -82,6 +82,14 @@ class Tables:
     carbon_yield: np.ndarray        # (3,) yield multiplier per soil carbon class
     carbon_class_limits: np.ndarray  # (2,)
     discount_rate: float
+    # total soil nitrogen (soil_nitrogen of soil-crop-response-hypotheses.json, 7a836bf): a stock, not available N
+    total_n_initial: float          # kg N/ha, 0-30 cm (SoilGrids)
+    total_n_balance: np.ndarray     # (C,) kg N/ha per year while the crop is in the field
+    total_n_target_per_carbon: float  # kg N/ha of the C:N target per g/kg of soil carbon
+    total_n_span: float             # deficit span, as a fraction of the target
+    total_n_coefficient: float
+    total_n_scale: float            # kg N/ha/year
+    total_n_class_limits: np.ndarray  # (2,) stock/target ratios bounding low and medium
     nitrogen: Nitrogen | None = None    # None: no nitrogen parameters, the repeated-crop penalty applies
 
     @property
@@ -227,6 +235,24 @@ def _cover(crops, entry) -> dict:
     }
 
 
+def _total_nitrogen(crops, payload, hypotheses) -> dict:
+    """The total-N stock of the team's model: it moves by each crop's annual net balance and steers the chain toward
+    crops that add N when the stock is below the C:N target. The target follows the soil carbon."""
+    soil, model = payload["soil"], hypotheses["soil_nitrogen"]
+    thresholds = model["state_ratio_thresholds"]
+    carbon = float(soil["organic_carbon_top_0_30_g_kg"])
+    target_per_carbon = float(soil["organic_carbon_stock_top_0_30_kg_ha"]) / carbon / float(model["reference_cn_stock_ratio"]) if carbon > 0 else 0.0
+    return {
+        "total_n_initial": float(soil["total_nitrogen_stock_top_0_30_kg_ha"]),
+        "total_n_balance": _per_crop(crops, lambda c: _number(model["annual_net_balance_kg_n_ha_year_by_crop"].get(c), 0.0)),
+        "total_n_target_per_carbon": target_per_carbon,
+        "total_n_span": float(model["deficit_span_fraction_of_target"]),
+        "total_n_coefficient": float(model["probability_log_weight_coefficient"]),
+        "total_n_scale": float(model["probability_balance_scale_kg_ha_year"]),
+        "total_n_class_limits": np.array([float(thresholds["low_max_exclusive"]), float(thresholds["medium_max_exclusive"])]),
+    }
+
+
 def _economics(crops, payload, hypotheses, crop_cycles) -> dict:
     economics, response = payload["economics"], hypotheses["economic_yield_response"]
     inputs = economics.get("crop_inputs") or {}
@@ -272,4 +298,5 @@ def build_tables(payload: dict, reference: dict) -> Tables:
         **_choice(crops, states, hypotheses),
         **_water(crops, states, payload, hypotheses),
         **_economics(crops, payload, hypotheses, crop_cycles),
+        **_total_nitrogen(crops, payload, hypotheses),
     )

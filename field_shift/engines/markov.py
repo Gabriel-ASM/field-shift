@@ -32,9 +32,22 @@ def soil_factor(xp, tables: Tables, carbon):
     return xp.exp(tables.soil_coefficient * deficit[:, None] * tables.soil_delta_mean[None, :] / 0.2)
 
 
-def destination_weights(xp, tables: Tables, base, allowed, water_fraction, carbon):
+def total_nitrogen_target(tables: Tables, carbon):
+    """C:N target stock of total N for the current soil carbon, kg N/ha."""
+    return tables.total_n_target_per_carbon * carbon
+
+
+def nitrogen_factor(xp, tables: Tables, total_n, carbon):
+    """A total-N stock below the C:N target favours crops with a positive N balance (cropEnvironmentalFactors)."""
+    target = total_nitrogen_target(tables, carbon)
+    deficit = xp.where(target > 0, xp.clip((target - total_n) / xp.maximum(target * tables.total_n_span, 1e-12), 0, 1), 0.0)
+    return xp.exp(tables.total_n_coefficient * deficit[:, None] * tables.total_n_balance[None, :] / tables.total_n_scale)
+
+
+def destination_weights(xp, tables: Tables, base, allowed, water_fraction, carbon, total_n):
     """Unnormalized probability of each destination, zero where it is not allowed."""
-    return base * water_factor(xp, tables, water_fraction) * soil_factor(xp, tables, carbon) * allowed
+    environment = water_factor(xp, tables, water_fraction) * soil_factor(xp, tables, carbon) * nitrogen_factor(xp, tables, total_n, carbon)
+    return base * environment * allowed
 
 
 def draw(xp, weights, uniform):
@@ -44,10 +57,11 @@ def draw(xp, weights, uniform):
     return xp.minimum((cumulative <= target[:, None]).sum(axis=1), weights.shape[1] - 1)
 
 
-def probabilities(xp, tables: Tables, source: int, water_fraction: float, carbon: float):
-    """Mean chain row of `source` under one water and soil condition (no parameter uncertainty)."""
+def probabilities(xp, tables: Tables, source: int, water_fraction: float, carbon: float, total_n: float | None = None):
+    """Mean chain row of `source` under one water, carbon and total-N condition (no parameter uncertainty)."""
+    total_n = tables.total_n_initial if total_n is None else total_n
     base = (tables.mass[source] + tables.alpha) * tables.eligible[source]
     weights = destination_weights(xp, tables, base[None, :], tables.eligible[source][None, :],
-                                  xp.asarray([water_fraction]), xp.asarray([carbon]))[0]
+                                  xp.asarray([water_fraction]), xp.asarray([carbon]), xp.asarray([total_n]))[0]
     total = weights.sum()
     return weights / total if float(total) > 0 else weights

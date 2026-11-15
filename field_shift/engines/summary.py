@@ -94,7 +94,7 @@ def final_state(result: dict, tables: Tables) -> dict:
     """Per trajectory, the state at the end of the horizon."""
     water_class = to_numpy(result["water_class"])[-1]
     return {"carbon": to_numpy(result["carbon"])[-1], "water_class": water_class,
-            "water_fraction": to_numpy(result["water_fraction"]),
+            "water_fraction": to_numpy(result["water_fraction"]), "total_nitrogen": to_numpy(result["total_nitrogen"]),
             "water_multiplier": to_numpy(tables.water_yield)[water_class]}
 
 
@@ -111,6 +111,7 @@ def route_summary(crops: list[str], members: np.ndarray, priced: np.ndarray, val
             "final_water_multiplier": float(final["water_multiplier"][members].mean()),
             "final_water": dict(zip(WATER_STATES, shares(final["water_class"][members], 3))),
             "final_water_fraction": float(final["water_fraction"][members].mean()),
+            "final_total_nitrogen": float(final["total_nitrogen"][members].mean()),
             "yield_penalty": yield_penalties(crops, tables)}
 
 
@@ -215,7 +216,8 @@ def route_detail(raw: dict, tables: Tables, crops: list[str]) -> dict | None:
     carbon, water_class = raw["carbon"][:, members], raw["water_class"][:, members]
     return {
         "crops": crops, "trajectories": int(members.size),
-        "frames": {"water": class_counts(environment % 3), "soil": class_counts(environment // 3)},
+        "frames": {"water": class_counts(environment % 3), "soil": class_counts((environment // 3) % 3),
+                   "nitrogen": class_counts(environment // 9)},
         "water": [dict(zip(WATER_STATES, shares(year, 3))) for year in water_class],
         "carbon": [dict(zip(("p5", "p50", "p95"), np.quantile(year, QUANTILES).round(4).tolist())) for year in carbon],
         "tracks": route_tracks(raw["paths"], members, names),

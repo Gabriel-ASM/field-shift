@@ -17,7 +17,7 @@ from .tables import Tables
 
 BATCH = 10_000
 
-TRAJECTORY_AXIS = {"value": 0, "priced": 0, "route": 0, "water_fraction": 0, "crop": 1, "water_class": 1, "carbon": 1}
+TRAJECTORY_AXIS = {"value": 0, "priced": 0, "route": 0, "water_fraction": 0, "total_nitrogen": 0, "crop": 1, "water_class": 1, "carbon": 1}
 PATH_AXIS = 1
 
 

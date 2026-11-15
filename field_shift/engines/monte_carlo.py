@@ -43,6 +43,7 @@ class State:
         self.water_fraction = full(tables.initial_water)
         self.water_class = water_class(xp, tables, self.water_fraction)
         self.carbon = full(tables.initial_carbon)
+        self.total_nitrogen = full(tables.total_n_initial)
         self.nitrogen = full(tables.nitrogen.initial if tables.nitrogen else 0.0)
         self.last_harvest_day = full(xp.nan)
         self.residual = full(0.0)       # yield gain of the crop in the field from the cover crop before it
@@ -94,6 +95,19 @@ def advance_soil(xp, tables: Tables, state: State, soil_rate) -> None:
     rows = xp.arange(state.crop.shape[0])
     rate = xp.where(state.crop >= 0, soil_rate[rows, crop_or_first(xp, state.crop)], 0.0)
     state.carbon = xp.maximum(0.1, state.carbon + rate * tables.period_days / DAYS_PER_YEAR)
+
+
+def advance_total_nitrogen(xp, tables: Tables, state: State) -> None:
+    """Total N moves at the annual net balance of the crop in the field; fallow leaves it unchanged. Never below 0."""
+    balance = xp.where(state.crop >= 0, tables.total_n_balance[crop_or_first(xp, state.crop)], 0.0)
+    state.total_nitrogen = xp.maximum(0.0, state.total_nitrogen + balance * tables.period_days / DAYS_PER_YEAR)
+
+
+def total_nitrogen_class(xp, tables: Tables, total_n, carbon):
+    """0 below, 1 near, 2 above the C:N target, by the stock/target ratio."""
+    target = markov.total_nitrogen_target(tables, carbon)
+    ratio = xp.where(target > 0, total_n / xp.maximum(target, 1e-12), 0.0)
+    return (ratio >= tables.total_n_class_limits[0]).astype(int) + (ratio >= tables.total_n_class_limits[1])
 
 
 def advance_clocks(tables: Tables, state: State) -> None:
@@ -178,7 +192,7 @@ def choose_from_chain(xp, tables: Tables, state: State, allowed, reform, rows, r
     index = xp.arange(state.crop.shape[0])
     allowed = chain_rules(xp, tables, state, allowed, reform)
     base = xp.where(reform[:, None], reform_rows, rows[index, state.last_crop])
-    weights = markov.destination_weights(xp, tables, base, allowed, state.water_fraction, state.carbon)
+    weights = markov.destination_weights(xp, tables, base, allowed, state.water_fraction, state.carbon, state.total_nitrogen)
     return markov.draw(xp, weights, uniform), allowed.any(axis=1)
 
 
@@ -293,6 +307,7 @@ def simulate(xp, tables: Tables, policy: Policy, seed: int, count: int, keep: in
         day = round((period + 1) * tables.period_days, 9)
         advance_water(xp, tables, state, rain, rng["environment"].random(count))
         advance_soil(xp, tables, state, soil_rate)
+        advance_total_nitrogen(xp, tables, state)
         advance_nitrogen(tables, state, rain)
         advance_clocks(tables, state)
         harvest(xp, tables, state, day)
@@ -311,11 +326,12 @@ def sample_or_none(xp, rng, tables: Tables, policy: Policy, count: int):
 
 
 def path_codes(xp, tables: Tables, state: State) -> dict:
-    """One period of every trajectory in one byte each: crop + 1 (0 = fallow), water class + 3 × carbon class,
-    and the cane cut (0 when the field holds no cane)."""
+    """One period of every trajectory in one byte each: crop + 1 (0 = fallow), water class + 3 × carbon class
+    + 9 × total-N class (environmentPeriodCode of analysis.js), and the cane cut (0 when the field holds no cane)."""
     cane = state.crop == tables.sugarcane
+    nitrogen = total_nitrogen_class(xp, tables, state.total_nitrogen, state.carbon)
     return {"crop": (state.crop + 1).astype(xp.int8),
-            "environment": (state.water_class + 3 * carbon_class(xp, tables, state.carbon)).astype(xp.uint8),
+            "environment": (state.water_class + 3 * carbon_class(xp, tables, state.carbon) + 9 * nitrogen).astype(xp.uint8),
             "cane_cut": xp.where(cane, state.cane_cut, 0).astype(xp.uint8)}
 
 
@@ -354,6 +370,6 @@ class Recorder:
 
     def result(self, state: State, climate) -> dict:
         return {"value": state.value, "priced": state.priced, "route": state.route, "crop": self.crop, "crop_count": self.crop_count,
-                "water_fraction": state.water_fraction,
+                "water_fraction": state.water_fraction, "total_nitrogen": state.total_nitrogen,
                 "water_class": self.water_class, "carbon": self.carbon, "track": self.track,
                 "climate": climate[: self.keep], "paths": self.paths}

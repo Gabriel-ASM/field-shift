@@ -99,6 +99,10 @@ def ranking_settings(tables: Tables) -> dict:
                     "full_score": support["full_score_vpl_samples"]},
         "environment_weight": {key: environment[key] for key in ("default_weight", "maximum_weight", "weight_step")},
         "soil_share": environment["soil_share"], "water_share": environment["water_share"],
+        "carbon_share_within_soil": environment["carbon_share_within_soil"],
+        "nitrogen_share_within_soil": environment["nitrogen_share_within_soil"],
+        "nitrogen_target_per_carbon": tables.total_n_target_per_carbon,
+        "nitrogen_ratio_limits": [float(v) for v in tables.total_n_class_limits],
         "soil_reference": environment["soil_reference_g_kg"],
         "water_scale": max(abs(m - 1) for m in water) or 1e-9,
     }
