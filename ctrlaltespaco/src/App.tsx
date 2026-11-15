@@ -2,6 +2,7 @@ import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
 import { CropStep } from "./journey/CropStep.tsx";
 import { LocationStep } from "./journey/LocationStep.tsx";
+import { Outdated } from "./journey/Outdated.tsx";
 import { PriorityStep } from "./journey/PriorityStep.tsx";
 import { ResultStep } from "./journey/ResultStep.tsx";
 import { SimulationStep } from "./journey/SimulationStep.tsx";
@@ -12,6 +13,7 @@ import { useJourney, useWorld, type Journey, type World } from "./useFieldShift.
 const PANEL_WIDTH = "min(460px, 100vw)";
 
 function Screen({ journey, world, area }: { journey: Journey; world: World; area: number | null }) {
+  if (journey.outdated) return <Outdated />;
   switch (journey.step) {
     case "location": return <LocationStep journey={journey} world={world} area={area} />;
     case "crop": return <CropStep journey={journey} />;
@@ -58,7 +60,7 @@ export function App() {
           <Steps current={journey.step} />
         </header>
         <Screen journey={journey} world={world} area={area} />
-        {journey.step !== "simulation" && journey.error && <p className="error">{journey.error}</p>}
+        {journey.step !== "simulation" && !journey.outdated && journey.error && <p className="error">{journey.error}</p>}
       </aside>
     </div>
   );

@@ -1,11 +1,24 @@
+import { BUNDLE_VERSION, DEV, RELOAD_MESSAGE, VERSION_HEADER } from "./version.ts";
 import type { Boundary, ChainMatrix, JobView, PlantingWindows, Profile, ProfileSummary, RouteDetail, RunChoices, RunResult, RuntimeConfig, ScenarioRequest } from "./types.ts";
 
 const HORIZON_DAYS = 1825;
 
 export class ApiError extends Error {}
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(path, init);
+/** The API runs another build than this bundle: the page must be reloaded. */
+export class OutdatedError extends Error {
+  constructor(readonly server: string) {
+    super(RELOAD_MESSAGE);
+  }
+}
+
+/** Every request names the bundle's build; the run routes answer 409, with their own build, when it differs. */
+async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const headers = new Headers(init.headers);
+  headers.set(VERSION_HEADER, BUNDLE_VERSION);
+  const response = await fetch(path, { ...init, headers });
+  const server = response.headers.get(VERSION_HEADER);
+  if (response.status === 409 && server) throw new OutdatedError(server);
   if (!response.ok) throw new ApiError(await failureMessage(path, response));
   return (await response.json()) as T;
 }
@@ -18,6 +31,9 @@ async function failureMessage(path: string, response: Response): Promise<string>
 }
 
 export const getConfig = () => request<RuntimeConfig>("/config");
+
+/** The API's build now, never from a cache: it may have been redeployed since the page loaded. */
+export const getServerVersion = async () => (await request<RuntimeConfig>("/config", { cache: "no-store" })).version ?? DEV;
 export const listProfiles = () => request<ProfileSummary[]>("/profiles");
 export const getProfile = (id: string) => request<Profile>(`/profiles/${encodeURIComponent(id)}`);
 export const getPlantingWindows = (id: string) => request<PlantingWindows>(`/profiles/${encodeURIComponent(id)}/planting-windows`);

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
-import { getConfig, getMunicipality, getProfile, getRunChoices, getStates, listProfiles } from "./api.ts";
+import { getConfig, getMunicipality, getProfile, getRunChoices, getServerVersion, getStates, listProfiles, OutdatedError } from "./api.ts";
 import { runJob, type Progress } from "./runJob.ts";
 import { regionScenario } from "./scenarios.ts";
 import { playhead } from "./state/playhead.ts";
 import type { Boundary, Profile, RunChoices, RunResult, RuntimeConfig } from "./types.ts";
+import { BUNDLE_VERSION, DEV, outdated } from "./version.ts";
 
 export interface World {
   config: RuntimeConfig;
@@ -25,6 +26,12 @@ export function useWorld(): { world: World | null; error: string | null } {
     load().then(setWorld, (failure) => setError(message(failure)));
   }, []);
   return { world, error };
+}
+
+/** Resolves when the API runs this bundle's build; a run from an older bundle may misread the result. */
+async function current(): Promise<void> {
+  const server = await getServerVersion();
+  if (outdated(BUNDLE_VERSION, server)) throw new OutdatedError(server);
 }
 
 export type Step = "location" | "crop" | "priority" | "simulation" | "result";
@@ -53,6 +60,10 @@ export interface Journey {
   /** Trajectories simulated so far, while the engine runs. */
   progress: Progress | null;
   error: string | null;
+  /** Build of the API as last seen (GET /config or a 409). */
+  server: string;
+  /** The API runs another build than this page: nothing more is run until the page is reloaded. */
+  outdated: boolean;
   go: (step: Step) => void;
   choosePlace: (profile: Profile) => void;
   chooseCrop: (crop: string) => void;
@@ -78,6 +89,17 @@ export function useJourney(world: World | null): Journey {
   const [progress, setProgress] = useState<Progress | null>(null);
   const [simulated, setSimulated] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [seen, setSeen] = useState<string | null>(null);
+  const server = seen ?? world?.config.version ?? DEV;
+
+  /** A failed run: if the API was redeployed meanwhile (a 409, or a job lost with the old process), ask for a reload. */
+  const fail = useCallback((failure: unknown) => {
+    if (failure instanceof OutdatedError) return setSeen(failure.server);
+    getServerVersion().then((now) => {
+      setSeen(now);
+      if (!outdated(BUNDLE_VERSION, now)) setError(message(failure));
+    }, () => setError(message(failure)));
+  }, []);
 
   const choosePlace = useCallback((profile: Profile) => {
     setError(null);
@@ -108,14 +130,15 @@ export function useJourney(world: World | null): Journey {
     go("simulation");
     setError(null);
     setProgress(null);
-    runJob({ profile: place.profile.id, seed, scenarios: [regionScenario(crop, caneCut)], ...world.config.run }, setProgress).then(({ job: id, result }) => {
+    const options = { profile: place.profile.id, seed, scenarios: [regionScenario(crop, caneCut)], ...world.config.run };
+    current().then(() => runJob(options, setProgress)).then(({ job: id, result }) => {
       playhead.reset(result.clock.periods);
       setRun(result);
       setJob(id);
       setSimulated(key);
       go("result");
-    }, (failure) => setError(message(failure)));
-  }, [world, place, crop, caneCut, seed, run, simulated]);
+    }, fail);
+  }, [world, place, crop, caneCut, seed, run, simulated, fail]);
 
   const restart = useCallback(() => {
     setPlace(null);
@@ -125,5 +148,5 @@ export function useJourney(world: World | null): Journey {
     go("location");
   }, []);
 
-  return { step, place, crop, caneCut, weight, returnWeight, seed, run, job, progress, error, go, choosePlace, chooseCrop, chooseCaneCut, setWeight, setReturnWeight, setSeed, simulate, restart };
+  return { step, place, crop, caneCut, weight, returnWeight, seed, run, job, progress, error, server, outdated: outdated(BUNDLE_VERSION, server), go, choosePlace, chooseCrop, chooseCaneCut, setWeight, setReturnWeight, setSeed, simulate, restart };
 }

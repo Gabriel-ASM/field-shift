@@ -6,9 +6,12 @@ import { defineConfig, loadEnv } from "vite";
 const API_PATHS = ["/config", "/profiles", "/runs", "/geo", "/contracts", "/health"];
 
 export default defineConfig(({ mode }) => {
-  const api = loadEnv(mode, process.cwd(), "").FIELD_SHIFT_API ?? "http://127.0.0.1:8000";
+  const env = loadEnv(mode, process.cwd(), "");
+  const api = env.FIELD_SHIFT_API ?? "http://127.0.0.1:8000";
   return {
     plugins: [react()],
+    // The build this bundle belongs to (the commit, set by the image build); compared with GET /config `version`.
+    define: { __FIELD_SHIFT_VERSION__: JSON.stringify(env.FIELD_SHIFT_VERSION || "dev") },
     server: { proxy: Object.fromEntries(API_PATHS.map((path) => [path, api])) },
   };
 });

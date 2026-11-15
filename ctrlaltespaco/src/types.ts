@@ -1,6 +1,8 @@
 /** Shapes of the API answers the front uses. They mirror field_shift/api and field_shift/engines/summary.py. */
 
 export interface RuntimeConfig {
+  /** Build of the API (the commit), "dev" outside an image. Absent from APIs older than the check. */
+  version?: string;
   basemap: { tiles: string; max_zoom: number; attribution: string };
   cms: { url: string | null; token: string | null };
   run: { trajectories: number; tracks: number };
