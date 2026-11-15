@@ -1,0 +1,64 @@
+{
+  "id": "franca-sp",
+  "label": "Franca, SP",
+  "municipality": {
+    "name": "Franca",
+    "uf": "SP",
+    "ibge_code": "3516200"
+  },
+  "scope": "grid_cell",
+  "initial_node": {
+    "state": "soybean:skip_stages",
+    "day": 0,
+    "soil": {
+      "pH": 5.283,
+      "organic_carbon": 24.6,
+      "available_water_capacity": 108.34,
+      "available_water_fraction": 0.5
+    },
+    "climate": {
+      "lat": -20.55525,
+      "long": -47.38155
+    }
+  },
+  "values": [
+    {
+      "pointer": "/soil/pH",
+      "support": "derived",
+      "provenance": "0-30 cm thickness-weighted mean of ph_water; ISRIC SoilGrids v2.0 properties API (mean prediction); AWC derived by Saxton & Rawls (2006) (data/profiles/franca-sp/soil-profile.json)"
+    },
+    {
+      "pointer": "/soil/organic_carbon",
+      "support": "derived",
+      "provenance": "0-30 cm thickness-weighted mean of organic_carbon_g_kg; ISRIC SoilGrids v2.0 properties API (mean prediction); AWC derived by Saxton & Rawls (2006) (data/profiles/franca-sp/soil-profile.json)"
+    },
+    {
+      "pointer": "/soil/available_water_capacity",
+      "support": "derived",
+      "provenance": "available_water_capacity_mm down to 100 cm; ISRIC SoilGrids v2.0 properties API (mean prediction); AWC derived by Saxton & Rawls (2006) (data/profiles/franca-sp/soil-profile.json)"
+    },
+    {
+      "pointer": "/soil/available_water_fraction",
+      "support": "prior",
+      "provenance": "No measured soil moisture; v1 starts every trajectory at medium water"
+    },
+    {
+      "pointer": "/climate/lat",
+      "support": "derived",
+      "provenance": "centroide de área da malha municipal IBGE consultada; não é posição de talhão"
+    },
+    {
+      "pointer": "/climate/long",
+      "support": "derived",
+      "provenance": "centroide de área da malha municipal IBGE consultada; não é posição de talhão"
+    }
+  ],
+  "climate_history": {
+    "file": "data/profiles/franca-sp/climate-daily.csv",
+    "period": [
+      "1981-01-01",
+      "2026-11-06"
+    ],
+    "source": "NASA POWER Daily API (see the 'source' column of the file)"
+  }
+}

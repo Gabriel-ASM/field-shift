@@ -1,0 +1,42 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://fieldshift.local/contracts/v2/event.json",
+    "title": "Random event",
+    "$comment": "Part of the ENVIRONMENT, never of the farmer's choice. Monte Carlo draws events from the environment stream, so two scenarios with the same seed see the same events on the same days. While active, an event behaves like a temporary overlay on the current state: 'entry' effects at onset, 'rate' effects for each active day, 'exit' effects when it ends.",
+    "type": "object",
+    "required": ["id", "kind", "probability", "duration_days", "effects", "support"],
+    "properties": {
+        "id": {"type": "string", "examples": ["drought_flowering", "rust_soybean", "frost_june"]},
+        "label": {"type": "string"},
+        "kind": {
+            "enum": ["pest", "disease", "drought", "heavy_rain", "heat_wave", "frost", "strong_wind", "radiation_peak"],
+            "description": "Climate extremes (drought, heavy_rain, heat_wave, frost, strong_wind, radiation_peak) and biological threats (pest, disease)."
+        },
+        "probability": {
+            "type": "object",
+            "required": ["value", "per"],
+            "properties": {
+                "value": {"$ref": "effect.json#/definitions/quantity", "description": "Chance that the event starts in one 'per' window. A distribution here means the chance itself is uncertain."},
+                "per": {"enum": ["day", "period", "month", "year", "cycle"], "description": "Window the chance refers to. 'period' = one Monte Carlo climate period; 'cycle' = once per stay in a crop state."}
+            },
+            "additionalProperties": false
+        },
+        "duration_days": {"$ref": "effect.json#/definitions/quantity", "description": "How long the event stays active once it starts."},
+        "when": {
+            "type": "array",
+            "items": {"$ref": "effect.json#/definitions/condition"},
+            "description": "The event can only start while the node meets every condition (e.g. /climate/month in [june, july] for frost)."
+        },
+        "crops": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Crop ids the event can hit. Absent = any crop, including fallow."
+        },
+        "max_occurrences": {"type": "integer", "minimum": 1, "description": "Upper bound per trajectory year. Absent = no bound."},
+        "effects": {"type": "array", "minItems": 1, "items": {"$ref": "effect.json"}},
+        "editable": {"type": "boolean", "default": true, "description": "Whether the web GUI may change probability and effects for a run. The stored contract stays unchanged; the edited copy travels with the simulation request."},
+        "support": {"$ref": "effect.json#/definitions/support"},
+        "provenance": {"type": "string"}
+    },
+    "additionalProperties": false
+}

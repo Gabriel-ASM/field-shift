@@ -1,0 +1,64 @@
+{
+  "id": "ariquemes-ro",
+  "label": "Ariquemes, RO",
+  "municipality": {
+    "name": "Ariquemes",
+    "uf": "RO",
+    "ibge_code": "1100023"
+  },
+  "scope": "grid_cell",
+  "initial_node": {
+    "state": "soybean:skip_stages",
+    "day": 0,
+    "soil": {
+      "pH": 4.483,
+      "organic_carbon": 14.783,
+      "available_water_capacity": 121.32,
+      "available_water_fraction": 0.5
+    },
+    "climate": {
+      "lat": -9.95187,
+      "long": -62.95718
+    }
+  },
+  "values": [
+    {
+      "pointer": "/soil/pH",
+      "support": "derived",
+      "provenance": "0-30 cm thickness-weighted mean of ph_water; ISRIC SoilGrids v2.0 properties API (mean prediction); AWC derived by Saxton & Rawls (2006) (data/profiles/ariquemes-ro/soil-profile.json)"
+    },
+    {
+      "pointer": "/soil/organic_carbon",
+      "support": "derived",
+      "provenance": "0-30 cm thickness-weighted mean of organic_carbon_g_kg; ISRIC SoilGrids v2.0 properties API (mean prediction); AWC derived by Saxton & Rawls (2006) (data/profiles/ariquemes-ro/soil-profile.json)"
+    },
+    {
+      "pointer": "/soil/available_water_capacity",
+      "support": "derived",
+      "provenance": "available_water_capacity_mm down to 100 cm; ISRIC SoilGrids v2.0 properties API (mean prediction); AWC derived by Saxton & Rawls (2006) (data/profiles/ariquemes-ro/soil-profile.json)"
+    },
+    {
+      "pointer": "/soil/available_water_fraction",
+      "support": "prior",
+      "provenance": "No measured soil moisture; v1 starts every trajectory at medium water"
+    },
+    {
+      "pointer": "/climate/lat",
+      "support": "derived",
+      "provenance": "centroide de área da malha municipal IBGE consultada; não é posição de talhão"
+    },
+    {
+      "pointer": "/climate/long",
+      "support": "derived",
+      "provenance": "centroide de área da malha municipal IBGE consultada; não é posição de talhão"
+    }
+  ],
+  "climate_history": {
+    "file": "data/profiles/ariquemes-ro/climate-daily.csv",
+    "period": [
+      "1981-01-01",
+      "2026-11-06"
+    ],
+    "source": "NASA POWER Daily API (see the 'source' column of the file)"
+  }
+}

@@ -2,7 +2,7 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "https://fieldshift.local/contracts/v2/effect.json",
     "title": "Effect on the simulation state",
-    "$comment": "An effect is NOT a state: it is a change applied to ONE variable of the state. Soil, climate and finances share this format; only 'target' changes. Monte Carlo applies effects, using the trajectory seed.",
+    "$comment": "An effect is NOT a state: it is a change applied to ONE variable of the state. Soil, climate and finances share this format; only 'target' changes. Effects are deterministic given their drawn values (see monte_carlo.json).",
     "type": "object",
     "required": [
         "target",
@@ -76,7 +76,7 @@
     "additionalProperties": false,
     "definitions": {
         "quantity": {
-            "description": "Fixed number or distribution. A distribution is sampled once per trajectory by Monte Carlo from its seed.",
+            "description": "Fixed number or distribution. A distribution is drawn once per trajectory from the parameters stream, keyed by trajectory index and the effect's location in the contracts, so the same draw repeats in every scenario of a run.",
             "oneOf": [
                 {
                     "type": "number"

@@ -4,8 +4,10 @@
     "climate.json",
     "crop.json",
     "effect.json",
+    "event.json",
     "markov.json",
     "monte_carlo.json",
+    "profile.json",
     "soil.json"
   ],
   "nodes": [
@@ -224,7 +226,7 @@
       "id": "effect",
       "file": "effect.json",
       "title": "Effect on the simulation state",
-      "comment": "An effect is NOT a state: it is a change applied to ONE variable of the state. Soil, climate and finances share this format; only 'target' changes. Monte Carlo applies effects, using the trajectory seed.",
+      "comment": "An effect is NOT a state: it is a change applied to ONE variable of the state. Soil, climate and finances share this format; only 'target' changes. Effects are deterministic given their drawn values (see monte_carlo.json).",
       "definitions": [
         "quantity",
         "condition",
@@ -318,10 +320,97 @@
       ]
     },
     {
+      "id": "event",
+      "file": "event.json",
+      "title": "Random event",
+      "comment": "Part of the ENVIRONMENT, never of the farmer's choice. Monte Carlo draws events from the environment stream, so two scenarios with the same seed see the same events on the same days. While active, an event behaves like a temporary overlay on the current state: 'entry' effects at onset, 'rate' effects for each active day, 'exit' effects when it ends.",
+      "definitions": [],
+      "fields": [
+        {
+          "path": "id",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "label",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "path": "kind",
+          "type": "enum: pest | disease | drought | heavy_rain | heat_wave | frost | ... (8)",
+          "required": true,
+          "description": "Climate extremes (drought, heavy_rain, heat_wave, frost, strong_wind, radiation_peak) and biological threats (pest, disease)."
+        },
+        {
+          "path": "probability.value",
+          "type": "-> effect.json#/definitions/quantity",
+          "required": true,
+          "description": "Chance that the event starts in one 'per' window. A distribution here means the chance itself is uncertain."
+        },
+        {
+          "path": "probability.per",
+          "type": "enum: day | period | month | year | cycle",
+          "required": true,
+          "description": "Window the chance refers to. 'period' = one Monte Carlo climate period; 'cycle' = once per stay in a crop state."
+        },
+        {
+          "path": "duration_days",
+          "type": "-> effect.json#/definitions/quantity",
+          "required": true,
+          "description": "How long the event stays active once it starts."
+        },
+        {
+          "path": "when",
+          "type": "array of -> effect.json#/definitions/condition",
+          "required": false,
+          "description": "The event can only start while the node meets every condition (e.g. /climate/month in [june, july] for frost)."
+        },
+        {
+          "path": "crops",
+          "type": "array of string",
+          "required": false,
+          "description": "Crop ids the event can hit. Absent = any crop, including fallow."
+        },
+        {
+          "path": "max_occurrences",
+          "type": "integer 1..",
+          "required": false,
+          "description": "Upper bound per trajectory year. Absent = no bound."
+        },
+        {
+          "path": "effects",
+          "type": "array of -> effect.json",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "editable",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether the web GUI may change probability and effects for a run. The stored contract stays unchanged; the edited copy travels with the simulation request."
+        },
+        {
+          "path": "support",
+          "type": "-> effect.json#/definitions/support",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "provenance",
+          "type": "string",
+          "required": false,
+          "description": ""
+        }
+      ]
+    },
+    {
       "id": "markov",
       "file": "markov.json",
       "title": "Markov chain graph",
-      "comment": "The chain walks over DISCRETE states (crop x stage). CONTINUOUS variables (soil, climate, finances) live in the node and change only through effects: what the chain can alter is whatever appears as an effect target. The chain has no seed: Monte Carlo owns the seed (monte_carlo.json) and draws every transition and effect value with it.",
+      "comment": "The chain walks over DISCRETE states (crop x stage). CONTINUOUS variables (soil, climate, finances) live in the node and change only through effects: what the chain can alter is whatever appears as an effect target. The chain holds no seed and makes no choice by itself: a scenario policy (monte_carlo.json) decides which edge to take, deterministically (rotation) or by drawing from 'probability' (markov).",
       "definitions": [
         "node",
         "state",
@@ -329,10 +418,28 @@
       ],
       "fields": [
         {
+          "path": "id",
+          "type": "string",
+          "required": false,
+          "description": "Chain id. Generated chains use the profile id."
+        },
+        {
+          "path": "profile",
+          "type": "string",
+          "required": false,
+          "description": "Profile the chain was generated for (profile.json id). Absent in hand-written examples."
+        },
+        {
           "path": "description",
           "type": "string",
           "required": false,
           "description": ""
+        },
+        {
+          "path": "provenance",
+          "type": "string",
+          "required": false,
+          "description": "How the chain was produced: source files, rule and its parameters."
         },
         {
           "path": "initial_state",
@@ -470,13 +577,25 @@
           "path": "transition.count",
           "type": "integer 0..",
           "required": false,
-          "description": "Observed count behind the probability, when there is one"
+          "description": "Whole observed transitions behind the edge, when there are any (v1: year pairs in which the municipality's dominant crop went from 'from' to 'to')."
         },
         {
           "path": "transition.outgoing_count",
           "type": "integer 0..",
           "required": false,
           "description": "Total observed transitions leaving 'from'"
+        },
+        {
+          "path": "transition.mass",
+          "type": "number 0..",
+          "required": false,
+          "description": "Fractional evidence behind the edge when it is not a whole count (v1: sum over consecutive years of area share of 'from' x area share of 'to' among the top-5 PAM crops, which assumes independence)."
+        },
+        {
+          "path": "transition.outgoing_mass",
+          "type": "number 0..",
+          "required": false,
+          "description": "Total mass leaving 'from' over the destinations kept in the chain. probability = mass / outgoing_mass."
         },
         {
           "path": "transition.when",
@@ -507,32 +626,213 @@
     {
       "id": "monte_carlo",
       "file": "monte_carlo.json",
-      "title": "",
-      "comment": "",
-      "definitions": [],
+      "title": "Monte Carlo run",
+      "comment": "A run separates three things. (1) ENVIRONMENT is random: climate periods, events and uncertain effect values are drawn from streams derived from 'seed' and the trajectory index only, so every scenario sees the same environment (common random numbers). (2) CHOICE belongs to the scenario: a 'rotation' policy is deterministic; a 'markov' policy draws edges from the chain probabilities with its own choice stream, which never shifts the environment streams. (3) OUTCOMES are deterministic given (1) and (2): effects are applied in a fixed order.",
+      "definitions": [
+        "scenario",
+        "rotation_policy",
+        "markov_policy"
+      ],
       "fields": [
         {
           "path": "seed",
-          "type": "integer",
+          "type": "integer 0..",
+          "required": true,
+          "description": "Master seed. Same seed + same trajectory index = same environment in every scenario."
+        },
+        {
+          "path": "trajectories",
+          "type": "integer 1..",
+          "required": true,
+          "description": "Trajectories per scenario."
+        },
+        {
+          "path": "horizon_days",
+          "type": "integer 1..",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "period_days",
+          "type": "integer 1..",
+          "required": false,
+          "description": "Length of one climate period (v1 uses fortnights)."
+        },
+        {
+          "path": "profile",
+          "type": "string",
+          "required": true,
+          "description": "Profile id (data/profiles/<id>), e.g. franca-sp. Gives the initial node and the climate history."
+        },
+        {
+          "path": "climate_source",
+          "type": "enum: historical_year_resample | historical_period_resample",
+          "required": false,
+          "description": "How the environment stream builds each trajectory's climate from the profile history (NASA POWER daily series)."
+        },
+        {
+          "path": "events",
+          "type": "array of -> event.json",
+          "required": false,
+          "description": "Random events that may hit any scenario."
+        },
+        {
+          "path": "chain",
+          "type": "-> markov.json",
+          "required": true,
+          "description": "States, edges, gates and effects. Shared by every scenario."
+        },
+        {
+          "path": "scenarios",
+          "type": "array of -> #/definitions/scenario",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "scenario.id",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "scenario.label",
+          "type": "string",
           "required": false,
           "description": ""
         },
         {
-          "path": "climate",
-          "type": "-> climate.json",
+          "path": "scenario.initial_state",
+          "type": "string",
           "required": false,
+          "description": "Overrides chain.initial_state."
+        },
+        {
+          "path": "scenario.policy",
+          "type": "number or distribution",
+          "required": true,
           "description": ""
         },
         {
-          "path": "weather",
+          "path": "rotation_policy.kind",
+          "type": "any",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "rotation_policy.sequence",
+          "type": "array of string",
+          "required": true,
+          "description": "Crop ids in planting order, e.g. [soybean, maize_grain, brachiaria]."
+        },
+        {
+          "path": "rotation_policy.fallback",
+          "type": "string",
+          "required": true,
+          "description": "State id used when the next crop is blocked, e.g. fallow:skip_stages or brachiaria:skip_stages."
+        },
+        {
+          "path": "markov_policy.kind",
+          "type": "any",
+          "required": true,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "id": "profile",
+      "file": "profile.json",
+      "title": "Location profile",
+      "comment": "One place the simulation can run for. Holds the node every trajectory starts from and says, value by value, where it came from.",
+      "definitions": [],
+      "fields": [
+        {
+          "path": "id",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "label",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "municipality.name",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "municipality.uf",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "municipality.ibge_code",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "scope",
+          "type": "enum: field | municipality | grid_cell",
+          "required": false,
+          "description": "What the soil values represent. grid_cell = map estimate at the municipality centroid, not a field sample."
+        },
+        {
+          "path": "initial_node",
+          "type": "-> markov.json#/definitions/node",
+          "required": true,
+          "description": "Node at day 0. 'state' is the default starting state; a scenario may override it."
+        },
+        {
+          "path": "values",
+          "type": "array of object",
+          "required": true,
+          "description": "Evidence for each initial value: one item per JSON Pointer set in initial_node."
+        },
+        {
+          "path": "values[].pointer",
+          "type": "string",
+          "required": true,
+          "description": "JSON Pointer into initial_node, e.g. /soil/pH"
+        },
+        {
+          "path": "values[].support",
+          "type": "-> effect.json#/definitions/support",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "values[].provenance",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "path": "climate_history",
           "type": "object",
           "required": false,
-          "description": ""
+          "description": "Daily series the environment stream resamples."
         },
         {
-          "path": "markov",
-          "type": "object",
-          "required": false,
+          "path": "climate_history.file",
+          "type": "string",
+          "required": true,
+          "description": "Path relative to the repository root"
+        },
+        {
+          "path": "climate_history.period",
+          "type": "array of string",
+          "required": true,
+          "description": "First and last day, ISO dates"
+        },
+        {
+          "path": "climate_history.source",
+          "type": "string",
+          "required": true,
           "description": ""
         }
       ]
@@ -666,6 +966,41 @@
       "target": "/definitions/support"
     },
     {
+      "kind": "ref",
+      "from": "event",
+      "field": "probability.value",
+      "to": "effect",
+      "target": "/definitions/quantity"
+    },
+    {
+      "kind": "ref",
+      "from": "event",
+      "field": "duration_days",
+      "to": "effect",
+      "target": "/definitions/quantity"
+    },
+    {
+      "kind": "ref",
+      "from": "event",
+      "field": "when[]",
+      "to": "effect",
+      "target": "/definitions/condition"
+    },
+    {
+      "kind": "ref",
+      "from": "event",
+      "field": "effects[]",
+      "to": "effect",
+      "target": "(whole contract)"
+    },
+    {
+      "kind": "ref",
+      "from": "event",
+      "field": "support",
+      "to": "effect",
+      "target": "/definitions/support"
+    },
+    {
       "kind": "internal",
       "from": "markov",
       "field": "states[]",
@@ -738,9 +1073,37 @@
     {
       "kind": "ref",
       "from": "monte_carlo",
-      "field": "climate",
-      "to": "climate",
+      "field": "events[]",
+      "to": "event",
       "target": "(whole contract)"
+    },
+    {
+      "kind": "ref",
+      "from": "monte_carlo",
+      "field": "chain",
+      "to": "markov",
+      "target": "(whole contract)"
+    },
+    {
+      "kind": "internal",
+      "from": "monte_carlo",
+      "field": "scenarios[]",
+      "to": "monte_carlo",
+      "target": "/definitions/scenario"
+    },
+    {
+      "kind": "ref",
+      "from": "profile",
+      "field": "initial_node",
+      "to": "markov",
+      "target": "/definitions/node"
+    },
+    {
+      "kind": "ref",
+      "from": "profile",
+      "field": "values[].support",
+      "to": "effect",
+      "target": "/definitions/support"
     },
     {
       "kind": "id",
@@ -792,6 +1155,48 @@
       "target": "state.id"
     },
     {
+      "kind": "id",
+      "from": "monte_carlo",
+      "field": "scenario.initial_state",
+      "to": "markov",
+      "target": "state.id"
+    },
+    {
+      "kind": "id",
+      "from": "monte_carlo",
+      "field": "rotation_policy.sequence[]",
+      "to": "crop",
+      "target": "name"
+    },
+    {
+      "kind": "id",
+      "from": "monte_carlo",
+      "field": "rotation_policy.fallback",
+      "to": "markov",
+      "target": "state.id"
+    },
+    {
+      "kind": "id",
+      "from": "monte_carlo",
+      "field": "profile",
+      "to": "profile",
+      "target": "id"
+    },
+    {
+      "kind": "id",
+      "from": "markov",
+      "field": "profile",
+      "to": "profile",
+      "target": "id"
+    },
+    {
+      "kind": "id",
+      "from": "event",
+      "field": "crops[]",
+      "to": "crop",
+      "target": "name"
+    },
+    {
       "kind": "pointer",
       "from": "effect",
       "field": "target",
@@ -806,11 +1211,11 @@
       "target": "read by conditions (when)"
     },
     {
-      "kind": "missing",
-      "from": "monte_carlo",
-      "field": "markov",
-      "to": "markov",
-      "target": "declared as a free object, not a $ref"
+      "kind": "pointer",
+      "from": "event",
+      "field": "when",
+      "to": "markov#node",
+      "target": "event can start only while conditions hold"
     }
   ],
   "node_fields": [
@@ -852,7 +1257,8 @@
       "source": "Not downloaded (SoilGrids has a nitrogen layer)",
       "read_by_app": "Nothing reads it",
       "written_in_examples": [
-        "markov.s1-soybean-maize-prior.json"
+        "markov.s1-soybean-maize-prior.json",
+        "monte_carlo.s1-three-scenarios.json"
       ],
       "read_in_examples": []
     },
@@ -865,7 +1271,8 @@
       "read_by_app": "Nothing reads it",
       "written_in_examples": [],
       "read_in_examples": [
-        "markov.s1-soybean-maize-prior.json"
+        "markov.s1-soybean-maize-prior.json",
+        "monte_carlo.s1-three-scenarios.json"
       ]
     },
     {
@@ -895,7 +1302,10 @@
       "status": "used",
       "source": "Water balance state (v1 water_low / medium / high)",
       "read_by_app": "Water states and water factor",
-      "written_in_examples": [],
+      "written_in_examples": [
+        "event.drought-soybean.json",
+        "monte_carlo.s1-three-scenarios.json"
+      ],
       "read_in_examples": []
     },
     {
@@ -946,7 +1356,10 @@
       "source": "Derived from date_local",
       "read_by_app": "Fortnight water periods and ZARC calendar",
       "written_in_examples": [],
-      "read_in_examples": []
+      "read_in_examples": [
+        "event.drought-soybean.json",
+        "monte_carlo.s1-three-scenarios.json"
+      ]
     },
     {
       "pointer": "/climate/season",
@@ -1026,7 +1439,8 @@
       "source": "CONAB production costs (economic-benchmarks.json)",
       "read_by_app": "NPV",
       "written_in_examples": [
-        "markov.s1-soybean-maize-prior.json"
+        "markov.s1-soybean-maize-prior.json",
+        "monte_carlo.s1-three-scenarios.json"
       ],
       "read_in_examples": []
     },
@@ -1038,7 +1452,8 @@
       "source": "PAM yield x PAM real price",
       "read_by_app": "NPV",
       "written_in_examples": [
-        "markov.s1-soybean-maize-prior.json"
+        "markov.s1-soybean-maize-prior.json",
+        "monte_carlo.s1-three-scenarios.json"
       ],
       "read_in_examples": []
     },
@@ -1049,7 +1464,10 @@
       "status": "used",
       "source": "PAM yield (kg/ha)",
       "read_by_app": "NPV",
-      "written_in_examples": [],
+      "written_in_examples": [
+        "event.drought-soybean.json",
+        "monte_carlo.s1-three-scenarios.json"
+      ],
       "read_in_examples": []
     },
     {
@@ -1121,8 +1539,10 @@
   ],
   "node_description": "The state of one Monte Carlo trajectory at a point in time: what the field looks like now. Behaviour: (1) Monte Carlo creates one node per trajectory from a profile (soil, climate at day 0, finances at 0). (2) Entering a state applies its 'entry' effects. (3) While in the state, 'rate' effects accumulate over duration_days and Monte Carlo refreshes climate each period. (4) Leaving applies 'exit' effects. (5) Outgoing edges are filtered by 'when' against the node, one is drawn, its effects apply, and the loop repeats until the horizon. Why it exists: crops, actions and climate must affect each other (soybean adds N used by maize, liming unlocks soybean, drought cuts yield). They can only do that through one shared place. A field belongs here only if some effect writes it or some condition reads it.",
   "examples": [
+    "event.drought-soybean.json",
     "markov.franca-sp-observed.json",
     "markov.node.json",
-    "markov.s1-soybean-maize-prior.json"
+    "markov.s1-soybean-maize-prior.json",
+    "monte_carlo.s1-three-scenarios.json"
   ]
 }

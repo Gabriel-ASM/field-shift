@@ -6,11 +6,50 @@ O projeto responde ao desafio [Field Shift: Adapting Farms with NASA Data](https
 
 > **Status:** NASA POWER/SoilGrids, PAM/IBGE, ZARC/MAPA e custos CONAB ingeridos para Ariquemes‑RO, Franca‑SP e Varginha‑MG. A página mostra a cadeia Markov de 14 culturas como grafo; o Monte Carlo evolui água e carbono por quinzena, decide a transição na próxima oportunidade municipal após a colheita e semeia o destino na janela MAPA standalone. Apenas coberturas sem linha MAPA no perfil podem usar qualquer decêndio, como hipótese explícita. A espera é pousio e as tábuas MAPA anual 2026/2027 e perene vigente são repetidas nos 60 meses. Cultura inicial é estabelecida; culturas novas aguardam maturação. Café e cana mantêm sua identidade perene; café tem uma subcadeia separada de coberturas entrelinhas, com prior uniforme e zero contagens observadas. Replantios consecutivos de anuais reduzem o rendimento bruto por uma hipótese editável e não calibrada. O VPL usa preços PAM históricos em R$ reais, tendência anual limitada e editável, e desconta cada fluxo pela data do ciclo. Probabilidade Markov e frequência Monte Carlo aparecem separadamente. Resultados exploratórios, não prova causal nem recomendação agronômica.
 
+## Backend (in progress, branch `refactor/backend-engine`)
+
+The research app is being turned into a backend for a web application. Design and audit graphs: [docs/backend-design.md](docs/backend-design.md). Contract map: [docs/contracts-v2.html](docs/contracts-v2.html).
+
+Everything in one image (MongoDB + API + front); the database is loaded when the container starts and is not reachable from outside it:
+
+```bash
+docker build -t field-shift .
+docker run --rm -p 8000:8000 field-shift  # front at http://localhost:8000, API docs at /docs
+```
+
+The front lives in `web/` and is served at `/`; set `FIELD_SHIFT_WEB_DIR` to serve another build. The generated pages in `docs/` are served at `/pages`.
+
+Local development:
+
+```bash
+uv sync                                   # install dependencies
+uv run pytest                             # unit and API tests
+uv run python -m field_shift.contracts    # validate the contract examples
+uv run python -m field_shift.ingest       # v1 data -> data/v2 (chains, profiles, audit report)
+uv run python -m field_shift.views        # regenerate the contract views
+
+docker run -d --name field-shift-mongo -p 127.0.0.1:27017:27017 mongo:7   # throwaway MongoDB
+uv run python -m field_shift.ingest --mongo mongodb://localhost:27017
+uv run uvicorn --factory field_shift.api:create_app   # http://localhost:8000
+FIELD_SHIFT_TEST_MONGO_URI=mongodb://localhost:27017 uv run pytest   # also runs the MongoDB validator tests
+```
+
+| Package | Role |
+|---|---|
+| `field_shift/contracts` | Load, validate and bundle the v2 JSON Schemas; translate them to MongoDB validators; cross-reference checks |
+| `field_shift/ingest` | Build v2 chains and profiles from the v1 files in `data/profiles` |
+| `field_shift/db` | MongoDB collections validated by the contracts |
+| `field_shift/api` | FastAPI: contracts, validation, views, profiles, chains |
+| `field_shift/views` | Contract graph and tree for the web |
+| `field_shift/legacy` | The v1 research engine and page generator, kept until the new engines reach parity |
+
+The sections below describe the v1 research app (`field_shift/legacy`).
+
 ## Executar o motor
 
-Para executar a simulação de referência nos três perfis, rode `python -m field_shift.demo`. Para um perfil isolado, use `python -m field_shift --profile data/profiles/ariquemes-ro --policy data/policies/balanco-hidrico-referencia.json --initial-state water_medium`. Os dados brutos estão em `data/raw/`, os normalizados e as contagens Markov em `data/profiles/`, e as fontes/gaps estão em `data/README.md`.
+Para executar a simulação de referência nos três perfis, rode `python -m field_shift.legacy.demo`. Para um perfil isolado, use `python -m field_shift.legacy --profile data/profiles/ariquemes-ro --policy data/policies/balanco-hidrico-referencia.json --initial-state water_medium`. Os dados brutos estão em `data/raw/`, os normalizados e as contagens Markov em `data/profiles/`, e as fontes/gaps estão em `data/README.md`.
 
-Abra a [demonstração interativa](docs/visualizacao.html) para escolher o município, definir a cultura principal inicial, inspecionar a matriz Markov completa e comparar o VPL em 60 meses. Regenere custos/entradas econômicas com `python data/pipeline/build_economic_benchmarks.py`, a cadeia com `python data/pipeline/build_crop_transition_markov.py` e a página com `python -m field_shift.visualize --output docs/visualizacao.html --seed 2026`.
+Abra a [demonstração interativa](docs/visualizacao.html) para escolher o município, definir a cultura principal inicial, inspecionar a matriz Markov completa e comparar o VPL em 60 meses. Regenere custos/entradas econômicas com `python data/pipeline/build_economic_benchmarks.py`, a cadeia com `python data/pipeline/build_crop_transition_markov.py` e a página com `python -m field_shift.legacy.visualize --output docs/visualizacao.html --seed 2026`.
 
 ## Ideia em uma figura
 

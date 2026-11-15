@@ -15,20 +15,30 @@ JSON Schema tools:
 `id` links and the field status (where each value comes from, what reads it today) are
 written by hand below, because no schema keyword expresses them.
 
-Usage: python data/pipeline/build_contract_views.py [--fragment PATH]
+Usage: python -m field_shift.views [--fragment PATH]
   --fragment also writes the page body without the <html>/<head> wrapper (for hosts that add their own).
 """
 
 from __future__ import annotations
 
-import argparse
 import json
 from pathlib import Path
+from typing import Any
 
-ROOT = Path(__file__).resolve().parents[2]
-V2 = ROOT / "data" / "contracts" / "v2"
+from .. import ROOT
+from ..contracts import V2_DIR as V2, load_schemas
+from ..contracts.bundle import split_ref
+
+
+def resolve(schemas: dict, contract: str, fragment: str) -> Any:
+    node = schemas[contract]
+    for part in (p for p in fragment.split("/") if p):
+        node = node[part]
+    return node
+
+
 VIEWS = V2 / "views"
-TEMPLATE = Path(__file__).resolve().parent / "templates" / "contracts_view.html"
+TEMPLATE = Path(__file__).with_name("contracts_view.html")
 PAGE = ROOT / "docs" / "contracts-v2.html"
 
 # String fields that must match an id defined in another contract.
@@ -40,16 +50,21 @@ ID_LINKS = [
     ("markov", "transition.to", "markov", "state.id"),
     ("markov", "transition.action", "action", "id"),
     ("markov", "node.state", "markov", "state.id"),
+    ("monte_carlo", "scenario.initial_state", "markov", "state.id"),
+    ("monte_carlo", "rotation_policy.sequence[]", "crop", "name"),
+    ("monte_carlo", "rotation_policy.fallback", "markov", "state.id"),
+    ("monte_carlo", "profile", "profile", "id"),
+    ("markov", "profile", "profile", "id"),
+    ("event", "crops[]", "crop", "name"),
 ]
 # JSON Pointer strings resolved against the trajectory node.
 POINTER_LINKS = [
     ("effect", "target", "markov#node", "written by effects"),
     ("effect", "condition.path", "markov#node", "read by conditions (when)"),
+    ("event", "when", "markov#node", "event can start only while conditions hold"),
 ]
 # Links that should exist but do not yet.
-MISSING_LINKS = [
-    ("monte_carlo", "markov", "markov", "declared as a free object, not a $ref"),
-]
+MISSING_LINKS: list[tuple[str, str, str, str]] = []
 
 # Where each node value comes from today and whether the current app reads it.
 # status: used | upstream | available | partial | none
@@ -97,29 +112,6 @@ V2_GAPS = [
     ("Planting windows (ZARC)", "crop.planting_windows", "MAPA SISZARC per municipality", "When a destination crop can be sown"),
     ("Yield and price", "markov.node.financial.yield, .price", "PAM yield and price, Yahoo futures", "Revenue = yield x price at harvest"),
 ]
-
-
-def load_schemas() -> dict[str, dict]:
-    schemas = {}
-    for path in sorted(V2.glob("*.json")):
-        data = json.loads(path.read_text(encoding="utf-8"))
-        # Skip bundles such as allcontracts.json: a schema is an object with $schema.
-        if isinstance(data, dict) and "$schema" in data:
-            schemas[path.stem] = data
-    return schemas
-
-
-def split_ref(ref: str, current: str) -> tuple[str, str]:
-    file_part, _, fragment = ref.partition("#")
-    contract = Path(file_part).stem if file_part else current
-    return contract, fragment
-
-
-def resolve(schemas: dict, contract: str, fragment: str) -> dict:
-    node = schemas[contract]
-    for part in [p for p in fragment.split("/") if p]:
-        node = node[part]
-    return node
 
 
 def describe_leaf(schema: dict) -> str:
@@ -297,37 +289,3 @@ def build_tree(schemas: dict, graph: dict) -> dict:
             "node_fields_effects_can_target": {r["pointer"]: f"{r['type']}  ({r['status']})" for r in graph["node_fields"]},
         }
     }
-
-
-PAGE_WRAPPER = """<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-</head>
-<body>
-{body}
-</body>
-</html>
-"""
-
-
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--fragment", type=Path, help="also write the page without the html/head wrapper")
-    args = parser.parse_args()
-    schemas = load_schemas()
-    graph = build_graph(schemas)
-    VIEWS.mkdir(exist_ok=True)
-    (VIEWS / "contracts-graph.json").write_text(json.dumps(graph, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    (VIEWS / "contracts-tree.json").write_text(json.dumps(build_tree(schemas, graph), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    body = TEMPLATE.read_text(encoding="utf-8").replace("/*GRAPH_DATA*/null", json.dumps(graph, ensure_ascii=False))
-    PAGE.write_text(PAGE_WRAPPER.format(body=body), encoding="utf-8")
-    if args.fragment:
-        args.fragment.write_text(body, encoding="utf-8")
-    for path in (VIEWS / "contracts-tree.json", VIEWS / "contracts-graph.json", PAGE):
-        print(f"wrote {path.relative_to(ROOT)} ({path.stat().st_size // 1024} KiB)")
-
-
-if __name__ == "__main__":
-    main()

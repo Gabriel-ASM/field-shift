@@ -11,7 +11,7 @@ from .markov import TransitionKey
 from .monte_carlo import MonteCarlo, SimulationConfig
 
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 PROFILE_ROOT = ROOT / "data" / "profiles"
 POLICY = "reference_et0_demand"
 STATE_IDS = ("water_low", "water_medium", "water_high")

@@ -2,7 +2,7 @@
     "$schema": "http://json-schema.org/draft-07/schema#",
     "$id": "https://fieldshift.local/contracts/v2/markov.json",
     "title": "Markov chain graph",
-    "$comment": "The chain walks over DISCRETE states (crop x stage). CONTINUOUS variables (soil, climate, finances) live in the node and change only through effects: what the chain can alter is whatever appears as an effect target. The chain has no seed: Monte Carlo owns the seed (monte_carlo.json) and draws every transition and effect value with it.",
+    "$comment": "The chain walks over DISCRETE states (crop x stage). CONTINUOUS variables (soil, climate, finances) live in the node and change only through effects: what the chain can alter is whatever appears as an effect target. The chain holds no seed and makes no choice by itself: a scenario policy (monte_carlo.json) decides which edge to take, deterministically (rotation) or by drawing from 'probability' (markov).",
     "type": "object",
     "required": [
         "initial_state",
@@ -10,8 +10,20 @@
         "transitions"
     ],
     "properties": {
+        "id": {
+            "type": "string",
+            "description": "Chain id. Generated chains use the profile id."
+        },
+        "profile": {
+            "type": "string",
+            "description": "Profile the chain was generated for (profile.json id). Absent in hand-written examples."
+        },
         "description": {
             "type": "string"
+        },
+        "provenance": {
+            "type": "string",
+            "description": "How the chain was produced: source files, rule and its parameters."
         },
         "initial_state": {
             "type": "string",
@@ -168,12 +180,22 @@
                 "count": {
                     "type": "integer",
                     "minimum": 0,
-                    "description": "Observed count behind the probability, when there is one"
+                    "description": "Whole observed transitions behind the edge, when there are any (v1: year pairs in which the municipality's dominant crop went from 'from' to 'to')."
                 },
                 "outgoing_count": {
                     "type": "integer",
                     "minimum": 0,
                     "description": "Total observed transitions leaving 'from'"
+                },
+                "mass": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Fractional evidence behind the edge when it is not a whole count (v1: sum over consecutive years of area share of 'from' x area share of 'to' among the top-5 PAM crops, which assumes independence)."
+                },
+                "outgoing_mass": {
+                    "type": "number",
+                    "minimum": 0,
+                    "description": "Total mass leaving 'from' over the destinations kept in the chain. probability = mass / outgoing_mass."
                 },
                 "when": {
                     "type": "array",

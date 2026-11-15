@@ -1,0 +1,112 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://fieldshift.local/contracts/v2/profile.json",
+    "title": "Location profile",
+    "$comment": "One place the simulation can run for. Holds the node every trajectory starts from and says, value by value, where it came from.",
+    "type": "object",
+    "required": [
+        "id",
+        "label",
+        "initial_node",
+        "values"
+    ],
+    "properties": {
+        "id": {
+            "type": "string",
+            "examples": [
+                "franca-sp"
+            ]
+        },
+        "label": {
+            "type": "string"
+        },
+        "municipality": {
+            "type": "object",
+            "required": [
+                "name",
+                "uf",
+                "ibge_code"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "uf": {
+                    "type": "string",
+                    "minLength": 2,
+                    "maxLength": 2
+                },
+                "ibge_code": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        },
+        "scope": {
+            "enum": [
+                "field",
+                "municipality",
+                "grid_cell"
+            ],
+            "description": "What the soil values represent. grid_cell = map estimate at the municipality centroid, not a field sample."
+        },
+        "initial_node": {
+            "$ref": "markov.json#/definitions/node",
+            "description": "Node at day 0. 'state' is the default starting state; a scenario may override it."
+        },
+        "values": {
+            "type": "array",
+            "description": "Evidence for each initial value: one item per JSON Pointer set in initial_node.",
+            "items": {
+                "type": "object",
+                "required": [
+                    "pointer",
+                    "support",
+                    "provenance"
+                ],
+                "properties": {
+                    "pointer": {
+                        "type": "string",
+                        "description": "JSON Pointer into initial_node, e.g. /soil/pH"
+                    },
+                    "support": {
+                        "$ref": "effect.json#/definitions/support"
+                    },
+                    "provenance": {
+                        "type": "string"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "climate_history": {
+            "type": "object",
+            "description": "Daily series the environment stream resamples.",
+            "required": [
+                "file",
+                "period",
+                "source"
+            ],
+            "properties": {
+                "file": {
+                    "type": "string",
+                    "description": "Path relative to the repository root"
+                },
+                "period": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "description": "First and last day, ISO dates"
+                },
+                "source": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}

@@ -11,9 +11,9 @@ Each task ends with a short answer in this file (or a linked note): **available 
 proxy / missing**, source, unit, resolution, and support level. Do not turn a
 proxy or hypothesis into an observation; keep provenance.
 
-Validate examples with `python data/pipeline/validate_v2_examples.py`. The map of every
+Validate examples with `python -m field_shift.contracts`. The map of every
 contract and field, with where each value comes from today, is `docs/contracts-v2.html`
-(regenerate with `python data/pipeline/build_contract_views.py`).
+(regenerate with `python -m field_shift.views`).
 
 Owner: data team (huatso) unless a task says otherwise.
 

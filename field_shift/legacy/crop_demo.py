@@ -11,7 +11,7 @@ from .data import load_crop_scenario, load_profile
 from .monte_carlo import MonteCarlo, SimulationConfig
 
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def water_id(value: str) -> str:
