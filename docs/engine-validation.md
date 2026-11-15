@@ -8,21 +8,22 @@ Field Shift results are exploratory; this page says how far they can be trusted,
 The backend engine (`field_shift/engines`) is a port of the simulator in `field_shift/front/analysis.js`.
 Both draw their own random numbers, so they are compared statistically.
 
-    uv run python tests/parity/compare.py 20000 7
+    uv run python tests/parity/compare.py 20000 2026
 
 | | |
 |---|---|
+| JS compared | `analysis.js` after the team's commit `7a836bf` (total nitrogen in the transitions and the soil score) |
 | Cases | 3 municipalities × 3 starting crops (soybean, maize, sugarcane) |
 | Trajectories | 20,000 per side per case |
 | Statistics compared | 144: share ending in each crop, share of the most frequent sequences, priced share, mean present value |
-| Largest difference | \|z\| = 2.7 |
-| Above \|z\| = 3 | none (4 above 2; about 7 are expected by chance among 144) |
+| Largest difference | \|z\| = 2.9 |
+| Above \|z\| = 3 | none (8 above 2; about 7 are expected by chance among 144) |
 
-Before the engine was aligned with the team's commit `8788667`, 44 of the 144 statistics differed by more than 3
-standard errors (largest 35). The comparison is the regression check for every future change of either side.
-
-**Not covered yet:** the team's commit `7a836bf` (nitrogen in the transitions and in the soil score) changes the JS
-model and is not in this tree. Parity has to be measured again once it is merged.
+History: before the engine was aligned with `8788667`, 44 of the 144 statistics differed by more than 3 standard
+errors (largest 35); after it, none (largest 2.7, seed 7). `7a836bf` reopened the gap (15 statistics above 4, largest
+10: Franca from soybean ended in sugarcane in 69.1% of trajectories in the JS, 71.9% in Python) until its total-N
+model was ported (`97bc5fd`); Franca from soybean is now 69.05% JS, 69.03% Python. The comparison is the regression
+check for every future change of either side.
 
 ## 2. Automated tests
 
