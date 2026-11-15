@@ -75,6 +75,7 @@ def export_page(output: Path, seed: int) -> None:
     catalog = read_json(ROOT / "data" / "catalog" / "perfis-exemplo.json")
     soil_hypotheses = read_json(ROOT / "data" / "reference" / "soil-crop-response-hypotheses.json")
     crop_cycles = read_json(ROOT / "data" / "reference" / "crop-cycle-assumptions.json")
+    run_settings = read_json(ROOT / "data" / "reference" / "visualization-run-settings.json")
     economic_prices = read_json(ROOT / "data" / "reference" / "yahoo-harvest-futures.json")
     economic_benchmarks = read_json(ROOT / "data" / "reference" / "economic-benchmarks.json")
     rng = Random(seed)
@@ -129,6 +130,7 @@ def export_page(output: Path, seed: int) -> None:
         "<!-- PROFILE_DATA -->": payload_json(profile_data),
         "<!-- SOIL_HYPOTHESES -->": payload_json(soil_hypotheses),
         "<!-- CROP_CYCLES -->": payload_json(crop_cycles),
+        "<!-- RUN_SETTINGS -->": payload_json(run_settings),
         "<!-- ECONOMIC_DATA -->": payload_json({
             "price_snapshot": economic_prices,
             "discount_rate": economic_benchmarks["discount_rate"],

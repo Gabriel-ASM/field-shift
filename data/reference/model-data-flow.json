@@ -227,7 +227,7 @@
   },
   "economic_optimization": {
     "objective": "ordenar o VPL médio condicional por hectare em horizonte de 60 meses, com ciclos variáveis, maturação e eventos de produção; mostrar chance de rota separadamente",
-    "decision_scope": "agrupar as 10.000 trajetórias pelo estado principal/cobertura no fechamento de cada ano; calcular o VPL de cada colheita, custo de formação e custo de cobertura na data do evento; exibir frequência Monte Carlo e probabilidade Markov separadamente, sem descartar rotas raras",
+    "decision_scope": "agrupar as 100.000 trajetórias pelo estado principal/cobertura no fechamento de cada ano; calcular o VPL de cada colheita, custo de formação e custo de cobertura na data do evento; exibir frequência Monte Carlo e probabilidade Markov separadamente, sem descartar rotas raras",
     "formula": "VPL = sum_event(((PAM yield × price_real_history × environmental yield factor) − CONAB cost)/(1+r_real)^(day/365)); formação perene recebe custo proxy no plantio e por ano de maturação (último intervalo proporcional), e receita só após a maturação",
     "risk_outputs": [
       "média",
@@ -257,7 +257,14 @@
       "perennial formation cost is a fraction of production proxy, not observed establishment investment",
       "coffee interrow cover chain has no observed transition counts and its uniform prior is a scenario",
       "water/SOC yield response is uncalibrated"
-    ]
+    ],
+    "route_score_shrinkage": {
+      "formula": "n_tail = max(1, ceil(0.05 * n_route_vpls)); raw_c = n_tail/(n_tail+n0); c = min(0.30, raw_c). Shrink CVaR5 and P95 route statistics separately toward the corresponding metric over all eligible route VPLs, then combine them with the preference slider.",
+      "default_n0_tail_vpls": 50,
+      "unit": "VPL observations in an empirical 5% tail",
+      "interpretation": "The raw route count remains visible. CVaR5/P95 are tail statistics, so confidence uses the number of extreme observations; route-specific evidence is capped at 30% of the score and the general reference always contributes at least 70%. This is an explicit heuristic, not a calibrated statistical posterior.",
+      "maximum_route_score_weight": 0.3
+    }
   },
   "not_yet_ingested_or_calibrated": [
     "MapBiomas Coleção 11 e dados por pixel de segunda safra para transições do mesmo local",
