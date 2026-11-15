@@ -69,7 +69,7 @@ export function PriorityStep({ journey, world }: { journey: Journey; world: Worl
       <h2>Let's balance it your way</h2>
       <p className="lead">Drag the sliders to give more weight to financial returns or to soil and water conservation.</p>
       <Balance journey={journey} settings={settings} />
-      <ReturnMix journey={journey} settings={settings} />
+      {/* <ReturnMix journey={journey} settings={settings} /> */}
       <SupportNote settings={settings} />
       <label className="seed">Random seed
         <input type="number" min={0} value={journey.seed} onChange={(event) => journey.setSeed(Number(event.target.value) || 0)} />
