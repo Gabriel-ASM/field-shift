@@ -37,6 +37,10 @@ export function App() {
   const [area, setArea] = useState<number | null>(null);
   const wide = journey.step === "result";
   const panel = usePanelWidth(wide);
+  // Each step starts at its top: the panel scrolls, and would otherwise keep the previous step's position.
+  useEffect(() => {
+    panel.current?.scrollTo({ top: 0 });
+  }, [journey.step, panel]);
   if (error) return <p className="error fatal">Could not reach the Field Shift API: {error}</p>;
   if (!world) return <p className="loading">Loading…</p>;
   const choosePlace = (id: string) => {

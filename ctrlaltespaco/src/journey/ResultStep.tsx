@@ -2,6 +2,7 @@ import { exploratory, rank, recommended, weights, type RankedRoute } from "../ra
 import type { RunResult, ScenarioResult } from "../types.ts";
 import type { Journey } from "../useFieldShift.ts";
 import { cropColor, cropLabel } from "../ui/colors.ts";
+import { CropArt } from "../ui/CropArt.tsx";
 import { EnvironmentChart } from "../ui/EnvironmentChart.tsx";
 import { count, money, percent } from "../ui/format.ts";
 import { Legend } from "../ui/Legend.tsx";
@@ -15,8 +16,8 @@ function Sequence({ crops }: { crops: string[] }) {
     <ol className="sequence">
       {crops.map((crop, index) => (
         <li key={index} style={{ borderColor: cropColor(crop) }}>
-          <small>{index === 0 ? "In the field" : `Planting ${index}`}</small>
-          {cropLabel(crop)}
+          <CropArt crop={crop} size={36} />
+          <span><small>{index === 0 ? "In the field" : `Planting ${index}`}</small>{cropLabel(crop)}</span>
         </li>
       ))}
     </ol>

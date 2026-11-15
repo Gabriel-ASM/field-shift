@@ -36,7 +36,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 .choice { display: grid; grid-template-columns: auto 1fr; gap: 0 11px; align-items: center; min-height: 65px; padding: 11px 14px; border-radius: 12px; text-align: left; text-transform: capitalize; }
 .choice strong { grid-column: 2; font-size: 1.02rem; }
 .choice small { grid-column: 2; color: var(--muted); text-transform: none; }
-.choice i { grid-row: span 2; width: 16px; height: 16px; border-radius: 5px; }
+.choice .crop-art { grid-row: span 2; }
 .choice[aria-pressed="true"] { border-color: var(--green); background: #f2f8f1; box-shadow: inset 0 0 0 1px var(--green); }
 .actions { display: flex; justify-content: space-between; gap: 10px; margin-top: 22px; }
 .poles { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
@@ -47,13 +47,18 @@ input[type="range"] { width: 100%; padding: 0; accent-color: var(--green); }
 .balance { margin: 12px 0 18px; padding: 12px 14px; border-radius: 12px; background: var(--soft); }
 .seed { display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; color: var(--muted); }
 .seed input { width: 7em; }
-.progress { height: 8px; margin: 22px 0; border-radius: 4px; overflow: hidden; background: var(--soft); }
-.progress div { width: 40%; height: 100%; border-radius: 4px; background: var(--green); }
+.growth-card { overflow: hidden; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); }
+.growth-scene { position: relative; aspect-ratio: 16 / 10; background: #edf5ef; }
+.growth-scene svg { display: block; width: 100%; height: 100%; }
+.growth-badge { position: absolute; top: 14px; left: 14px; display: flex; align-items: center; gap: 7px; padding: 6px 10px; border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 999px; background: rgba(255, 255, 255, 0.82); color: var(--green); font-size: 0.75rem; font-weight: 700; }
+.growth-badge i { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+.growth-copy { padding: 20px 22px 22px; }
+.growth-copy h2 { margin-top: 0; }
 .card, .metric { padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
 .recommendation { padding: 24px; border: 1px solid #cfded1; border-radius: 20px; background: linear-gradient(135deg, #fbfefb, #f2f8f1); }
 .result { display: grid; gap: 14px; }
 .sequence { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
-.sequence li { padding: 8px 12px; border-left: 5px solid; border-radius: 8px; background: var(--surface); text-transform: capitalize; font-weight: 600; }
+.sequence li { display: flex; align-items: center; gap: 6px; padding: 6px 12px 6px 6px; border-left: 5px solid; border-radius: 8px; background: var(--surface); text-transform: capitalize; font-weight: 600; }
 .sequence small { display: block; color: var(--muted); font-size: 0.7rem; font-weight: 400; text-transform: none; }
 .metrics { display: grid; gap: 14px; }
 .metric { display: grid; }

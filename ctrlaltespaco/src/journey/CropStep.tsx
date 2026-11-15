@@ -1,5 +1,6 @@
 import type { Journey } from "../useFieldShift.ts";
-import { cropColor, cropLabel } from "../ui/colors.ts";
+import { cropLabel } from "../ui/colors.ts";
+import { CropArt } from "../ui/CropArt.tsx";
 
 export function CropStep({ journey }: { journey: Journey }) {
   const crops = journey.place?.choices.initial_crops ?? [];
@@ -10,7 +11,7 @@ export function CropStep({ journey }: { journey: Journey }) {
       <div className="choices">
         {crops.map((crop) => (
           <button key={crop} type="button" className="choice" aria-pressed={crop === journey.crop} onClick={() => journey.chooseCrop(crop)}>
-            <i style={{ background: cropColor(crop) }} />
+            <CropArt crop={crop} />
             <strong>{cropLabel(crop)}</strong>
           </button>
         ))}
