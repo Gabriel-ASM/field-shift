@@ -10,7 +10,7 @@ Turn the research app into a backend for a web application:
 - `markov.py` and `monte_carlo.py` engines that implement contracts v2 (`data/contracts/v2/`).
 - MongoDB collections validated by the same contracts.
 
-Today the crop model (Markov, water, carbon, NPV, 100,000 trajectories) runs in JavaScript inside `field_shift/replay.html`. The Python engines only cover the v1 water-state model. The engine phase ports the JavaScript model to Python.
+Today the crop model (Markov, water, carbon, NPV, 100,000 trajectories) runs in JavaScript inside `field_shift/legacy/replay.html`. The Python engines only cover the v1 water-state model. The engine phase ports the JavaScript model to Python.
 
 Out of scope: the geographic map overlay of simulations.
 
@@ -334,7 +334,7 @@ MongoDB, the API and the front ship in one image (`Dockerfile`, based on `mongo:
 | `field_shift/markov.py` (`Distribution`) | markov policy draw |
 | `field_shift/monte_carlo.py` (`FinancialSummary`, `SeasonalHistory`) | NPV summary, climate resampling |
 | `field_shift/visualize.py` (`topsoil_carbon_g_kg`) | profile ingestion |
-| `field_shift/replay.html` JS (`nextPlantingOpportunity`, `cycleDays`, `maturationDays`, `advanceWaterForCrop`, `soilDelta`, `repeatedCropYieldMultiplier`, `economicCashflow`, `scoreTrajectoryVpl`) | ported to `engines/` |
+| `field_shift/legacy/replay.html` JS (`nextPlantingOpportunity`, `cycleDays`, `maturationDays`, `advanceWaterForCrop`, `soilDelta`, `repeatedCropYieldMultiplier`, `economicCashflow`, `scoreTrajectoryVpl`) | ported to `engines/` |
 
 ## Phases
 
