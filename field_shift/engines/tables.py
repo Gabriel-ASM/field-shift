@@ -85,7 +85,10 @@ class Tables:
     discount_rate: float
     # total soil nitrogen (soil_nitrogen of soil-crop-response-hypotheses.json, 7a836bf): a stock, not available N
     total_n_initial: float          # kg N/ha, 0-30 cm (SoilGrids)
-    total_n_balance: np.ndarray     # (C,) kg N/ha per year while the crop is in the field
+    total_n_balance: np.ndarray     # (C,) kg N/ha per year while the crop is in the field (steers the chain)
+    total_n_fixation: np.ndarray    # (C,) kg N/ha fixed per cycle, before the trajectory's factor
+    total_n_export: np.ndarray      # (C,) kg N/ha exported per cycle
+    fixation_factor: np.ndarray     # (2,) lowest and highest factor on fixation, drawn per trajectory
     total_n_target_per_carbon: float  # kg N/ha of the C:N target per g/kg of soil carbon
     total_n_span: float             # deficit span, as a fraction of the target
     total_n_coefficient: float
@@ -250,6 +253,9 @@ def _total_nitrogen(crops, payload, hypotheses) -> dict:
     return {
         "total_n_initial": float(soil["total_nitrogen_stock_top_0_30_kg_ha"]),
         "total_n_balance": _per_crop(crops, lambda c: _number(model["annual_net_balance_kg_n_ha_year_by_crop"].get(c), 0.0)),
+        "total_n_fixation": _per_crop(crops, lambda c: _number(model["fixation_kg_n_ha_per_cycle_by_crop"].get(c), 0.0)),
+        "total_n_export": _per_crop(crops, lambda c: _number(model["export_kg_n_ha_per_cycle_by_crop"].get(c), 0.0)),
+        "fixation_factor": np.array([float(model["fixation_scenario_factor"]["min"]), float(model["fixation_scenario_factor"]["max"])]),
         "total_n_target_per_carbon": target_per_carbon,
         "total_n_span": float(model["deficit_span_fraction_of_target"]),
         "total_n_coefficient": float(model["probability_log_weight_coefficient"]),

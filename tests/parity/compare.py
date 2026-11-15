@@ -7,7 +7,7 @@ the share of trajectories ending in each crop, the share of the most frequent ro
 A |z| above 4 is reported as a difference (the sample is large and the tests are many, so smaller z values are
 expected by chance). The JS side is field_shift/front/analysis.js as embedded in docs/visualizacao.html.
 
-Rules the engine has and the page does not yet are switched off here: the soil carbon cost of soybean on soybean
+Rules the engine has and the page does not yet are switched off here (not run any more: rollback to the tag parity-ok-2026-11-15 instead; the per-cycle total-N balance and the window-mean soil differ from the page on purpose):
 (data/reference/soybean-repetition-soil.json) and the available-N balance
 (model block of data/reference/nitrogen-balance.json).
 """

@@ -300,15 +300,16 @@ def test_job_endpoints(client):
 
 
 def test_total_nitrogen_moves_by_the_crop_balance_and_steers_the_chain(tables):
-    """soil_nitrogen (7a836bf): the stock moves by each crop's annual net balance; below the C:N target the chain
-    favours crops with a positive balance (crotalaria +450) over negative ones (maize −192)."""
+    """soil_nitrogen: the stock moves by each crop's per-cycle fixation x factor - export over its cycle; below the
+    C:N target the chain favours crops with a positive balance (crotalaria +450/yr) over negative ones (maize −192)."""
     from field_shift.engines.monte_carlo import State, advance_total_nitrogen
     maize, crotalaria = tables.crops.index("maize_grain"), tables.crops.index("crotalaria")
-    state = State(np, tables, Policy(maize), 2)
-    state.crop = np.array([maize, -1])
+    state = State(np, tables, Policy(maize), 3)
+    state.crop, state.fixation_factor = np.array([maize, -1, crotalaria]), np.array([1.0, 1.0, 1.3])
     advance_total_nitrogen(np, tables, state)
-    step = tables.period_days / 365
-    assert state.total_nitrogen.tolist() == pytest.approx([tables.total_n_initial - 192 * step, tables.total_n_initial])
+    share = lambda crop: tables.period_days / tables.cycle_days[crop]
+    assert state.total_nitrogen.tolist() == pytest.approx([tables.total_n_initial - 80 * share(maize), tables.total_n_initial,
+                                                           tables.total_n_initial + 150 * 1.3 * share(crotalaria)])
     target = tables.total_n_target_per_carbon * tables.initial_carbon
     soybean = tables.crops.index("soybean")
     poor = markov.probabilities(np, tables, soybean, 0.5, tables.initial_carbon, 0.4 * target)

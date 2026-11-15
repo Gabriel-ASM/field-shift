@@ -52,9 +52,10 @@ def after_mineralization(params: Nitrogen, available, total_n, years: float):
     return available + params.mineralization * total_n * years
 
 
-def after_harvest(xp, params: Nitrogen, crop, available, harvested_tonnes):
-    """Available N after a harvest: the fixed N comes in, the N in the product goes out."""
-    fixed = params.credit[crop] + params.credit_per_tonne[crop] * harvested_tonnes
+def after_harvest(xp, params: Nitrogen, crop, available, harvested_tonnes, factor=1.0):
+    """Available N after a harvest: the fixed N (times the trajectory's fixation factor) comes in, the N in the
+    product goes out."""
+    fixed = (params.credit[crop] + params.credit_per_tonne[crop] * harvested_tonnes) * factor
     exported = params.removal_per_cycle[crop] + params.removal[crop] * harvested_tonnes
     return xp.maximum(0.0, available + fixed - exported)
 
