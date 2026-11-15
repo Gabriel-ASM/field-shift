@@ -10,8 +10,8 @@ export function chainCrops(matrix: ChainMatrix): string[] {
 }
 
 /** The starting crop followed by its most likely different successor: the rotation the data itself suggests. */
-export function suggestedRotation(matrix: ChainMatrix): string[] {
-  const start = matrix.initial_state;
+export function suggestedRotation(matrix: ChainMatrix, crop: string = cropOf(matrix.initial_state)): string[] {
+  const start = `${crop}:skip_stages`;
   const row = matrix.rows.find((candidate) => candidate.from === start);
   const successors = matrix.states
     .map((state, index) => ({ state, probability: row?.cells[index]?.probability ?? 0 }))
@@ -20,10 +20,12 @@ export function suggestedRotation(matrix: ChainMatrix): string[] {
   return [cropOf(start), ...successors.slice(0, 1).map(({ state }) => cropOf(state))];
 }
 
-export function scenariosFor(sequence: string[]): ScenarioRequest[] {
+/** Both scenarios start from `start`; the rotation then follows its sequence. */
+export function scenariosFor(sequence: string[], start: string): ScenarioRequest[] {
+  const initial_state = `${start}:skip_stages`;
   return [
-    { id: "region", label: "What the region usually does", policy: { kind: "markov" } },
-    { id: "rotation", label: `Fixed rotation: ${sequence.map((crop) => crop.replace(/_/g, " ")).join(" → ")}`,
+    { id: "region", label: "What the region usually does", initial_state, policy: { kind: "markov" } },
+    { id: "rotation", initial_state, label: `Fixed rotation: ${sequence.map((crop) => crop.replace(/_/g, " ")).join(" → ")}`,
       policy: { kind: "rotation", sequence, fallback: FALLOW_STATE } },
   ];
 }

@@ -29,5 +29,6 @@ test("the suggested rotation is the starting crop and its likeliest other succes
   };
   assert.deepEqual(suggestedRotation(matrix), ["soybean", "maize_grain"]);
   assert.deepEqual(chainCrops(matrix), ["soybean", "maize_grain"]);
-  assert.equal(scenariosFor(["soybean"])[1]!.policy.kind, "rotation");
+  assert.equal(scenariosFor(["soybean"], "soybean")[1]!.policy.kind, "rotation");
+  assert.equal(scenariosFor(["soybean"], "maize_grain")[0]!.initial_state, "maize_grain:skip_stages");
 });

@@ -48,7 +48,15 @@ button:disabled { opacity: 0.55; cursor: default; }
 .range u { position: absolute; top: -5px; height: 18px; border-left: 1px dashed var(--muted); }
 .tracks { display: block; width: 100%; margin: 12px 0 8px; image-rendering: pixelated; }
 .routes { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 0.8rem; color: var(--muted); }
-.routes li { display: flex; justify-content: space-between; align-items: center; }
+.routes li { display: grid; grid-template-columns: 1fr auto 3em; gap: 10px; align-items: center; }
+.routes li span:last-child { text-align: right; }
+.scenario h4 { margin: 12px 0 6px; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.environment { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.environment svg { display: block; width: 100%; height: auto; }
+.environment text { fill: var(--muted); font-size: 9px; }
+.environment figure { margin: 0; }
+.environment figcaption { font-size: 0.74rem; color: var(--muted); margin-top: 4px; }
+.controls select { width: 100%; margin-bottom: 12px; text-transform: capitalize; }
 .route i { margin-right: 2px; }
 .site-label button { white-space: nowrap; background: rgba(5, 8, 13, 0.7); border-radius: 999px; font-size: 0.78rem; padding: 2px 10px; }
 .site-label.selected button { border-color: var(--accent); color: var(--accent); }

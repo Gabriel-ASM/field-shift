@@ -44,6 +44,14 @@ def policy_of(tables: Tables, scenario: dict, default_state: str) -> Policy:
     return Policy(initial, sequence, int(scenario.get("initial_sugarcane_cut", 1)))
 
 
+def options(profile_id: str) -> dict:
+    """What a client may choose for a run of this profile."""
+    tables = tables_for(profile_id)
+    selectable = profile_payload(profile_id)["crop_markov"]["initial_crop_ids"]
+    return {"profile": profile_id, "crops": list(tables.crops), "initial_crops": [c for c in selectable if c in tables.crops],
+            "max_trajectories": MAX_TRAJECTORIES, "horizon_days": tables.horizon_years * DAYS_PER_YEAR}
+
+
 def check_request(tables: Tables, request: dict) -> None:
     horizon = tables.horizon_years * DAYS_PER_YEAR
     if request["horizon_days"] != horizon:

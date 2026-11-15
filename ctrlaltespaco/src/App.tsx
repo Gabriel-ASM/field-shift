@@ -1,5 +1,6 @@
 import { MapScene } from "./scene/MapScene.tsx";
 import type { RunResult } from "./types.ts";
+import { cropLabel } from "./ui/colors.ts";
 import { count } from "./ui/format.ts";
 import { Legend } from "./ui/Legend.tsx";
 import { RotationEditor } from "./ui/RotationEditor.tsx";
@@ -34,12 +35,16 @@ function Results({ run }: { run: RunResult }) {
 }
 
 function Panel({ simulation }: { simulation: Simulation }) {
-  const { selection, sequence, seed, run, running, error } = simulation;
+  const { selection, sequence, start, seed, run, running, error } = simulation;
   if (!selection) return <aside className="panel"><p className="hint">Choose a municipality on the map.</p></aside>;
   return (
     <aside className="panel">
       <h2>{selection.profile.label}</h2>
       <form className="controls" onSubmit={(event) => { event.preventDefault(); simulation.simulate(); }}>
+        <label htmlFor="start-crop">Crop in the field today</label>
+        <select id="start-crop" value={start} onChange={(event) => simulation.setStart(event.target.value)}>
+          {selection.startCrops.map((crop) => <option key={crop} value={crop}>{cropLabel(crop)}</option>)}
+        </select>
         <label>Rotation to compare</label>
         <RotationEditor crops={selection.crops} sequence={sequence} onChange={simulation.setSequence} />
         <div className="row">

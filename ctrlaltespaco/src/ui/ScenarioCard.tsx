@@ -1,5 +1,6 @@
 import type { ScenarioResult, ValueSummary } from "../types.ts";
 import { cropColor, cropLabel } from "./colors.ts";
+import { EnvironmentChart } from "./EnvironmentChart.tsx";
 import { money, percent } from "./format.ts";
 import { TrackStrips } from "./TrackStrips.tsx";
 
@@ -31,6 +32,28 @@ function Value({ value, scale }: { value: ValueSummary; scale: [number, number] 
   );
 }
 
+const RANKED = 5;
+
+/** The most frequent crop sequences, best median value first; unpriced ones go last. */
+function RouteRanking({ routes }: { routes: ScenarioResult["routes"] }) {
+  if (routes.length < 2) return null;
+  const ranked = [...routes].sort((a, b) => (b.value?.p50 ?? -Infinity) - (a.value?.p50 ?? -Infinity)).slice(0, RANKED);
+  return (
+    <>
+      <h4>Most frequent sequences, by median value</h4>
+      <ol className="routes">
+        {ranked.map((route, index) => (
+          <li key={index}>
+            <Route crops={route.crops} />
+            <span>{route.value ? money(route.value.p50) : "no price data"}</span>
+            <span>{percent(route.share)}</span>
+          </li>
+        ))}
+      </ol>
+    </>
+  );
+}
+
 interface ScenarioCardProps {
   scenario: ScenarioResult;
   scale: [number, number];
@@ -46,14 +69,8 @@ export function ScenarioCard({ scenario, scale }: ScenarioCardProps) {
         <p className="note">{percent(unpriced)} of trajectories pass through a crop without cost or price data and are left out of the value.</p>
       )}
       <TrackStrips tracks={scenario.tracks} />
-      <ol className="routes">
-        {scenario.routes.slice(0, 3).map((route, index) => (
-          <li key={index}>
-            <Route crops={route.crops} />
-            <span>{percent(route.share)}</span>
-          </li>
-        ))}
-      </ol>
+      <RouteRanking routes={scenario.routes} />
+      <EnvironmentChart water={scenario.water} carbon={scenario.carbon} />
     </article>
   );
 }

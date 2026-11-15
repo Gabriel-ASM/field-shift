@@ -8,7 +8,7 @@ from fastapi import APIRouter, Body, HTTPException, Query, Request
 
 from ...contracts import validate
 from ...db import find_one
-from ...engines.run import MAX_TRACKS, RunError, run
+from ...engines.run import MAX_TRACKS, RunError, options, run
 
 router = APIRouter(prefix="/runs", tags=["runs"])
 
@@ -18,6 +18,13 @@ def _chain(request: Request, profile_id: str) -> dict[str, Any]:
     if chain is None:
         raise HTTPException(404, f"No chain for profile {profile_id!r}")
     return chain
+
+
+@router.get("/options/{profile_id}")
+def run_options(profile_id: str, request: Request) -> dict[str, Any]:
+    """Crops of the profile, and the ones a simulation may start from."""
+    _chain(request, profile_id)
+    return options(profile_id)
 
 
 @router.post("")

@@ -107,5 +107,7 @@ def test_runs_endpoint(client):
     assert response.status_code == 200, response.text
     assert [scenario["id"] for scenario in response.json()["scenarios"]] == ["region", "soy-maize"]
     assert client.post("/runs", json={**REQUEST, "profile": "nowhere"}).status_code == 404
+    assert client.get("/runs/options/franca-sp").json()["initial_crops"] == ["soybean", "maize_grain", "sugarcane"]
+    assert client.get("/runs/options/nowhere").status_code == 404
     assert client.post("/runs", json={"profile": "franca-sp"}).status_code == 422
     assert client.post("/runs", params={"device": "cpu"}, json={**REQUEST, "horizon_days": 30}).status_code == 422

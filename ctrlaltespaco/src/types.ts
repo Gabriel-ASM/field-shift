@@ -22,11 +22,17 @@ export interface ChainMatrix {
   rows: { from: string; cells: ({ probability: number } | null)[] }[];
 }
 
+export interface RunChoices {
+  crops: string[];
+  initial_crops: string[];
+}
+
 export type Policy = { kind: "markov" } | { kind: "rotation"; sequence: string[]; fallback: string };
 
 export interface ScenarioRequest {
   id: string;
   label: string;
+  initial_state?: string;
   policy: Policy;
 }
 
@@ -55,6 +61,7 @@ export interface ScenarioResult {
   priced_share: number;
   value: ValueSummary | null;
   occupancy: Record<string, number>[];
+  water: Record<string, number>[];
   carbon: { p5: number; p50: number; p95: number }[];
   routes: { crops: string[]; share: number; value: ValueSummary | null }[];
   tracks: Track[];
