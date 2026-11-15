@@ -1,19 +1,28 @@
-# Field Shift in one image: MongoDB + API + front.
+# Field Shift in one image: MongoDB + API + front (ctrlaltespaco, built in the first stage).
 #   docker build -t field-shift .
 #   docker run --rm -p 8000:8000 field-shift        # http://localhost:8000
 # MongoDB listens only inside the container. Add `-v field-shift-db:/data/db` to keep the database.
+FROM node:22-slim AS front
+WORKDIR /front
+COPY ctrlaltespaco/package.json ctrlaltespaco/package-lock.json ./
+RUN npm ci
+COPY ctrlaltespaco/ ./
+RUN npm run build
+
 FROM mongo:7
 
 COPY --from=ghcr.io/astral-sh/uv:0.5 /uv /usr/local/bin/uv
 
 ENV UV_PYTHON_INSTALL_DIR=/opt/python \
     UV_LINK_MODE=copy \
+    UV_NO_CACHE=1 \
     UV_COMPILE_BYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
     PATH=/app/.venv/bin:$PATH \
     FIELD_SHIFT_MONGO_URI=mongodb://127.0.0.1:27017 \
-    FIELD_SHIFT_DB=field_shift
+    FIELD_SHIFT_DB=field_shift \
+    FIELD_SHIFT_WEB_DIR=/app/ctrlaltespaco/dist
 
 WORKDIR /app
 
@@ -24,7 +33,7 @@ RUN uv python install 3.12 && uv sync --frozen --no-dev --no-install-project
 COPY field_shift/ field_shift/
 COPY data/ data/
 COPY docs/*.html docs/
-COPY web/ web/
+COPY --from=front /front/dist ctrlaltespaco/dist
 COPY docker/entrypoint.sh /usr/local/bin/field-shift-entrypoint
 
 RUN useradd --system --no-create-home app \

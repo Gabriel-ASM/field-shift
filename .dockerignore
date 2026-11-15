@@ -10,3 +10,7 @@ research
 tests
 docs/*.md
 docs/tasks
+ctrlaltespaco/node_modules
+ctrlaltespaco/dist
+web
+downloads
