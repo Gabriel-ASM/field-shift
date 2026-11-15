@@ -95,6 +95,12 @@ h4 { margin: 12px 0 6px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0
   .panel { top: 46vh; width: 100vw; border-left: 0; border-top: 1px solid var(--line); }
   .panel.wide { top: 0; }
 }
+.micro-card { margin-top: 18px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
+.micro-card .micro-count { color: var(--muted); font-size: 0.72rem; font-variant-numeric: tabular-nums; }
+.micro-card h3 { margin: 4px 0 6px; font-size: 0.95rem; }
+.micro-card p { margin: 0; color: var(--muted); font-size: 0.86rem; line-height: 1.5; animation: micro-in 0.6s ease; }
+@keyframes micro-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .micro-card p { animation: none; } }
 .run-progress { margin: 4px 0 8px; }
 .run-progress-track { height: 8px; overflow: hidden; border-radius: 99px; background: #e8eee8; }
 .run-progress-track div { height: 100%; border-radius: inherit; background: var(--green); transition: width 0.3s ease; }
