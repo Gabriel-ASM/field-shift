@@ -320,7 +320,7 @@ class Recorder:
         self.water_class = xp.empty((years, count), dtype=int)
         self.carbon = xp.empty((years, count))
         self.crop_count = xp.zeros((tables.periods + 1, len(tables.crops) + 1), dtype=int)
-        self.track = {name: xp.empty((tables.periods + 1, self.keep)) for name in ("crop", "water_fraction", "carbon", "value")}
+        self.track = {name: xp.empty((tables.periods + 1, self.keep)) for name in ("crop", "water_fraction", "carbon", "value", "cane_cut")}
         self._year(0, state)
         self._period(0, state)
 

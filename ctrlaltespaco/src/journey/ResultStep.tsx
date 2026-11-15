@@ -6,6 +6,7 @@ import { rank, recommended, type RankedRoute } from "../ranking.ts";
 import { Alternatives, Facts } from "../result/Facts.tsx";
 import { ResultMetrics } from "../result/ResultMetrics.tsx";
 import { RotationPath } from "../result/RotationPath.tsx";
+import { YourChoices } from "../result/YourChoices.tsx";
 import type { RunResult, ScenarioResult } from "../types.ts";
 import type { Journey } from "../useFieldShift.ts";
 import { cropLabel } from "../ui/colors.ts";
@@ -56,13 +57,13 @@ function Heading({ single, explain }: { single: boolean; explain: () => void }) 
   );
 }
 
-function Unfolded({ run, scenario }: { run: RunResult; scenario: ScenarioResult }) {
+function Unfolded({ run, scenario, cuts }: { run: RunResult; scenario: ScenarioResult; cuts: number | null }) {
   return (
     <article className="card unfolded">
       <h3>How the scenarios unfolded</h3>
       <Timebar periodsPerYear={run.clock.periods / run.clock.horizon_years} />
       <Legend crops={run.crops.filter((crop) => scenario.occupancy.some((period) => crop in period))} />
-      <TrackStrips tracks={scenario.tracks} />
+      <TrackStrips tracks={scenario.tracks} cuts={cuts} />
       <EnvironmentChart water={scenario.water} carbon={scenario.carbon} />
     </article>
   );
@@ -98,7 +99,8 @@ export function ResultStep({ journey }: { journey: Journey }) {
         <Facts journey={journey} run={run} scenario={scenario} best={best} />
         <Alternatives ranked={ranked.filter((item) => item !== best)} minimum={run.ranking.support.minimum_recommended} />
       </div>
-      <Unfolded run={run} scenario={scenario} />
+      <Unfolded run={run} scenario={scenario} cuts={journey.place!.choices.sugarcane_cuts} />
+      <YourChoices journey={journey} trajectories={scenario.trajectories} />
       <p className="note">An exploratory study based on municipal data and model assumptions. These values do not guarantee income and do not replace an agronomist's assessment of your field.</p>
       <Actions journey={journey} />
       <MethodDialog open={explaining} onClose={() => setExplaining(false)} facts={facts} />

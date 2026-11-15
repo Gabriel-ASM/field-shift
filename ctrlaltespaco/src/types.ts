@@ -118,6 +118,8 @@ export interface RankingReference {
 
 export interface Track {
   crop: string[];
+  /** Next cut of the cane in the field; 0 when the field holds another crop or none. */
+  cane_cut: number[];
   water_fraction: number[];
   carbon: number[];
   value: number[];

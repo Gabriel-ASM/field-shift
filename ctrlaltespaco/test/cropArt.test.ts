@@ -11,3 +11,12 @@ test("soybean, maize and sugarcane have their own drawing; other crops share the
   assert.equal(cropShapes("fallow").length, 1, "fallow is bare ground");
   assert.ok(cropShapes("unknown_crop").length > 1);
 });
+
+test("cane gets darker at each cut, starting from its own colour", async () => {
+  const { caneShade } = await import("../src/ui/caneShade.ts");
+  const { cropColor } = await import("../src/ui/colors.ts");
+  assert.equal(caneShade(1, 5), cropColor("sugarcane"));
+  const brightness = (hex: string) => [1, 3, 5].reduce((sum, at) => sum + parseInt(hex.slice(at, at + 2), 16), 0);
+  const shades = [1, 2, 3, 4, 5].map((cut) => brightness(caneShade(cut, 5)));
+  assert.ok(shades.every((value, index) => index === 0 || value < shades[index - 1]!));
+});

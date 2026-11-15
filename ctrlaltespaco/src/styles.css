@@ -65,6 +65,12 @@ input[type="range"] { width: 100%; padding: 0; accent-color: var(--green); }
 .timebar output { min-width: 4.5em; text-align: right; font-variant-numeric: tabular-nums; }
 .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; list-style: none; margin: 0 0 12px; padding: 0; font-size: 0.8rem; color: var(--muted); text-transform: capitalize; }
 .legend i { margin-right: 5px; }
+.cane-cuts { margin: -6px 0 14px; color: var(--muted); font-size: 0.78rem; }
+.cane-cuts span { margin-right: 8px; }
+.cane-cuts i { display: inline-block; width: 11px; height: 11px; margin-right: 3px; border-radius: 3px; vertical-align: -1px; }
+.choices-summary dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 12px 0; font-size: 0.86rem; }
+.choices-summary dt { color: var(--muted); }
+.choices-summary dd { margin: 0; }
 .tracks { display: block; width: 100%; margin: 0 0 14px; image-rendering: pixelated; border-radius: 6px; background: var(--soft); }
 h4 { margin: 12px 0 6px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .environment { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }

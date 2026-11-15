@@ -142,12 +142,15 @@ def routes(route: np.ndarray, value: np.ndarray, priced: np.ndarray, final: dict
 
 
 def tracks(track: dict, climate: np.ndarray, tables: Tables, names: list[str]) -> list[dict]:
-    """Trajectories recorded period by period, for animation."""
+    """Trajectories recorded period by period, for animation. `cane_cut` is the next cut of the cane in the field,
+    0 when the field holds another crop or none."""
     crop = to_numpy(track["crop"]).astype(int)
     series = {name: to_numpy(track[name]) for name in ("water_fraction", "carbon", "value")}
+    cut = np.where(crop == tables.sugarcane, to_numpy(track["cane_cut"]), 0).astype(int)
     years = to_numpy(climate)
     return [{"crop": [names[c] for c in crop[:, i]],
              "climate_years": [tables.climate_years[y] for y in years[i]],
+             "cane_cut": cut[:, i].tolist(),
              **{name: values[:, i].round(4).tolist() for name, values in series.items()}}
             for i in range(crop.shape[1])]
 

@@ -169,6 +169,20 @@ def test_standing_cane_reforms_after_its_last_modeled_cut(tables):
     assert still_cane[1] > 0.95 and still_cane[5] < 0.05
 
 
+def test_tracks_show_the_cut_of_standing_cane():
+    """Cut 1: the first field still has cane, and cuts 2+ follow. Cut 5: the first harvest is the last, then reform."""
+    scenario = {"id": "cane", "initial_state": "sugarcane:skip_stages", "policy": {"kind": "markov"}}
+    tracks = {}
+    for cut in (1, 5):
+        result = run({**REQUEST, "trajectories": 20, "scenarios": [{**scenario, "initial_sugarcane_cut": cut}]}, "soybean:skip_stages", "cpu", tracks=5)
+        tracks[cut] = result["scenarios"][0]["tracks"]
+    for cut, recorded in tracks.items():
+        assert all(track["cane_cut"][0] == cut for track in recorded)
+    after_first_harvest = 25   # 24 half-month periods in a year
+    assert all(track["cane_cut"][after_first_harvest] == 2 for track in tracks[1])
+    assert all(track["cane_cut"][after_first_harvest] in (0, 1) for track in tracks[5])
+
+
 def test_cane_cut_is_checked_against_the_modeled_cuts():
     scenario = {"id": "cane", "initial_state": "sugarcane:skip_stages", "policy": {"kind": "markov"}}
     with pytest.raises(RunError, match="cuts 1 to 5"):
