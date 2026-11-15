@@ -14,6 +14,18 @@ export interface ProfileSummary {
 
 export interface Profile extends ProfileSummary {
   initial_node: { state: string; soil: Record<string, number>; climate: { lat: number; long: number } };
+  scope?: string;
+  economics?: { reference_currency_month?: string; discount_rate?: unknown };
+  climate_history?: { period: [string, string]; source: string };
+}
+
+/** MAPA ZARC planting windows per crop: lowest published risk (%) of each decendio 1-36; null for the
+ *  project's all-year windows of covers without an official row. */
+export interface PlantingWindows {
+  seasons: string[];
+  risk_levels: number[];
+  crops: Record<string, { official: boolean; risk: Record<string, number | null> }>;
+  source: { publisher: string; system: string; url: string; license?: string };
 }
 
 export interface ChainMatrix {

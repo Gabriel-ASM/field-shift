@@ -127,3 +127,15 @@ def test_boundaries_are_served(client):
     assert len(client.get("/geo/states").json()["features"]) == 27
     assert client.get("/geo/profiles/franca-sp").json()["features"][0]["properties"]["codarea"] == "3516200"
     assert client.get("/geo/profiles/nowhere").status_code == 404
+
+
+def test_planting_windows_give_the_lowest_zarc_risk_per_decendio():
+    import mongomock
+    from fastapi.testclient import TestClient
+    from field_shift.api import create_app
+    client = TestClient(create_app(mongomock.MongoClient()["x"]))
+    windows = client.get("/profiles/franca-sp/planting-windows").json()
+    soybean = windows["crops"]["soybean"]
+    assert windows["risk_levels"] == [20, 30, 40] and soybean["official"] and windows["seasons"] == ["2026/2027"]
+    assert soybean["risk"]["30"] == 20 and set(soybean["risk"].values()) <= {20, 30, 40}
+    assert client.get("/profiles/nowhere/planting-windows").status_code == 404

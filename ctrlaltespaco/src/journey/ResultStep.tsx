@@ -19,13 +19,15 @@ import { Legend } from "../ui/Legend.tsx";
 import { ReturnChart } from "../ui/ReturnChart.tsx";
 import { Timebar } from "../ui/Timebar.tsx";
 import { TrackStrips } from "../ui/TrackStrips.tsx";
+import { PrintPlan } from "../result/PrintPlan.tsx";
 
 const EXPLORATORY = 4;
 const OPTIONS = 6;
 
-function Actions({ journey }: { journey: Journey }) {
+function Actions({ journey, printable = false }: { journey: Journey; printable?: boolean }) {
   return (
     <div className="actions">
+      {printable ? <button type="button" onClick={() => window.print()}>Print this plan</button> : null}
       <button type="button" onClick={journey.restart}>Explore another scenario</button>
       <button type="button" className="primary" onClick={() => journey.go("priority")}>Adjust my priorities</button>
     </div>
@@ -159,7 +161,10 @@ export function ResultStep({ journey }: { journey: Journey }) {
       <Unfolded run={run} detail={detail} cuts={journey.place!.choices.sugarcane_cuts} />
       <YourChoices journey={journey} trajectories={scenario.trajectories} />
       <p className="note">An exploratory study based on municipal data and model assumptions. These values do not guarantee income and do not replace an agronomist's assessment of your field.</p>
-      <Actions journey={journey} />
+      <Actions journey={journey} printable />
+      <PrintPlan profile={journey.place!.profile} start={journey.crop!} ranked={selected} settings={run.ranking}
+        tracks={detail?.tracks ?? null} periodsPerYear={run.clock.periods / run.clock.horizon_years}
+        years={run.clock.horizon_years} seed={journey.seed} trajectories={scenario.trajectories} />
       <MethodDialog open={explaining} onClose={() => setExplaining(false)} facts={facts} />
     </section>
   );

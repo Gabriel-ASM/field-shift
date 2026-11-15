@@ -1,4 +1,4 @@
-import type { Boundary, ChainMatrix, JobView, Profile, ProfileSummary, RouteDetail, RunChoices, RunResult, RuntimeConfig, ScenarioRequest } from "./types.ts";
+import type { Boundary, ChainMatrix, JobView, PlantingWindows, Profile, ProfileSummary, RouteDetail, RunChoices, RunResult, RuntimeConfig, ScenarioRequest } from "./types.ts";
 
 const HORIZON_DAYS = 1825;
 
@@ -20,6 +20,7 @@ async function failureMessage(path: string, response: Response): Promise<string>
 export const getConfig = () => request<RuntimeConfig>("/config");
 export const listProfiles = () => request<ProfileSummary[]>("/profiles");
 export const getProfile = (id: string) => request<Profile>(`/profiles/${encodeURIComponent(id)}`);
+export const getPlantingWindows = (id: string) => request<PlantingWindows>(`/profiles/${encodeURIComponent(id)}/planting-windows`);
 export const getMatrix = (id: string) => request<ChainMatrix>(`/profiles/${encodeURIComponent(id)}/chain/matrix`);
 export const getRunChoices = (id: string) => request<RunChoices>(`/runs/options/${encodeURIComponent(id)}`);
 export const getStates = () => request<Boundary>("/geo/states");

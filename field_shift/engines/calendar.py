@@ -37,6 +37,21 @@ def official_windows(rows: list[dict], crops: set[str], risk_levels: list[int]) 
     return windows
 
 
+def lowest_risk(rows: list[dict], crops: set[str], risk_levels: list[int]) -> dict[str, dict[int, int]]:
+    """Per crop and decendio, the lowest ZARC risk (%) any published row gives, over the same rows as the engine."""
+    risk: dict[str, dict[int, int]] = {}
+    for row in rows:
+        crop = row.get("crop_parameter_id")
+        if crop not in crops or INTERCROP.search(str(row.get("crop") or "")):
+            continue
+        published = row.get("planting_decendios_by_risk_percent") or {}
+        for level in risk_levels:
+            for decendio in published.get(str(level), []):
+                current = risk.setdefault(crop, {}).get(int(decendio))
+                risk[crop][int(decendio)] = level if current is None else min(current, level)
+    return risk
+
+
 def planting_windows(rows: list[dict], crops: list[str], crop_cycles: dict) -> dict[str, set[int]]:
     """Official windows, plus the all-year fallback for listed rotation covers without an official row."""
     risk_levels = crop_cycles["time_basis"]["planting_calendar"]["risk_levels_included_percent"]

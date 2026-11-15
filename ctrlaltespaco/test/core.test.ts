@@ -126,3 +126,13 @@ test("identical trajectories form one group and consecutive periods merge into s
   assert.deepEqual(segments(same).map(({ crop, cut, start, end }) => [crop, cut, start, end]), [
     ["soybean", 0, 0, 2], ["fallow", 0, 2, 3], ["sugarcane", 1, 3, 4], ["sugarcane", 2, 4, 5]]);
 });
+
+import { decendioOfDay, plantings, windowText } from "../src/result/plan.ts";
+
+test("plantings read off a trajectory and ZARC windows in words", () => {
+  assert.equal(decendioOfDay(0), 1);
+  assert.equal(decendioOfDay(273), 28);      // October 1st
+  const track = { crop: ["soybean", "fallow", "maize_grain", "maize_grain", "sugarcane", "sugarcane"], cane_cut: [0, 0, 0, 0, 1, 2] };
+  assert.deepEqual(plantings(track, 4), [{ crop: "maize_grain", year: 1, decendio: 19 }, { crop: "sugarcane", year: 2, decendio: 1 }]);
+  assert.equal(windowText({ 1: 20, 27: 30, 28: 30, 29: 20, 30: 20, 36: 20 }), "late Sep – early Oct (30%), mid Oct – late Oct (20%), late Dec – early Jan (20%)");
+});
