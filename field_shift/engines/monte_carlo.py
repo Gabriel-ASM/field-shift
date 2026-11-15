@@ -248,7 +248,8 @@ def sample_or_none(xp, rng, tables: Tables, policy: Policy, count: int):
 
 
 class Recorder:
-    """Collects the state at each year end for every trajectory, and each period for the first `keep`."""
+    """Collects crop counts every period, the state of every trajectory at each year end,
+    and the first `keep` trajectories period by period."""
 
     def __init__(self, xp, tables: Tables, state: State, count: int, keep: int):
         self.xp, self.tables, self.keep = xp, tables, min(keep, count)
@@ -256,6 +257,7 @@ class Recorder:
         self.crop = xp.empty((years, count), dtype=int)
         self.water_class = xp.empty((years, count), dtype=int)
         self.carbon = xp.empty((years, count))
+        self.crop_count = xp.zeros((tables.periods + 1, len(tables.crops) + 1), dtype=int)
         self.track = {name: xp.empty((tables.periods + 1, self.keep)) for name in ("crop", "water_fraction", "carbon", "value")}
         self._year(0, state)
         self._period(0, state)
@@ -264,6 +266,7 @@ class Recorder:
         self.crop[year], self.water_class[year], self.carbon[year] = state.crop, state.water_class, state.carbon
 
     def _period(self, step: int, state: State) -> None:
+        self.crop_count[step] = self.xp.bincount(state.crop + 1, minlength=self.crop_count.shape[1])
         for name, row in self.track.items():
             row[step] = getattr(state, name)[: self.keep]
 
@@ -273,6 +276,6 @@ class Recorder:
             self._year((period + 1) // self.tables.periods_per_year, state)
 
     def result(self, state: State, climate) -> dict:
-        return {"value": state.value, "priced": state.priced, "route": state.route, "crop": self.crop,
+        return {"value": state.value, "priced": state.priced, "route": state.route, "crop": self.crop, "crop_count": self.crop_count,
                 "water_class": self.water_class, "carbon": self.carbon, "track": self.track,
                 "climate": climate[: self.keep]}

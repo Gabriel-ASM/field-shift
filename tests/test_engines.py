@@ -62,7 +62,7 @@ def test_fixed_rotation_plants_its_sequence(tables):
 def test_run_summary_is_consistent():
     result = run(REQUEST, "soybean:skip_stages", "cpu", tracks=2)
     region = result["scenarios"][0]
-    assert result["device"] == "cpu" and len(region["occupancy"]) == 6 and len(region["tracks"]) == 2
+    assert result["device"] == "cpu" and len(region["occupancy"]) == result["clock"]["periods"] + 1 and len(region["tracks"]) == 2
     assert all(sum(year.values()) == pytest.approx(1, abs=1e-4) for year in region["occupancy"])
     assert region["occupancy"][0] == {"soybean": 1.0}
     assert len(region["tracks"][0]["crop"]) == result["clock"]["periods"] + 1

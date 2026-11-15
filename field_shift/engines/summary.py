@@ -26,10 +26,10 @@ def shares(labels: np.ndarray, size: int) -> list[float]:
     return (np.bincount(labels, minlength=size) / labels.size).round(6).tolist()
 
 
-def occupancy(crop: np.ndarray, names: list[str]) -> list[dict[str, float]]:
-    """Per year, the share of trajectories in each crop. Fallow is the last name."""
-    rows = [shares(np.where(year < 0, len(names) - 1, year), len(names)) for year in crop]
-    return [{name: share for name, share in zip(names, row) if share > 0} for row in rows]
+def occupancy(crop_count: np.ndarray, names: list[str]) -> list[dict[str, float]]:
+    """Per period, the share of trajectories in each crop. Counts come with fallow first; names have it last."""
+    ordered = np.roll(crop_count, -1, axis=1) / crop_count.sum(axis=1, keepdims=True)
+    return [{name: share for name, share in zip(names, row) if share > 0} for row in ordered.round(6).tolist()]
 
 
 def decode_route(key: int, names: list[str]) -> list[str]:
@@ -63,12 +63,12 @@ def tracks(track: dict, climate: np.ndarray, tables: Tables, names: list[str]) -
 def summarize(result: dict, tables: Tables, route_limit: int = 10) -> dict:
     names = [*tables.crops, "fallow"]
     value, priced = to_numpy(result["value"]), to_numpy(result["priced"])
-    crop, carbon = to_numpy(result["crop"]), to_numpy(result["carbon"])
+    carbon = to_numpy(result["carbon"])
     return {
         "trajectories": int(value.size),
         "priced_share": float(priced.mean()),
         "value": value_summary(value[priced]),
-        "occupancy": occupancy(crop, names),
+        "occupancy": occupancy(to_numpy(result["crop_count"]), names),
         "water": [dict(zip(WATER_STATES, shares(year, 3))) for year in to_numpy(result["water_class"])],
         "carbon": [dict(zip(("p5", "p50", "p95"), np.quantile(year, QUANTILES).round(4).tolist())) for year in carbon],
         "routes": routes(to_numpy(result["route"]), value, priced, names, route_limit),
