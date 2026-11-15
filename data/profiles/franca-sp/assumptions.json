@@ -26,7 +26,10 @@
     "field-measured soil and initial water",
     "crop yield response to water stress for these municipality/crop/technology combinations",
     "local cost and current price curves needed for net return and VPL",
-    "field-calibrated crop Kc and root depth; the FAO-56 values are reference priors"
+    "field-calibrated crop Kc and root depth; the FAO-56 values are reference priors",
+    "crop-specific transition counts",
+    "ZARC planting eligibility",
+    "crop yield, prices, costs, and VPL"
   ],
   "crop_data_ingestion": {
     "zarc": "annual 2026/2027 and perennial/no-season MAPA rows are stored for all published products in the three municipality extracts; official rows take precedence over fallback calendars for rotation-only crops",

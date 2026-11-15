@@ -15,7 +15,7 @@ const minimumRecommendedVplSamples=Number(rankingSupportSettings.minimum_recomme
 const waterLabels={water_low:"Baixa",water_medium:"Média",water_high:"Alta"};
 const rainLabels={dry:"seca",normal:"normal",wet:"úmida"};
 const maxTrajectories=Number(monteCarloSettings.maximum_trajectories),horizon=5,horizonMonths=Number(cropCycles.time_basis.horizon_months),horizonDays=horizonMonths*Number(cropCycles.time_basis.days_per_year)/12,climatePeriodDays=Number(cropCycles.time_basis.days_per_year)/Number(cropCycles.time_basis.environment_periods_per_year),rankingPageSize=25;
-const environmentPeriodCount=Math.round(horizonDays/climatePeriodDays),waterStateIds=Object.keys(waterLabels),soilStateIds=["soil_degraded","soil_regular","soil_good"],waterStateIndex={water_low:0,water_medium:1,water_high:2},soilStateIndex={low:0,medium:1,high:2};
+const environmentPeriodCount=Math.round(horizonDays/climatePeriodDays),waterStateIds=Object.keys(waterLabels),soilStateIds=["soil_degraded","soil_regular","soil_good"],nitrogenStateIds=["nitrogen_low","nitrogen_medium","nitrogen_high"],waterStateIndex={water_low:0,water_medium:1,water_high:2},soilStateIndex={low:0,medium:1,high:2},nitrogenStateIndex={low:0,medium:1,high:2};
 let active=null,latestRun=null,simulationSession=null,selectedGraphCropId=null,cachedCropStateProfile=null,cachedCropStatesById=null,cachedCropTransitionProfile=null,cachedCropTransitions=null,cachedCalendarProfile=null,cachedCropPlantingWindows=null,cachedPlantingDecendios=null,cachedCropCalendarBasis=null,cachedAllowedProfile=null,cachedAllowedBySource=null,cachedEligibleBySource=null,cachedScheduleProfile=null,cachedPlantingSchedules=null,cachedWaterProfile=null,cachedWaterRows=null,simulationRunId=0,rotationRankingPage=0;
 const graphIntervalCache=new Map();
 
@@ -28,12 +28,16 @@ function pct(value){return fmt(100*value,1)+"%";}
 function clamp(x,lo,hi){return Math.min(hi,Math.max(lo,x));}
 function scoreOnTen(value,scale){const minimum=Number(rankingScoreSettings.minimum),maximum=Number(rankingScoreSettings.maximum),breakEven=Number(rankingScoreSettings.break_even),span=value<0?breakEven-minimum:maximum-breakEven,effectiveScale=Math.max(1e-9,Math.abs(Number(scale)||0));return clamp(breakEven+(value/effectiveScale)*span,minimum,maximum);}
 function soilScoreOnTen(soc){return clamp(Number(soc)/Number(rankingEnvironmentSettings.soil_reference_g_kg)*Number(rankingScoreSettings.maximum),Number(rankingScoreSettings.minimum),Number(rankingScoreSettings.maximum));}
+function nitrogenTargetStockKgHa(soc){const initialSoc=Number(active?.soil?.organic_carbon_top_0_30_g_kg)||0,initialCarbonStock=Number(active?.soil?.organic_carbon_stock_top_0_30_kg_ha)||0,ratio=Number(soilHypotheses.soil_nitrogen.reference_cn_stock_ratio)||12;return initialSoc>0?Math.max(0,initialCarbonStock*Number(soc)/initialSoc/ratio):0;}
+function nitrogenStockRatio(stock,soc){const target=nitrogenTargetStockKgHa(soc);return target>0?Number(stock)/target:0;}
+function soilNitrogenClass(stock,soc){const thresholds=soilHypotheses.soil_nitrogen.state_ratio_thresholds,ratio=nitrogenStockRatio(stock,soc);if(ratio<Number(thresholds.low_max_exclusive))return "low";if(ratio<Number(thresholds.medium_max_exclusive))return "medium";return "high";}
+function nitrogenScoreOnTen(stock,soc){const target=nitrogenTargetStockKgHa(soc);return target>0?clamp(Number(stock)/target*Number(rankingScoreSettings.maximum),Number(rankingScoreSettings.minimum),Number(rankingScoreSettings.maximum)):0;}
 function waterMultiplierMean(counts){const multipliers=soilHypotheses.economic_yield_response.water_multiplier_by_class;let total=0,weighted=0;for(const [water,count] of Object.entries(counts||{})){const n=Number(count)||0,multiplier=Number(multipliers[water]);if(n>0&&Number.isFinite(multiplier)){total+=n;weighted+=n*multiplier;}}return total?weighted/total:Number(multipliers.water_medium)||1;}
 function waterScoreOnTen(meanMultiplier){const multipliers=Object.values(soilHypotheses.economic_yield_response.water_multiplier_by_class).map(Number),scale=Math.max(...multipliers.map(value=>Math.abs(value-1)),1e-9);return scoreOnTen(Number(meanMultiplier)-1,scale);}
 function waterDistributionSummary(counts,total){const entries=[["water_low","Baixa"],["water_medium","Média"],["water_high","Alta"]].filter(([id])=>Number(counts?.[id]||0)>0);return entries.map(([id,label])=>label+" "+pct(Number(counts[id])/Math.max(1,total))).join(" · ")||"sem observações";}
 function soilCarbonClass(soc){const thresholds=soilHypotheses.soil_carbon.state_thresholds_g_kg;if(Number(soc)<Number(thresholds.low_max_exclusive))return "low";if(Number(soc)<Number(thresholds.medium_max_exclusive))return "medium";return "high";}
-function environmentCountFrame(){return {water:{water_low:0,water_medium:0,water_high:0},soil:{soil_degraded:0,soil_regular:0,soil_good:0}};}
-function environmentPeriodCode(water,soc){return waterStateIndex[water]+3*soilStateIndex[soilCarbonClass(soc)];}
+function environmentCountFrame(){return {water:{water_low:0,water_medium:0,water_high:0},soil:{soil_degraded:0,soil_regular:0,soil_good:0},nitrogen:{nitrogen_low:0,nitrogen_medium:0,nitrogen_high:0}};}
+function environmentPeriodCode(water,soc,nitrogenStock){return waterStateIndex[water]+3*soilStateIndex[soilCarbonClass(soc)]+9*nitrogenStateIndex[soilNitrogenClass(nitrogenStock,soc)];}
 function rotationEnvironmentFrames(sample){
   // One byte per period and trajectory; expand counts only for the selected route.
   if(sample.environmentFrames?.count===sample.frequency)return sample.environmentFrames.frames;
@@ -42,7 +46,8 @@ function rotationEnvironmentFrames(sample){
     for(let period=0;period<path.length;period++){
       const code=path[period],frame=frames[period];
       frame.water[waterStateIds[code%3]]++;
-      frame.soil[soilStateIds[Math.floor(code/3)]]++;
+      frame.soil[soilStateIds[Math.floor(code/3)%3]]++;
+      frame.nitrogen[nitrogenStateIds[Math.floor(code/9)]]++;
     }
   }
   sample.environmentFrames={count:sample.frequency,frames};
@@ -99,9 +104,10 @@ function renderEnvironmentAreaChart(svgId,legendId,summaryId,countsByYear,dimens
   summary.textContent="A5 · "+lastCount.toLocaleString("en-US")+" trajetórias · "+finalSummary+".";
 }
 function renderEnvironmentalDistributionCharts(countsByYear,completed){
-  const thresholds=soilHypotheses.soil_carbon.state_thresholds_g_kg,soilSeries=[{id:"soil_good",label:"Bom (≥"+fmt(thresholds.high_min_inclusive,0)+" g/kg)",color:"#2eb78d"},{id:"soil_regular",label:"Regular ("+fmt(thresholds.low_max_exclusive,0)+"–<"+fmt(thresholds.medium_max_exclusive,0)+" g/kg)",color:"#e0ad25"},{id:"soil_degraded",label:"Degradado (<"+fmt(thresholds.low_max_exclusive,0)+" g/kg)",color:"#d96770"}],waterSeries=[{id:"water_high",label:"Alta",color:"#2eb78d"},{id:"water_medium",label:"Média",color:"#e0ad25"},{id:"water_low",label:"Baixa",color:"#d96770"}];
+  const thresholds=soilHypotheses.soil_carbon.state_thresholds_g_kg,nThresholds=soilHypotheses.soil_nitrogen.state_ratio_thresholds,soilSeries=[{id:"soil_good",label:"Bom (≥"+fmt(thresholds.high_min_inclusive,0)+" g/kg)",color:"#2eb78d"},{id:"soil_regular",label:"Regular ("+fmt(thresholds.low_max_exclusive,0)+"–<"+fmt(thresholds.medium_max_exclusive,0)+" g/kg)",color:"#e0ad25"},{id:"soil_degraded",label:"Degradado (<"+fmt(thresholds.low_max_exclusive,0)+" g/kg)",color:"#d96770"}],waterSeries=[{id:"water_high",label:"Alta",color:"#2eb78d"},{id:"water_medium",label:"Média",color:"#e0ad25"},{id:"water_low",label:"Baixa",color:"#d96770"}],nitrogenSeries=[{id:"nitrogen_high",label:"Acima (≥"+fmt(nThresholds.medium_max_exclusive,1)+"× C:N alvo)",color:"#2eb78d"},{id:"nitrogen_medium",label:"Perto do alvo ("+fmt(nThresholds.low_max_exclusive,1)+"–<"+fmt(nThresholds.medium_max_exclusive,1)+"×)",color:"#e0ad25"},{id:"nitrogen_low",label:"Abaixo (<"+fmt(nThresholds.low_max_exclusive,1)+"×)",color:"#d96770"}];
   renderEnvironmentAreaChart("soil-state-area-chart","soil-state-area-legend","soil-state-area-summary",countsByYear,"soil",soilSeries,completed);
   renderEnvironmentAreaChart("water-state-area-chart","water-state-area-legend","water-state-area-summary",countsByYear,"water",waterSeries,completed);
+  renderEnvironmentAreaChart("nitrogen-state-area-chart","nitrogen-state-area-legend","nitrogen-state-area-summary",countsByYear,"nitrogen",nitrogenSeries,completed);
 }
 function seeded(seed){let s=(seed>>>0)||1;return function(){s+=0x6D2B79F5;let t=s;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return ((t^(t>>>14))>>>0)/4294967296;};}
 function currentSeed(){return Math.max(0,Number.parseInt(byId("simulation-seed").value,10)||0);}
@@ -219,7 +225,7 @@ function renderCropTimeline(){
   }
 }
 
-function cropEnvironmentalFactors(crop,waterId,soc){
+function cropEnvironmentalFactors(crop,waterId,soc,nitrogenStock){
   const params=soilHypotheses.probability_modifiers;
   const waterFraction=typeof waterId==="number"?waterId:Number(params.water_state_representative_fraction[waterId]??0.5);
   const kcValues=cropStates().map(item=>item.kc_annual_effective).filter(value=>Number.isFinite(value));
@@ -232,32 +238,34 @@ function cropEnvironmentalFactors(crop,waterId,soc){
   const range=soil.delta_by_crop[crop.id]||[0,0];
   const deltaMean=(Number(range[0])+Number(range[1]))/2;
   const soilFactor=Math.exp(Number(params.soil_log_weight_coefficient)*deficit*(deltaMean/0.2));
-  return {waterFactor,soilFactor,waterAlignment,soilDeficit:deficit};
+  const nitrogen=soilHypotheses.soil_nitrogen,nTarget=nitrogenTargetStockKgHa(soc),nDeficit=nTarget>0?clamp((nTarget-Number(nitrogenStock))/(nTarget*Number(nitrogen.deficit_span_fraction_of_target)),0,1):0;
+  const nBalance=Number(nitrogen.annual_net_balance_kg_n_ha_year_by_crop[crop.id]||0),nitrogenFactor=Math.exp(Number(nitrogen.probability_log_weight_coefficient)*nDeficit*(nBalance/Number(nitrogen.probability_balance_scale_kg_ha_year)));
+  return {waterFactor,soilFactor,nitrogenFactor,waterAlignment,soilDeficit:deficit,nitrogenDeficit:nDeficit};
 }
 
-function cropProbabilities(sourceId,waterId,soc,baseWeights=null,eligibleDestinations=null){
+function cropProbabilities(sourceId,waterId,soc,nitrogenStock,baseWeights=null,eligibleDestinations=null){
   const allowed=eligibleDestinations?new Set(eligibleDestinations):cropAllowedDestinations(sourceId);
-  if(!baseWeights)return Object.fromEntries(Object.entries(cropProbabilitySummary(sourceId,waterId,soc,1200,allowed)).map(([id,summary])=>[id,summary.mean]));
+  if(!baseWeights)return Object.fromEntries(Object.entries(cropProbabilitySummary(sourceId,waterId,soc,nitrogenStock,1200,allowed)).map(([id,summary])=>[id,summary.mean]));
   const crops=cropStates(),weights={};
   for(const dest of crops){
     if(!allowed.has(dest.id)){weights[dest.id]=0;continue;}
     const base=Number(baseWeights[dest.id]||0);
-    const factors=cropEnvironmentalFactors(dest,waterId,soc);
-    weights[dest.id]=base*factors.waterFactor*factors.soilFactor;
+    const factors=cropEnvironmentalFactors(dest,waterId,soc,nitrogenStock);
+    weights[dest.id]=base*factors.waterFactor*factors.soilFactor*factors.nitrogenFactor;
   }
   const total=Object.values(weights).reduce((a,b)=>a+b,0)||1;
   return Object.fromEntries(Object.entries(weights).map(([id,value])=>[id,value/total]));
 }
 
-function cropProbabilitySummary(sourceId,waterId,soc,samples=1200,eligibleDestinations=null){
+function cropProbabilitySummary(sourceId,waterId,soc,nitrogenStock,samples=1200,eligibleDestinations=null){
   const allowed=eligibleDestinations?new Set(eligibleDestinations):cropAllowedDestinations(sourceId);
-  const cacheKey=[active?.crop_markov?.source?.municipality_ibge_code,sourceId,waterId,Number(soc).toFixed(1),samples,[...allowed].sort().join(",")].join("|");
+  const cacheKey=[active?.crop_markov?.source?.municipality_ibge_code,sourceId,waterId,Number(soc).toFixed(1),Number(nitrogenStock).toFixed(0),samples,[...allowed].sort().join(",")].join("|");
   if(graphIntervalCache.has(cacheKey))return graphIntervalCache.get(cacheKey);
   let hash=2166136261;for(const char of cacheKey){hash^=char.charCodeAt(0);hash=Math.imul(hash,16777619);}
   const rng=seeded(hash),crops=cropStates(),values=Object.fromEntries(crops.map(crop=>[crop.id,[]]));
   for(let sample=0;sample<samples;sample++){
     const weights={};let total=0;
-    for(const dest of crops){if(!allowed.has(dest.id)){weights[dest.id]=0;continue;}const factor=cropEnvironmentalFactors(dest,waterId,soc),weight=gammaRandom(pamMass(sourceId,dest.id)+alpha(),rng)*factor.waterFactor*factor.soilFactor;weights[dest.id]=weight;total+=weight;}
+    for(const dest of crops){if(!allowed.has(dest.id)){weights[dest.id]=0;continue;}const factor=cropEnvironmentalFactors(dest,waterId,soc,nitrogenStock),weight=gammaRandom(pamMass(sourceId,dest.id)+alpha(),rng)*factor.waterFactor*factor.soilFactor*factor.nitrogenFactor;weights[dest.id]=weight;total+=weight;}
     for(const dest of crops)values[dest.id].push(total?weights[dest.id]/total:0);
   }
   const result=Object.fromEntries(crops.map(crop=>{const draws=values[crop.id];return[crop.id,{mean:draws.reduce((sum,value)=>sum+value,0)/draws.length,lower:quantile(draws,.05),upper:quantile(draws,.95)}];}));
@@ -271,20 +279,20 @@ function blendColor(from,to,fraction){
   const a=from.match(/[a-f0-9]{2}/gi).map(value=>parseInt(value,16)),b=to.match(/[a-f0-9]{2}/gi).map(value=>parseInt(value,16));
   return "#"+a.map((value,index)=>Math.round(value+(b[index]-value)*clamp(fraction,0,1)).toString(16).padStart(2,"0")).join("");
 }
-function renderCropGraph(waterId,soc,nodeCountsByYear={},edgeCountsByYear={},completedTrajectories=0){
+function renderCropGraph(waterId,soc,nitrogenStock,nodeCountsByYear={},edgeCountsByYear={},completedTrajectories=0){
   if(!active)return;
   const plantingDay=selectedGraphPlantingDay(),plantingDecendio=decendioForDay(plantingDay);
   const states=cropStates(),countNodes=byId("crop-graph-nodes"),countEdges=byId("crop-graph-edges"),countLabels=byId("crop-graph-edge-labels"),yearSelect=byId("graph-year-select");
   const fullCycle=yearSelect.value==="all",year=Math.max(0,Number(yearSelect.value)||0),sumYears=source=>{const result={};for(let index=1;index<=horizon;index++)for(const [key,value] of Object.entries(source[index]||{}))result[key]=(result[key]||0)+Number(value);return result;},nodeCounts=fullCycle?sumYears(nodeCountsByYear):(nodeCountsByYear[year]||{}),edgeCounts=fullCycle?sumYears(edgeCountsByYear):(edgeCountsByYear[year]||{}),graphScope=fullCycle?"ciclo completo · 5 anos":year===0?"estado inicial":"ano "+year,nodeDenominator=completedTrajectories*(fullCycle?horizon:1),maxCount=Math.max(1,...Object.values(nodeCounts).map(Number));
   selectedGraphCropId=states.some(state=>state.id===selectedGraphCropId)?selectedGraphCropId:states.find(state=>state.initial_selectable)?.id||states[0]?.id;
   const selected=states.find(state=>state.id===selectedGraphCropId),positions=new Map();
-  const probabilitySummaries=cropProbabilitySummary(selectedGraphCropId,waterId,soc,1200,eligibleCropDestinations(selectedGraphCropId,plantingDay));
+  const probabilitySummaries=cropProbabilitySummary(selectedGraphCropId,waterId,soc,nitrogenStock,1200,eligibleCropDestinations(selectedGraphCropId,plantingDay));
   states.forEach((state,index)=>{const angle=-Math.PI/2+index*2*Math.PI/states.length;positions.set(state.id,{x:500+300*Math.cos(angle),y:400+300*Math.sin(angle),index});});
   countNodes.replaceChildren();countEdges.replaceChildren();countLabels.replaceChildren();
   const transitions=[];
   for(const source of states){
-    const allowed=eligibleCropDestinations(source.id,plantingDay),probabilities=cropProbabilities(source.id,waterId,soc,null,allowed),sourceTotal=outgoingCount(source.id),eligibleTotal=eligiblePamMass(source.id,allowed),lifecycle=cropLifecycleRule(source.id);
-    for(const destination of states){const factors=cropEnvironmentalFactors(destination,waterId,soc),posterior=source.id===selectedGraphCropId?probabilitySummaries[destination.id]:null;transitions.push({source,destination,probability:Number(posterior?.mean??probabilities[destination.id]??0),interval:posterior,observed:pamMass(source.id,destination.id),dominantObserved:dominantObservedCount(source.id,destination.id),sourceTotal,eligibleTotal,dominantSourceTotal:dominantOutgoingCount(source.id),eligibleCount:allowed.size,baseProbability:cropBaseProbability(source.id,destination.id,allowed),waterFactor:factors.waterFactor,soilFactor:factors.soilFactor,calendarBasis:cropCalendarBasis(destination.id),lifecycleOverride:!allowed.has(destination.id),lifecycle});}
+    const allowed=eligibleCropDestinations(source.id,plantingDay),probabilities=cropProbabilities(source.id,waterId,soc,nitrogenStock,null,allowed),sourceTotal=outgoingCount(source.id),eligibleTotal=eligiblePamMass(source.id,allowed),lifecycle=cropLifecycleRule(source.id);
+    for(const destination of states){const factors=cropEnvironmentalFactors(destination,waterId,soc,nitrogenStock),posterior=source.id===selectedGraphCropId?probabilitySummaries[destination.id]:null;transitions.push({source,destination,probability:Number(posterior?.mean??probabilities[destination.id]??0),interval:posterior,observed:pamMass(source.id,destination.id),dominantObserved:dominantObservedCount(source.id,destination.id),sourceTotal,eligibleTotal,dominantSourceTotal:dominantOutgoingCount(source.id),eligibleCount:allowed.size,baseProbability:cropBaseProbability(source.id,destination.id,allowed),waterFactor:factors.waterFactor,soilFactor:factors.soilFactor,nitrogenFactor:factors.nitrogenFactor,calendarBasis:cropCalendarBasis(destination.id),lifecycleOverride:!allowed.has(destination.id),lifecycle});}
   }
   for(const edge of transitions){
     const start=positions.get(edge.source.id),end=positions.get(edge.destination.id),isOutgoing=edge.source.id===selectedGraphCropId,dx=end.x-start.x,dy=end.y-start.y,length=Math.max(1,Math.hypot(dx,dy));
@@ -300,7 +308,7 @@ function renderCropGraph(waterId,soc,nodeCountsByYear={},edgeCountsByYear={},com
     }
     const path=svgNode("path",{d,class:"graph-edge"+(isOutgoing?" is-outgoing":"")+(edge.lifecycleOverride?" lifecycle-blocked":""),"stroke-width":isOutgoing?1.2+8*Math.sqrt(edge.probability):.7+2*Math.sqrt(edge.probability),"marker-end":"url(#crop-arrow)"});
     const edgeCount=Number(edgeCounts[edge.source.id+"|"+edge.destination.id]||0),outgoingEvents=Object.entries(edgeCounts).filter(([key])=>key.startsWith(edge.source.id+"|")).reduce((sum,[,value])=>sum+Number(value),0),edgeFrequency=outgoingEvents?edgeCount/outgoingEvents:0;
-    const interval=edge.interval||{lower:edge.probability,upper:edge.probability},calendarNote=edge.calendarBasis==="official_zarc"?"; calendário: janela oficial MAPA (grupos/códigos agregados)":edge.calendarBasis==="all_season_rotation_fallback"?"; calendário: hipótese de cobertura de rotação, qualquer decêndio, sem linha ZARC":"; calendário: sem dado ZARC ou hipótese de rotação",blockedNote=edge.lifecycleOverride?"; bloqueada por regra perene ou falta de janela elegível no próximo ano":"",title=svgNode("title");title.textContent=edge.source.name+" → "+edge.destination.name+": P média contextual "+fmt(100*edge.probability,2)+"%; intervalo Dirichlet 90% "+fmt(100*interval.lower,2)+"–"+fmt(100*interval.upper,2)+"%; P₀ top-5=(massa ponderada + α)/(suporte ponderado + α×destinos)="+fmt(100*edge.baseProbability,2)+"%; massa top-5 "+fmt(edge.observed,3)+"/"+fmt(edge.sourceTotal,3)+" unidades esperadas, suporte elegível="+fmt(edge.eligibleTotal,3)+(edge.probability>0&&edge.observed===0?"; apenas prior Dirichlet":"")+"; rank 1 observado "+edge.dominantObserved+"/"+edge.dominantSourceTotal+" pares, α="+fmt(alpha(),1)+" por destino; fatores água/solo "+fmt(edge.waterFactor,3)+"/"+fmt(edge.soilFactor,3)+calendarNote+blockedNote+"; Monte Carlo no "+graphScope+": "+edgeCount+" decisões/transições ("+fmt(100*edgeFrequency,1)+"% das saídas deste nó).";path.append(title);countEdges.append(path);
+    const interval=edge.interval||{lower:edge.probability,upper:edge.probability},calendarNote=edge.calendarBasis==="official_zarc"?"; calendário: janela oficial MAPA (grupos/códigos agregados)":edge.calendarBasis==="all_season_rotation_fallback"?"; calendário: hipótese de cobertura de rotação, qualquer decêndio, sem linha ZARC":"; calendário: sem dado ZARC ou hipótese de rotação",blockedNote=edge.lifecycleOverride?"; bloqueada por regra perene ou falta de janela elegível no próximo ano":"",title=svgNode("title");title.textContent=edge.source.name+" → "+edge.destination.name+": P média contextual "+fmt(100*edge.probability,2)+"%; intervalo Dirichlet 90% "+fmt(100*interval.lower,2)+"–"+fmt(100*interval.upper,2)+"%; P₀ top-5=(massa ponderada + α)/(suporte ponderado + α×destinos)="+fmt(100*edge.baseProbability,2)+"%; massa top-5 "+fmt(edge.observed,3)+"/"+fmt(edge.sourceTotal,3)+" unidades esperadas, suporte elegível="+fmt(edge.eligibleTotal,3)+(edge.probability>0&&edge.observed===0?"; apenas prior Dirichlet":"")+"; rank 1 observado "+edge.dominantObserved+"/"+edge.dominantSourceTotal+" pares, α="+fmt(alpha(),1)+" por destino; fatores água/COS/N total "+fmt(edge.waterFactor,3)+"/"+fmt(edge.soilFactor,3)+"/"+fmt(edge.nitrogenFactor,3)+calendarNote+blockedNote+"; Monte Carlo no "+graphScope+": "+edgeCount+" decisões/transições ("+fmt(100*edgeFrequency,1)+"% das saídas deste nó).";path.append(title);countEdges.append(path);
     if(isOutgoing){const label=svgNode("text",{x:labelX,y:labelY,class:"graph-edge-label"});label.textContent=fmt(100*edge.probability,2)+"%";countLabels.append(label);}
   }
   for(const state of states){
@@ -308,22 +316,22 @@ function renderCropGraph(waterId,soc,nodeCountsByYear={},edgeCountsByYear={},com
     const rect=svgNode("rect",{x:-63,y:-30,width:126,height:60,rx:13,fill:blendColor("#edf2ed","#377a4e",relative*.85)}),name=svgNode("text",{x:0,y:-4,class:"graph-node-name",fill:relative>.58?"#fff":"#26382b"}),frequencyText=svgNode("text",{x:0,y:15,class:"graph-node-frequency",fill:relative>.58?"#f2f8f3":"#58695d"});
     name.textContent=state.name;frequencyText.textContent="MC "+pct(frequency)+" · n="+count.toLocaleString("en-US");
     const title=svgNode("title");title.textContent=state.name+" · P(MC "+graphScope+")="+pct(frequency)+(state.initial_selectable?" · cultura inicial permitida":" · destino de transição");group.append(rect,name,frequencyText,title);
-    group.addEventListener("click",()=>{selectedGraphCropId=state.id;renderCropGraph(waterId,soc,nodeCountsByYear,edgeCountsByYear,completedTrajectories);});
-    group.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();selectedGraphCropId=state.id;renderCropGraph(waterId,soc,nodeCountsByYear,edgeCountsByYear,completedTrajectories);}});
+    group.addEventListener("click",()=>{selectedGraphCropId=state.id;renderCropGraph(waterId,soc,nitrogenStock,nodeCountsByYear,edgeCountsByYear,completedTrajectories);});
+    group.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();selectedGraphCropId=state.id;renderCropGraph(waterId,soc,nitrogenStock,nodeCountsByYear,edgeCountsByYear,completedTrajectories);}});
     countNodes.append(group);
   }
   const outgoing=transitions.filter(edge=>edge.source.id===selectedGraphCropId).sort((a,b)=>b.probability-a.probability),totalAtNode=Number(nodeCounts[selectedGraphCropId]||0),sideTitle=byId("graph-selected-title"),sideContext=byId("graph-selected-context"),sideList=byId("graph-edge-list");
   sideTitle.textContent="Saídas de "+(selected?.name||"—");
   const lifecycle=cropLifecycleRule(selectedGraphCropId),mcState=(completedTrajectories?"amostra parcial "+completedTrajectories.toLocaleString("en-US")+"/"+maxTrajectories.toLocaleString("en-US"):"simulação ainda não iniciada"),occupied=Object.values(nodeCounts).reduce((sum,value)=>sum+Number(value||0),0),fallowPositions=Math.max(0,nodeDenominator-occupied);
-  sideContext.textContent=graphScope+": "+mcState+" · "+pct(nodeDenominator?totalAtNode/nodeDenominator:0)+" das posições observadas ocupam este nó (n="+totalAtNode.toLocaleString("en-US")+" de "+nodeDenominator.toLocaleString("en-US")+" posições). Pousio no fechamento: "+fallowPositions.toLocaleString("en-US")+" posições ("+pct(nodeDenominator?fallowPositions/nodeDenominator:0)+"). As transições PAM usam o produto das participações top-5 entre anos consecutivos, com independência assumida entre áreas municipais; não são trocas observadas no mesmo talhão. A probabilidade ajusta essa massa com prior Dirichlet, ambiente e calendário MAPA ou hipótese explícita de cobertura no "+decendioName(plantingDecendio)+". Água "+waterLabels[waterId].toLowerCase()+" e carbono "+fmt(soc,1)+" g/kg ajustam os pesos; intervalo de 90% sorteia linhas Dirichlet. A cultura escolhida pode esperar a próxima janela aplicável para ser semeada."+(lifecycle?" Regra de ciclo: "+lifecycle.rationale:"");
+  sideContext.textContent=graphScope+": "+mcState+" · "+pct(nodeDenominator?totalAtNode/nodeDenominator:0)+" das posições observadas ocupam este nó (n="+totalAtNode.toLocaleString("en-US")+" de "+nodeDenominator.toLocaleString("en-US")+" posições). Pousio no fechamento: "+fallowPositions.toLocaleString("en-US")+" posições ("+pct(nodeDenominator?fallowPositions/nodeDenominator:0)+"). As transições PAM usam o produto das participações top-5 entre anos consecutivos, com independência assumida entre áreas municipais; não são trocas observadas no mesmo talhão. A probabilidade ajusta essa massa com prior Dirichlet, ambiente e calendário MAPA ou hipótese explícita de cobertura no "+decendioName(plantingDecendio)+". Água "+waterLabels[waterId].toLowerCase()+", COS "+fmt(soc,1)+" g/kg e N total "+fmt(nitrogenStock,0)+" kg/ha ajustam os pesos; N é comparado à referência derivada do carbono e não equivale a N mineral disponível. Intervalo de 90% sorteia linhas Dirichlet. A cultura escolhida pode esperar a próxima janela aplicável para ser semeada."+(lifecycle?" Regra de ciclo: "+lifecycle.rationale:"");
   sideList.replaceChildren();
-  for(const edge of outgoing){const edgeCount=Number(edgeCounts[edge.source.id+"|"+edge.destination.id]||0),outgoingEvents=Object.entries(edgeCounts).filter(([key])=>key.startsWith(edge.source.id+"|")).reduce((sum,[,value])=>sum+Number(value),0),mcShare=outgoingEvents?edgeCount/outgoingEvents:0,interval=edge.interval||{lower:edge.probability,upper:edge.probability},li=document.createElement("li"),strong=el("strong","→ "+edge.destination.name+" · P média "+fmt(100*edge.probability,2)+"%"),ruleNote=edge.lifecycleOverride?" · bloqueada por janela/regra perene":"",small=el("small","Calendário: "+cropCalendarBasisLabel(edge.destination.id)+" · Dirichlet 90%: "+fmt(100*interval.lower,2)+"–"+fmt(100*interval.upper,2)+"% · P₀ top-5 "+fmt(100*edge.baseProbability,2)+"% (α="+fmt(alpha(),1)+") · massa top-5 "+fmt(edge.observed,3)+"/"+fmt(edge.sourceTotal,3)+" eq. · rank 1 PAM "+edge.dominantObserved+"/"+edge.dominantSourceTotal+" · água/solo "+fmt(edge.waterFactor,3)+"/"+fmt(edge.soilFactor,3)+ruleNote+" · MC no "+graphScope+": "+edgeCount+"/"+outgoingEvents+" saídas ("+pct(mcShare)+")");li.append(strong,document.createElement("br"),small);sideList.append(li);}
-  byId("graph-environment").textContent="Ambiente da decisão: "+decendioName(plantingDecendio)+" · destinos com janela MAPA ou hipótese aplicável nos próximos 365 dias · água "+waterLabels[waterId].toLowerCase()+" · carbono "+fmt(soc,1)+" g/kg · origem selecionada: "+(selected?.name||"—");
+  for(const edge of outgoing){const edgeCount=Number(edgeCounts[edge.source.id+"|"+edge.destination.id]||0),outgoingEvents=Object.entries(edgeCounts).filter(([key])=>key.startsWith(edge.source.id+"|")).reduce((sum,[,value])=>sum+Number(value),0),mcShare=outgoingEvents?edgeCount/outgoingEvents:0,interval=edge.interval||{lower:edge.probability,upper:edge.probability},li=document.createElement("li"),strong=el("strong","→ "+edge.destination.name+" · P média "+fmt(100*edge.probability,2)+"%"),ruleNote=edge.lifecycleOverride?" · bloqueada por janela/regra perene":"",small=el("small","Calendário: "+cropCalendarBasisLabel(edge.destination.id)+" · Dirichlet 90%: "+fmt(100*interval.lower,2)+"–"+fmt(100*interval.upper,2)+"% · P₀ top-5 "+fmt(100*edge.baseProbability,2)+"% (α="+fmt(alpha(),1)+") · massa top-5 "+fmt(edge.observed,3)+"/"+fmt(edge.sourceTotal,3)+" eq. · rank 1 PAM "+edge.dominantObserved+"/"+edge.dominantSourceTotal+" · fatores água/COS/N "+fmt(edge.waterFactor,3)+"/"+fmt(edge.soilFactor,3)+"/"+fmt(edge.nitrogenFactor,3)+ruleNote+" · MC no "+graphScope+": "+edgeCount+"/"+outgoingEvents+" saídas ("+pct(mcShare)+")");li.append(strong,document.createElement("br"),small);sideList.append(li);}
+  byId("graph-environment").textContent="Ambiente da decisão: "+decendioName(plantingDecendio)+" · destinos com janela MAPA ou hipótese aplicável nos próximos 365 dias · água "+waterLabels[waterId].toLowerCase()+" · COS "+fmt(soc,1)+" g/kg · N total "+fmt(nitrogenStock,0)+" kg/ha · origem selecionada: "+(selected?.name||"—");
 }
 
 function renderCropMatrix(){
   const table=byId("crop-matrix");table.replaceChildren();
-  const states=cropStates(),waterId=byId("matrix-water-select").value||"water_medium",soc=Number(byId("matrix-carbon-input").value)||0,plantingDay=selectedGraphPlantingDay(),plantingDecendio=decendioForDay(plantingDay);
+  const states=cropStates(),waterId=byId("matrix-water-select").value||"water_medium",soc=Number(byId("matrix-carbon-input").value)||0,nitrogenStock=Number(byId("matrix-nitrogen-input").value)||0,plantingDay=selectedGraphPlantingDay(),plantingDecendio=decendioForDay(plantingDay);
   const thead=document.createElement("thead"),headRow=document.createElement("tr");
   headRow.append(el("th","Origem ↓ · próximo destino →","corner"));
   for(const state of states){const th=el("th",state.name);th.scope="col";th.title=(state.initial_selectable?"Cultura inicial permitida":"Candidata de transição")+" · Kc efetivo anual: "+(Number.isFinite(state.kc_annual_effective)?fmt(state.kc_annual_effective,2):"sem curva, fator hídrico neutro")+" · "+state.kc_annual_support;headRow.append(th);}
@@ -334,19 +342,19 @@ function renderCropMatrix(){
     const allowed=eligibleCropDestinations(source.id,plantingDay),n=eligiblePamMass(source.id,allowed),stateNode=el("div",source.name,"matrix-state");
     stateNode.append(el("small","Top-5 PAM · suporte elegível="+fmt(n,2)+" eq. · rank 1 n="+dominantOutgoingCount(source.id)+(source.initial_selectable?" · início permitido":"")));
     rowHead.append(stateNode);row.append(rowHead);
-    const probabilities=cropProbabilities(source.id,waterId,soc,null,allowed);
+    const probabilities=cropProbabilities(source.id,waterId,soc,nitrogenStock,null,allowed);
     for(const dest of states){
       const td=document.createElement("td"),count=pamMass(source.id,dest.id),dominantCount=dominantObservedCount(source.id,dest.id),probability=probabilities[dest.id];
       const cell=el("div",undefined,"cell-content"+((n<5)?" matrix-low-support":""));
       cell.append(el("strong",pct(probability)),el("span",fmt(count,2)+"/"+fmt(n,2)+" massa"),el("span",allowed.has(dest.id)&&count===0?"Só prior":"rank 1: "+dominantCount));
-      cell.title=allowed.has(dest.id)?"P ajustada por água/solo e condicionada à decisão no "+decendioName(plantingDecendio)+"; calendário: "+cropCalendarBasisLabel(dest.id)+". Massa de transição top-5 ponderada: "+fmt(count,4)+"/"+fmt(n,4)+" unidades esperadas sob independência de marginais municipais; pares rank 1 observados: "+dominantCount+". Prior Dirichlet: "+alpha()+" por destino elegível.":"Destino bloqueado no contexto: calendário "+cropCalendarBasisLabel(dest.id)+" ou regra perene; a aresta não é sorteada.";
+      cell.title=allowed.has(dest.id)?"P ajustada por água, COS e N total e condicionada à decisão no "+decendioName(plantingDecendio)+"; calendário: "+cropCalendarBasisLabel(dest.id)+". Massa de transição top-5 ponderada: "+fmt(count,4)+"/"+fmt(n,4)+" unidades esperadas sob independência de marginais municipais; pares rank 1 observados: "+dominantCount+". Prior Dirichlet: "+alpha()+" por destino elegível.":"Destino bloqueado no contexto: calendário "+cropCalendarBasisLabel(dest.id)+" ou regra perene; a aresta não é sorteada.";
       td.append(cell);row.append(td);
     }
     tbody.append(row);
   }
   table.append(tbody);
-  byId("crop-matrix-note").textContent="Matriz completa: "+states.length+" estados de cultura. A evidência é a massa fracionária de transições construída com as participações de área PAM do top 5 em anos consecutivos, sob independência assumida; o número rank 1 fica separado como diagnóstico. Contexto: decisão no "+decendioName(plantingDecendio)+" · água "+waterLabels[waterId].toLowerCase()+" · carbono "+fmt(soc,1)+" g/kg. As probabilidades são condicionais a uma janela MAPA ou à hipótese explicitamente marcada de calendário para cobertura sem dado. Células âmbar têm suporte efetivo baixo; destinos sem calendário aplicável aparecem em 0%.";
-  renderCropGraph(waterId,soc,latestRun?.nodeCountsByYear||{},latestRun?.edgeCountsByYear||{},latestRun?.completed||0);
+  byId("crop-matrix-note").textContent="Matriz completa: "+states.length+" estados de cultura. A evidência é a massa fracionária de transições construída com as participações de área PAM do top 5 em anos consecutivos, sob independência assumida; o número rank 1 fica separado como diagnóstico. Contexto: decisão no "+decendioName(plantingDecendio)+" · água "+waterLabels[waterId].toLowerCase()+" · COS "+fmt(soc,1)+" g/kg · N total "+fmt(nitrogenStock,0)+" kg/ha. A probabilidade ajusta destinos por água, déficit de COS e balanço anual hipotético de N, sem tratar N total como N disponível. As probabilidades são condicionais a uma janela MAPA ou à hipótese explicitamente marcada de calendário para cobertura sem dado. Células âmbar têm suporte efetivo baixo; destinos sem calendário aplicável aparecem em 0%.";
+  renderCropGraph(waterId,soc,nitrogenStock,latestRun?.nodeCountsByYear||{},latestRun?.edgeCountsByYear||{},latestRun?.completed||0);
 
 }
 
@@ -469,34 +477,36 @@ function sampleTrajectory(startCrop,rng,environmentYears,initialSugarcaneCut=1){
   const posteriorRows={},historyBlocks=Array.from({length:horizon},()=>environmentYears[Math.floor(rng()*environmentYears.length)]),path=[],annualPath=[],soilRates={};
   let crop=startCrop,lastMainCrop=startCrop,consecutivePlantings=1;
   let nextSugarcaneCut=startCrop==="sugarcane"?initialSugarcaneCut:1;
-  let waterFraction=active.water_markov.initial_storage_fraction,water=waterClass(waterFraction),soc=active.soil.organic_carbon_top_0_30_g_kg,mainTimer=cycleDays(crop),maturityRemaining=0,formationTimer=Infinity,pendingPlanting=null;
+  let waterFraction=active.water_markov.initial_storage_fraction,water=waterClass(waterFraction),soc=active.soil.organic_carbon_top_0_30_g_kg,nStock=active.soil.total_nitrogen_stock_top_0_30_kg_ha,mainTimer=cycleDays(crop),maturityRemaining=0,formationTimer=Infinity,pendingPlanting=null;
   const daysPerYear=Number(cropCycles.time_basis.days_per_year),yearStates=Array(horizon+1),environmentPath=Array(horizon+1),environmentPeriodPath=new Uint8Array(environmentPeriodCount+1);
   const rateFor=id=>{if(!id)return 0;if(!soilRates[id])soilRates[id]=soilDelta(id,rng);return soilRates[id];};
-  path.push({day:0,year:0,crop,water,waterFraction,soc,eventKind:"start"});yearStates[0]={crop};environmentPath[0]={water,waterFraction,soc};environmentPeriodPath[0]=environmentPeriodCode(water,soc);
+  path.push({day:0,year:0,crop,water,waterFraction,soc,nitrogenStock:nStock,eventKind:"start"});yearStates[0]={crop};environmentPath[0]={water,waterFraction,soc,nitrogenStock:nStock};environmentPeriodPath[0]=environmentPeriodCode(water,soc,nStock);
   for(let period=0;period<environmentPeriodCount;period++){
     const day=period*climatePeriodDays,yearIndex=Math.min(horizon-1,Math.floor(day/daysPerYear)),periodInYear=period%Number(cropCycles.time_basis.environment_periods_per_year),climate=historyBlocks[yearIndex][1][periodInYear];
     waterFraction=advanceWaterForCrop(water,climate,crop,rng);
     water=waterClass(waterFraction);
     soc=Math.max(0.1,soc+rateFor(crop)*climatePeriodDays/daysPerYear);
-    environmentPeriodPath[period+1]=environmentPeriodCode(water,soc);
+    const nitrogenBalance=Number(soilHypotheses.soil_nitrogen.annual_net_balance_kg_n_ha_year_by_crop[crop]||0);
+    nStock=Math.max(0,nStock+nitrogenBalance*climatePeriodDays/daysPerYear);
+    environmentPeriodPath[period+1]=environmentPeriodCode(water,soc,nStock);
     mainTimer-=climatePeriodDays;if(maturityRemaining>0)maturityRemaining-=climatePeriodDays;if(Number.isFinite(formationTimer))formationTimer-=climatePeriodDays;
     const eventDay=Math.round((period+1)*climatePeriodDays*1e9)/1e9;
     const eventYear=Math.min(horizon,Math.ceil(eventDay/daysPerYear));
     // An annual cycle is exactly 24 climate steps. Subtraction can leave a tiny positive remainder.
     if(crop&&mainTimer<=1e-9){
-      const harvested=crop,perennial=Boolean(cropLifecycleRule(harvested)),harvest={day:eventDay,year:eventYear,crop:harvested,water,waterFraction,soc,eventKind:"main_harvest",flowKind:"main_harvest",flowCrop:harvested,consecutivePlantings,repeatYieldMultiplier:repeatedCropYieldMultiplier(harvested,consecutivePlantings),cycleDays:cycleDays(harvested),climateYear:historyBlocks[yearIndex][0]};
+      const harvested=crop,perennial=Boolean(cropLifecycleRule(harvested)),harvest={day:eventDay,year:eventYear,crop:harvested,water,waterFraction,soc,nitrogenStock:nStock,eventKind:"main_harvest",flowKind:"main_harvest",flowCrop:harvested,consecutivePlantings,repeatYieldMultiplier:repeatedCropYieldMultiplier(harvested,consecutivePlantings),cycleDays:cycleDays(harvested),climateYear:historyBlocks[yearIndex][0]};
       const caneCut=harvested==="sugarcane"?nextSugarcaneCut++:null;
       if(caneCut!==null)harvest.sugarcane_cut=caneCut;
       path.push(harvest);
       const reform=caneCut===cycleRule("sugarcane").modeled_harvest_cuts;
       if(perennial&&!reform){
-        path.push({day:eventDay,year:eventYear,crop:harvested,fromCrop:harvested,water,soc,transitionProbability:1,eventKind:"main_transition",transitionReason:"colheita recorrente de cultura perene"});
+        path.push({day:eventDay,year:eventYear,crop:harvested,fromCrop:harvested,water,soc,nitrogenStock:nStock,transitionProbability:1,eventKind:"main_transition",transitionReason:"colheita recorrente de cultura perene"});
         mainTimer=cycleDays(harvested);maturityRemaining=0;formationTimer=Infinity;
       }else{
         lastMainCrop=harvested;crop=null;mainTimer=Infinity;maturityRemaining=0;formationTimer=Infinity;
         pendingPlanting=reform&&eventDay>=horizonDays?null:nextPlantingOpportunity(lastMainCrop,eventDay);
         if(reform)path.push({day:eventDay,year:eventYear,crop:harvested,eventKind:"sugarcane_reform",sugarcane_cut:caneCut});
-        if(!pendingPlanting||pendingPlanting.day>eventDay)path.push({day:eventDay,year:eventYear,crop:"fallow",fromCrop:lastMainCrop,water,soc,eventKind:"fallow_start",nextDecisionDay:pendingPlanting?.day??null,nextDecisionDecendio:pendingPlanting?.decendio??null,climateYear:historyBlocks[yearIndex][0]});
+        if(!pendingPlanting||pendingPlanting.day>eventDay)path.push({day:eventDay,year:eventYear,crop:"fallow",fromCrop:lastMainCrop,water,soc,nitrogenStock:nStock,eventKind:"fallow_start",nextDecisionDay:pendingPlanting?.day??null,nextDecisionDecendio:pendingPlanting?.decendio??null,climateYear:historyBlocks[yearIndex][0]});
       }
     }
     if(!crop&&pendingPlanting&&!pendingPlanting.cropId&&pendingPlanting.day<=eventDay){
@@ -507,11 +517,11 @@ function sampleTrajectory(startCrop,rng,environmentYears,initialSugarcaneCut=1){
       else{
         if(!posteriorRows[lastMainCrop])posteriorRows[lastMainCrop]=reform
           ?sampleCropRow(lastMainCrop,rng,allowed,true):sampleCropRow(lastMainCrop,rng);
-        const probabilities=cropProbabilities(lastMainCrop,waterFraction,soc,posteriorRows[lastMainCrop],allowed),next=drawProbability(probabilities,rng),transitionProbability=probabilities[next],previous=lastMainCrop,sowOpportunity=nextCropPlantingWindow(next,decisionDay);
+        const probabilities=cropProbabilities(lastMainCrop,waterFraction,soc,nStock,posteriorRows[lastMainCrop],allowed),next=drawProbability(probabilities,rng),transitionProbability=probabilities[next],previous=lastMainCrop,sowOpportunity=nextCropPlantingWindow(next,decisionDay);
         if(!sowOpportunity){pendingPlanting=nextPlantingOpportunity(lastMainCrop,decisionDay+1);}
         else{
           const newStreak=next===previous?consecutivePlantings+1:1;
-          path.push({day:decisionDay,year:Math.min(horizon,Math.ceil(decisionDay/daysPerYear)),crop:next,fromCrop:previous,water,soc,transitionProbability,eventKind:"main_transition",plantingDecendio:sowOpportunity.decendio,scheduledPlantingDay:sowOpportunity.day,decisionDecendio,plantingRule:cropCalendarBasisLabel(next),consecutivePlantings:newStreak,repeatYieldMultiplier:repeatedCropYieldMultiplier(next,newStreak),climateYear:historyBlocks[yearIndex][0]});
+          path.push({day:decisionDay,year:Math.min(horizon,Math.ceil(decisionDay/daysPerYear)),crop:next,fromCrop:previous,water,soc,nitrogenStock:nStock,transitionProbability,eventKind:"main_transition",plantingDecendio:sowOpportunity.decendio,scheduledPlantingDay:sowOpportunity.day,decisionDecendio,plantingRule:cropCalendarBasisLabel(next),consecutivePlantings:newStreak,repeatYieldMultiplier:repeatedCropYieldMultiplier(next,newStreak),climateYear:historyBlocks[yearIndex][0]});
           if(sowOpportunity.day>decisionDay)path.push({day:decisionDay,year:Math.min(horizon,Math.ceil(decisionDay/daysPerYear)),crop:"fallow",fromCrop:previous,toCrop:next,water,soc,eventKind:"fallow_until_planting",nextPlantingDay:sowOpportunity.day,nextPlantingDecendio:sowOpportunity.decendio,climateYear:historyBlocks[yearIndex][0]});
           pendingPlanting={cropId:next,fromCrop:previous,day:sowOpportunity.day,decendio:sowOpportunity.decendio,consecutivePlantings:newStreak,repeatYieldMultiplier:repeatedCropYieldMultiplier(next,newStreak)};
         }
@@ -522,15 +532,15 @@ function sampleTrajectory(startCrop,rng,environmentYears,initialSugarcaneCut=1){
       crop=next;consecutivePlantings=pendingPlanting.consecutivePlantings;
       if(next==="sugarcane")nextSugarcaneCut=1;
       const firstCycleDuration=Math.max(cycleDays(next),maturationDays(next));mainTimer=Math.max(climatePeriodDays,firstCycleDuration-elapsedDays);maturityRemaining=Math.max(0,maturationDays(next)-elapsedDays);formationTimer=perennial?Math.max(0,daysPerYear-elapsedDays):Infinity;
-      path.push({day:plantingDay,year:Math.min(horizon,Math.ceil(plantingDay/daysPerYear)),crop,fromCrop:previous,water,soc,eventKind:"planting",plantingDecendio:pendingPlanting.decendio,consecutivePlantings,repeatYieldMultiplier:pendingPlanting.repeatYieldMultiplier,climateYear:historyBlocks[yearIndex][0]});
+      path.push({day:plantingDay,year:Math.min(horizon,Math.ceil(plantingDay/daysPerYear)),crop,fromCrop:previous,water,soc,nitrogenStock:nStock,eventKind:"planting",plantingDecendio:pendingPlanting.decendio,consecutivePlantings,repeatYieldMultiplier:pendingPlanting.repeatYieldMultiplier,climateYear:historyBlocks[yearIndex][0]});
       if(perennial)path.push({day:plantingDay,year:Math.min(horizon,Math.ceil(plantingDay/daysPerYear)),crop,water,waterFraction,soc,eventKind:"formation_cost",flowKind:"perennial_formation_cost",flowCrop:crop,cycleDays:Math.min(daysPerYear,maturationDays(crop)),climateYear:historyBlocks[yearIndex][0]});
       pendingPlanting=null;
     }
     if(Number.isFinite(formationTimer)&&maturityRemaining>0&&formationTimer<=0){path.push({day:eventDay,year:eventYear,crop,water,waterFraction,soc,eventKind:"formation_cost",flowKind:"perennial_formation_cost",flowCrop:crop,cycleDays:Math.min(daysPerYear,maturityRemaining),climateYear:historyBlocks[yearIndex][0]});formationTimer+=daysPerYear;}
-    if((period+1)%Number(cropCycles.time_basis.environment_periods_per_year)===0){const year=(period+1)/Number(cropCycles.time_basis.environment_periods_per_year);yearStates[year]={crop:crop||"fallow"};environmentPath[year]={water,waterFraction,soc};}
+    if((period+1)%Number(cropCycles.time_basis.environment_periods_per_year)===0){const year=(period+1)/Number(cropCycles.time_basis.environment_periods_per_year);yearStates[year]={crop:crop||"fallow"};environmentPath[year]={water,waterFraction,soc,nitrogenStock:nStock};}
   }
-  for(let year=1;year<=horizon;year++){annualPath.push(yearStates[year]||{crop:crop||"fallow"});environmentPath[year]=environmentPath[year]||environmentPath[year-1]||{water,waterFraction,soc};}
-  return {path,crop:crop||"fallow",water,waterFraction,soc,annualPath,environmentPath,environmentPeriodPath};
+  for(let year=1;year<=horizon;year++){annualPath.push(yearStates[year]||{crop:crop||"fallow"});environmentPath[year]=environmentPath[year]||environmentPath[year-1]||{water,waterFraction,soc,nitrogenStock:nStock};}
+  return {path,crop:crop||"fallow",water,waterFraction,soc,nitrogenStock:nStock,annualPath,environmentPath,environmentPeriodPath};
 }
 function quantileSorted(sorted,p){if(!sorted.length)return 0;const i=(sorted.length-1)*p,lo=Math.floor(i),hi=Math.ceil(i);return sorted[lo]+(sorted[hi]-sorted[lo])*(i-lo);}
 function quantile(values,p){return quantileSorted([...values].sort((a,b)=>a-b),p);}
@@ -593,10 +603,10 @@ function addRotationSample(rotationSamples,result,inputs,selectedCropIds){
   const path=result.path;
   const routeEvents=actualRouteEvents(path),key=JSON.stringify(routeEvents);
   let sample=rotationSamples.get(key);
-  if(!sample){sample={frequency:0,values:[],environmentPaths:[],finalSocSum:0,finalWaterFractionSum:0,finalEnvironmentCount:0,finalWaterCounts:{}};rotationSamples.set(key,sample);}
+  if(!sample){sample={frequency:0,values:[],environmentPaths:[],finalSocSum:0,finalNitrogenStockSum:0,finalWaterFractionSum:0,finalEnvironmentCount:0,finalWaterCounts:{}};rotationSamples.set(key,sample);}
   sample.frequency++;
   sample.environmentPaths.push(result.environmentPeriodPath);
-  sample.finalWaterFractionSum+=result.waterFraction;sample.finalSocSum+=Number(result.soc);sample.finalEnvironmentCount++;
+  sample.finalWaterFractionSum+=result.waterFraction;sample.finalSocSum+=Number(result.soc);sample.finalNitrogenStockSum+=Number(result.nitrogenStock);sample.finalEnvironmentCount++;
   sample.finalWaterCounts[result.water]=(sample.finalWaterCounts[result.water]||0)+1;
   const scored=scoreTrajectoryVpl(path,inputs,selectedCropIds);if(!scored)return;
   sample.values.push(scored.vpl);
@@ -696,10 +706,10 @@ function applyEconomicInputs(){
 }
 function renderEconomicOptimization(start,rotationSamples){
   const states=cropStates(),inputs=active.economics.crop_inputs||{},selected=states.filter(crop=>Boolean(inputs[crop.id]?.include_in_vpl??inputs[crop.id]?.eligible_for_economic_comparison)),rReal=Number(active.economics.discount_rate.real_annual_rate_approx);
-  const overallFinalSocMean=latestRun.socValues.length?latestRun.socValues.reduce((sum,value)=>sum+Number(value),0)/latestRun.socValues.length:Number(active.soil.organic_carbon_top_0_30_g_kg),overallWaterMultiplier=waterMultiplierMean(latestRun.waterCounts);
+  const overallFinalSocMean=latestRun.socValues.length?latestRun.socValues.reduce((sum,value)=>sum+Number(value),0)/latestRun.socValues.length:Number(active.soil.organic_carbon_top_0_30_g_kg),overallFinalNitrogenMean=latestRun.nitrogenStockValues?.length?latestRun.nitrogenStockValues.reduce((sum,value)=>sum+Number(value),0)/latestRun.nitrogenStockValues.length:Number(active.soil.total_nitrogen_stock_top_0_30_kg_ha),overallWaterMultiplier=waterMultiplierMean(latestRun.waterCounts);
   const yieldHypothesis=soilHypotheses.economic_yield_response,waterText=["water_low","water_medium","water_high"].map(id=>fmt(yieldHypothesis.water_multiplier_by_class[id],2)).join("/");
   const soilText=["low","medium","high"].map(id=>fmt(yieldHypothesis.soil_carbon_multiplier_by_class[id],2)).join("/");
-  byId("economic-method").textContent="Cada colheita gera fluxo na data do evento: rendimento × preço real projetado × resposta ambiental × fator fixo de repetição definido no JSON de ciclos − custo. O VPL desconta cada fluxo pela data ("+pct(rReal)+" real ao ano), em R$ de "+active.economics.reference_currency_month.slice(0,4)+"/"+active.economics.reference_currency_month.slice(4)+". Cultura inicial começa estabelecida; nova cultura só gera receita após maturação e calendário. Água multiplica rendimento por "+waterText+" e carbono por "+soilText+". Os padrões de rendimento, preço e custo vêm do JSON econômico; Yahoo fica como referência separada. A nota total combina o score econômico (P95 e, se selecionado, CVaR5 como medida de resiliência) com solo e água finais. O suporte amostral tem peso fixo e cresce até o limite de VPLs válidos definido para cada rotação.";
+  byId("economic-method").textContent="Cada colheita gera fluxo na data do evento: rendimento × preço real projetado × resposta ambiental × fator fixo de repetição definido no JSON de ciclos − custo. O VPL desconta cada fluxo pela data ("+pct(rReal)+" real ao ano), em R$ de "+active.economics.reference_currency_month.slice(0,4)+"/"+active.economics.reference_currency_month.slice(4)+". Cultura inicial começa estabelecida; nova cultura só gera receita após maturação e calendário. Água multiplica rendimento por "+waterText+" e carbono por "+soilText+"; N total influencia a transição e a nota de seleção, sem multiplicador de rendimento. Os padrões de rendimento, preço e custo vêm do JSON econômico; Yahoo fica como referência separada. A nota total combina o score econômico (P95 e, se selecionado, CVaR5 como medida de resiliência), carbono, N total, água e suporte amostral.";
   const excluded=states.filter(crop=>!selected.includes(crop)).map(crop=>crop.name);
   byId("economic-coverage-note").textContent="O grafo mantém os "+states.length+" estados. "+selected.length+" culturas estão marcadas para comparação econômica; outras ficam fora do VPL até preencher/ativar premissas, e só são destinos Markov se houver janela MAPA standalone ou hipótese explicitamente marcada para cobertura sem dado. Coberturas sem colheita comercial começam com receita zero e custo proxy editável."+(excluded.length?" Fora do ranking: "+excluded.join(", ")+".":"");
   byId("economic-method").textContent+=" Hipótese de manejo: "+(cropCycles.repeated_crop_effect.block_replant_after_penalty_cap?"após colher uma cultura anual no teto da penalidade por repetição, seu próximo replantio é bloqueado; sem alternativa elegível, permanece em pousio.":"bloqueio de repetição no teto desativado.")+" O teto representa perda de rendimento, não prejuízo financeiro. Alternar duas culturas não certifica rotação diversificada.";
@@ -712,8 +722,8 @@ function renderEconomicOptimization(start,rotationSamples){
     const routeEvents=JSON.parse(key),values=sample.values||[],n=values.length,routeCrops=routeEvents.crops||[];
     if(n<minimumRankedVplSamples||!sample.frequency||!selected.some(item=>item.id===start)||routeCrops.some(crop=>crop!=="fallow"&&!selected.some(item=>item.id===crop)))continue;
     const sorted=[...values].sort((a,b)=>a-b),tail=sorted.slice(0,Math.max(1,Math.ceil(sorted.length*.05))),worst=tail.reduce((sum,value)=>sum+value,0)/tail.length;
-    const finalEnvironmentCount=Number(sample.finalEnvironmentCount||0),finalWaterCounts=sample.finalWaterCounts||{},finalSocMean=finalEnvironmentCount?Number(sample.finalSocSum)/finalEnvironmentCount:overallFinalSocMean;
-    routeResults.push({key,routeEvents,median:quantileSorted(sorted,.5),p95:quantileSorted(sorted,.95),loss:values.filter(value=>value<0).length/values.length,cvar5:worst,count:values.length,tailCount:Math.max(1,Math.ceil(values.length*.05)),frequency:sample.frequency,finalEnvironmentCount,finalSocMean,finalWaterFractionMean:sample.finalWaterFractionSum/finalEnvironmentCount,finalWaterCounts,finalWaterSummary:waterDistributionSummary(finalWaterCounts,finalEnvironmentCount),finalWaterMultiplier:waterMultiplierMean(finalWaterCounts)});
+    const finalEnvironmentCount=Number(sample.finalEnvironmentCount||0),finalWaterCounts=sample.finalWaterCounts||{},finalSocMean=finalEnvironmentCount?Number(sample.finalSocSum)/finalEnvironmentCount:overallFinalSocMean,finalNitrogenStockMean=finalEnvironmentCount?Number(sample.finalNitrogenStockSum)/finalEnvironmentCount:overallFinalNitrogenMean;
+    routeResults.push({key,routeEvents,median:quantileSorted(sorted,.5),p95:quantileSorted(sorted,.95),loss:values.filter(value=>value<0).length/values.length,cvar5:worst,count:values.length,tailCount:Math.max(1,Math.ceil(values.length*.05)),frequency:sample.frequency,finalEnvironmentCount,finalSocMean,finalNitrogenStockMean,finalWaterFractionMean:sample.finalWaterFractionSum/finalEnvironmentCount,finalWaterCounts,finalWaterSummary:waterDistributionSummary(finalWaterCounts,finalEnvironmentCount),finalWaterMultiplier:waterMultiplierMean(finalWaterCounts)});
   }
   latestRun.routeResults=routeResults;
   const completed=Number(latestRun.completed||0),frequencyTotal=[...rotationSamples.values()].reduce((sum,sample)=>sum+Number(sample.frequency||0),0),allScoredVplCount=[...rotationSamples.values()].reduce((sum,sample)=>sum+(sample.values||[]).length,0),overcountedGroups=[...rotationSamples.values()].filter(sample=>(sample.values||[]).length>Number(sample.frequency||0)).length,frequencyMismatch=frequencyTotal!==completed;
@@ -722,15 +732,15 @@ function renderEconomicOptimization(start,rotationSamples){
     return {main:crops.join(" → ")};
   };
   const eligibleValues=routeResults.flatMap(route=>rotationSamples.get(route.key)?.values||[]),eligibleSorted=[...eligibleValues].sort((a,b)=>a-b),referenceTail=eligibleSorted.slice(0,Math.max(1,Math.ceil(eligibleSorted.length*.05))),referenceCvar5=referenceTail.length?referenceTail.reduce((sum,value)=>sum+value,0)/referenceTail.length:0,referenceP95=quantileSorted(eligibleSorted,.95);
-  const columns=["Pos.","Sequência de plantios realmente ocorridos","Trajetórias / VPL","Ambiente final · solo e água","Mediana do VPL","P(VPL<0)","CVaR5 · resiliência","P95 · retorno alto","Nota total · 0–10"];
+  const columns=["Pos.","Sequência de plantios realmente ocorridos","Trajetórias / VPL","Ambiente final · C, N e água","Mediana do VPL","P(VPL<0)","CVaR5 · resiliência","P95 · retorno alto","Nota total · 0–10"];
   const table=byId("rotation-path-ranking"),slider=byId("ranking-return-weight"),environmentSlider=byId("ranking-environment-weight"),tablePageInfo=byId("rotation-ranking-page-info"),previous=byId("rotation-ranking-previous"),next=byId("rotation-ranking-next");
   const renderRanking=()=>{
-    const returnWeight=Number(slider.value)/100,resilienceWeight=1-returnWeight,environmentPreference=clamp(Number(environmentSlider.value)/100,0,Number(rankingEnvironmentSettings.maximum_weight)),weights=rotationScoreWeights(environmentPreference),{economic:economicWeight,environment:environmentWeight,support:supportWeight}=weights,soilShare=Number(rankingEnvironmentSettings.soil_share),waterShare=Number(rankingEnvironmentSettings.water_share),scoreScale=Math.max(Math.abs(referenceCvar5),Math.abs(referenceP95),Number(rankingScoreSettings.minimum_scale_brl_per_ha)),referenceSoilScore=soilScoreOnTen(overallFinalSocMean),referenceWaterScore=waterScoreOnTen(overallWaterMultiplier);
+    const returnWeight=Number(slider.value)/100,resilienceWeight=1-returnWeight,environmentPreference=clamp(Number(environmentSlider.value)/100,0,Number(rankingEnvironmentSettings.maximum_weight)),weights=rotationScoreWeights(environmentPreference),{economic:economicWeight,environment:environmentWeight,support:supportWeight}=weights,soilShare=Number(rankingEnvironmentSettings.soil_share),waterShare=Number(rankingEnvironmentSettings.water_share),carbonShare=Number(rankingEnvironmentSettings.carbon_share_within_soil),nitrogenShare=Number(rankingEnvironmentSettings.nitrogen_share_within_soil),scoreScale=Math.max(Math.abs(referenceCvar5),Math.abs(referenceP95),Number(rankingScoreSettings.minimum_scale_brl_per_ha)),referenceCarbonScore=soilScoreOnTen(overallFinalSocMean),referenceNitrogenScore=nitrogenScoreOnTen(overallFinalNitrogenMean,overallFinalSocMean),referenceSoilScore=carbonShare*referenceCarbonScore+nitrogenShare*referenceNitrogenScore,referenceWaterScore=waterScoreOnTen(overallWaterMultiplier);
     byId("ranking-return-weight-value").textContent=fmt(100*returnWeight,0)+"% P95 · "+fmt(100*resilienceWeight,0)+"% CVaR5";
     byId("ranking-environment-weight-value").textContent=fmt(100*environmentPreference,0)+"% ambiente · "+fmt(100*(1-environmentPreference),0)+"% economia (entre as prioridades)";
-    byId("ranking-component-summary").textContent=fmt(100*economicWeight,1)+"% economia ("+fmt(100*economicWeight*returnWeight,1)+"% P95 · "+fmt(100*economicWeight*resilienceWeight,1)+"% CVaR5) · "+fmt(100*environmentWeight*soilShare,1)+"% solo · "+fmt(100*environmentWeight*waterShare,1)+"% água · "+fmt(100*supportWeight,1)+"% suporte (até "+rankingSupportSettings.full_score_vpl_samples+" VPLs válidos).";
-    byId("ranking-score-reference").textContent="Escala econômica comum: "+eligibleValues.length.toLocaleString("en-US")+" VPLs · CVaR5 "+brl(referenceCvar5)+"/ha · P95 "+brl(referenceP95)+"/ha. Referência ambiental da simulação: solo médio "+fmt(overallFinalSocMean,1)+" g/kg ("+fmt(referenceSoilScore,1)+"/10) · água final "+waterDistributionSummary(latestRun.waterCounts,latestRun.completed)+" ("+fmt(referenceWaterScore,1)+"/10 ambiental combinado). A nota de suporte usa o número de VPLs válidos da rotação. O CVaR5 mede o resultado médio na cauda de perdas.";
-    for(const route of routeResults){route.preferenceScore=resilienceWeight*route.cvar5+returnWeight*route.p95;route.preferenceScore10=scoreOnTen(route.preferenceScore,scoreScale);route.soilScore10=soilScoreOnTen(route.finalSocMean);route.waterScore10=waterScoreOnTen(route.finalWaterMultiplier);route.environmentScore=soilShare*route.soilScore10+waterShare*route.waterScore10;route.priorityScore10=rotationScore(route.preferenceScore10,route.environmentScore,0,{economic:1-environmentPreference,environment:environmentPreference,support:0});route.supportScore10=rotationSupportScore(route.count);route.combinedScore10=rotationScore(route.preferenceScore10,route.environmentScore,route.supportScore10,weights);}
+    byId("ranking-component-summary").textContent=fmt(100*economicWeight,1)+"% economia ("+fmt(100*economicWeight*returnWeight,1)+"% P95 · "+fmt(100*economicWeight*resilienceWeight,1)+"% CVaR5) · "+fmt(100*environmentWeight*soilShare*carbonShare,1)+"% carbono · "+fmt(100*environmentWeight*soilShare*nitrogenShare,1)+"% N total · "+fmt(100*environmentWeight*waterShare,1)+"% água · "+fmt(100*supportWeight,1)+"% suporte (até "+rankingSupportSettings.full_score_vpl_samples+" VPLs válidos).";
+    byId("ranking-score-reference").textContent="Escala econômica comum: "+eligibleValues.length.toLocaleString("en-US")+" VPLs · CVaR5 "+brl(referenceCvar5)+"/ha · P95 "+brl(referenceP95)+"/ha. Referência ambiental da simulação: carbono médio "+fmt(overallFinalSocMean,1)+" g/kg ("+fmt(referenceCarbonScore,1)+"/10) · N total médio "+fmt(overallFinalNitrogenMean,0)+" kg/ha ("+fmt(referenceNitrogenScore,1)+"/10 relativo ao C:N alvo) · água final "+waterDistributionSummary(latestRun.waterCounts,latestRun.completed)+" ("+fmt(referenceSoilScore,1)+"/10 solo composto; "+fmt(referenceWaterScore,1)+"/10 água). N total não mede N mineral disponível. A nota de suporte usa VPLs válidos; CVaR5 mede o resultado médio na cauda inferior.";
+    for(const route of routeResults){route.preferenceScore=resilienceWeight*route.cvar5+returnWeight*route.p95;route.preferenceScore10=scoreOnTen(route.preferenceScore,scoreScale);route.carbonScore10=soilScoreOnTen(route.finalSocMean);route.nitrogenScore10=nitrogenScoreOnTen(route.finalNitrogenStockMean,route.finalSocMean);route.soilScore10=carbonShare*route.carbonScore10+nitrogenShare*route.nitrogenScore10;route.waterScore10=waterScoreOnTen(route.finalWaterMultiplier);route.environmentScore=soilShare*route.soilScore10+waterShare*route.waterScore10;route.priorityScore10=rotationScore(route.preferenceScore10,route.environmentScore,0,{economic:1-environmentPreference,environment:environmentPreference,support:0});route.supportScore10=rotationSupportScore(route.count);route.combinedScore10=rotationScore(route.preferenceScore10,route.environmentScore,route.supportScore10,weights);}
     routeResults.sort((a,b)=>compareRankedRoutes(a,b,"combinedScore10"));
     const best=routeResults.find(route=>route.count>=minimumRecommendedVplSamples)??null;
     latestRun.recommendedRoute=best;
@@ -745,7 +755,7 @@ function renderEconomicOptimization(start,rotationSamples){
       if(route.count<minimumRecommendedVplSamples)routeCell.append(el("small","Exploratória · recomendação exige "+minimumRecommendedVplSamples+" VPLs válidos.","small-muted"));
       else if(route.count<rankingSupportSettings.full_score_vpl_samples)routeCell.append(el("small","Amostra rara: interpretação econômica incerta.","small-muted"));
       const support=el("td",undefined);support.append(el("span",route.frequency.toLocaleString("en-US")+" / "+completed.toLocaleString("en-US")+" · "+pct(route.frequency/Math.max(1,completed))));support.append(el("small","VPLs completos: "+route.count.toLocaleString("en-US")+" · cauda CVaR5: "+route.tailCount.toLocaleString("en-US"),"small-muted"));
-      const environmentCell=el("td",undefined);environmentCell.append(el("span",fmt(route.finalSocMean,1)+" g/kg solo"));environmentCell.append(el("small","Água: "+route.finalWaterSummary+" · notas solo "+fmt(route.soilScore10,1)+"/10, água "+fmt(route.waterScore10,1)+"/10","small-muted"));
+      const environmentCell=el("td",undefined);environmentCell.append(el("span",fmt(route.finalSocMean,1)+" g/kg C · "+fmt(route.finalNitrogenStockMean,0)+" kg N/ha"));environmentCell.append(el("small","Água: "+route.finalWaterSummary+" · notas C "+fmt(route.carbonScore10,1)+", N "+fmt(route.nitrogenScore10,1)+", solo "+fmt(route.soilScore10,1)+", água "+fmt(route.waterScore10,1)+"/10","small-muted"));
       const scoreCell=el("td",undefined);scoreCell.append(el("strong",fmt(route.combinedScore10,1)+"/10"));scoreCell.append(el("small","Economia "+fmt(route.preferenceScore10,1)+"/10 · ambiente "+fmt(route.environmentScore,1)+"/10 · suporte "+fmt(route.supportScore10,1)+"/10","small-muted"));
       row.append(el("td",String(startIndex+index+1)),routeCell,support,environmentCell,el("td",brl(route.median)+"/ha"),el("td",pct(route.loss)),el("td",brl(route.cvar5)+"/ha"),el("td",brl(route.p95)+"/ha"),scoreCell);body.append(row);
     });
@@ -771,7 +781,7 @@ function renderEconomicOptimization(start,rotationSamples){
     const auditCard=(title,value,detail)=>{const card=el("div",undefined,"audit-card");card.append(el("strong",title),el("span",value),el("small",detail));audit.append(card);};
     auditCard(frequencyMismatch||overcountedGroups?"Integridade · verificar":"Integridade · confere",completed.toLocaleString("en-US")+" trajetórias acumuladas · teto "+maxTrajectories.toLocaleString("en-US"), "Frequências nas sequências: "+frequencyTotal.toLocaleString("en-US")+(frequencyMismatch?" (diferença de "+Math.abs(frequencyTotal-completed).toLocaleString("en-US")+")":" (soma confere)")+(overcountedGroups?" · "+overcountedGroups+" grupo(s) com mais VPLs que trajetórias":""));
     auditCard("Cobertura econômica",rankedVplCount.toLocaleString("en-US")+" VPLs usados · "+routeResults.length.toLocaleString("en-US")+" sequências",allScoredVplCount.toLocaleString("en-US")+" VPLs calculados no total; "+missingVpl.toLocaleString("en-US")+" trajetória(s) em rotas listadas sem VPL completo; "+excludedVpl.toLocaleString("en-US")+" VPL(s) fora do ranking por filtros econômicos; "+unrankedFrequency.toLocaleString("en-US")+" trajetórias não comparáveis no ranking.");
-    auditCard("Peso da nota",fmt(100*economicWeight,0)+"% economia · "+fmt(100*environmentWeight,0)+"% solo/água · "+fmt(100*supportWeight,0)+"% suporte","Dentro da economia: "+fmt(100*returnWeight,0)+"% P95 e "+fmt(100*resilienceWeight,0)+"% CVaR5. Suporte máximo com "+rankingSupportSettings.full_score_vpl_samples+" VPLs válidos.");
+     auditCard("Peso da nota",fmt(100*economicWeight,0)+"% economia · "+fmt(100*environmentWeight*soilShare*carbonShare,1)+"% carbono · "+fmt(100*environmentWeight*soilShare*nitrogenShare,1)+"% N total · "+fmt(100*environmentWeight*waterShare,1)+"% água · "+fmt(100*supportWeight,0)+"% suporte","Dentro da economia: "+fmt(100*returnWeight,0)+"% P95 e "+fmt(100*resilienceWeight,0)+"% CVaR5. Peso do solo: "+fmt(100*carbonShare,0)+"% carbono e "+fmt(100*nitrogenShare,0)+"% N total; suporte máximo com "+rankingSupportSettings.full_score_vpl_samples+" VPLs válidos.");
     if(best){
       const without=bestRouteWithoutSupport(routeResults),changed=best!==without;
       auditCard("Efeito do suporte na recomendação",changed?"O suporte mudou a sequência líder":"A líder permanece sem o peso de suporte",(changed?"Sem esse peso: "+without.routeEvents.crops.map(cropName).join(" → ")+" · "+without.count.toLocaleString("en-US")+" VPLs · mediana "+brl(without.median)+"/ha. ":"")+"Comparação entre as mesmas sequências, com mínimo de "+minimumRecommendedVplSamples+" VPLs. Sequências com mais plantios podem dividir as amostras entre mais combinações.");
@@ -782,7 +792,7 @@ function renderEconomicOptimization(start,rotationSamples){
       return;
     }
     const sequenceBest=routeSequenceLabel(best.routeEvents);
-    byId("vpl-status").textContent="Sequência recomendada: "+sequenceBest.main+" · nota total "+fmt(best.combinedScore10,1)+"/10 (economia "+fmt(best.preferenceScore10,1)+" · solo "+fmt(best.soilScore10,1)+" · água "+fmt(best.waterScore10,1)+" · suporte "+fmt(best.supportScore10,1)+") · final: solo "+fmt(best.finalSocMean,1)+" g/kg, água "+best.finalWaterSummary+" · mediana "+brl(best.median)+"/ha · CVaR5 "+brl(best.cvar5)+"/ha · P95 "+brl(best.p95)+"/ha · "+best.frequency.toLocaleString("en-US")+" trajetórias ("+best.count.toLocaleString("en-US")+" com VPL)."+(best.count<rankingSupportSettings.full_score_vpl_samples?" Amostra rara; resultado pouco estável.":"");
+     byId("vpl-status").textContent="Sequência recomendada: "+sequenceBest.main+" · nota total "+fmt(best.combinedScore10,1)+"/10 (economia "+fmt(best.preferenceScore10,1)+" · solo C/N "+fmt(best.soilScore10,1)+" · água "+fmt(best.waterScore10,1)+" · suporte "+fmt(best.supportScore10,1)+") · final: COS "+fmt(best.finalSocMean,1)+" g/kg, N total "+fmt(best.finalNitrogenStockMean,0)+" kg/ha, água "+best.finalWaterSummary+" · mediana "+brl(best.median)+"/ha · CVaR5 "+brl(best.cvar5)+"/ha · P95 "+brl(best.p95)+"/ha · "+best.frequency.toLocaleString("en-US")+" trajetórias ("+best.count.toLocaleString("en-US")+" com VPL). N total não representa N mineral disponível."+(best.count<rankingSupportSettings.full_score_vpl_samples?" Amostra rara; resultado pouco estável.":"");
   };
   slider.disabled=!routeResults.length;slider.oninput=()=>{rotationRankingPage=0;renderRanking();};environmentSlider.disabled=!routeResults.length;environmentSlider.oninput=()=>{rotationRankingPage=0;renderRanking();};
   renderRanking();
@@ -793,7 +803,7 @@ function initialSugarcaneCut(start){
 function createSimulationSession(seed){
   const profile=active,history=Object.entries(profile.water_markov.environment_years).filter(([,block])=>Array.isArray(block)&&block.length===profile.water_markov.periods_per_year),start=byId("initial-crop-select").value;
   const selectedEconomicIds=new Set(cropStates().filter(crop=>Boolean(profile.economics.crop_inputs?.[crop.id]?.include_in_vpl??profile.economics.crop_inputs?.[crop.id]?.eligible_for_economic_comparison)).map(crop=>crop.id));
-  return {profile,start,initialSugarcaneCut:initialSugarcaneCut(start),seed,rng:seeded(seed),history,selectedEconomicIds,waterCounts:{},socValues:[],rotationSamples:new Map(),nodeCountsByYear:Array.from({length:horizon+1},()=>({})),edgeCountsByYear:Array.from({length:horizon+1},()=>({})),completed:0,previousLeaderKey:null,stableLeaderCheckpoints:0,running:false};
+  return {profile,start,initialSugarcaneCut:initialSugarcaneCut(start),seed,rng:seeded(seed),history,selectedEconomicIds,waterCounts:{},socValues:[],nitrogenStockValues:[],rotationSamples:new Map(),nodeCountsByYear:Array.from({length:horizon+1},()=>({})),edgeCountsByYear:Array.from({length:horizon+1},()=>({})),completed:0,previousLeaderKey:null,stableLeaderCheckpoints:0,running:false};
 }
 function nextRefinementTarget(completed){
   return (monteCarloSettings.refinement_targets||[]).map(Number).find(target=>target>completed)||null;
@@ -834,7 +844,7 @@ async function renderSimulation(seed,target=Number(monteCarloSettings.initial_pr
     let processed=0;
     while(processed<progressEvery&&state.completed<targetLimit){
       const result=sampleTrajectory(state.start,state.rng,state.history,state.initialSugarcaneCut);
-      state.waterCounts[result.water]=(state.waterCounts[result.water]||0)+1;state.socValues.push(result.soc);
+      state.waterCounts[result.water]=(state.waterCounts[result.water]||0)+1;state.socValues.push(result.soc);state.nitrogenStockValues.push(result.nitrogenStock);
       state.nodeCountsByYear[0][state.start]=(state.nodeCountsByYear[0][state.start]||0)+1;
       for(let year=0;year<result.annualPath.length;year++){
         const annual=result.annualPath[year],yearNumber=year+1;
@@ -852,14 +862,14 @@ async function renderSimulation(seed,target=Number(monteCarloSettings.initial_pr
     latestRun=state;progress.value=state.completed;
     progressText.textContent=state.completed.toLocaleString("en-US")+" / "+maxTrajectories.toLocaleString("en-US")+" trajetórias acumuladas";
     status.textContent="Monte Carlo em execução · "+fmt(100*state.completed/maxTrajectories,1)+"% do teto · "+state.completed.toLocaleString("en-US")+" trajetórias";
-    if(state.completed%graphRefreshEvery===0&&state.completed<targetLimit){renderCropGraph(byId("matrix-water-select").value,Number(byId("matrix-carbon-input").value),state.nodeCountsByYear,state.edgeCountsByYear,state.completed);}
+    if(state.completed%graphRefreshEvery===0&&state.completed<targetLimit){renderCropGraph(byId("matrix-water-select").value,Number(byId("matrix-carbon-input").value),Number(byId("matrix-nitrogen-input").value),state.nodeCountsByYear,state.edgeCountsByYear,state.completed);}
     await yieldToBrowser();if(runId!==simulationRunId){state.running=false;return;}
   }
   status.textContent="Amostra de "+state.completed.toLocaleString("en-US")+" concluída; atualizando cadeia e VPL.";
   await yieldToBrowser();if(runId!==simulationRunId){state.running=false;return;}
-  state.running=false;state.socMedian=quantile(state.socValues,0.5);
+  state.running=false;state.socMedian=quantile(state.socValues,0.5);state.nitrogenStockMedian=quantile(state.nitrogenStockValues,0.5);
   state.finalWater=[...Object.entries(state.waterCounts)].sort((a,b)=>b[1]-a[1])[0]?.[0]||"water_medium";
-  latestRun=state;byId("matrix-water-select").value=state.finalWater;byId("matrix-carbon-input").value=state.socMedian.toFixed(1);
+  latestRun=state;byId("matrix-water-select").value=state.finalWater;byId("matrix-carbon-input").value=state.socMedian.toFixed(1);byId("matrix-nitrogen-input").value=state.nitrogenStockMedian.toFixed(0);
   renderCropMatrix();
   renderEconomicOptimization(state.start,state.rotationSamples);
   const rankSlider=byId("ranking-return-weight"),environmentSlider=byId("ranking-environment-weight");rankSlider.disabled=!state.routeResults?.length;environmentSlider.disabled=!state.routeResults?.length;
@@ -885,8 +895,8 @@ function startSimulation(seed,target=Number(monteCarloSettings.initial_preview_t
 }
 function renderProfile(){
   const profileRenderId=++simulationRunId;active=profiles[byId("case-select").value];latestRun=null;
-  byId("soil-baseline").textContent=fmt(active.soil.organic_carbon_top_0_30_g_kg,1)+" g/kg";
-  byId("soil-scope").textContent="SoilGrids · "+active.soil.scope+" · "+active.soil.sample_point_basis;
+  byId("soil-baseline").textContent=fmt(active.soil.organic_carbon_top_0_30_g_kg,1)+" g/kg C · "+fmt(active.soil.total_nitrogen_stock_top_0_30_kg_ha,0)+" kg N/ha";
+  byId("soil-scope").textContent="SoilGrids · N total, não disponível · "+active.soil.scope+" · "+active.soil.sample_point_basis;
   byId("crop-period").textContent=active.crop_markov.annual_observation_count+" anos municipais · "+active.crop_markov.period[0]+"–"+active.crop_markov.period[1]+" · "+active.crop_markov.adjacent_year_transition_count+" pares consecutivos · top "+active.crop_markov.top_crop_limit+" por área · "+active.crop_markov.states.length+" estados de cultura.";
   byId("crop-data-note").textContent="Uma cultura principal por talhão. Soja, milho e cana podem iniciar; as demais são destinos quando há janela municipal MAPA ou uma hipótese explicitamente marcada para cobertura sem dado. A cadeia considera a distribuição PAM do top 5 por área e forma transições marginais entre anos com independência assumida; a PAM não liga culturas ao mesmo talhão. A série rank 1 aparece como diagnóstico separado. Datas são decêndios das tábuas anual 2026/2027 e perene vigente repetidas nos cinco anos; classes de solo e grupos de cultivar são agregados."+beanCalendarAuditNote();
   const lifecycleNote=byId("crop-lifecycle-note");
@@ -912,6 +922,7 @@ function renderProfile(){
   graphYearSelect.add(new Option("Ciclo completo · 5 anos","all"));graphYearSelect.value="all";selectedGraphCropId=cropSelect.value;
   const decendioSelect=byId("matrix-planting-decendio");decendioSelect.replaceChildren();for(let decendio=1;decendio<=36;decendio++)decendioSelect.add(new Option(decendioName(decendio),String(decendio)));decendioSelect.value="1";
   byId("matrix-carbon-input").value=active.soil.organic_carbon_top_0_30_g_kg.toFixed(1);
+  byId("matrix-nitrogen-input").value=Number(active.soil.total_nitrogen_stock_top_0_30_kg_ha).toFixed(0);
   simulationSession=null;updateRefinementControls(false);
   renderCropTimeline();renderCropMatrix();renderWaterMatrix();byId("simulation-progress").value=0;byId("simulation-progress-text").textContent="Aguardando simulação";byId("run-status").textContent="Cadeia pronta; o Monte Carlo começará após a página aparecer.";
   byId("run-status").textContent="Perfil pronto. Inicie a análise na experiência principal ou use os controles avançados.";
@@ -932,7 +943,8 @@ byId("initial-sugarcane-cut").addEventListener("change",()=>startSimulation(curr
 byId("matrix-water-select").addEventListener("change",renderCropMatrix);
 byId("matrix-carbon-input").addEventListener("input",renderCropMatrix);
 byId("matrix-planting-decendio").addEventListener("change",renderCropMatrix);
-byId("graph-year-select").addEventListener("change",()=>{renderCropGraph(byId("matrix-water-select").value,Number(byId("matrix-carbon-input").value),latestRun?.nodeCountsByYear||{},latestRun?.edgeCountsByYear||{},latestRun?.completed||0);});
+  byId("matrix-nitrogen-input").addEventListener("input",renderCropMatrix);
+  byId("graph-year-select").addEventListener("change",()=>{renderCropGraph(byId("matrix-water-select").value,Number(byId("matrix-carbon-input").value),Number(byId("matrix-nitrogen-input").value),latestRun?.nodeCountsByYear||{},latestRun?.edgeCountsByYear||{},latestRun?.completed||0);});
 byId("apply-economic-inputs").addEventListener("click",applyEconomicInputs);
 byId("simulation-seed").addEventListener("change",()=>startSimulation(currentSeed()));
 byId("run-simulation").addEventListener("click",()=>startSimulation(currentSeed()));

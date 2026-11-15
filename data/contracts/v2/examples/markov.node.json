@@ -4,6 +4,7 @@
     "soil": {
         "pH": 5.4,
         "organic_carbon": 21.0,
+        "N2": 5838.75,
         "available_water_capacity": 108.3,
         "available_water_fraction": 0.5
     },

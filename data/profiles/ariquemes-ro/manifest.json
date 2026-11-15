@@ -26,14 +26,14 @@
       "contract_id": "climate_daily"
     },
     "soil-profile.json": {
-      "origem": "ISRIC SoilGrids v2.0; AWC derivada por Saxton & Rawls (2006)",
+      "origem": "ISRIC SoilGrids v2.0; N total e densidade no WCS; AWC derivada por Saxton & Rawls (2006)",
       "responsavel": "ISRIC / Field Shift derivação",
       "frequencia": "perfil estático; predição média",
-      "unidade": "%; g/kg; pH; mm de água disponível",
-      "periodo": "mapa estático consultado em 2026-11-13",
+      "unidade": "%; g/kg; kg N/ha; kg/dm³; pH; mm de água disponível",
+      "periodo": "mapa estático; WCS consultado em 2026-11-15",
       "resolucao": "célula SoilGrids 250 m no centroide IBGE municipal",
-      "qualidade": "estimativa mapeada; AWC de pedotransfer; sem análise local",
-      "sha256": "665d0a16184b5bdcc09c9a08580f490221b121542c5dcf1515ef174ba89512c9",
+      "qualidade": "estimativa mapeada; N total não é N mineral/disponível; AWC de pedotransfer; sem análise local",
+      "sha256": "5166fc169c7c8280ae3c9d92c0ac3ea22af6cc7622b3f4eb1dd9ddd096435017",
       "contract_id": "soil_profile"
     },
     "states.json": {
@@ -76,7 +76,7 @@
       "periodo": "aplicado à série 1981-2025",
       "resolucao": "perfil de referência municipal",
       "qualidade": "suposições explícitas; não substituir dados de talhão",
-      "sha256": "6f1852e41dbfcc7d2e22a43452a4bde2bdf47248754b533f0bc51e0e53f2bf7b"
+      "sha256": "f763f9e2e3ef7c0ecae2d62f386b3dd60cd6ece318a9ba4935771c2c4c93cf57"
     },
     "climate-summary.json": {
       "origem": "agregação de climate-daily.csv",
@@ -479,6 +479,25 @@
         "sidecar_sha256": "cf3764a16deabcdbb9d8eb1e2939b7eda38bfea2079af4bfc87dcef628e46a3b",
         "normalized_municipality_rows": 375
       }
-    ]
+    ],
+    "soilgrids_nitrogen_bdod_wcs_json": {
+      "path": "data/raw/soilgrids/soilgrids-v2-ariquemes-nitrogen-bdod-wcs.json",
+      "sha256": "eaa61d5af017ff2682d0d43a967d9c47b08f26efa06e3abbe411f30c60a4a0f8",
+      "query": "https://maps.isric.org/mapserv?map=/map/{nitrogen|bdod}.map&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID={property}_{0-5cm|5-15cm|15-30cm}_mean&FORMAT=image/tiff&SUBSET=X/Y(centroid +/- 125m)&SUBSETTINGCRS=EPSG:152160",
+      "properties": [
+        "nitrogen",
+        "bdod"
+      ],
+      "depths": [
+        "0-5cm",
+        "5-15cm",
+        "15-30cm"
+      ],
+      "bbox_side_m": 250,
+      "valid_pixels_per_layer": 1,
+      "nitrogen_raw_unit": "cg/kg; d_factor=100 to g/kg",
+      "bulk_density_raw_unit": "cg/cm3; d_factor=100 to kg/dm3",
+      "retrieved_at": "2026-11-15"
+    }
   }
 }

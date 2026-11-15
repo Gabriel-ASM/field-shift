@@ -54,6 +54,7 @@ def build_profile(profile: str, initial_state: str) -> dict[str, Any]:
         "soil": {
             "pH": round(topsoil_mean(soil["layers"], "ph_water"), 3),
             "organic_carbon": round(topsoil_mean(soil["layers"], "organic_carbon_g_kg"), 3),
+            "N2": round(soil["total_nitrogen_stock_top_0_30_kg_ha"], 2),
             "available_water_capacity": round(soil["available_water_capacity_mm"], 2),
             "available_water_fraction": INITIAL_WATER_FRACTION,
         },
@@ -62,6 +63,7 @@ def build_profile(profile: str, initial_state: str) -> dict[str, Any]:
     values = [
         {"pointer": "/soil/pH", "support": "derived", "provenance": f"0-{TOPSOIL_CM} cm thickness-weighted mean of ph_water; {soil_source}"},
         {"pointer": "/soil/organic_carbon", "support": "derived", "provenance": f"0-{TOPSOIL_CM} cm thickness-weighted mean of organic_carbon_g_kg; {soil_source}"},
+        {"pointer": "/soil/N2", "support": "derived", "provenance": f"SoilGrids total nitrogen in 0-{TOPSOIL_CM} cm × SoilGrids bulk density × layer thickness; stock in kg N/ha. Total N is not mineral/available N; {soil_source}"},
         {"pointer": "/soil/available_water_capacity", "support": "derived", "provenance": f"available_water_capacity_mm down to {soil['depth_cm']} cm; {soil_source}"},
         {"pointer": "/soil/available_water_fraction", "support": "prior", "provenance": "No measured soil moisture; v1 starts every trajectory at medium water"},
         {"pointer": "/climate/lat", "support": "derived", "provenance": point["basis"]},

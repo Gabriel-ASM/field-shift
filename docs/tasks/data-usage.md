@@ -31,13 +31,24 @@ Owner: data team (huatso) unless a task says otherwise.
 
 ### S2. Nitrogen
 - Owner: data team.
-- Contract field: `soil.N2` (unit is still empty).
-- What we have: nothing in the profiles. SoilGrids publishes a `nitrogen` property
-  that we did not download.
-- Questions: is SoilGrids `nitrogen` (total N) good enough as an initial value? Which
-  unit and depth (0-30 cm weighted, like carbon)? Is "total N" what the crop effects
-  need, or do we need mineral/available N?
-- Deliverable: unit decision for `N2` + value per profile + support level.
+- Contract field: `soil.N2`, total-N stock in kg N/ha for 0–30 cm.
+- Source: ISRIC SoilGrids v2.0 `nitrogen` total-N and `bdod` bulk density via WCS,
+  queried at the same centroid as the other profile soil properties in a 250 m box.
+  Raw requests are preserved in `data/raw/soilgrids/*-nitrogen-bdod-wcs.json`.
+- Derivation: SoilGrids cg/kg ÷ 100 → g/kg; bdod cg/cm³ ÷ 100 → kg/dm³.
+  Per-layer stock = N concentration × bulk density × layer thickness × 100,
+  summed over 0–5, 5–15, and 15–30 cm. One valid raster pixel was returned per layer;
+  prediction quantiles were not fetched. Support: mapped estimate at municipality
+  centroid, not a field analysis.
+- Profiles: Ariquemes, Franca and Varginha values are generated in
+  `data/profiles/*/soil-profile.json`; the same stock initializes `soil.N2` in
+  `data/v2/profiles/*.json`.
+- Model use: N total changes as an explicit, uncalibrated fixation-minus-harvest
+  export hypothesis, informs transition weights and contributes 33% of the soil
+  score. The soil score is 67% carbon / 33% N, with an exploratory C:N stock target
+  of 12:1. These rates are sensitivity assumptions, not observations. Total N is
+  not nitrate/ammonium or directly plant-available N; fertilizer, mineralization,
+  immobilization, and losses are not modeled.
 
 ### S3. pH
 - Contract field: `soil.pH`.
@@ -117,7 +128,7 @@ Owner: data team (huatso) unless a task says otherwise.
 | Field | ariquemes-ro | franca-sp | varginha-mg | Source | Support |
 |---|---|---|---|---|---|
 | soil.order | | | | | |
-| soil.N2 | | | | | |
+| soil.N2 | v1 | v1 | v1 | SoilGrids N total + bdod WCS; 0–30 cm kg N/ha | derived mapped estimate |
 | soil.pH | | | | | |
 | soil.temperature_per_depth | | | | | |
 | soil.organic_carbon | v1 | v1 | v1 | SoilGrids soc | derived |

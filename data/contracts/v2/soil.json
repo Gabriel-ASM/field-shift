@@ -10,8 +10,8 @@
             "description": "Static. Dominant SiBCS soil order (English names; Latosol = Latossolo, etc.). Source: IBGE soil map 1:250,000 (R045). Filling it per profile is task S1 in docs/tasks/data-usage.md."
         },
         "N2": {
-            "type": "number", "unit": "", "minimum": 0,
-            "description": "Dynamic. Amount of nitrogen in the soil. Unit and source pending: task S2 in docs/tasks/data-usage.md."
+            "type": "number", "unit": "kg/ha", "minimum": 0,
+            "description": "Dynamic stock of total nitrogen in the top 0-30 cm. Initial value is derived from SoilGrids total nitrogen and bulk density; crop-cycle changes use explicit, uncalibrated fixation-minus-harvest-export assumptions. Total N is not mineral or directly plant-available N."
         },
         "pH": {
             "type": "number", "unit": "log10", "minimum": 0, "maximum": 14,

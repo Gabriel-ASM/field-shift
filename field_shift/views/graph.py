@@ -85,7 +85,7 @@ FIELD_STATUS = {
     "climate.weather.temperature": ("upstream", "NASA POWER T2M_MAX/T2M_MIN", "ET0"),
     "climate.weather.relative_humidity": ("upstream", "NASA POWER RH2M", "ET0"),
     "soil.order": ("partial", "IBGE SiBCS (R045) collected; sibcs_order is null in every profile", "Nothing reads it"),
-    "soil.N2": ("none", "Not downloaded (SoilGrids has a nitrogen layer)", "Nothing reads it"),
+    "soil.N2": ("used", "SoilGrids nitrogen (total) + bulk density -> 0-30 cm stock in kg/ha; crop-cycle N balances are explicit hypotheses", "Initial stock, transition weighting, Monte Carlo soil state and route selection; not a mineral-N or fertilizer model"),
     "soil.pH": ("available", "SoilGrids phh2o -> ph_water per layer", "Nothing reads it"),
     "soil.temperature_per_depth": ("none", "Not collected", "Nothing reads it"),
     "soil.organic_carbon": ("used", "SoilGrids soc -> organic_carbon_g_kg, 0-30 cm", "Carbon Monte Carlo, transition weights, yield"),

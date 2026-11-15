@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0.0",
-  "purpose": "Hipóteses explícitas, editáveis e não calibradas para deixar o carbono do solo variar no Monte Carlo, afetar os pesos de transição e sensibilizar a produtividade usada no VPL.",
+  "purpose": "Hipóteses explícitas e editáveis para variar carbono e estoque de nitrogênio total no Monte Carlo, ponderar transições e compor o score ambiental. COS e N total não são medições de campo; N total não representa N mineral/disponível.",
   "status": "uncalibrated_hypothesis",
-  "warning": "As faixas abaixo não são observações, efeitos causais nem recomendações. Não há série local de rotação pareada com carbono do solo. Foram escolhidas como uma faixa de sensibilidade demonstrativa e devem ser substituídas por dados de campo ou fonte validada.",
+  "warning": "As faixas abaixo não são observações, efeitos causais nem recomendações. Não há série local de rotação pareada com carbono ou N do solo. As mudanças de COS e os balanços FBN-exportação são hipóteses de sensibilidade e devem ser substituídas por dados de campo ou fonte validada.",
   "soil_carbon": {
     "initial_source": "SoilGrids; média ponderada das camadas de 0–5, 5–15 e 15–30 cm",
     "unit": "g/kg",
@@ -32,6 +32,38 @@
       "crotalaria": [-0.2, 0.4],
       "mucuna": [-0.2, 0.4]
     }
+  },
+  "soil_nitrogen": {
+    "initial_source": "SoilGrids nitrogen (total), concentração ponderada em 0-30 cm; estoque calculado por camada com bdod",
+    "form": "total_not_plant_available",
+    "concentration_unit": "g/kg",
+    "stock_unit": "kg N/ha",
+    "annual_balance_unit": "kg N/ha/year",
+    "stock_formula": "sum(total_nitrogen_g_kg × bulk_density_kg_dm3 × layer_thickness_cm × 100) em 0-30 cm",
+    "reference_cn_stock_ratio": 12,
+    "reference_cn_source_url": "https://extension.umn.edu/natural-resources/conservation/agricultural-soil-and-water/soil-organic-matter-in-cropping-systems",
+    "deficit_span_fraction_of_target": 0.5,
+    "state_ratio_thresholds": {"low_max_exclusive": 0.8, "medium_max_exclusive": 1.2, "high_min_inclusive": 1.2},
+    "probability_log_weight_coefficient": 0.8,
+    "probability_balance_scale_kg_ha_year": 450,
+    "annual_net_balance_kg_n_ha_year_by_crop": {
+      "soybean": -192,
+      "maize_grain": -192,
+      "sugarcane": -80,
+      "coffee": -60,
+      "sorghum_grain": -144,
+      "wheat": -144,
+      "dry_bean": -60,
+      "peanut": -48,
+      "oat": 0,
+      "forage_radish": 0,
+      "brachiaria": 0,
+      "millet": 0,
+      "crotalaria": 450,
+      "mucuna": 336
+    },
+    "status": "uncalibrated_hypothesis",
+    "warning": "Rates are illustrative net external balances (biological fixation minus harvested N export), annualized from the existing cycle assumptions. Residue N is treated as internal recycling. No mineralization, immobilization, fertilizer, leaching, volatilization, denitrification, or direct yield response is modeled. They are not observations or agronomic recommendations."
   },
   "probability_modifiers": {
     "water_state_representative_fraction": {

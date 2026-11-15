@@ -37,8 +37,10 @@
       "weight_step": 0.05,
       "soil_share": 0.6666666667,
       "water_share": 0.3333333333,
+      "carbon_share_within_soil": 0.67,
+      "nitrogen_share_within_soil": 0.33,
       "soil_reference_g_kg": 20,
-      "soil_score_formula": "clamp(mean_final_soc_g_kg / soil_reference_g_kg * 10, 0, 10)",
+      "soil_score_formula": "carbon_share_within_soil * carbon_score10 + nitrogen_share_within_soil * nitrogen_score10; nitrogen_score10 uses N_total_stock / (C_stock / reference_CN_stock_ratio)",
       "water_multiplier_source": "soilHypotheses.economic_yield_response.water_multiplier_by_class",
       "water_score_formula": "clamp(5 + (mean_final_water_multiplier - 1) / max(abs(low_multiplier - 1), abs(high_multiplier - 1)) * 5, 0, 10)",
       "environment_score_formula": "soil_share * soil_score10 + water_share * water_score10"

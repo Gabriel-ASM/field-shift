@@ -109,6 +109,11 @@ def profile_payload(profile_id: str) -> dict:
         },
         "soil": {
             "organic_carbon_top_0_30_g_kg": node["soil"]["organic_carbon"],
+            "total_nitrogen_top_0_30_g_kg": soil["total_nitrogen_top_0_30_g_kg"],
+            "total_nitrogen_stock_top_0_30_kg_ha": node["soil"]["N2"],
+            "organic_carbon_stock_top_0_30_kg_ha": soil["organic_carbon_stock_top_0_30_kg_ha"],
+            "bulk_density_top_0_30_kg_dm3": soil["bulk_density_top_0_30_kg_dm3"],
+            "carbon_nitrogen_stock_ratio_top_0_30": soil["carbon_nitrogen_stock_ratio_top_0_30"],
             "available_water_capacity_mm": node["soil"]["available_water_capacity"],
             "source": soil["source"],
             "scope": profile["scope"],

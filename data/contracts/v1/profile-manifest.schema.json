@@ -19,6 +19,11 @@
         "time_standard": {"type": "string"},
         "value": {"type": "string"},
         "depths": {"type": "array", "items": {"type": "string"}},
+        "properties": {"type": "array", "items": {"type": "string"}},
+        "bbox_side_m": {"type": "number", "exclusiveMinimum": 0},
+        "valid_pixels_per_layer": {"type": "integer", "minimum": 1},
+        "nitrogen_raw_unit": {"type": "string"},
+        "bulk_density_raw_unit": {"type": "string"},
         "sidecar": {"type": ["string", "null"]},
         "sidecar_sha256": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
         "normalized_municipality_rows": {"type": "integer", "minimum": 0}

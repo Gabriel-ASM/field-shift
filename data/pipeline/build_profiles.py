@@ -186,10 +186,15 @@ def power_rows(location: dict) -> list[dict]:
 
 def soil_profile(location: dict) -> dict:
     raw = read_json(RAW_SOIL / f"soilgrids-v2-{location['source_stem']}-mean.json")
+    raw_nitrogen_bdod = read_json(RAW_SOIL / f"soilgrids-v2-{location['source_stem']}-nitrogen-bdod-wcs.json")
     layers = {layer["name"]: layer for layer in raw["properties"]["layers"]}
+    nitrogen_properties = raw_nitrogen_bdod["properties"]
     output_layers = []
     total_awc = 0.0
     weighted = defaultdict(float)
+    topsoil_weighted = defaultdict(float)
+    carbon_stock_topsoil = 0.0
+    nitrogen_stock_topsoil = 0.0
     for top, bottom in DEPTHS:
         label = f"{top}-{bottom}cm"
         values = {}
@@ -200,6 +205,20 @@ def soil_profile(location: dict) -> dict:
             if value is None:
                 raise ValueError(f"SoilGrids returned no mean for {location['id']} {key} {label}")
             values[field] = float(value) / float(layer["unit_measure"]["d_factor"])
+        nitrogen_entry = nitrogen_properties["nitrogen"]["values"].get(label)
+        density_entry = nitrogen_properties["bdod"]["values"].get(label)
+        if bottom <= 30 and (not nitrogen_entry or not density_entry):
+            raise ValueError(f"Missing SoilGrids total-N or bulk-density value for {location['id']} {label}")
+        if nitrogen_entry and density_entry:
+            nitrogen_g_kg = float(nitrogen_entry["mean"]) / float(nitrogen_properties["nitrogen"]["unit_measure"]["d_factor"])
+            density_kg_dm3 = float(density_entry["mean"]) / float(nitrogen_properties["bdod"]["unit_measure"]["d_factor"])
+            if nitrogen_entry["valid_pixels"] != 1 or density_entry["valid_pixels"] != 1:
+                raise ValueError(f"Expected one SoilGrids WCS pixel per topsoil layer for {location['id']} {label}")
+            if bottom <= 30 and (nitrogen_g_kg <= 0 or density_kg_dm3 <= 0):
+                raise ValueError(f"Invalid SoilGrids total-N or bulk-density value for {location['id']} {label}")
+        else:
+            nitrogen_g_kg = None
+            density_kg_dm3 = None
         sand = values["sand_pct"] / 100
         clay = values["clay_pct"] / 100
         # Saxton & Rawls (2006) uses percent OM and texture fractions 0-1.
@@ -218,8 +237,22 @@ def soil_profile(location: dict) -> dict:
         total_awc += awc_mm
         for field, value in values.items():
             weighted[field] += value * (bottom - top)
+        carbon_stock_layer = None
+        nitrogen_stock_layer = None
+        if bottom <= 30 and nitrogen_g_kg is not None and density_kg_dm3 is not None:
+            thickness_cm = bottom - top
+            carbon_stock_layer = values["organic_carbon_g_kg"] * density_kg_dm3 * thickness_cm * 100
+            nitrogen_stock_layer = nitrogen_g_kg * density_kg_dm3 * thickness_cm * 100
+            carbon_stock_topsoil += carbon_stock_layer
+            nitrogen_stock_topsoil += nitrogen_stock_layer
+            topsoil_weighted["total_nitrogen_g_kg"] += nitrogen_g_kg * density_kg_dm3 * thickness_cm
+            topsoil_weighted["bulk_density_kg_dm3"] += density_kg_dm3 * thickness_cm
         output_layers.append({
             "depth_top_cm": top, "depth_bottom_cm": bottom, **values,
+            "total_nitrogen_g_kg": nitrogen_g_kg,
+            "bulk_density_kg_dm3": density_kg_dm3,
+            "organic_carbon_stock_kg_ha": carbon_stock_layer,
+            "total_nitrogen_stock_kg_ha": nitrogen_stock_layer,
             "organic_matter_pct_for_pedotransfer": organic_matter_pct,
             "theta_33_volumetric": theta_33,
             "theta_1500_volumetric": theta_1500,
@@ -227,17 +260,25 @@ def soil_profile(location: dict) -> dict:
             "available_water_capacity_mm": awc_mm,
         })
     avg = {key: value / 100 for key, value in weighted.items()}
+    bulk_density_top_0_30_kg_dm3 = topsoil_weighted["bulk_density_kg_dm3"] / 30
+    total_nitrogen_top_0_30_g_kg = nitrogen_stock_topsoil / (bulk_density_top_0_30_kg_dm3 * 30 * 100)
     return {
         "location_id": location["id"], "scope": "grid_cell", "reference_date": None,
-        "source": "ISRIC SoilGrids v2.0 properties API (mean prediction); AWC derived by Saxton & Rawls (2006)",
+        "source": "ISRIC SoilGrids v2.0 mean prediction (properties API + WCS); AWC derived by Saxton & Rawls (2006)",
         "sample_point": {"longitude": location["lon"], "latitude": location["lat"], "basis": "centroide de área da malha municipal IBGE consultada; não é posição de talhão"},
         "depth_cm": 100, "available_water_capacity_mm": total_awc,
         "available_water_fraction": None, "texture_class": None, **avg,
+        "nitrogen_basis": "total_not_plant_available",
+        "total_nitrogen_top_0_30_g_kg": total_nitrogen_top_0_30_g_kg,
+        "total_nitrogen_stock_top_0_30_kg_ha": nitrogen_stock_topsoil,
+        "organic_carbon_stock_top_0_30_kg_ha": carbon_stock_topsoil,
+        "bulk_density_top_0_30_kg_dm3": bulk_density_top_0_30_kg_dm3,
+        "carbon_nitrogen_stock_ratio_top_0_30": carbon_stock_topsoil / nitrogen_stock_topsoil if nitrogen_stock_topsoil > 0 else 0.0,
         "sibcs_order": None, "layers": output_layers,
         "quality": {
             "status": "mapped_estimate",
-            "flags": ["soilgrids_mean_prediction", "awc_pedotransfer_derived", "municipality_centroid_not_field_sample", "not_a_field_soil_analysis"],
-            "uncertainty": "Média espacial SoilGrids em célula de 250 m. Sem amostra de campo e sem quantis inferior/superior no download; a célula no centroide pode não representar área agrícola do município.",
+            "flags": ["soilgrids_mean_prediction", "soilgrids_total_nitrogen", "soilgrids_bulk_density_wcs", "awc_pedotransfer_derived", "municipality_centroid_not_field_sample", "not_a_field_soil_analysis"],
+            "uncertainty": "Estimativas SoilGrids em célula de 250 m no centroide municipal; N é nitrogênio total, não nitrato/amônio nem N diretamente disponível. A extração WCS de N e densidade retornou um pixel por camada, sem quantis de incerteza; o ponto pode não representar área agrícola ou talhão.",
         },
     }
 
@@ -391,10 +432,10 @@ def climate_summary(rows: list[dict], location_id: str) -> dict:
     }
 
 
-def profile_manifest(location: dict, raw_climate: Path, raw_soil: Path, climate_path: Path, soil_path: Path, transitions_path: Path, history_path: Path, states_path: Path, assumptions_path: Path, summary_path: Path, derivation_path: Path) -> dict:
+def profile_manifest(location: dict, raw_climate: Path, raw_soil: Path, raw_soil_nitrogen_bdod: Path, climate_path: Path, soil_path: Path, transitions_path: Path, history_path: Path, states_path: Path, assumptions_path: Path, summary_path: Path, derivation_path: Path) -> dict:
     datasets = {
         "climate-daily.csv": {"origem": "NASA POWER Daily API v2.10.3", "responsavel": "NASA Langley Research Center", "frequencia": "diária, horário padrão local solar (LST)", "unidade": "mm/d; °C; MJ/m²/d; %; m/s", "periodo": f"1981-01-01 a {LAST_DAY.isoformat()}", "resolucao": "ponto amostrado no centroide municipal; grade nativa POWER, variável dependente", "qualidade": "T2M/chuva/humidade/vento; radiação ausente em 1981-1983 e em quatro dias recentes usa Hargreaves-Samani para ET0; chuva POWER sem correção contra IMERG", "sha256": sha256(climate_path), "contract_id": "climate_daily"},
-        "soil-profile.json": {"origem": "ISRIC SoilGrids v2.0; AWC derivada por Saxton & Rawls (2006)", "responsavel": "ISRIC / Field Shift derivação", "frequencia": "perfil estático; predição média", "unidade": "%; g/kg; pH; mm de água disponível", "periodo": "mapa estático consultado em 2026-11-13", "resolucao": "célula SoilGrids 250 m no centroide IBGE municipal", "qualidade": "estimativa mapeada; AWC de pedotransfer; sem análise local", "sha256": sha256(soil_path), "contract_id": "soil_profile"},
+        "soil-profile.json": {"origem": "ISRIC SoilGrids v2.0; N total e densidade no WCS; AWC derivada por Saxton & Rawls (2006)", "responsavel": "ISRIC / Field Shift derivação", "frequencia": "perfil estático; predição média", "unidade": "%; g/kg; kg N/ha; kg/dm³; pH; mm de água disponível", "periodo": "mapa estático; WCS consultado em 2026-11-15", "resolucao": "célula SoilGrids 250 m no centroide IBGE municipal", "qualidade": "estimativa mapeada; N total não é N mineral/disponível; AWC de pedotransfer; sem análise local", "sha256": sha256(soil_path), "contract_id": "soil_profile"},
         "states.json": {"origem": "classes 1/3 e 2/3 do plano MVP aplicadas ao balanço de referência", "responsavel": "Field Shift derivação", "frequencia": "estado de água por quinzena", "unidade": "fração da AWC em 0-100 cm", "periodo": "estado discreto calculado com climatologia 1981-2025", "resolucao": "ponto de referência municipal; 15 dias", "qualidade": "estado hídrico derivado; solo/cultura não classificados", "sha256": sha256(states_path), "contract_id": "markov_state"},
         "transitions.json": {"origem": "transições do balanço hídrico de NASA POWER + SoilGrids/Saxton-Rawls", "responsavel": "Field Shift derivação", "frequencia": "quinzenal", "unidade": "contagens por água atual × ambiente × água seguinte", "periodo": "1983-01-01 a 2025-12-31; spin-up 1981-1982 descartado", "resolucao": "ponto municipal; classes ambientais por percentis de chuva quinzenal", "qualidade": "derivado de modelo de referência, não observado em talhão; linhas esparsas agrupadas e identificadas", "sha256": sha256(transitions_path), "contract_id": "markov_transition"},
         "environment.json": {"origem": "classes quinzenais de precipitação NASA POWER; limiares por mês/quinzena, P20/P80", "responsavel": "Field Shift derivação", "frequencia": "quinzenal; anos completos", "unidade": "classe seca/normal/úmida", "periodo": "1981-01-01 a 2025-12-31", "resolucao": "ponto municipal; 24 períodos por ano", "qualidade": "dados POWER e classes derivadas; blocos sazonais usados no Monte Carlo", "sha256": sha256(history_path)},
@@ -409,6 +450,7 @@ def profile_manifest(location: dict, raw_climate: Path, raw_soil: Path, climate_
         **existing_manifest.get("raw_sources", {}),
         "nasa_power_json": {"path": str(raw_climate.relative_to(ROOT)).replace("\\", "/"), "sha256": sha256(raw_climate), "query": f"https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M_MAX,T2M_MIN,RH2M,WS2M,ALLSKY_SFC_SW_DWN,PRECTOTCORR&community=AG&longitude={location['lon']}&latitude={location['lat']}&start=19810101&end=20261106&format=JSON", "api_start": "19810101", "api_end": "20261106", "time_standard": "LST", "retrieved_at": "2026-11-13"},
         "soilgrids_json": {"path": str(raw_soil.relative_to(ROOT)).replace("\\", "/"), "sha256": sha256(raw_soil), "query": f"https://rest.isric.org/soilgrids/v2.0/properties/query?lon={location['lon']}&lat={location['lat']}&property=clay&property=sand&property=silt&property=phh2o&property=soc&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean", "value": "mean", "depths": [f"{top}-{bottom}cm" for top, bottom in DEPTHS], "retrieved_at": "2026-11-13"},
+        "soilgrids_nitrogen_bdod_wcs_json": {"path": str(raw_soil_nitrogen_bdod.relative_to(ROOT)).replace("\\", "/"), "sha256": sha256(raw_soil_nitrogen_bdod), "query": "https://maps.isric.org/mapserv?map=/map/{nitrogen|bdod}.map&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID={property}_{0-5cm|5-15cm|15-30cm}_mean&FORMAT=image/tiff&SUBSET=X/Y(centroid +/- 125m)&SUBSETTINGCRS=EPSG:152160", "properties": ["nitrogen", "bdod"], "depths": ["0-5cm", "5-15cm", "15-30cm"], "bbox_side_m": 250, "valid_pixels_per_layer": 1, "nitrogen_raw_unit": "cg/kg; d_factor=100 to g/kg", "bulk_density_raw_unit": "cg/cm3; d_factor=100 to kg/dm3", "retrieved_at": "2026-11-15"},
         "ibge_malha_geojson": {"path": f"data/raw/ibge/ibge-malha-municipal-{location['ibge_code']}.geojson", "sha256": sha256(RAW_IBGE / f"ibge-malha-municipal-{location['ibge_code']}.geojson"), "query": f"https://servicodados.ibge.gov.br/api/v3/malhas/municipios/{location['ibge_code']}?formato=application/vnd.geo%2Bjson&qualidade=intermediaria", "retrieved_at": "2026-11-13"},
     }
     return {
@@ -424,6 +466,7 @@ def profile_manifest(location: dict, raw_climate: Path, raw_soil: Path, climate_
 def build_location(location: dict) -> dict:
     raw_climate = RAW_POWER / f"nasa-power-daily-{location['source_stem']}-1981-20261106.json"
     raw_soil = RAW_SOIL / f"soilgrids-v2-{location['source_stem']}-mean.json"
+    raw_soil_nitrogen_bdod = RAW_SOIL / f"soilgrids-v2-{location['source_stem']}-nitrogen-bdod-wcs.json"
     longitude, latitude = ibge_area_centroid(location["ibge_code"])
     if abs(longitude - location["lon"]) > 1e-5 or abs(latitude - location["lat"]) > 1e-5:
         raise ValueError(f"Configured NASA/SoilGrids point does not match IBGE centroid for {location['id']}: {(longitude, latitude)}")
@@ -507,7 +550,7 @@ def build_location(location: dict) -> dict:
     summary_path = profile / "climate-summary.json"
     derivation_path = profile / "markov-derivation.json"
     write_json(summary_path, summary)
-    metadata = profile_manifest(location, raw_climate, raw_soil, climate_path, soil_path, transitions_path, history_path, states_path, assumptions_path, summary_path, derivation_path)
+    metadata = profile_manifest(location, raw_climate, raw_soil, raw_soil_nitrogen_bdod, climate_path, soil_path, transitions_path, history_path, states_path, assumptions_path, summary_path, derivation_path)
     validate_contract("profile_manifest", metadata, source=f"{location['id']}/manifest.json")
     write_json(profile / "manifest.json", metadata)
     return {"location": location, "summary": summary, "awc_mm": soil["available_water_capacity_mm"], "soil": soil}

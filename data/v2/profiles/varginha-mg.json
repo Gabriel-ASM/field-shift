@@ -13,6 +13,7 @@
     "soil": {
       "pH": 5.1,
       "organic_carbon": 21.733,
+      "N2": 6003.9,
       "available_water_capacity": 123.83,
       "available_water_fraction": 0.5
     },
@@ -25,17 +26,22 @@
     {
       "pointer": "/soil/pH",
       "support": "derived",
-      "provenance": "0-30 cm thickness-weighted mean of ph_water; ISRIC SoilGrids v2.0 properties API (mean prediction); AWC derived by Saxton & Rawls (2006) (data/profiles/varginha-mg/soil-profile.json)"
+      "provenance": "0-30 cm thickness-weighted mean of ph_water; ISRIC SoilGrids v2.0 mean prediction (properties API + WCS); AWC derived by Saxton & Rawls (2006) (data/profiles/varginha-mg/soil-profile.json)"
     },
     {
       "pointer": "/soil/organic_carbon",
       "support": "derived",
-      "provenance": "0-30 cm thickness-weighted mean of organic_carbon_g_kg; ISRIC SoilGrids v2.0 properties API (mean prediction); AWC derived by Saxton & Rawls (2006) (data/profiles/varginha-mg/soil-profile.json)"
+      "provenance": "0-30 cm thickness-weighted mean of organic_carbon_g_kg; ISRIC SoilGrids v2.0 mean prediction (properties API + WCS); AWC derived by Saxton & Rawls (2006) (data/profiles/varginha-mg/soil-profile.json)"
+    },
+    {
+      "pointer": "/soil/N2",
+      "support": "derived",
+      "provenance": "SoilGrids total nitrogen in 0-30 cm × SoilGrids bulk density × layer thickness; stock in kg N/ha. Total N is not mineral/available N; ISRIC SoilGrids v2.0 mean prediction (properties API + WCS); AWC derived by Saxton & Rawls (2006) (data/profiles/varginha-mg/soil-profile.json)"
     },
     {
       "pointer": "/soil/available_water_capacity",
       "support": "derived",
-      "provenance": "available_water_capacity_mm down to 100 cm; ISRIC SoilGrids v2.0 properties API (mean prediction); AWC derived by Saxton & Rawls (2006) (data/profiles/varginha-mg/soil-profile.json)"
+      "provenance": "available_water_capacity_mm down to 100 cm; ISRIC SoilGrids v2.0 mean prediction (properties API + WCS); AWC derived by Saxton & Rawls (2006) (data/profiles/varginha-mg/soil-profile.json)"
     },
     {
       "pointer": "/soil/available_water_fraction",

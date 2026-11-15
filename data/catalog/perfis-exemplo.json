@@ -54,8 +54,8 @@
   ],
   "limitations": [
     "Ponto de referência é centroide municipal e não representa talhão.",
-    "Chuva usa POWER PRECTOTCORR, sem IMERG local; pesquisa no Oeste do PR observou viés do POWER menor que IMERG.",
-    "Matriz agrícola adicional deriva Kc FAO-56 com calendário ZARC; não representa transição observada em talhão ou resposta causal de manejo.",
-    "PAM é média municipal e não rendimento de talhão; sem custos, preços locais e resposta calibrada de produtividade, não há recomendação nem VPL."
+    "Chuva usa POWER PRECTOTCORR, sem IMERG local; comparação do Oeste do PR não é extrapolada para outros estados.",
+    "O balanço de referência não contém ação; matrizes de cultura são acrescentadas por pipeline separado e são derivadas de processo, não observadas em campo.",
+    "PAM municipal não calibra resposta causal; custos e preços locais continuam necessários para VPL."
   ]
 }

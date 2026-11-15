@@ -368,7 +368,7 @@
             "soil *": {
               "-> soil.json": {
                 "order": "enum: Latosol | Argisol | Neosol | Cambisol | Gleysol | Plinthosol | ... (14)",
-                "N2": "number 0..",
+                "N2": "number [kg/ha] 0..",
                 "pH": "number [log10] 0..14",
                 "organic_carbon": "number [g/kg] 0..",
                 "available_water_capacity": "number [mm] 0..",
@@ -449,7 +449,7 @@
       "/state": "string  (simulation)",
       "/day": "integer 0..  (simulation)",
       "/soil/order": "enum: Latosol | Argisol | Neosol | Cambisol | Gleysol | Plinthosol | ... (14)  (partial)",
-      "/soil/N2": "number 0..  (none)",
+      "/soil/N2": "number [kg/ha] 0..  (used)",
       "/soil/pH": "number [log10] 0..14  (available)",
       "/soil/organic_carbon": "number [g/kg] 0..  (used)",
       "/soil/available_water_capacity": "number [mm] 0..  (used)",

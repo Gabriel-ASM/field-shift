@@ -118,15 +118,15 @@
     <div class="screen-heading centered">
       <span class="screen-kicker">What matters most to you?</span>
       <h2 id="priority-title">Let's balance it your way</h2>
-      <p>Drag the slider to give more weight to financial returns or soil and water conservation.</p>
+        <p>Drag the slider to give more weight to financial returns or to soil carbon, total nitrogen, and water.</p>
     </div>
     <div class="priority-card">
       <div class="priority-labels">
         <div class="priority-side"><span class="priority-icon"><svg><use href="#i-money"/></svg></span><span><strong>Higher returns</strong><small>Prioritize the financial return of the rotation.</small></span></div>
-        <div class="priority-side"><span class="priority-icon"><svg><use href="#i-water"/></svg></span><span><strong>More soil and water</strong><small>Prioritize the conservation of natural resources.</small></span></div>
+        <div class="priority-side"><span class="priority-icon"><svg><use href="#i-water"/></svg></span><span><strong>More soil and water</strong><small>Prioritize carbon, total nitrogen, and water in the ranking.</small></span></div>
       </div>
-      <input id="farmer-priority" type="range" min="0" max="50" step="5" value="20" aria-label="Weight of soil and water conservation">
-      <div class="priority-value"><strong id="priority-value-title">Balanced, with a focus on returns</strong><span id="priority-value-copy">80% financial return · 20% soil and water · excluding fixed sample support</span></div>
+      <input id="farmer-priority" type="range" min="0" max="50" step="5" value="20" aria-label="Weight of soil carbon, total nitrogen, and water">
+      <div class="priority-value"><strong id="priority-value-title">Balanced, with a focus on returns</strong><span id="priority-value-copy">80% financial return · 20% carbon, total nitrogen, and water · excluding fixed sample support</span></div>
     </div>
     <div class="simulation-summary"><span><svg><use href="#i-pin"/></svg><span data-selected-city></span></span><span><svg><use href="#i-leaf"/></svg><span data-selected-crop></span></span><span><svg><use href="#i-spark"/></svg><span id="simulation-count-summary">100,000 scenarios</span></span></div>
     <div class="screen-actions priority-actions"><button class="text-button button-with-icon" type="button" data-go="crop"><svg><use href="#i-back"/></svg> Adjust crop</button><button class="primary-button button-with-icon" id="run-farmer-simulation" type="button">Find my crop rotation <svg><use href="#i-spark"/></svg></button></div>
@@ -161,7 +161,7 @@
       </article>
       <div class="result-metrics">
         <article class="metric-card income"><span class="metric-label"><svg><use href="#i-money"/></svg> Estimated net income</span><strong class="metric-value" id="result-income">—</strong><span class="metric-detail" id="result-income-detail">Present value over five years, per hectare.</span></article>
-        <article class="metric-card"><span class="metric-label"><svg><use href="#i-soil"/></svg> Final soil condition</span><strong class="metric-value" id="result-soil">—</strong><span class="metric-detail" id="result-soil-detail"></span></article>
+        <article class="metric-card"><span class="metric-label"><svg><use href="#i-soil"/></svg> Final carbon + total nitrogen</span><strong class="metric-value" id="result-soil">—</strong><span class="metric-detail" id="result-soil-detail"></span></article>
         <article class="metric-card"><span class="metric-label"><svg><use href="#i-water"/></svg> Available water</span><strong class="metric-value" id="result-water">—</strong><span class="metric-detail" id="result-water-detail"></span></article>
       </div>
     </div>
@@ -188,6 +188,12 @@
           <div class="result-chart-legend" aria-label="Soil chart legend"><span><i style="background:#5c8d5a"></i>Good</span><span><i style="background:#c59a50"></i>Fair</span><span><i style="background:#b97657"></i>Bad</span></div>
           <svg id="farmer-soil-chart" class="result-chart" role="img" tabindex="0" aria-label="Continuous distribution of good, fair and bad soil conditions over 60 months"></svg>
           <p class="chart-period-detail" id="farmer-soil-period"></p><p class="chart-interaction-hint">Hover, touch, or focus and use the arrow keys to inspect a period.</p>
+        </article>
+        <article class="result-chart-card">
+          <div class="result-chart-heading"><h3>Total N along the recommended sequence</h3><span class="chart-badge" id="farmer-nitrogen-badge"></span><p>Share of matching scenarios relative to the carbon-derived stock target (C:N 12:1).</p></div>
+          <div class="result-chart-legend" aria-label="Total nitrogen chart legend"><span><i style="background:#5c8d5a"></i>Above target</span><span><i style="background:#c59a50"></i>Near target</span><span><i style="background:#b97657"></i>Below target</span></div>
+          <svg id="farmer-nitrogen-chart" class="result-chart" role="img" tabindex="0" aria-label="Distribution of total nitrogen stock relative to the carbon-derived target over 60 months"></svg>
+          <p class="chart-period-detail" id="farmer-nitrogen-period"></p><p class="chart-interaction-hint">Total nitrogen is not mineral or directly available nitrogen.</p>
         </article>
       </div>
     </section>
@@ -287,18 +293,18 @@
       <section class="engine-column">
         <span class="engine-column-title">Monte Carlo kernel · one trajectory</span>
         <div class="engine-node is-core"><strong>1 · Sample an exogenous future</strong><small>Climate blocks + posterior transition rows</small><code>ω⁽ᵏ⁾ ~ historical + posterior draws</code></div>
-        <div class="engine-node is-core"><strong>2 · Propagate the state</strong><small>Water every half month; carbon by crop</small><code>xₜ = [cₜ, wₜ, sₜ, τₜ]</code></div>
-        <div class="engine-node is-core"><strong>3 · Draw a constrained transition</strong><small>Environment reweights the regional prior</small><code>P(c′) ∝ P₀(c′) · Fw · Fs, c′ ∈ Ωₜ</code></div>
+        <div class="engine-node is-core"><strong>2 · Propagate the state</strong><small>Water, carbon, and total nitrogen update through each crop cycle</small><code>xₜ = [cₜ, wₜ, Cₜ, Nₜ, τₜ]</code></div>
+        <div class="engine-node is-core"><strong>3 · Draw a constrained transition</strong><small>Environment reweights the regional prior</small><code>P(c′) ∝ P₀(c′) · Fw · FC · FN, c′ ∈ Ωₜ</code></div>
         <div class="engine-node is-core"><strong>4 · Resolve events & cash flow</strong><small>Plant, wait, harvest, form perennial, discount</small><code>NPV⁽ᵏ⁾ = Σ CFₜ / (1+r)^(dayₜ/365)</code></div>
       </section>
       <div class="engine-link delay" aria-hidden="true"></div>
       <section class="engine-column">
         <span class="engine-column-title">Decision layer · N trajectories</span>
-        <div class="engine-node is-output"><strong>Aggregate realized routes</strong><small>Group identical crop sequences</small><code>{route⁽ʲ⁾, NPV⁽ʲ⁾, w, s}</code></div>
+        <div class="engine-node is-output"><strong>Aggregate realized routes</strong><small>Group identical crop sequences</small><code>{route⁽ʲ⁾, NPV⁽ʲ⁾, w, C, N}</code></div>
         <div class="engine-node is-output"><strong>Measure return & downside</strong><small>Distribution, not a point forecast</small><code>median · P95 · CVaR₅ · P(NPV &lt; 0)</code></div>
-        <div class="engine-node is-output"><strong>Rank by your priorities</strong><small>Economics, final soil and water, and sample support</small><code>arg maxⱼ Jⱼ → recommendation</code></div>
+        <div class="engine-node is-output"><strong>Rank by your priorities</strong><small>Economics, final carbon, total nitrogen, water, and support</small><code>arg maxⱼ Jⱼ → recommendation</code></div>
       </section>
-      <div class="engine-feedback"><svg aria-hidden="true"><use href="#i-arrow"/></svg><span>Feedback: crop demand changes water; water and carbon change transition probabilities and yield.</span></div>
+      <div class="engine-feedback"><svg aria-hidden="true"><use href="#i-arrow"/></svg><span>Feedback: crop demand changes water; water, carbon, and total nitrogen change transition probabilities. Only water and carbon change modeled yield.</span></div>
     </div>
     <section class="horizon-card">
       <div class="tech-card-heading"><div><h3>60-month event horizon</h3><p>One illustrative trajectory: the environment advances in half-month steps; Markov decisions occur only at eligible planting events.</p></div><span class="tech-tag">Δt ≈ 15.2 days</span></div>
@@ -321,11 +327,12 @@
     <div class="tech-grid">
       <section class="tech-card">
         <div class="tech-card-heading"><div><h3>State vector & feasible set</h3><p>Every simulated decision sees the current state and its constraints.</p></div><span class="tech-tag">xₜ → Ωₜ</span></div>
-        <div class="state-vector">xₜ = [ cₜ, wₜ, sₜ, τₜ ]</div>
+        <div class="state-vector">xₜ = [ cₜ, wₜ, Cₜ, Nₜ, τₜ ]</div>
         <div class="state-list">
           <div class="state-item"><code>cₜ</code><strong>Crop / fallow</strong><small>Current state and consecutive plantings</small></div>
           <div class="state-item"><code>wₜ</code><strong>Water</strong><small>Storage fraction and low / medium / high class</small></div>
-          <div class="state-item"><code>sₜ</code><strong>Soil carbon</strong><small>SOC in g/kg, updated by crop hypothesis</small></div>
+          <div class="state-item"><code>Cₜ</code><strong>Organic carbon</strong><small>SOC in g/kg, updated by crop hypothesis</small></div>
+          <div class="state-item"><code>Nₜ</code><strong>Total nitrogen</strong><small>Stock in kg N/ha; not mineral or available N</small></div>
           <div class="state-item"><code>τₜ</code><strong>Event clock</strong><small>Cycle, maturation, calendar, pending planting</small></div>
         </div>
         <div class="constraint-title">Feasible destinations Ωₜ</div>
@@ -366,7 +373,7 @@
   <header>
     <p class="eyebrow">Field Shift · uma cultura por vez</p>
     <h1>O Monte Carlo muda o ambiente. O ambiente muda a próxima cultura.</h1>
-    <p class="intro">Escolha uma região e a cultura principal inicial (soja, milho ou cana). O Monte Carlo avança pelos ciclos e calendários municipais MAPA; só coberturas sem linha oficial podem usar a hipótese de qualquer decêndio. Água e carbono atualizam as probabilidades Markov. Repetições consecutivas de anuais reduzem o rendimento por uma hipótese editável.</p>
+    <p class="intro">Escolha uma região e a cultura principal inicial (soja, milho ou cana). O Monte Carlo avança pelos ciclos e calendários municipais MAPA; só coberturas sem linha oficial podem usar a hipótese de qualquer decêndio. Água, carbono orgânico e estoque de nitrogênio total atualizam as probabilidades Markov. Repetições consecutivas de anuais reduzem o rendimento por uma hipótese editável.</p>
   </header>
 
   <div class="selection">
@@ -383,7 +390,7 @@
         </label>
       </div>
     </div>
-    <div class="stat"><span>Carbono orgânico no solo · SoilGrids 0–30 cm</span><strong id="soil-baseline"></strong><small id="soil-scope"></small></div>
+    <div class="stat"><span>Solo inicial · SoilGrids 0–30 cm</span><strong id="soil-baseline"></strong><small id="soil-scope"></small></div>
   </div>
 
   <section aria-labelledby="crop-markov-title">
@@ -398,6 +405,9 @@
         </label>
         <label for="matrix-carbon-input">Carbono do solo para recalcular · g/kg
           <input id="matrix-carbon-input" type="number" min="0" max="60" step="0.1">
+        </label>
+        <label for="matrix-nitrogen-input">N total do solo para recalcular · kg N/ha
+          <input id="matrix-nitrogen-input" type="number" min="0" step="10">
         </label>
         <label for="matrix-planting-decendio">Decêndio de decisão Markov
           <select id="matrix-planting-decendio"></select>
@@ -465,7 +475,7 @@
       <span id="simulation-refinement-status" class="small-muted">A prévia será atualizada após a primeira amostra.</span>
     </div>
     <h3 style="margin-top:19px">Como solo e água evoluem na rotação recomendada</h3>
-    <p class="small-muted">Cada faixa mostra a porcentagem das trajetórias da rotação recomendada em cada estado; em A0–A5, as faixas somam 100%. A0 é a condição inicial e A1–A5 são os fechamentos anuais. Passe o cursor sobre uma faixa para ver os percentuais por ano.</p>
+    <p class="small-muted">Cada faixa mostra a porcentagem das trajetórias da rotação recomendada em cada estado; em A0–A5, as faixas somam 100%. A0 é a condição inicial e A1–A5 são os fechamentos anuais. N é classificado em relação ao alvo C:N configurado. Passe o cursor sobre uma faixa para ver os percentuais por ano.</p>
     <div class="environment-distribution-grid">
       <article class="environment-distribution-card">
         <h3>Estados de carbono do solo</h3>
@@ -479,21 +489,27 @@
         <div id="water-state-area-legend" class="environment-chart-legend"></div>
         <p id="water-state-area-summary" class="environment-chart-summary">A distribuição aparece após a primeira prévia do Monte Carlo.</p>
       </article>
+      <article class="environment-distribution-card">
+        <h3>Estados de N total</h3>
+        <div class="environment-chart-viewport"><svg id="nitrogen-state-area-chart" class="environment-area-chart" viewBox="0 0 760 252" role="img" aria-label="Distribuição percentual das classes de estoque de nitrogênio total relativo ao alvo C:N ao longo de cinco anos"></svg></div>
+        <div id="nitrogen-state-area-legend" class="environment-chart-legend"></div>
+        <p id="nitrogen-state-area-summary" class="environment-chart-summary">A distribuição aparece após a primeira prévia do Monte Carlo.</p>
+      </article>
     </div>
-    <p class="small-muted">Classes de solo usam os limiares exploratórios já aplicados ao modelo econômico: degradado &lt;10 g/kg, regular 10–&lt;20 g/kg e bom ≥20 g/kg. São hipóteses não calibradas. Água usa os estados da cadeia hídrica (baixa, média e alta).</p>
+    <p class="small-muted">Carbono usa limiares exploratórios não calibrados: degradado &lt;10 g/kg, regular 10–&lt;20 g/kg e bom ≥20 g/kg. N total é comparado com o estoque correspondente ao carbono em um C:N de referência, sem representar N mineral disponível; balanços anuais por cultura são hipóteses ilustrativas. Água usa os estados da cadeia hídrica (baixa, média e alta).</p>
   </section>
 
   <section aria-labelledby="vpl-title">
     <div class="section-head">
       <div>
         <h2 id="vpl-title">Decisão econômica e ambiental · rotação</h2>
-        <p>A nota de 0 a 10 combina economia, solo/água finais e suporte amostral. O CVaR5 mede o desempenho nos piores cenários e compõe a nota econômica junto ao P95.</p>
+        <p>A nota de 0 a 10 combina economia, carbono, N total, água e suporte amostral. O CVaR5 mede o desempenho nos piores cenários e compõe a nota econômica junto ao P95.</p>
       </div>
     </div>
     <p class="data-note" id="vpl-status"></p>
     <h3>Conferência da simulação e do ranking</h3>
     <div class="audit-grid" id="ranking-audit" aria-live="polite"><div class="audit-card">A conferência aparece após a prévia.</div></div>
-    <p class="small-muted">Fluxo: cultura inicial → Monte Carlo gera clima, água e carbono → o ambiente altera a cadeia completa → cada trajetória percorre os nós Markov → as rotações simuladas são ordenadas pela nota combinada. Premissas de rendimento, preço e custo são editáveis abaixo.</p>
+    <p class="small-muted">Fluxo: cultura inicial → Monte Carlo gera clima, água, carbono e N total → o ambiente altera a cadeia completa → cada trajetória percorre os nós Markov → as rotações simuladas são ordenadas pela nota combinada. Premissas de rendimento, preço e custo são editáveis abaixo.</p>
     <p class="small-muted" id="economic-method"></p>
     <h3>Ranking de rotações ajustável</h3>
     <div class="controls ranking-preference">
@@ -508,8 +524,8 @@
       </label>
       <strong id="ranking-environment-weight-value">20% ambiente · 80% economia (entre as prioridades)</strong>
     </div>
-    <p class="small-muted" id="ranking-component-summary">Peso combinado: economia, solo e água.</p>
-    <p class="small-muted">A parcela ajustável combina economia (P95 e CVaR5) e ambiente final (dois terços solo e um terço água). A parcela fixa de suporte cresce proporcionalmente ao número de VPLs válidos da rotação até atingir a nota máxima. O carbono final usa referência de 20 g/kg; a nota hídrica usa a classe final e os multiplicadores de rendimento do modelo. Mediana, CVaR5 e P95 seguem em R$/ha. As regras estão em visualization-run-settings.json e os multiplicadores hídricos em soil-crop-response-hypotheses.json.</p>
+    <p class="small-muted" id="ranking-component-summary">Peso combinado: economia, carbono, N total, água e suporte.</p>
+    <p class="small-muted">A parcela ajustável combina economia (P95 e CVaR5) e ambiente final (dois terços solo, um terço água). Dentro da parcela de solo, 67% do score vem do carbono (referência 20 g/kg) e 33% do N total comparado ao estoque-alvo derivado do carbono por C:N de referência 12. A parcela fixa de suporte cresce proporcionalmente ao número de VPLs válidos da rotação até atingir a nota máxima. N total não é N mineral disponível e não altera diretamente o rendimento; a nota hídrica usa a classe final e os multiplicadores de rendimento do modelo. Mediana, CVaR5 e P95 seguem em R$/ha. As regras estão em visualization-run-settings.json e as hipóteses em soil-crop-response-hypotheses.json.</p>
     <p class="small-muted" id="ranking-score-reference"></p>
     <div class="ranking-pager"><span id="rotation-ranking-page-info"></span><div class="ranking-pager-controls"><button id="rotation-ranking-previous" type="button">Anterior</button><button id="rotation-ranking-next" type="button">Próxima</button></div></div>
     <div class="matrix-wrap"><table id="rotation-path-ranking" class="change-table" aria-label="Ranking de sequências de plantio pela nota econômica e ambiental ajustável de 0 a 10"></table></div>
@@ -543,8 +559,8 @@
     <p>Em cada ano, selecionamos as cinco culturas mapeadas com maior área colhida e dividimos cada área pela soma do top 5. Para cada par consecutivo de anos, a massa da transição i → j é a participação de i no ano t multiplicada pela participação de j no ano t+1; as massas são somadas ao longo da série. É uma distribuição conjunta de máxima entropia sob independência das marginais municipais, não uma rotação observada. Produtos fora do catálogo, como arroz, não competem no top 5. Os pares em que o rank 1 muda continuam registrados como diagnóstico separado, sem serem adicionados outra vez à evidência.</p>
     <p>A matriz usa essa massa fracionária com uma posterior Dirichlet e condiciona a linha às culturas que tenham janela MAPA standalone nos 365 dias seguintes ou sejam cobertura de rotação sem linha oficial e com fallback configurado: <strong>P₀ = (massa top-5 + α) / (suporte top-5 elegível + m elegível × α)</strong>, com α=0,5 por destino. Para coberturas de rotação sem linha standalone no perfil, usa uma hipótese explícita de disponibilidade nos 36 decêndios; o grafo marca essas arestas como hipótese, não como ZARC. Uma linha oficial existente sempre prevalece, inclusive quando não publica risco 20/30/40; a hipótese não apaga uma restrição oficial. Destinos sem calendário aplicável continuam bloqueados. Com suporte zero e 14 destinos elegíveis, a prior começa em 7,1%; conforme o suporte observado aumenta, a parcela cai. Portanto 6–7% é possível em linhas pouco apoiadas, mas não é piso nem frequência observada.</p>
     <p>Depois de cada colheita anual, o Monte Carlo espera a próxima oportunidade de decisão Markov; o destino sorteado é semeado na sua janela MAPA ou, nas exceções de cobertura sem dado, em qualquer decêndio pela hipótese descrita. O intervalo é pousio (Kc de referência e delta de carbono zero). As tabelas anuais 2026/2027 e perenes/sem safra agregam grupos/códigos de solo e se repetem nos cinco anos; linhas de consórcio foram removidas para manter uma cultura principal por talhão. A cadeia PAM é um prior regional, não histórico da gleba.</p>
-    <p>Depois da amostragem de cada bloco de clima, a probabilidade de destino é reponderada por água e carbono do solo: peso = P₀ × exp(βágua × alinhamento hídrico × (Kc anual efetivo − Kc médio)) × exp(βsolo × déficit de carbono × (ΔCOS hipotético / escala)). As probabilidades são normalizadas na linha. Kc vem do catálogo FAO‑56 já usado no projeto; a resposta de COS e os coeficientes beta estão em <code>data/reference/soil-crop-response-hypotheses.json</code>.</p>
-    <p>NASA POWER fornece chuva por quinzena; água atualiza a cada período de clima. O Kc de cultura ajusta a fração representativa da CAD por (Kc−1)×ETo média quinzenal/CAD e a classe é recalculada nos cortes declarados. A fração contínua estimada é preservada. As classes baixa, média e alta dividem a CAD em três faixas exploratórias; não são limiares de estresse específicos da cultura. SoilGrids fornece o carbono inicial; as faixas de variação de carbono são hipóteses não calibradas.</p>
+    <p>Depois da amostragem de cada bloco de clima, a probabilidade de destino é reponderada por água, carbono e N total: peso = P₀ × exp(βágua × alinhamento hídrico × (Kc anual efetivo − Kc médio)) × exp(βsolo × déficit de carbono × (ΔCOS hipotético / escala)) × exp(βN × déficit relativo ao estoque-alvo C:N × balanço anual hipotético de N / escala). O estoque-alvo muda com o estoque de carbono; balanços de N total por cultura atualizam a cada período e são hipóteses, sem mineralização, fertilizante ou perdas modeladas. As probabilidades são normalizadas na linha. Kc vem do catálogo FAO‑56; as respostas e os coeficientes estão em <code>data/reference/soil-crop-response-hypotheses.json</code>.</p>
+    <p>NASA POWER fornece chuva por quinzena; água atualiza a cada período de clima. O Kc de cultura ajusta a fração representativa da CAD por (Kc−1)×ETo média quinzenal/CAD e a classe é recalculada nos cortes declarados. A fração contínua estimada é preservada. As classes baixa, média e alta dividem a CAD em três faixas exploratórias; não são limiares de estresse específicos da cultura. SoilGrids fornece carbono e N total iniciais; o N é extraído como concentração em g/kg e convertido em estoque para 0–30 cm com densidade aparente e espessura, em kg N/ha. A média de N e a densidade vêm de uma célula WCS de 250 m por camada, sem quantis de incerteza, no centroide municipal; podem não representar o talhão. N total não é N mineral/amônio/nitrato nem diretamente disponível.</p>
     <p id="cycle-assumptions-detail"></p>
     <p id="price-projection-detail"></p>
     <p id="mapbiomas-note"></p>
@@ -555,6 +571,8 @@
       <a href="https://finance.yahoo.com/quote/ZSK27.CBT/history/" target="_blank" rel="noreferrer">Yahoo Finance · soja CBOT</a>
       <a href="https://power.larc.nasa.gov/" target="_blank" rel="noreferrer">NASA POWER</a>
       <a href="https://www.isric.org/explore/soilgrids" target="_blank" rel="noreferrer">ISRIC SoilGrids</a>
+      <a href="https://docs.isric.org/globaldata/soilgrids/SoilGrids_faqs_01.html" target="_blank" rel="noreferrer">SoilGrids · propriedades e unidades</a>
+      <a href="https://docs.isric.org/globaldata/soilgrids/wcs.html" target="_blank" rel="noreferrer">ISRIC · serviço WCS SoilGrids</a>
       <a href="https://www.fao.org/4/x0490e/x0490e0b.htm" target="_blank" rel="noreferrer">FAO‑56 · coeficientes Kc</a>
       <a href="https://www.embrapa.br/documents/1355202/83794724/4.%2BJRenato%2B-%2BZARC%2BSoja%2B06%2BADs%2B_%2B2023%2B_%2BSeminario%2BZARC.pdf/3bed6875-beb3-fbb6-fe37-c7f033a45629" target="_blank" rel="noreferrer">Embrapa · ciclos da soja</a>
       <a href="https://www.embrapa.br/web/agencia-de-informacao-tecnologica/cultivos/cana-de-acucar/producao/manejo/plantio" target="_blank" rel="noreferrer">Embrapa · maturação da cana</a>

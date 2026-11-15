@@ -63,7 +63,7 @@
 
   function updatePriority() {
     const environment=Number($("farmer-priority").value),finance=100-environment;
-    $("priority-value-copy").textContent=`${finance}% financial return · ${environment}% soil and water · excluding fixed sample support`;
+    $("priority-value-copy").textContent=`${finance}% financial return · ${environment}% carbon, total nitrogen, and water · excluding fixed sample support`;
     $("priority-value-title").textContent=environment===0?"Fully focused on returns":environment<20?"Stronger focus on returns":environment===20?"Balanced, with a focus on returns":environment<40?"Balanced, with a focus on soil and water":environment<50?"Stronger focus on soil and water":"Soil and water come first";
   }
 
@@ -90,7 +90,7 @@
     $("farmer-progress").setAttribute("aria-valuenow",String(percent));
     $("farmer-progress-count").textContent=`${completed.toLocaleString("en-US")} of ${target.toLocaleString("en-US")} scenarios`;
     $("farmer-progress-percent").textContent=`${percent}%`;
-    $("simulation-friendly-status").textContent=fraction<.25?"Analyzing your region's climate and conditions.":fraction<.55?"Tracking water and soil health through each crop cycle.":fraction<.85?"Comparing crops and rotation possibilities.":"Choosing the sequence that best matches your priorities.";
+    $("simulation-friendly-status").textContent=fraction<.25?"Analyzing your region's climate and conditions.":fraction<.55?"Tracking water, carbon, and total nitrogen through each crop cycle.":fraction<.85?"Comparing crops and rotation possibilities.":"Choosing the sequence that best matches your priorities.";
     if (!renderGrowth.lastBucket || Math.abs(renderGrowth.lastBucket-fraction)>.02 || fraction===1) { renderGrowth(fraction); renderGrowth.lastBucket=fraction; }
   }
 
@@ -200,9 +200,10 @@
   function renderFarmerResultCharts(run,best) {
     const sample=run.rotationSamples.get(best.key),frames=rotationEnvironmentFrames(sample);
     renderReturnChart(best,sample.values);
-    for(const id of ["water","soil"])$(`farmer-${id}-badge`).textContent=`${best.frequency.toLocaleString("en-US")} scenarios`;
+    for(const id of ["water","soil","nitrogen"])$(`farmer-${id}-badge`).textContent=`${best.frequency.toLocaleString("en-US")} scenarios`;
     renderEnvironmentOutcomeChart(frames,{svgId:"farmer-water-chart",detailId:"farmer-water-period",dimension:"water",series:[{id:"water_high",label:"Good",color:"#4b91ad"},{id:"water_medium",label:"Fair",color:"#d6ad51"},{id:"water_low",label:"Bad",color:"#cf7b6b"}]});
     renderEnvironmentOutcomeChart(frames,{svgId:"farmer-soil-chart",detailId:"farmer-soil-period",dimension:"soil",series:[{id:"soil_good",label:"Good",color:"#5c8d5a"},{id:"soil_regular",label:"Fair",color:"#c59a50"},{id:"soil_degraded",label:"Bad",color:"#b97657"}]});
+    renderEnvironmentOutcomeChart(frames,{svgId:"farmer-nitrogen-chart",detailId:"farmer-nitrogen-period",dimension:"nitrogen",series:[{id:"nitrogen_high",label:"Above target",color:"#5c8d5a"},{id:"nitrogen_medium",label:"Near target",color:"#c59a50"},{id:"nitrogen_low",label:"Below target",color:"#b97657"}]});
   }
 
   function showFarmerResult() {
@@ -225,14 +226,15 @@
     });
     $("result-income").innerHTML=`${brl(best.median,0)} <small>/ha</small>`;
     $("result-income-detail").textContent=`Median present value over five years · ${best.count.toLocaleString("en-US")} ${best.count===1?"scenario":"scenarios"} with complete calculations${best.count<rankingSupportSettings.full_score_vpl_samples?" · small sample":""}.`;
-    $("result-soil").textContent=soilFriendly(best.finalSocMean);
-    $("result-soil-detail").textContent=`${fmt(best.finalSocMean,1)} g/kg of estimated organic carbon at the end of the cycle.`;
+    $("result-soil").textContent=soilFriendly(best.finalSocMean)+" · "+({low:"N below target",medium:"N near target",high:"N above target"})[soilNitrogenClass(best.finalNitrogenStockMean,best.finalSocMean)];
+    $("result-soil-detail").textContent=`${fmt(best.finalSocMean,1)} g/kg organic carbon · ${fmt(best.finalNitrogenStockMean,0)} kg/ha total N (not mineral or available). Soil score: ${fmt(best.soilScore10,1)}/10; N score compares stock with the C:N target.`;
     const waterEntries=Object.entries(best.finalWaterCounts||{}).sort((a,b)=>b[1]-a[1]),waterId=waterEntries[0]?.[0]||"water_medium",waterShare=Number(waterEntries[0]?.[1]||0)/Math.max(1,best.finalEnvironmentCount);
     $("result-water").textContent=({water_low:"Low",water_medium:"Medium",water_high:"High"})[waterId]||"Medium";
     $("result-water-detail").textContent=`Most frequent final condition, seen in ${pct(waterShare)} of trajectories. Mean final water: ${pct(best.finalWaterFractionMean)} of capacity.`;
     const facts=[
       `${city.municipality} (${city.uf}): historical climate, soil, and municipal planting calendar.`,
-      `Starting with ${farmerCropName(farmerUI.crop).toLowerCase()}, with priorities split ${finance}% returns and ${environment}% soil and water before fixed sample support.`,
+      `Starting with ${farmerCropName(farmerUI.crop).toLowerCase()}, with priorities split ${finance}% returns and ${environment}% carbon, total nitrogen, and water before fixed sample support.`,
+      "Nitrogen is total stock from mapped soil data. Crop-balance rates and the C:N reference are uncalibrated model assumptions; total N is not plant-available nitrogen.",
       `${best.frequency.toLocaleString("en-US")} of ${run.completed.toLocaleString("en-US")} simulated scenarios followed this sequence; ${best.count.toLocaleString("en-US")} had a valid NPV.`,
       `Sample support: ${fmt(best.supportScore10,1)}/10, worth ${fmt(100*rankingSupportSettings.weight,0)}% of the ranking score. Full support takes ${rankingSupportSettings.full_score_vpl_samples} valid NPVs.`
     ];

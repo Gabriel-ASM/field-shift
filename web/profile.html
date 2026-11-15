@@ -96,7 +96,7 @@ const FIELDS = {
   "/soil/organic_carbon": {title: "Organic carbon", unit: "g/kg", digits: 1, hint: "Carbon stored in the top 30 cm of soil."},
   "/soil/available_water_capacity": {title: "Water the soil can hold", unit: "mm", digits: 0, hint: "Water available to plants down to 1 m when the soil is full."},
   "/soil/available_water_fraction": {title: "Soil water at the start", percent: true, gauge: "fill", hint: "How full that water store is on day zero."},
-  "/soil/N2": {title: "Soil nitrogen", digits: 1},
+  "/soil/N2": {title: "Total nitrogen stock", unit: "kg/ha", digits: 0, hint: "Mapped stock in the top 30 cm; not mineral or directly plant-available nitrogen."},
   "/climate/alt": {title: "Altitude", unit: "m", digits: 0},
 };
 const SCOPES = {grid_cell: "Municipality centre, not a specific field"};
