@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from pymongo.database import Database
 
@@ -29,6 +30,9 @@ def create_app(database: Database | None = None) -> FastAPI:
         os.environ.get("FIELD_SHIFT_MONGO_URI", "mongodb://localhost:27017"),
         os.environ.get("FIELD_SHIFT_DB", "field_shift"),
     )
+
+    # The v1 demo page is 2.5 MB of inline JSON; compressed it is about 130 kB.
+    app.add_middleware(GZipMiddleware, minimum_size=1024)
 
     @app.get("/health", tags=["service"])
     def health() -> dict[str, str]:

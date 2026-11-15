@@ -79,3 +79,10 @@ def test_web_dir_can_be_replaced(generated, tmp_path, monkeypatch):
     (tmp_path / "index.html").write_text("<h1>real front</h1>", encoding="utf-8")
     monkeypatch.setenv("FIELD_SHIFT_WEB_DIR", str(tmp_path))
     assert "real front" in TestClient(create_app(mongomock.MongoClient()["x"])).get("/").text
+
+
+def test_large_pages_are_compressed(client):
+    response = client.get("/pages/visualizacao.html", headers={"Accept-Encoding": "gzip"})
+    assert response.headers["content-encoding"] == "gzip"
+    assert len(response.content) > 1_000_000        # decoded body is the full page
+    assert client.get("/health").headers.get("content-encoding") is None   # tiny responses stay as they are
