@@ -10,6 +10,9 @@ function position(index: number, crop: string, caneCut: number): string {
   return crop === "sugarcane" ? `Current crop · cut ${caneCut} next` : "Current crop";
 }
 
+/** Soybean right after soybean also costs soil carbon (data/reference/soybean-repetition-soil.json). */
+const soyOnSoy = (crops: string[], index: number) => index > 0 && crops[index] === "soybean" && crops[index - 1] === "soybean";
+
 export function RotationPath({ route, caneCut }: { route: Route; caneCut: number }) {
   return (
     <div className="rotation-path">
@@ -21,6 +24,7 @@ export function RotationPath({ route, caneCut }: { route: Route; caneCut: number
             <strong>{cropLabel(crop)}</strong>
             <small>{position(index, crop, caneCut)}</small>
             {penalty > 0 && <small>−{percent(penalty)} yield at harvest</small>}
+            {soyOnSoy(route.crops, index) && <small>Soy on soy: soil carbon a rotation would build is lost</small>}
           </div>
         );
       })}

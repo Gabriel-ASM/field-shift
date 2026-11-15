@@ -312,3 +312,19 @@ def test_total_nitrogen_moves_by_the_crop_balance_and_steers_the_chain(tables):
     rich = markov.probabilities(np, tables, soybean, 0.5, tables.initial_carbon, 1.5 * target)
     ratio = lambda row: row[crotalaria] / row[maize]
     assert ratio(poor) > ratio(rich)
+
+
+
+def test_soybean_on_soybean_costs_soil_carbon(tables):
+    """soybean-repetition-soil.json (Campos et al. 2011): a soybean replanted on soybean loses 0.29-0.51 Mg C/ha/yr
+    that a rotation would build, converted to g/kg in 0-30 cm with the profile's bulk density."""
+    from field_shift.engines.monte_carlo import State, advance_soil
+    soybean, maize = tables.crops.index("soybean"), tables.crops.index("maize_grain")
+    density = 1.3566666666666667          # Franca, SoilGrids bdod 0-30 cm
+    assert tables.repeat_carbon_penalty.tolist() == pytest.approx([0.29 / 3 / density, 0.51 / 3 / density])
+    state = State(np, tables, Policy(soybean), 3)
+    state.crop, state.streak = np.array([soybean, soybean, maize]), np.array([1, 2, 2])
+    rate, penalty = np.zeros((3, len(tables.crops))), np.full(3, 0.1)
+    advance_soil(np, tables, state, rate, penalty)
+    step = tables.period_days / 365
+    assert state.carbon.tolist() == pytest.approx([tables.initial_carbon, tables.initial_carbon - 0.1 * step, tables.initial_carbon])

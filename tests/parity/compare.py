@@ -6,6 +6,9 @@ Both sides draw their own random numbers, so the comparison is statistical: for 
 the share of trajectories ending in each crop, the share of the most frequent routes and the mean present value.
 A |z| above 4 is reported as a difference (the sample is large and the tests are many, so smaller z values are
 expected by chance). The JS side is field_shift/front/analysis.js as embedded in docs/visualizacao.html.
+
+Rules the engine has and the page does not yet are switched off here: the soil carbon cost of soybean on soybean
+(data/reference/soybean-repetition-soil.json).
 """
 
 from __future__ import annotations
@@ -14,6 +17,7 @@ import json
 import math
 import subprocess
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -33,8 +37,13 @@ def js_cases(count: int, seed: int) -> list[dict]:
     return json.loads(output)
 
 
+def shared_model(profile: str):
+    """The engine's tables without the rules the page does not have."""
+    return replace(tables_for(profile), repeat_carbon_penalty=np.zeros(2))
+
+
 def python_case(profile: str, start: str, count: int, seed: int) -> dict:
-    tables = tables_for(profile)
+    tables = shared_model(profile)
     names = [*tables.crops, "fallow"]
     result = simulate(np, tables, Policy(tables.crops.index(start)), seed, count)
     final = [names[c] for c in result["crop"][-1]]

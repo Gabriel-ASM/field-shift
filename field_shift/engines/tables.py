@@ -12,6 +12,7 @@ import numpy as np
 
 from .calendar import DAYS_PER_YEAR, days_until_open, planting_windows
 from .nitrogen import Nitrogen
+from .payload import DATA_ROOT, read_json
 
 WATER_STATES = ("water_low", "water_medium", "water_high")
 RAIN_LABELS = ("dry", "normal", "wet")
@@ -90,6 +91,9 @@ class Tables:
     total_n_coefficient: float
     total_n_scale: float            # kg N/ha/year
     total_n_class_limits: np.ndarray  # (2,) stock/target ratios bounding low and medium
+    # soybean on soybean (soybean-repetition-soil.json): soil carbon the field does not accrue, g/kg per year
+    repeat_carbon_crop: int         # crop index the penalty applies to, or -2
+    repeat_carbon_penalty: np.ndarray  # (2,) lowest and highest penalty
     nitrogen: Nitrogen | None = None    # None: no nitrogen parameters, the repeated-crop penalty applies
 
     @property
@@ -253,6 +257,16 @@ def _total_nitrogen(crops, payload, hypotheses) -> dict:
     }
 
 
+def _repeat_carbon(crops, payload, rule: dict) -> dict:
+    """Soil carbon cost of replanting soybean right after soybean, converted from Mg C/ha to g/kg in 0-30 cm with
+    the profile's bulk density."""
+    penalty, crop = rule["penalty_mg_c_ha_year"], rule["applies_to"]
+    density = float(payload["soil"]["bulk_density_top_0_30_kg_dm3"])
+    to_g_kg = lambda mg_ha: mg_ha * 1e6 / (0.30 * 10_000 * density * 1000)
+    return {"repeat_carbon_crop": crops.index(crop) if crop in crops else -2,
+            "repeat_carbon_penalty": np.array([to_g_kg(float(penalty["min"])), to_g_kg(float(penalty["max"]))])}
+
+
 def _economics(crops, payload, hypotheses, crop_cycles) -> dict:
     economics, response = payload["economics"], hypotheses["economic_yield_response"]
     inputs = economics.get("crop_inputs") or {}
@@ -299,4 +313,5 @@ def build_tables(payload: dict, reference: dict) -> Tables:
         **_water(crops, states, payload, hypotheses),
         **_economics(crops, payload, hypotheses, crop_cycles),
         **_total_nitrogen(crops, payload, hypotheses),
+        **_repeat_carbon(crops, payload, read_json(DATA_ROOT / "reference" / "soybean-repetition-soil.json")),
     )

@@ -90,10 +90,12 @@ def advance_water(xp, tables: Tables, state: State, rain, uniform) -> None:
     state.water_class = water_class(xp, tables, state.water_fraction)
 
 
-def advance_soil(xp, tables: Tables, state: State, soil_rate) -> None:
-    """Soil carbon moves at the rate of the crop in the field; fallow leaves it unchanged."""
+def advance_soil(xp, tables: Tables, state: State, soil_rate, repeat_penalty) -> None:
+    """Soil carbon moves at the rate of the crop in the field; fallow leaves it unchanged. Soybean planted right after
+    soybean also loses the carbon a rotation would have built (soybean-repetition-soil.json)."""
     rows = xp.arange(state.crop.shape[0])
-    rate = xp.where(state.crop >= 0, soil_rate[rows, crop_or_first(xp, state.crop)], 0.0)
+    repeated = (state.crop == tables.repeat_carbon_crop) & (state.streak > 1)
+    rate = xp.where(state.crop >= 0, soil_rate[rows, crop_or_first(xp, state.crop)], 0.0) - xp.where(repeated, repeat_penalty, 0.0)
     state.carbon = xp.maximum(0.1, state.carbon + rate * tables.period_days / DAYS_PER_YEAR)
 
 
@@ -298,6 +300,8 @@ def simulate(xp, tables: Tables, policy: Policy, seed: int, count: int, keep: in
     climate = rng["environment"].integers(0, tables.rain_years.shape[0], (count, tables.horizon_years))
     low, high = tables.soil_delta_low[None, :], tables.soil_delta_high[None, :]
     soil_rate = low + rng["environment"].random((count, low.shape[1])) * (high - low)
+    least, most = tables.repeat_carbon_penalty[0], tables.repeat_carbon_penalty[1]
+    repeat_penalty = least + rng["environment"].random(count) * (most - least)
     rows = sample_or_none(xp, rng["parameters"], tables, policy, count)
     choose = chooser(xp, tables, state, policy, *rows, rng["choice"])
     yearly = Recorder(xp, tables, state, count, keep, paths)
@@ -306,7 +310,7 @@ def simulate(xp, tables: Tables, policy: Policy, seed: int, count: int, keep: in
         rain = tables.rain_years[climate[:, year], period % tables.periods_per_year]
         day = round((period + 1) * tables.period_days, 9)
         advance_water(xp, tables, state, rain, rng["environment"].random(count))
-        advance_soil(xp, tables, state, soil_rate)
+        advance_soil(xp, tables, state, soil_rate, repeat_penalty)
         advance_total_nitrogen(xp, tables, state)
         advance_nitrogen(tables, state, rain)
         advance_clocks(tables, state)

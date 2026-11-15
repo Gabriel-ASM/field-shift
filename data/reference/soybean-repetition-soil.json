@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "purpose": "Soil carbon cost of planting soybean right after soybean. Decision (João, 2026-11-15): soybean on soybean may happen in the simulator, but it must be penalized in the soil. Read by the Python engine only; the team's page (analysis.js) does not use this file yet.",
+  "rule": "While a soybean planted right after a soybean harvest is in the field, soil organic carbon (0-30 cm) changes at the crop's own rate minus this penalty. The penalty is drawn per trajectory, uniformly in [min, max], as the crop carbon deltas of soil-crop-response-hypotheses.json are.",
+  "applies_to": "soybean",
+  "penalty_mg_c_ha_year": {
+    "value": 0.29,
+    "min": 0.29,
+    "max": 0.51,
+    "unit": "Mg C/ha/year, 0-0.30 m",
+    "support": "observed",
+    "meaning": "Carbon a no-till soybean/wheat succession did not accrue, against the two rotations of the same experiment: winter crop rotation (min) and intensive crop rotation (max).",
+    "source": "Campos, B.-H. C.; Amado, T. J. C.; Bayer, C.; Nicoloso, R. S.; Fiorin, J. E. 2011. Carbon stock and its compartments in a subtropical oxisol under long-term tillage and crop rotation systems. Revista Brasileira de Ciência do Solo 35(3): 805-817. doi:10.1590/S0100-06832011000300016",
+    "url": "https://scielo.br/j/rbcs/a/QwtnHgLDmv73PYZJbsshbrD/?lang=en",
+    "quote": "Assuming the system CT R0 as base line, soil C sequestration rates ranged from 0 to 0.51 Mg ha-1 yr-1 C in the 0–0.30 m layer (Figure 4). This way, there was no C sequestration in the NT R0 system [...] the rates of soil C sequestration in these crop rotations were higher in untilled soil (0.29 and 0.51 Mg ha -1 yr -1 C, respectively).",
+    "treatments_quote": "monoculture system (R0) – wheat (Triticum aestivum L.) /soybean (Glycine max (L.) Merrill); winter crop rotation (R1) – wheat/soybean/ black oat (Avena strigosa Schreb)/soybean",
+    "context": "Long-term experiment set up in 1985 at FUNDACEP, Cruz Alta, Rio Grande do Sul; Red Oxisol (Latossolo Vermelho distrófico típico); 19 years; sampled in 2004.",
+    "gap": "One experiment in a subtropical Oxisol of Rio Grande do Sul; transfer to Ariquemes, Franca and Varginha is a hypothesis. The monoculture of the study alternates soybean with wheat in winter, not soybean alone. No source yet for an effect of repeated soybean on total N."
+  },
+  "conversion": {
+    "formula": "g/kg/year = penalty (Mg C/ha/year) × 1e6 g/Mg ÷ (0.30 m × 10,000 m²/ha × bulk density (kg/dm³) × 1000 kg/m³ per kg/dm³) = penalty × 0.3333 ÷ bulk density",
+    "bulk_density_source": "profile soil.bulk_density_top_0_30_kg_dm3 (SoilGrids bdod, 0-30 cm)",
+    "support": "derived"
+  }
+}
