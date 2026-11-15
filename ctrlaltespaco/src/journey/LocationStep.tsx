@@ -13,7 +13,7 @@ interface LocationStepProps {
   onExplore: (explored: Explored | null) => void;
 }
 
-export function   ({ journey, world, area, explored, onExplore }: LocationStepProps) {
+export function LocationStep({ journey, world, area, explored, onExplore }: LocationStepProps) {
   const chosen = journey.place?.profile.id;
   return (
     <section>
