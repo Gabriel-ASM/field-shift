@@ -44,7 +44,8 @@ class State:
         self.water_class = water_class(xp, tables, self.water_fraction)
         self.carbon = full(tables.initial_carbon)
         self.total_nitrogen = full(tables.total_n_initial)
-        self.nitrogen = full(tables.nitrogen.initial if tables.nitrogen else 0.0)
+        self.nitrogen = full(tables.nitrogen.initial if tables.nitrogen else 0.0)   # available N, kg N/ha
+        self.fertilizer_draw = full(0.0)   # where in its fertilizer range this trajectory doses
         self.last_harvest_day = full(xp.nan)
         self.residual = full(0.0)       # yield gain of the crop in the field from the cover crop before it
         self.harvest_in = full(float(tables.cycle_days[policy.initial_crop]))
@@ -123,16 +124,19 @@ def repeat_multiplier(xp, tables: Tables, crop, streak):
 
 
 def rotation_multiplier(xp, tables: Tables, state: State, crop):
-    """What the field's history does to yield: the nitrogen left by earlier crops when the profile has
-    nitrogen parameters, otherwise the fixed penalty for replanting the same crop."""
+    """What the field's history does to yield: the penalty for replanting the same crop (rotation effects beyond
+    N) and, for crops that respond to N, the available nitrogen earlier crops and fertilizer left."""
+    repeat = repeat_multiplier(xp, tables, crop, state.streak)
     if tables.nitrogen:
-        return nitrogen.yield_multiplier(xp, tables.nitrogen, crop, state.nitrogen)
-    return repeat_multiplier(xp, tables, crop, state.streak)
+        return repeat * nitrogen.yield_multiplier(xp, tables.nitrogen, crop, state.nitrogen)
+    return repeat
 
 
 def advance_nitrogen(tables: Tables, state: State, rain) -> None:
     if tables.nitrogen:
-        state.nitrogen = nitrogen.after_losses(tables.nitrogen, state.nitrogen, rain)
+        available = nitrogen.after_mineralization(tables.nitrogen, state.nitrogen, state.total_nitrogen,
+                                                  tables.period_days / DAYS_PER_YEAR)
+        state.nitrogen = nitrogen.after_losses(tables.nitrogen, available, rain)
 
 
 def harvested_tonnes(xp, tables: Tables, state: State, crop):
@@ -256,7 +260,7 @@ def plant(xp, tables: Tables, state: State, day: float) -> None:
     state.residual = xp.where(sowing, residual_gain(xp, tables, state, crop, sown_on), state.residual)
     state.crop = xp.where(sowing, crop, state.crop)
     if tables.nitrogen:
-        state.nitrogen = xp.where(sowing, nitrogen.after_planting(tables.nitrogen, crop, state.nitrogen), state.nitrogen)
+        state.nitrogen = xp.where(sowing, nitrogen.after_planting(tables.nitrogen, crop, state.nitrogen, state.fertilizer_draw), state.nitrogen)
     state.streak = xp.where(sowing, state.pending_streak, state.streak)
     state.cane_cut = xp.where(sowing & (crop == tables.sugarcane), 1, state.cane_cut)
     state.harvest_in = xp.where(sowing, xp.maximum(tables.period_days, first_cycle - elapsed), state.harvest_in)
@@ -302,6 +306,7 @@ def simulate(xp, tables: Tables, policy: Policy, seed: int, count: int, keep: in
     soil_rate = low + rng["environment"].random((count, low.shape[1])) * (high - low)
     least, most = tables.repeat_carbon_penalty[0], tables.repeat_carbon_penalty[1]
     repeat_penalty = least + rng["environment"].random(count) * (most - least)
+    state.fertilizer_draw = rng["environment"].random(count)   # drawn either way: same stream with N on or off
     rows = sample_or_none(xp, rng["parameters"], tables, policy, count)
     choose = chooser(xp, tables, state, policy, *rows, rng["choice"])
     yearly = Recorder(xp, tables, state, count, keep, paths)

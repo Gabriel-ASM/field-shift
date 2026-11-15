@@ -8,7 +8,8 @@ A |z| above 4 is reported as a difference (the sample is large and the tests are
 expected by chance). The JS side is field_shift/front/analysis.js as embedded in docs/visualizacao.html.
 
 Rules the engine has and the page does not yet are switched off here: the soil carbon cost of soybean on soybean
-(data/reference/soybean-repetition-soil.json).
+(data/reference/soybean-repetition-soil.json) and the available-N balance
+(model block of data/reference/nitrogen-balance.json).
 """
 
 from __future__ import annotations
@@ -39,7 +40,7 @@ def js_cases(count: int, seed: int) -> list[dict]:
 
 def shared_model(profile: str):
     """The engine's tables without the rules the page does not have."""
-    return replace(tables_for(profile), repeat_carbon_penalty=np.zeros(2))
+    return replace(tables_for(profile), repeat_carbon_penalty=np.zeros(2), nitrogen=None)
 
 
 def python_case(profile: str, start: str, count: int, seed: int) -> dict:

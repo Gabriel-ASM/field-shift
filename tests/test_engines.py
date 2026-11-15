@@ -91,7 +91,8 @@ def nitrogen_fixture(tables):
     size, legume = len(tables.crops), tables.crops.index("soybean")
     credit, demand = np.zeros(size), np.full(size, 120.0)
     credit[legume], demand[legume] = 40.0, 0.0
-    return Nitrogen(initial=60.0, credit=credit, fertilizer=np.zeros(size), removal=np.full(size, 15.0), demand=demand,
+    return Nitrogen(initial=60.0, credit=credit, fertilizer=np.zeros(size), fertilizer_high=np.zeros(size),
+                    removal=np.full(size, 15.0), demand=demand,
                     floor=np.full(size, 0.5), loss_fraction=np.array([0.0, 0.01, 0.03]))
 
 
@@ -344,3 +345,24 @@ def test_a_fixed_rotation_reports_its_own_result_and_detail(tables):
     assert overall["value"]["distribution"]["counts"] and overall["crops"] == []
     detail = route_detail(raw, tables, None)
     assert detail["trajectories"] == 800 and all(sum(period) == 800 for period in detail["frames"]["water"])
+
+
+def test_available_nitrogen_comes_from_the_sourced_model_block(tables):
+    """nitrogen-balance.json `model`: legumes leave what they fixed, maize responds to N, unsourced crops are neutral."""
+    n, index = tables.nitrogen, tables.crops.index
+    assert n is not None and n.initial == 0.0 and n.mineralization == 0.02
+    assert n.credit[index("soybean")] == 184.5 and n.removal[index("soybean")] == 65
+    assert n.demand[index("maize_grain")] > 0 and n.fertilizer[index("maize_grain")] < n.fertilizer_high[index("maize_grain")]
+    for crop in ("dry_bean", "sugarcane", "coffee"):
+        if crop in tables.crops:
+            i = index(crop)
+            assert (n.credit[i], n.removal[i], n.demand[i], n.fertilizer_high[i]) == (0, 0, 0, 0)
+
+
+def test_maize_on_maize_runs_short_of_nitrogen_and_soybean_does_not(tables):
+    from dataclasses import replace
+    off = replace(tables, nitrogen=None)
+    soybean, maize = tables.crops.index("soybean"), tables.crops.index("maize_grain")
+    value = lambda t, crops: simulate(np, t, Policy(crops[0], crops), 3, 2000)["value"].mean()
+    assert value(tables, (maize,)) < value(off, (maize,))
+    assert abs(value(tables, (soybean,)) - value(off, (soybean,))) < 1e-9

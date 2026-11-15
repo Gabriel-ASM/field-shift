@@ -68,11 +68,9 @@ def decode_route(key: int, names: list[str]) -> list[str]:
     return crops[::-1]
 
 
-def yield_penalties(crops: list[str], tables: Tables) -> list[float] | None:
+def yield_penalties(crops: list[str], tables: Tables) -> list[float]:
     """Yield lost at each planting's harvest by replanting the same crop (repeated_crop_effect), as the result page of
-    producer.js shows it. None when the profile has nitrogen parameters: then the loss depends on the soil's N."""
-    if tables.nitrogen:
-        return None
+    producer.js shows it. The available-N response comes on top of it and varies by trajectory, so it is not here."""
     penalties, streak = [], 0
     for index, crop in enumerate(crops):
         streak = streak + 1 if index and crop == crops[index - 1] else 1

@@ -54,7 +54,7 @@ export function App() {
         municipality={journey.place?.municipality ?? null} onSelect={choosePlace} onArea={setArea} />
       <aside ref={panel} className={wide ? "panel wide" : "panel"}>
         <header>
-          <strong>Field Shift</strong>
+          <strong>Ctrl + Alt + Espaço</strong>
           <Steps current={journey.step} />
         </header>
         <Screen journey={journey} world={world} area={area} />

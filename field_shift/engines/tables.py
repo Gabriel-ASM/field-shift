@@ -94,7 +94,8 @@ class Tables:
     # soybean on soybean (soybean-repetition-soil.json): soil carbon the field does not accrue, g/kg per year
     repeat_carbon_crop: int         # crop index the penalty applies to, or -2
     repeat_carbon_penalty: np.ndarray  # (2,) lowest and highest penalty
-    nitrogen: Nitrogen | None = None    # None: no nitrogen parameters, the repeated-crop penalty applies
+    # available soil nitrogen (model block of nitrogen-balance.json); None switches the balance off
+    nitrogen: Nitrogen | None = None
 
     @property
     def periods(self) -> int:
@@ -257,6 +258,26 @@ def _total_nitrogen(crops, payload, hypotheses) -> dict:
     }
 
 
+def _nitrogen(crops, model: dict) -> Nitrogen:
+    """The available-N balance, from the `model` block of nitrogen-balance.json. Crops it does not name are neutral."""
+    rules = model["crops"]
+    value = lambda crop, key, default=0.0: _number((rules.get(crop) or {}).get(key), default)
+    fertilizer = lambda crop, end: _number(((rules.get(crop) or {}).get("fertilizer_kg_ha") or {}).get(end), 0.0)
+    response = lambda crop, key, default: _number(((rules.get(crop) or {}).get("yield_response") or {}).get(key), default)
+    return Nitrogen(
+        initial=float(model["initial_available_kg_ha"]["value"]),
+        credit=_per_crop(crops, lambda c: value(c, "fixation_kg_ha_per_cycle")),
+        fertilizer=_per_crop(crops, lambda c: fertilizer(c, "min")),
+        fertilizer_high=_per_crop(crops, lambda c: fertilizer(c, "max")),
+        removal=_per_crop(crops, lambda c: value(c, "removal_kg_per_tonne")),
+        demand=_per_crop(crops, lambda c: response(c, "demand_kg_ha", 0.0)),
+        floor=_per_crop(crops, lambda c: response(c, "floor", 1.0)),
+        loss_fraction=np.zeros(3),          # no sourced leaching by rain class (model.rain_losses)
+        fertilizer_loss=float(model["fertilizer_loss_fraction"]["value"]),
+        mineralization=float(model["mineralization_fraction_per_year"]["value"]),
+    )
+
+
 def _repeat_carbon(crops, payload, rule: dict) -> dict:
     """Soil carbon cost of replanting soybean right after soybean, converted from Mg C/ha to g/kg in 0-30 cm with
     the profile's bulk density."""
@@ -314,4 +335,5 @@ def build_tables(payload: dict, reference: dict) -> Tables:
         **_economics(crops, payload, hypotheses, crop_cycles),
         **_total_nitrogen(crops, payload, hypotheses),
         **_repeat_carbon(crops, payload, read_json(DATA_ROOT / "reference" / "soybean-repetition-soil.json")),
+        nitrogen=_nitrogen(crops, read_json(DATA_ROOT / "reference" / "nitrogen-balance.json")["model"]),
     )
