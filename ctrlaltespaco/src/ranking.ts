@@ -1,7 +1,10 @@
-/** The team's 0-10 ranking of crop sequences: financial return blended with final soil and water,
- *  plus a fixed share for the evidence behind each sequence (field_shift/front/analysis.js, commit 8788667). */
+/** The team's 0-10 ranking of crop sequences (field_shift/front/analysis.js, renderEconomicOptimization):
+ *    E = α·P95 + (1−α)·CVaR5 → E10
+ *    J = (1−w)[(1−λ)E10 + λ(⅔S10 + ⅓W10)] + w·A10
+ *  α weighs high returns against protection in bad futures, λ is the farmer's preference for soil and water,
+ *  w the fixed share of sample support A. */
 
-import type { RankingSettings, Route } from "./types.ts";
+import type { RankingReference, RankingSettings, Route } from "./types.ts";
 
 export interface RankedRoute {
   route: Route;
@@ -44,14 +47,18 @@ export function comparable(routes: Route[], settings: RankingSettings): Route[] 
   return routes.filter((route) => route.value && route.value.count >= settings.support.minimum_ranked);
 }
 
-/** One money scale for every route: the largest tail loss or high return among them. */
-export function moneyScale(routes: Route[], settings: RankingSettings): number {
-  const extremes = routes.flatMap((route) => [Math.abs(route.value!.cvar5), Math.abs(route.value!.p95)]);
-  return Math.max(settings.minimum_scale, ...extremes);
+/** One money scale for every route: CVaR5 and P95 of all ranked scenarios pooled (referenceCvar5, referenceP95). */
+export function moneyScale(reference: RankingReference, settings: RankingSettings): number {
+  return Math.max(Math.abs(reference.cvar5), Math.abs(reference.p95), settings.minimum_scale);
 }
 
-function scored(route: Route, scale: number, settings: RankingSettings, share: Weights): RankedRoute {
-  const economic = scoreOnTen(route.value!.p50, scale, settings);
+/** E before scaling: α of the high return (P95), the rest of the mean of the worst 5% (CVaR5). */
+export function preference(route: Route, returnWeight: number): number {
+  return returnWeight * route.value!.p95 + (1 - returnWeight) * route.value!.cvar5;
+}
+
+function scored(route: Route, scale: number, settings: RankingSettings, share: Weights, returnWeight: number): RankedRoute {
+  const economic = scoreOnTen(preference(route, returnWeight), scale, settings);
   const soil = clamp((route.final_carbon / settings.soil_reference) * settings.maximum, settings.minimum, settings.maximum);
   const water = scoreOnTen(route.final_water_multiplier - 1, settings.water_scale, settings);
   const environment = settings.soil_share * soil + settings.water_share * water;
@@ -64,13 +71,19 @@ function better(a: RankedRoute, b: RankedRoute): number {
   return b.total - a.total || b.route.value!.p50 - a.route.value!.p50 || a.route.crops.join().localeCompare(b.route.crops.join());
 }
 
-/** Best sequence first. `weight` is the farmer's preference for soil and water (0 to the maximum weight). */
-export function rank(routes: Route[], settings: RankingSettings, weight: number): RankedRoute[] {
+/** The farmer's two choices: λ for soil and water (0 to the maximum weight), α for P95 against CVaR5 (0 to 1). */
+export interface Priorities {
+  weight: number;
+  returnWeight: number;
+}
+
+/** Best sequence first. */
+export function rank(routes: Route[], reference: RankingReference | null, settings: RankingSettings, priorities: Priorities): RankedRoute[] {
   const candidates = comparable(routes, settings);
-  if (!candidates.length) return [];
-  const scale = moneyScale(candidates, settings);
-  const share = weights(weight, settings);
-  return candidates.map((route) => scored(route, scale, settings, share)).sort(better);
+  if (!candidates.length || !reference) return [];
+  const scale = moneyScale(reference, settings);
+  const share = weights(priorities.weight, settings);
+  return candidates.map((route) => scored(route, scale, settings, share, priorities.returnWeight)).sort(better);
 }
 
 /** The recommendation: the best-ranked sequence with at least `minimum_recommended` priced scenarios. */

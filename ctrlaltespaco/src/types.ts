@@ -28,6 +28,8 @@ export interface RankingSettings {
   break_even: number;
   minimum_scale: number;
   minimum_samples: number;
+  /** Share of P95 against CVaR5 in the economic score (the team's slider: 0-1, default 0.5). */
+  return_weight: { default: number; step: number };
   /** Evidence behind a sequence: its count of priced scenarios (data/reference/visualization-run-settings.json). */
   support: { weight: number; minimum_ranked: number; minimum_recommended: number; full_score: number };
   environment_weight: { default_weight: number; maximum_weight: number; weight_step: number };
@@ -43,14 +45,45 @@ export interface RunChoices {
   /** Harvests of a cane field before it is reformed; null when the profile has no cane. */
   sugarcane_cuts: number | null;
   ranking: RankingSettings;
+  model: ModelSettings;
 }
+
+/** The engine's own numbers, shown in "Behind your estimate". */
+export interface ModelSettings {
+  dirichlet_alpha: number;
+  discount_rate: number;
+  period_days: number;
+  periods_per_year: number;
+  decision_steps_per_year: number;
+  horizon_years: number;
+}
+
+export type WaterClass = "water_low" | "water_medium" | "water_high";
 
 export interface Route {
   crops: string[];
   share: number;
+  trajectories: number;
   value: ValueSummary | null;
   final_carbon: number;
+  final_carbon_class: "low" | "medium" | "high";
   final_water_multiplier: number;
+  /** Share of the route's trajectories ending in each water class. */
+  final_water: Record<WaterClass, number>;
+  /** Mean final water storage, as a fraction of the soil's capacity. */
+  final_water_fraction: number;
+  /** Yield lost at the harvest of each planting by replanting the same crop; null when nitrogen decides it. */
+  yield_penalty: number[] | null;
+}
+
+/** Fixed-bin histogram of a route's present values, with the spread the chart's smoothing uses. */
+export interface Distribution {
+  start: number;
+  width: number;
+  counts: number[];
+  sd: number;
+  q25: number;
+  q75: number;
 }
 
 export type Policy = { kind: "markov" } | { kind: "rotation"; sequence: string[]; fallback: string };
@@ -71,6 +104,16 @@ export interface ValueSummary {
   p95: number;
   cvar5: number;
   count: number;
+  /** Only on routes with enough priced scenarios to be recommended. */
+  distribution?: Distribution;
+}
+
+/** Money scale of the ranking: CVaR5 and P95 over every priced scenario of the routes that can be ranked. */
+export interface RankingReference {
+  cvar5: number;
+  p95: number;
+  count: number;
+  routes: number;
 }
 
 export interface Track {
@@ -92,6 +135,7 @@ export interface ScenarioResult {
   water: Record<string, number>[];
   carbon: { p5: number; p50: number; p95: number }[];
   routes: Route[];
+  ranking_reference: RankingReference | null;
   tracks: Track[];
 }
 
@@ -103,6 +147,7 @@ export interface RunResult {
   clock: { period_days: number; periods: number; horizon_years: number };
   crops: string[];
   ranking: RankingSettings;
+  model: ModelSettings;
   scenarios: ScenarioResult[];
 }
 

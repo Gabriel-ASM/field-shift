@@ -41,8 +41,10 @@ export interface Journey {
   crop: string | null;
   /** Next harvest of standing cane; used only when the crop is sugarcane. */
   caneCut: number;
-  /** Share of the score given to soil and water. */
+  /** Share of the score given to soil and water (λ). */
   weight: number;
+  /** Share of the economic score given to the high return P95 against the worst-case mean CVaR5 (α). */
+  returnWeight: number;
   seed: number;
   run: RunResult | null;
   error: string | null;
@@ -51,6 +53,7 @@ export interface Journey {
   chooseCrop: (crop: string) => void;
   chooseCaneCut: (cut: number) => void;
   setWeight: (weight: number) => void;
+  setReturnWeight: (weight: number) => void;
   setSeed: (seed: number) => void;
   simulate: () => void;
   restart: () => void;
@@ -63,6 +66,7 @@ export function useJourney(world: World | null): Journey {
   const [crop, setCrop] = useState<string | null>(null);
   const [caneCut, setCaneCut] = useState(1);
   const [weight, setWeight] = useState(0.2);
+  const [returnWeight, setReturnWeight] = useState(0.5);
   const [seed, setSeed] = useState(2026);
   const [run, setRun] = useState<RunResult | null>(null);
   const [simulated, setSimulated] = useState("");
@@ -75,6 +79,7 @@ export function useJourney(world: World | null): Journey {
     Promise.all([getMunicipality(profile.id), getRunChoices(profile.id)]).then(([municipality, choices]) => {
       setPlace({ profile, municipality, choices });
       setWeight(choices.ranking.environment_weight.default_weight);
+      setReturnWeight(choices.ranking.return_weight.default);
     }, (failure) => setError(message(failure)));
   }, []);
 
@@ -111,5 +116,5 @@ export function useJourney(world: World | null): Journey {
     go("location");
   }, []);
 
-  return { step, place, crop, caneCut, weight, seed, run, error, go, choosePlace, chooseCrop, chooseCaneCut, setWeight, setSeed, simulate, restart };
+  return { step, place, crop, caneCut, weight, returnWeight, seed, run, error, go, choosePlace, chooseCrop, chooseCaneCut, setWeight, setReturnWeight, setSeed, simulate, restart };
 }
