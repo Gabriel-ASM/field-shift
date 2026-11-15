@@ -75,3 +75,16 @@ def test_run_checks_catch_scenarios_outside_the_chain():
     run["scenarios"][0]["policy"]["sequence"].append("rice")
     run["scenarios"][1]["policy"]["fallback"] = "nowhere:skip_stages"
     assert len(check("monte_carlo", run)) == 2
+
+
+def test_sugarcane_cut_is_a_scenario_input_for_standing_cane():
+    run = example("monte_carlo.s1-three-scenarios.json")
+    scenario = run["scenarios"][0]
+    scenario["initial_sugarcane_cut"] = 4
+    assert any("requires a sugarcane initial state" in error for error in check("monte_carlo", run))
+    run["chain"]["states"].append({"id": "sugarcane:skip_stages", "crop": "sugarcane", "stage": "skip_stages"})
+    scenario["initial_state"] = "sugarcane:skip_stages"
+    assert validate("monte_carlo", run) == []
+    assert check("monte_carlo", run) == []
+    scenario["initial_sugarcane_cut"] = 6
+    assert any("initial_sugarcane_cut" in error for error in validate("monte_carlo", run))

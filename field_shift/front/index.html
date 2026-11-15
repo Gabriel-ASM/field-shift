@@ -114,9 +114,14 @@
     <div class="crop-grid">
       <button class="crop-choice" type="button" data-crop="soybean"><span class="crop-check"><svg><use href="#i-check"/></svg></span><span class="crop-art" data-crop-art="soybean"></span><span class="crop-choice-copy"><strong>Soybean</strong><small>Annual grain crop</small></span></button>
       <button class="crop-choice" type="button" data-crop="maize_grain"><span class="crop-check"><svg><use href="#i-check"/></svg></span><span class="crop-art" data-crop-art="maize_grain"></span><span class="crop-choice-copy"><strong>Corn</strong><small>Annual grain crop</small></span></button>
-      <button class="crop-choice" type="button" data-crop="sugarcane"><span class="crop-check"><svg><use href="#i-check"/></svg></span><span class="crop-art" data-crop-art="sugarcane"></span><span class="crop-choice-copy"><strong>Sugarcane</strong><small>Perennial crop</small></span></button>
+      <button class="crop-choice" type="button" data-crop="sugarcane"><span class="crop-check"><svg><use href="#i-check"/></svg></span><span class="crop-art" data-crop-art="sugarcane"></span><span class="crop-choice-copy"><strong>Sugarcane</strong><small>Standing cane</small></span></button>
     </div>
-    <div class="screen-actions"><span class="small-muted">Don't see your crop? This version supports these three options as a starting point.</span><button class="primary-button button-with-icon" id="crop-next" type="button" disabled>Continue <svg><use href="#i-arrow"/></svg></button></div>
+    <div class="sugarcane-cut-field" id="farmer-sugarcane-cut-field" hidden>
+      <label for="farmer-sugarcane-cut">Next sugarcane harvest</label>
+      <select id="farmer-sugarcane-cut" aria-describedby="farmer-sugarcane-cut-note"></select>
+      <p id="farmer-sugarcane-cut-note"></p>
+    </div>
+    <div class="screen-actions"><button class="primary-button button-with-icon" id="crop-next" type="button" disabled>Continue <svg><use href="#i-arrow"/></svg></button></div>
   </section>
 
   <section class="farmer-screen" id="screen-priority" aria-labelledby="priority-title" hidden>
@@ -208,9 +213,16 @@
     <label for="case-select">Região de exemplo
       <select id="case-select" aria-label="Região de exemplo"></select>
     </label>
-    <label for="initial-crop-select">Cultura inicial do talhão
-      <select id="initial-crop-select" aria-label="Cultura inicial"></select>
-    </label>
+    <div>
+      <label for="initial-crop-select">Cultura inicial do talhão
+        <select id="initial-crop-select" aria-label="Cultura inicial"></select>
+      </label>
+      <div id="technical-sugarcane-cut-field" hidden>
+        <label for="initial-sugarcane-cut">Próximo corte da cana
+          <select id="initial-sugarcane-cut"></select>
+        </label>
+      </div>
+    </div>
     <div class="stat"><span>Carbono orgânico no solo · SoilGrids 0–30 cm</span><strong id="soil-baseline"></strong><small id="soil-scope"></small></div>
   </div>
 
@@ -235,7 +247,7 @@
     <p id="crop-data-note" class="data-note"></p>
     <div id="crop-lifecycle-note" class="perennial-note"></div>
     <h3 class="graph-heading">Grafo da cadeia completa</h3>
-    <p class="small-muted">Cada nó é uma cultura principal individual. O seletor indica quando a decisão Markov acontece; a matriz considera destinos com janela MAPA municipal nos 365 dias seguintes ou cobertura de rotação sem linha oficial, marcada como hipótese. No Monte Carlo, a decisão ocorre na próxima oportunidade municipal após a colheita e o plantio espera o calendário aplicável. As tábuas anuais 2026/2027 e perenes vigentes são repetidas nos cinco anos. A cana permanece no talhão durante o horizonte do modelo.</p>
+    <p class="small-muted">Cada nó é uma cultura principal individual. O seletor indica quando a decisão Markov acontece; a matriz considera destinos com janela MAPA municipal nos 365 dias seguintes ou cobertura de rotação sem linha oficial, marcada como hipótese. No Monte Carlo, a decisão ocorre na próxima oportunidade municipal após a colheita e o plantio espera o calendário aplicável. As tábuas anuais 2026/2027 e perenes vigentes são repetidas nos cinco anos. No Monte Carlo, a cana permanece até o quinto corte do ciclo modelado; depois o simulador pode sortear culturas anuais com calendário elegível.</p>
     <div class="graph-controls">
       <label for="graph-year-select">Recorte das transições Monte Carlo
         <select id="graph-year-select"></select>

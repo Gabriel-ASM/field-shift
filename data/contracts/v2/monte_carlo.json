@@ -55,6 +55,13 @@
                 "id": {"type": "string"},
                 "label": {"type": "string"},
                 "initial_state": {"type": "string", "description": "Overrides chain.initial_state."},
+                "initial_sugarcane_cut": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 5,
+                    "default": 1,
+                    "description": "Ordinal of the next harvest of standing sugarcane in the modeled five-cut cycle. Applies only when the effective initial state is sugarcane. This is a scenario input, not a measured field age."
+                },
                 "policy": {"oneOf": [{"$ref": "#/definitions/rotation_policy"}, {"$ref": "#/definitions/markov_policy"}]}
             },
             "additionalProperties": false

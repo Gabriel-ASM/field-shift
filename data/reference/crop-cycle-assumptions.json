@@ -82,9 +82,10 @@
     "sugarcane": {
       "cycle_days": 365,
       "maturation_days": 540,
+      "modeled_harvest_cuts": 5,
       "class": "perennial_or_semiperennial",
       "support": "published_reference_plus_hypothesis",
-      "basis": "Embrapa descreve maturação da cana-planta em 16–18 meses; modelo usa 18 meses (540 dias). Canavial estabelecido recebe cortes anuais simplificados; idade e número de cortes são desconhecidos."
+      "basis": "Embrapa descreve maturação da cana-planta em 16–18 meses; modelo usa 18 meses (540 dias). Canavial estabelecido recebe cortes anuais simplificados. O próximo corte é informado no cenário; a reforma após cinco cortes é uma hipótese de modelagem, não uma idade observada. O rendimento e os custos disponíveis são agregados."
     },
     "coffee": {
       "cycle_days": 365,

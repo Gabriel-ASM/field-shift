@@ -32,11 +32,15 @@ def monte_carlo_errors(run: dict[str, Any]) -> list[str]:
     chain = run["chain"]
     errors = [f"chain: {message}" for message in markov_graph_errors(chain)]
     ids = {state["id"] for state in chain["states"]}
+    crop_by_state = {state["id"]: state["crop"] for state in chain["states"]}
     crops = {state["crop"] for state in chain["states"]}
     for scenario in run["scenarios"]:
         policy, name = scenario["policy"], scenario["id"]
         if scenario.get("initial_state") and scenario["initial_state"] not in ids:
             errors.append(f"scenario {name}: initial_state {scenario['initial_state']!r} is not a chain state")
+        effective_start = scenario.get("initial_state", chain["initial_state"])
+        if "initial_sugarcane_cut" in scenario and crop_by_state.get(effective_start) != "sugarcane":
+            errors.append(f"scenario {name}: initial_sugarcane_cut requires a sugarcane initial state")
         if policy["kind"] == "rotation":
             errors += [f"scenario {name}: crop {crop!r} has no state in the chain" for crop in policy["sequence"] if crop not in crops]
             if policy["fallback"] not in ids:

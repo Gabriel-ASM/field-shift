@@ -51,6 +51,7 @@
 
   function selectCrop(crop) {
     farmerUI.crop=crop;
+    $("farmer-sugarcane-cut-field").hidden=crop!=="sugarcane";
     document.querySelectorAll(".crop-choice").forEach(node=>{
       const selected=node.dataset.crop===crop;
       node.classList.toggle("is-selected",selected);
@@ -129,6 +130,7 @@
       `Starting with ${farmerCropName(farmerUI.crop).toLowerCase()}, with ${finance}% priority on returns and ${environment}% on soil and water.`,
       `${run.completed.toLocaleString("en-US")} scenarios simulated using NASA POWER, SoilGrids, IBGE, MAPA, and CONAB data.`
     ];
+    if(run.start==="sugarcane")facts.push(`Sugarcane starts at cut ${run.initialSugarcaneCut} of the modeled ${cycleRule("sugarcane").modeled_harvest_cuts} cuts.`);
     $("result-facts").innerHTML=facts.map(text=>`<li>${icon("check")}<span>${text}</span></li>`).join("");
     const alternatives=run.routeResults.slice(1,4),alternativeRoot=$("result-alternatives"); alternativeRoot.replaceChildren();
     if(!alternatives.length) alternativeRoot.textContent="No other sequence with complete data appeared in this sample.";
@@ -162,6 +164,8 @@
     farmerUI.target=Number($("config-trajectories").value)||100000;
     farmerUI.running=true; farmerUI.runToken++; farmerUI.startedAt=Date.now(); renderGrowth.lastBucket=null;
     $("initial-crop-select").value=farmerUI.crop;
+    $("technical-sugarcane-cut-field").hidden=farmerUI.crop!=="sugarcane";
+    if(farmerUI.crop==="sugarcane")$("initial-sugarcane-cut").value=$("farmer-sugarcane-cut").value;
     $("ranking-environment-weight").value=$("farmer-priority").value;
     $("simulation-seed").value=$("config-seed").value;
     $("simulation-title").textContent=`We're growing possibilities for ${farmerCropName(farmerUI.crop).toLowerCase()}`;
@@ -175,6 +179,12 @@
     if(node.classList.contains("city-marker")) node.addEventListener("keydown",event=>{ if(event.key==="Enter"||event.key===" "){event.preventDefault();selectCity(node.dataset.profile);} });
   });
   document.querySelectorAll(".crop-choice").forEach(node=>node.addEventListener("click",()=>selectCrop(node.dataset.crop)));
+  const modeledCuts=cycleRule("sugarcane").modeled_harvest_cuts;
+  for(let cut=1;cut<=modeledCuts;cut++){
+    const label=cut===1?"Cut 1 · plant cane":`Cut ${cut} · ratoon cane`;
+    $("farmer-sugarcane-cut").add(new Option(label,String(cut)));
+  }
+  $("farmer-sugarcane-cut-note").textContent=`Choose the next cut, not the last completed one. The model allows rotation after cut ${modeledCuts} and uses regional yield and costs for each cut.`;
   document.querySelectorAll("[data-crop-art]").forEach(node=>node.innerHTML=cropArtwork(node.dataset.cropArt));
   document.querySelectorAll("[data-go]").forEach(node=>node.addEventListener("click",()=>showFarmerScreen(node.dataset.go)));
   $("location-next").addEventListener("click",()=>showFarmerScreen("crop"));
@@ -183,7 +193,7 @@
   $("run-farmer-simulation").addEventListener("click",runFarmerAnalysis);
   $("retry-simulation").addEventListener("click",runFarmerAnalysis);
   $("adjust-priority").addEventListener("click",()=>showFarmerScreen("priority"));
-  $("restart-analysis").addEventListener("click",()=>{ farmerUI.crop=null; document.querySelectorAll(".crop-choice").forEach(node=>{node.classList.remove("is-selected");node.setAttribute("aria-pressed","false");}); $("crop-next").disabled=true; showFarmerScreen("location"); });
+  $("restart-analysis").addEventListener("click",()=>{ farmerUI.crop=null; $("farmer-sugarcane-cut-field").hidden=true; $("farmer-sugarcane-cut").value="1"; document.querySelectorAll(".crop-choice").forEach(node=>{node.classList.remove("is-selected");node.setAttribute("aria-pressed","false");}); $("crop-next").disabled=true; showFarmerScreen("location"); });
   $("brand-home").addEventListener("click",event=>{ event.preventDefault(); if(farmerUI.running){farmerUI.runToken++;farmerUI.running=false;simulationRunId++;if(simulationSession)simulationSession.running=false;} showFarmerScreen("location"); });
   $("open-settings").addEventListener("click",()=>{ $("config-seed").value=$("simulation-seed").value; $("settings-dialog").showModal(); });
   $("close-settings").addEventListener("click",()=>$("settings-dialog").close());

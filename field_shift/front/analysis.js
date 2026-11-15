@@ -149,9 +149,16 @@ function cropAllowedDestinations(sourceId){
 function plantingScheduleFor(sourceId){
   if(cachedScheduleProfile!==active){cachedPlantingSchedules=new Map();cachedScheduleProfile=active;}
   if(cachedPlantingSchedules.has(sourceId))return cachedPlantingSchedules.get(sourceId);
-  const allowed=cropAllowedDestinations(sourceId),grouped=plantingWindowsByDecendio(),slots=[];
+  const allowed=sourceId==="sugarcane"?sugarcaneReformDestinations():cropAllowedDestinations(sourceId);
+  const grouped=plantingWindowsByDecendio(),slots=[];
   for(let decendio=1;decendio<=36;decendio++){const destinations=new Set([...grouped[decendio]].filter(cropId=>allowed.has(cropId)));if(destinations.size)slots.push({decendio,destinations});}
   cachedPlantingSchedules.set(sourceId,slots);return slots;
+}
+function sugarcaneReformDestinations(){
+  return new Set(cropStates().filter(({id})=>{
+    const kind=cycleRule(id).class;
+    return (kind==="annual"||kind==="cover_or_annual")&&plantingDecendiosForCrop(id).length>0;
+  }).map(({id})=>id));
 }
 function selectedGraphPlantingDay(){return decendioStartDay(Number(byId("matrix-planting-decendio")?.value||1))+4;}
 function outgoingCount(stateId){return active.crop_markov.transitions.filter(row=>row.from===stateId).reduce((maximum,row)=>Math.max(maximum,Number(row.outgoing_mass??0)),0);}
@@ -350,11 +357,12 @@ function gammaRandom(shape,rng){
     if(draw<1-0.0331*x*x*x*x||Math.log(draw)<0.5*x*x+d*(1-cube+Math.log(cube)))return d*cube;
   }
 }
-function sampleCropRow(sourceId,rng){
-  const weights={},allowed=cropAllowedDestinations(sourceId);let total=0;
+function sampleCropRow(sourceId,rng,allowed=cropAllowedDestinations(sourceId),reform=false){
+  const weights={};let total=0;
   for(const dest of cropStates()){
     if(!allowed.has(dest.id)){weights[dest.id]=0;continue;}
-    const value=gammaRandom(pamMass(sourceId,dest.id)+alpha(),rng);weights[dest.id]=value;total+=value;
+    const mass=reform?(active.crop_markov.sugarcane_reform_pam_mass[dest.id]??0):pamMass(sourceId,dest.id);
+    const value=gammaRandom(mass+alpha(),rng);weights[dest.id]=value;total+=value;
   }
   return Object.fromEntries(Object.entries(weights).map(([id,value])=>[id,value/total]));
 }
@@ -399,9 +407,10 @@ function repeatedCropYieldMultiplier(cropId,consecutivePlantings){
   const repeats=Math.max(0,Number(consecutivePlantings||1)-1),perRepeat=Math.max(0,Number(cropEffect.yield_penalty_per_consecutive_replant_fraction||0)),cap=clamp(Number(cropEffect.maximum_yield_penalty_fraction||0),0,1);
   return Math.max(1-cap,1-repeats*perRepeat);
 }
-function sampleTrajectory(startCrop,rng,environmentYears){
+function sampleTrajectory(startCrop,rng,environmentYears,initialSugarcaneCut=1){
   const posteriorRows={},historyBlocks=Array.from({length:horizon},()=>environmentYears[Math.floor(rng()*environmentYears.length)]),path=[],annualPath=[],soilRates={};
   let crop=startCrop,lastMainCrop=startCrop,consecutivePlantings=1;
+  let nextSugarcaneCut=startCrop==="sugarcane"?initialSugarcaneCut:1;
   let waterFraction=active.water_markov.initial_storage_fraction,water=waterClass(waterFraction),soc=active.soil.organic_carbon_top_0_30_g_kg,mainTimer=cycleDays(crop),maturityRemaining=0,formationTimer=Infinity,pendingPlanting=null;
   const daysPerYear=Number(cropCycles.time_basis.days_per_year),yearStates=Array(horizon+1),environmentPath=Array(horizon+1);
   const rateFor=id=>{if(!id)return 0;if(!soilRates[id])soilRates[id]=soilDelta(id,rng);return soilRates[id];};
@@ -413,38 +422,47 @@ function sampleTrajectory(startCrop,rng,environmentYears){
     water=waterClass(waterFraction);
     soc=Math.max(0.1,soc+rateFor(crop)*climatePeriodDays/daysPerYear);
     mainTimer-=climatePeriodDays;if(maturityRemaining>0)maturityRemaining-=climatePeriodDays;if(Number.isFinite(formationTimer))formationTimer-=climatePeriodDays;
-    const eventDay=day+climatePeriodDays,eventYear=Math.min(horizon,Math.ceil(eventDay/daysPerYear));
-    if(crop&&mainTimer<=0){
+    const eventDay=Math.round((period+1)*climatePeriodDays*1e9)/1e9;
+    const eventYear=Math.min(horizon,Math.ceil(eventDay/daysPerYear));
+    // An annual cycle is exactly 24 climate steps. Subtraction can leave a tiny positive remainder.
+    if(crop&&mainTimer<=1e-9){
       const harvested=crop,perennial=Boolean(cropLifecycleRule(harvested)),harvest={day:eventDay,year:eventYear,crop:harvested,water,waterFraction,soc,eventKind:"main_harvest",flowKind:"main_harvest",flowCrop:harvested,consecutivePlantings,repeatYieldMultiplier:repeatedCropYieldMultiplier(harvested,consecutivePlantings),cycleDays:cycleDays(harvested),climateYear:historyBlocks[yearIndex][0]};
+      const caneCut=harvested==="sugarcane"?nextSugarcaneCut++:null;
+      if(caneCut!==null)harvest.sugarcane_cut=caneCut;
       path.push(harvest);
-      if(perennial){
+      const reform=caneCut===cycleRule("sugarcane").modeled_harvest_cuts;
+      if(perennial&&!reform){
         path.push({day:eventDay,year:eventYear,crop:harvested,fromCrop:harvested,water,soc,transitionProbability:1,eventKind:"main_transition",transitionReason:"colheita recorrente de cultura perene"});
         mainTimer=cycleDays(harvested);maturityRemaining=0;formationTimer=Infinity;
       }else{
         lastMainCrop=harvested;crop=null;mainTimer=Infinity;maturityRemaining=0;formationTimer=Infinity;
-        pendingPlanting=nextPlantingOpportunity(lastMainCrop,eventDay);
+        pendingPlanting=reform&&eventDay>=horizonDays?null:nextPlantingOpportunity(lastMainCrop,eventDay);
+        if(reform)path.push({day:eventDay,year:eventYear,crop:harvested,eventKind:"sugarcane_reform",sugarcane_cut:caneCut});
         if(!pendingPlanting||pendingPlanting.day>eventDay)path.push({day:eventDay,year:eventYear,crop:"fallow",fromCrop:lastMainCrop,water,soc,eventKind:"fallow_start",nextDecisionDay:pendingPlanting?.day??null,nextDecisionDecendio:pendingPlanting?.decendio??null,climateYear:historyBlocks[yearIndex][0]});
       }
     }
-    if(!crop&&pendingPlanting&&pendingPlanting.day<=eventDay){
-      const decisionDay=pendingPlanting.day,decisionDecendio=pendingPlanting.decendio,allowed=eligibleCropDestinations(lastMainCrop,decisionDay);
+    if(!crop&&pendingPlanting&&!pendingPlanting.cropId&&pendingPlanting.day<=eventDay){
+      const decisionDay=pendingPlanting.day,decisionDecendio=pendingPlanting.decendio;
+      const reform=lastMainCrop==="sugarcane";
+      const allowed=reform?sugarcaneReformDestinations():eligibleCropDestinations(lastMainCrop,decisionDay);
       if(!allowed.size){pendingPlanting=nextPlantingOpportunity(lastMainCrop,decisionDay+1);}
       else{
-        if(!posteriorRows[lastMainCrop])posteriorRows[lastMainCrop]=sampleCropRow(lastMainCrop,rng);
+        if(!posteriorRows[lastMainCrop])posteriorRows[lastMainCrop]=reform
+          ?sampleCropRow(lastMainCrop,rng,allowed,true):sampleCropRow(lastMainCrop,rng);
         const probabilities=cropProbabilities(lastMainCrop,waterFraction,soc,posteriorRows[lastMainCrop],allowed),next=drawProbability(probabilities,rng),transitionProbability=probabilities[next],previous=lastMainCrop,sowOpportunity=nextCropPlantingWindow(next,decisionDay);
         if(!sowOpportunity){pendingPlanting=nextPlantingOpportunity(lastMainCrop,decisionDay+1);}
         else{
           const newStreak=next===previous?consecutivePlantings+1:1;
           path.push({day:decisionDay,year:Math.min(horizon,Math.ceil(decisionDay/daysPerYear)),crop:next,fromCrop:previous,water,soc,transitionProbability,eventKind:"main_transition",plantingDecendio:sowOpportunity.decendio,scheduledPlantingDay:sowOpportunity.day,decisionDecendio,plantingRule:cropCalendarBasisLabel(next),consecutivePlantings:newStreak,repeatYieldMultiplier:repeatedCropYieldMultiplier(next,newStreak),climateYear:historyBlocks[yearIndex][0]});
-          lastMainCrop=next;pendingPlanting=null;
           if(sowOpportunity.day>decisionDay)path.push({day:decisionDay,year:Math.min(horizon,Math.ceil(decisionDay/daysPerYear)),crop:"fallow",fromCrop:previous,toCrop:next,water,soc,eventKind:"fallow_until_planting",nextPlantingDay:sowOpportunity.day,nextPlantingDecendio:sowOpportunity.decendio,climateYear:historyBlocks[yearIndex][0]});
           pendingPlanting={cropId:next,fromCrop:previous,day:sowOpportunity.day,decendio:sowOpportunity.decendio,consecutivePlantings:newStreak,repeatYieldMultiplier:repeatedCropYieldMultiplier(next,newStreak)};
         }
       }
     }
-    if(!crop&&pendingPlanting&&pendingPlanting.day<=eventDay){
+    if(!crop&&pendingPlanting?.cropId&&pendingPlanting.day<=eventDay){
       const plantingDay=pendingPlanting.day,next=pendingPlanting.cropId,previous=pendingPlanting.fromCrop,elapsedDays=Math.max(0,eventDay-plantingDay),perennial=Boolean(cropLifecycleRule(next));
       crop=next;consecutivePlantings=pendingPlanting.consecutivePlantings;
+      if(next==="sugarcane")nextSugarcaneCut=1;
       const firstCycleDuration=Math.max(cycleDays(next),maturationDays(next));mainTimer=Math.max(climatePeriodDays,firstCycleDuration-elapsedDays);maturityRemaining=Math.max(0,maturationDays(next)-elapsedDays);formationTimer=perennial?Math.max(0,daysPerYear-elapsedDays):Infinity;
       path.push({day:plantingDay,year:Math.min(horizon,Math.ceil(plantingDay/daysPerYear)),crop,fromCrop:previous,water,soc,eventKind:"planting",plantingDecendio:pendingPlanting.decendio,consecutivePlantings,repeatYieldMultiplier:pendingPlanting.repeatYieldMultiplier,climateYear:historyBlocks[yearIndex][0]});
       if(perennial)path.push({day:plantingDay,year:Math.min(horizon,Math.ceil(plantingDay/daysPerYear)),crop,water,waterFraction,soc,eventKind:"formation_cost",flowKind:"perennial_formation_cost",flowCrop:crop,cycleDays:Math.min(daysPerYear,maturationDays(crop)),climateYear:historyBlocks[yearIndex][0]});
@@ -464,6 +482,7 @@ function economicYieldMultiplier(water,soc){
   return Number(response.water_multiplier_by_class[water])*Number(response.soil_carbon_multiplier_by_class[soilClass]);
 }
 function priceAtYear(input,years){const price=Number(input?.price?.brl_per_tonne),trend=Number(input?.price?.trend_annual_fraction||0);return price*Math.pow(1+trend,Math.max(0,years));}
+
 function economicCashflow(step,inputs){
   const cropId=step.flowCrop,input=inputs[cropId],cost=Number(input?.cost_panel?.total_cost_brl_ha_reference_month);
   if(step.flowKind==="main_harvest"){
@@ -655,10 +674,13 @@ function renderEconomicOptimization(start,rotationSamples){
   slider.disabled=!routeResults.length;slider.oninput=()=>{rotationRankingPage=0;renderRanking();};environmentSlider.disabled=!routeResults.length;environmentSlider.oninput=()=>{rotationRankingPage=0;renderRanking();};
   renderRanking();
 }
+function initialSugarcaneCut(start){
+  return start==="sugarcane"?Number(byId("initial-sugarcane-cut").value):1;
+}
 function createSimulationSession(seed){
   const profile=active,history=Object.entries(profile.water_markov.environment_years).filter(([,block])=>Array.isArray(block)&&block.length===profile.water_markov.periods_per_year),start=byId("initial-crop-select").value;
   const selectedEconomicIds=new Set(cropStates().filter(crop=>Boolean(profile.economics.crop_inputs?.[crop.id]?.include_in_vpl??profile.economics.crop_inputs?.[crop.id]?.eligible_for_economic_comparison)).map(crop=>crop.id));
-  return {profile,start,seed,rng:seeded(seed),history,selectedEconomicIds,waterCounts:{},socValues:[],rotationSamples:new Map(),environmentCountsByYear:Array.from({length:horizon+1},environmentCountFrame),nodeCountsByYear:Array.from({length:horizon+1},()=>({})),edgeCountsByYear:Array.from({length:horizon+1},()=>({})),completed:0,previousLeaderKey:null,stableLeaderCheckpoints:0,running:false};
+  return {profile,start,initialSugarcaneCut:initialSugarcaneCut(start),seed,rng:seeded(seed),history,selectedEconomicIds,waterCounts:{},socValues:[],rotationSamples:new Map(),environmentCountsByYear:Array.from({length:horizon+1},environmentCountFrame),nodeCountsByYear:Array.from({length:horizon+1},()=>({})),edgeCountsByYear:Array.from({length:horizon+1},()=>({})),completed:0,previousLeaderKey:null,stableLeaderCheckpoints:0,running:false};
 }
 function nextRefinementTarget(completed){
   return (monteCarloSettings.refinement_targets||[]).map(Number).find(target=>target>completed)||null;
@@ -685,7 +707,7 @@ function updateRefinementCheckpoint(state){
 async function renderSimulation(seed,target=Number(monteCarloSettings.initial_preview_trajectories),reset=true){
   const runId=++simulationRunId,status=byId("run-status"),progress=byId("simulation-progress"),progressText=byId("simulation-progress-text"),start=byId("initial-crop-select").value;
   const current=simulationSession;
-  if(reset||!current||current.profile!==active||current.start!==start||current.seed!==seed)simulationSession=createSimulationSession(seed);
+  if(reset||!current||current.profile!==active||current.start!==start||current.seed!==seed||current.initialSugarcaneCut!==initialSugarcaneCut(start))simulationSession=createSimulationSession(seed);
   const state=simulationSession;
   if(!state.history.length){status.textContent="Não há blocos climáticos completos para simular.";progressText.textContent="Sem clima completo";updateRefinementControls(false);return;}
   if(state.completed===0)renderEnvironmentalDistributionCharts(state.environmentCountsByYear,0);
@@ -698,7 +720,7 @@ async function renderSimulation(seed,target=Number(monteCarloSettings.initial_pr
   while(state.completed<targetLimit){
     let processed=0;
     while(processed<progressEvery&&state.completed<targetLimit){
-      const result=sampleTrajectory(state.start,state.rng,state.history);
+      const result=sampleTrajectory(state.start,state.rng,state.history,state.initialSugarcaneCut);
       state.waterCounts[result.water]=(state.waterCounts[result.water]||0)+1;state.socValues.push(result.soc);
       for(let year=0;year<result.environmentPath.length;year++){
         const environment=result.environmentPath[year],frame=state.environmentCountsByYear[year];
@@ -762,7 +784,7 @@ function renderProfile(){
   byId("crop-data-note").textContent="Uma cultura principal por talhão. Soja, milho e cana podem iniciar; as demais são destinos quando há janela municipal MAPA ou uma hipótese explicitamente marcada para cobertura sem dado. A cadeia considera a distribuição PAM do top 5 por área e forma transições marginais entre anos com independência assumida; a PAM não liga culturas ao mesmo talhão. A série rank 1 aparece como diagnóstico separado. Datas são decêndios das tábuas anual 2026/2027 e perene vigente repetidas nos cinco anos; classes de solo e grupos de cultivar são agregados."+beanCalendarAuditNote();
   const lifecycleNote=byId("crop-lifecycle-note");
   lifecycleNote.replaceChildren();
-  lifecycleNote.append(el("strong","Perenes e maturação."),document.createTextNode(" A cana permanece como cultura principal durante o horizonte por falta de idade/reforma. A cultura inicial é tratada como estabelecida; ao entrar numa cultura nova, a receita espera o ciclo ou a maturação correspondente e custos de formação são cobrados."));
+  lifecycleNote.append(el("strong","Perenes e maturação."),document.createTextNode(" A matriz regional mostra a permanência da cana nas socas. No Monte Carlo, o próximo corte é informado para um canavial existente. O quinto corte abre a rotação com culturas anuais elegíveis, usando a PAM regional como prior. Rendimento e custo usam o mesmo benchmark em todos os cortes; o custo de remoção da soqueira não está separado. Novos plantios passam por maturação e custos de formação."));
   const rankOnePairs=active.crop_markov.transitions.reduce((sum,row)=>sum+Number(row.count||0),0);
   byId("crop-source-detail").textContent="Fonte: "+active.crop_markov.source.publisher+" · "+active.crop_markov.source.survey+", tabela "+active.crop_markov.source.table+" · município IBGE "+active.crop_markov.source.municipality_ibge_code+" · área colhida em hectares. Para cada ano, o top "+active.crop_markov.top_crop_limit+" entre as culturas mapeadas é normalizado pela área do próprio top 5. Os "+active.crop_markov.area_weighted_transition_pair_count+" pares anuais geram massa esperada pela multiplicação das participações t × t+1; "+rankOnePairs+" pares rank 1 das arestas elegíveis são informados separadamente, sem dupla contagem na probabilidade.";
   byId("mapbiomas-note").textContent="O relatório de pesquisa cita sequências e seis tabelas MapBiomas, mas esses arquivos não estão neste checkout. Os assets oficiais de uso agrícola e carbono do solo são publicados pelo MapBiomas; não foram usados para preencher contagens ausentes nesta página. Assim, a cadeia fica baseada na PAM e identifica sua escala municipal.";
@@ -774,6 +796,7 @@ function renderProfile(){
   const cropSelect=byId("initial-crop-select"),previous=cropSelect.value;cropSelect.replaceChildren();
   for(const id of active.crop_markov.initial_crop_ids){const crop=cropStateMap()[id];cropSelect.add(new Option(crop.name,crop.id));}
   cropSelect.value=active.crop_markov.initial_crop_ids.includes(previous)?previous:"soybean";
+  byId("technical-sugarcane-cut-field").hidden=cropSelect.value!=="sugarcane";
   const waterSelect=byId("matrix-water-select");waterSelect.replaceChildren();
   for(const state of active.water_markov.states)waterSelect.add(new Option(state.label,state.id));
   waterSelect.value="water_medium";
@@ -788,9 +811,17 @@ function renderProfile(){
 }
 
 for(const item of cases.cases)byId("case-select").add(new Option(item.municipality+" · "+item.uf,item.profile));
+for(let cut=1;cut<=cycleRule("sugarcane").modeled_harvest_cuts;cut++){
+  byId("initial-sugarcane-cut").add(new Option(cut+"º corte",String(cut)));
+}
 renderVplReferences();
 byId("case-select").addEventListener("change",renderProfile);
-byId("initial-crop-select").addEventListener("change",()=>{selectedGraphCropId=byId("initial-crop-select").value;startSimulation(currentSeed());});
+byId("initial-crop-select").addEventListener("change",()=>{
+  selectedGraphCropId=byId("initial-crop-select").value;
+  byId("technical-sugarcane-cut-field").hidden=selectedGraphCropId!=="sugarcane";
+  startSimulation(currentSeed());
+});
+byId("initial-sugarcane-cut").addEventListener("change",()=>startSimulation(currentSeed()));
 byId("matrix-water-select").addEventListener("change",renderCropMatrix);
 byId("matrix-carbon-input").addEventListener("input",renderCropMatrix);
 byId("matrix-planting-decendio").addEventListener("change",renderCropMatrix);
