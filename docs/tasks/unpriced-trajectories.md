@@ -2,6 +2,15 @@
 
 Owner: @Gabriel-ASM (economic inputs). Written on 2026-11-15 as a brief for a person or an AI assistant picking this up.
 
+> **Status, 2026-11-15:** closed on the data side by commit 8788667 (economic fallback). With it, every
+> trajectory of the three profiles is priced (`priced_share` = 1.0, checked for franca-sp from soybean and
+> varginha-mg from maize_grain). The text below is kept as the record of the problem.
+>
+> **New follow-up:** that commit also changed the choice logic in `field_shift/front/analysis.js`. The Python
+> engine (`field_shift/engines`) was ported from the previous version and now differs from the page: for
+> franca-sp from soybean, 65% of trajectories end in sugarcane in Python against 72% in the page. The engine
+> must be brought in line with the new JS before the two are compared again.
+
 ## The problem in one paragraph
 
 The Monte Carlo engine computes the present value (BRL/ha, 5 years) of each simulated trajectory. A trajectory
