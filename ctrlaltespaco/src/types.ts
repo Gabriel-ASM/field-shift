@@ -146,6 +146,8 @@ export interface ScenarioResult {
   carbon: { p5: number; p50: number; p95: number }[];
   routes: Route[];
   ranking_reference: RankingReference | null;
+  /** Every trajectory of the scenario as one route: a fixed rotation's own result. */
+  overall: Route;
   tracks: Track[];
 }
 

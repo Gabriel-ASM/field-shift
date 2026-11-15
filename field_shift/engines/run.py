@@ -11,7 +11,7 @@ from .calendar import DAYS_PER_YEAR
 from .batches import batch_for, simulate_batches
 from .monte_carlo import Policy
 from .payload import profile_payload, reference_payload
-from .summary import Support, summarize
+from .summary import Support, summarize, yield_penalties
 from .tables import Tables, build_tables
 
 MAX_TRAJECTORIES = 1_000_000
@@ -125,6 +125,11 @@ def prepare(request: dict, default_state: str) -> tuple[Tables, list[Policy]]:
     return tables, [policy_of(tables, scenario, default_state) for scenario in request["scenarios"]]
 
 
+def name_sequence(overall: dict, crops: list[str], tables: Tables) -> None:
+    """A fixed rotation's own result is its sequence: name it, with the yield lost at each replanting."""
+    overall["crops"], overall["yield_penalty"] = crops, yield_penalties(crops, tables)
+
+
 def total_trajectories(request: dict) -> int:
     return request["trajectories"] * len(request["scenarios"])
 
@@ -145,8 +150,11 @@ def run(request: dict, default_state: str, device: str = "auto", tracks: int = 0
                                   paths=raw is not None, batch=batch_for(xp), progress=lambda done: progress(before + done))
         if raw is not None:
             raw.append(result)
+        summary = summarize(result, tables, support_of(tables))
+        if policy.sequence:
+            name_sequence(summary["overall"], [tables.crops[i] for i in policy.sequence], tables)
         scenarios.append({"id": scenario["id"], "label": scenario.get("label", scenario["id"]),
-                          "initial_crop": tables.crops[policy.initial_crop], **summarize(result, tables, support_of(tables))})
+                          "initial_crop": tables.crops[policy.initial_crop], **summary})
     return {
         "profile": request["profile"], "seed": request["seed"], "device": "gpu" if xp.__name__ == "cupy" else "cpu",
         "seconds": round(time.perf_counter() - started, 3),

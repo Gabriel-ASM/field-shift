@@ -100,3 +100,6 @@ h4 { margin: 12px 0 6px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0
 .result-eyebrow.is-option button { margin-left: 6px; padding: 4px 10px; font-size: 0.7rem; letter-spacing: 0; text-transform: none; }
 button.alternative-route { width: 100%; border: 1px solid transparent; text-align: left; cursor: pointer; }
 button.alternative-route[aria-pressed="true"] { border-color: var(--fs-green); background: var(--fs-green-soft); }
+.refine-status { margin: 0 auto; max-width: 860px; padding: 10px 14px; border-radius: 10px; background: var(--fs-canvas); color: var(--fs-muted); font-size: 0.82rem; text-align: center; }
+.refine-status small { display: block; margin-top: 2px; }
+.refine-status.is-done { background: var(--fs-green-soft); color: var(--fs-green-dark); }

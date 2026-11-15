@@ -52,6 +52,9 @@ export function startJob(options: RunOptions): Promise<{ id: string; total: numb
 
 export const getJob = (id: string) => request<JobView>(`/runs/jobs/${encodeURIComponent(id)}`);
 
-/** Water and soil every period, year-end charts and some trajectories of one route of a finished job. */
-export const getRoute = (job: string, crops: string[], scenario = 0) =>
-  request<RouteDetail>(`/runs/jobs/${encodeURIComponent(job)}/route?scenario=${scenario}&crops=${encodeURIComponent(crops.join(","))}`);
+/** Water and soil every period, year-end charts and some trajectories of one route of a finished job;
+ *  `crops` null takes every trajectory of the scenario (a fixed rotation). */
+export function getRoute(job: string, crops: string[] | null, scenario = 0): Promise<RouteDetail> {
+  const route = crops ? `&crops=${encodeURIComponent(crops.join(","))}` : "";
+  return request<RouteDetail>(`/runs/jobs/${encodeURIComponent(job)}/route?scenario=${scenario}${route}`);
+}

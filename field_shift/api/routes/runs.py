@@ -87,7 +87,8 @@ def job_status(job_id: str) -> dict[str, Any]:
 
 
 @router.get("/jobs/{job_id}/route")
-def job_route(job_id: str, crops: str = Query(..., description="Comma-separated crops of the route, as in its summary."),
+def job_route(job_id: str, crops: str | None = Query(None, description="Comma-separated crops of the route, as in its "
+                                                                   "summary; omitted: every trajectory of the scenario."),
               scenario: int = Query(0, ge=0)) -> dict[str, Any]:
     """Water and soil every period, year-end charts and some trajectories of one route of a finished job."""
     job = _job(job_id)
@@ -95,7 +96,7 @@ def job_route(job_id: str, crops: str = Query(..., description="Comma-separated 
         raise HTTPException(409, f"Job {job_id!r} is {job.status}")
     if scenario >= len(job.raw):
         raise HTTPException(404, f"No scenario {scenario}")
-    detail = route_detail(job.raw[scenario], tables_for(job.profile), crops.split(","))
+    detail = route_detail(job.raw[scenario], tables_for(job.profile), crops.split(",") if crops else None)
     if detail is None:
         raise HTTPException(404, f"No trajectory followed {crops!r}")
     return detail
