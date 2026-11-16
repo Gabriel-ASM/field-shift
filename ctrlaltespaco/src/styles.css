@@ -82,7 +82,7 @@ h4 { margin: 12px 0 6px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0
 /* The plan, once the panel has grown over the map. Cards and charts come from reference.css. */
 .card { padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); }
 .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 3px; }
-.result { display: grid; gap: 20px; max-width: 1120px; padding: 1em ; margin: 0 auto; }
+.result { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; max-width: 1120px; padding: 1em ; margin: 0 auto; }
 .result-heading { display: grid; justify-items: center; text-align: center; }
 .result-heading h2 { max-width: 760px; margin: 0 0 8px; font-size: clamp(1.6rem, 3.4vw, 2.6rem); line-height: 1.08; letter-spacing: -0.04em; }
 .result-heading .lead { margin: 0; }
@@ -92,8 +92,11 @@ h4 { margin: 12px 0 6px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0
 .method-resilience > span { font-size: 1rem; line-height: 1.2; }
 .engine-feedback > span:first-child { color: var(--fs-green); }
 @media (max-width: 760px) {
-  .panel { top: 46vh; width: 100vw; border-left: 0; border-top: 1px solid var(--line); }
-  .panel.wide { top: 0; }
+  /* Phones keep the map visible above the panel, also on the result. The panel gets most of the screen so the steps fit. */
+  .panel { top: 32vh; width: 100vw; border-left: 0; border-top: 1px solid var(--line); }
+  .panel.wide { top: 32vh; }
+  /* The next step stays in reach at the bottom of the panel, so nobody has to scroll to find it. */
+  .panel .actions { position: sticky; bottom: 0; z-index: 3; margin: 0 -28px; padding: 12px 28px; background: var(--bg); border-top: 1px solid var(--line); box-shadow: 0 -10px 18px rgba(20, 30, 24, 0.08); }
 }
 .micro-card { margin-top: 18px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; background: #fff; }
 .micro-card .micro-count { color: var(--muted); font-size: 0.72rem; font-variant-numeric: tabular-nums; }

@@ -29,9 +29,7 @@ export function LocationStep({ journey, world, area, explored, onExplore }: Loca
         ))}
       </div>
       <PlaceSearch profiles={world.profiles} explored={explored} onExplore={onExplore} onChooseProfile={journey.choosePlace} />
-      <p className="note">{area === null
-        ? "You can outline your field with the polygon tool on the map."
-        : `Your field: ${HECTARES.format(area)} ha. Results are per hectare and use municipal data; the outline does not change them yet.`}</p>
+      {area !== null && <p className="note">Your field: {HECTARES.format(area)} ha. Results are per hectare and use municipal data; the outline does not change them yet.</p>}
       <div className="actions">
         <span />
         <button type="button" className="primary" disabled={!journey.place} onClick={() => journey.go("crop")}>Continue</button>
