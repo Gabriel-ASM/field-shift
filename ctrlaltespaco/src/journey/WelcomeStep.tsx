@@ -26,6 +26,7 @@ function PixelCropField() {
 
 export function WelcomeStep({ futures, onStart }: { futures: number; onStart: () => void }) {
   const [explaining, setExplaining] = useState(false);
+  const scenarioCount = futures.toLocaleString("en-US");
   return (
     <main className="welcome">
       <PixelCropField />
@@ -35,15 +36,16 @@ export function WelcomeStep({ futures, onStart }: { futures: number; onStart: ()
             <svg viewBox="0 0 28 28" aria-hidden="true">
               <path d="M3 3h10v10H3zM15 3h10v4H15zM15 9h10v4H15zM3 15h4v10H3zM9 15h16v4H9zM9 21h16v4H9z" fill="currentColor" />
             </svg>
-            <strong>Field Shift</strong>
+            <strong>Ctrl + Alt + Espaço</strong>
           </span>
           <span className="welcome-header-note">Climate-smart crop planning</span>
         </header>
         <section className="welcome-hero" aria-labelledby="welcome-title">
           <div className="welcome-copy">
-            <p className="kicker">Welcome to Field Shift</p>
+            <p className="kicker">Welcome to Ctrl + Alt + Espaço</p>
             <h1 id="welcome-title">Build a five-year crop plan for a changing climate.</h1>
             <p className="welcome-lead">Explore crop rotations that balance financial return, soil health, and water—guided by NASA climate data, local field conditions, and your priorities.</p>
+            <p className="welcome-proof">Our statistical approach simulates <strong>{scenarioCount} possible climate and crop scenarios</strong>—not just one average forecast—then compares rotations to find the best fit for your priorities.</p>
             <div className="welcome-actions">
               <button className="primary welcome-start" type="button" onClick={onStart}>Start planning <span aria-hidden="true">→</span></button>
               <p className="welcome-start-note">Three simple steps. No account needed.</p>
