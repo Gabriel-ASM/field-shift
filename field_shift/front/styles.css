@@ -219,7 +219,7 @@
   .button-with-icon { display:inline-flex; align-items:center; justify-content:center; gap:9px; }
   .button-with-icon svg { width:17px; height:17px; }
   .choice-panel>.primary-button { width:100%; margin-top:14px; }
-  .screen-toolbar { margin:-10px 0 22px; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .screen-toolbar { margin:-10px 0 22px; display:none; justify-content:space-between; align-items:center; gap:12px; }
   .location-pill { display:inline-flex; align-items:center; gap:7px; padding:7px 11px; border:1px solid var(--fs-line); border-radius:999px; background:#fff; color:#486054; font-size:.73rem; }
   .location-pill svg { width:14px; height:14px; flex:0 0 auto; }
   .crop-grid { display:flex; flex-wrap:wrap; justify-content:center; gap:14px; max-width:820px; margin-inline:auto; }

@@ -43,7 +43,7 @@
 .compare { margin-top:20px; padding:22px; border:1px solid var(--fs-line); border-radius:16px; background:#fff; }
 .compare-heading h3 { margin:0; font-size:.87rem; }
 .compare-heading p { margin:6px 0 0; color:var(--fs-muted); font-size:.71rem; line-height:1.55; }
-.compare-grid { margin-top:16px; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:16px; }
+.compare-grid { margin-top:16px; display:grid; grid-auto-flow:column; grid-auto-columns:minmax(240px,1fr); gap:16px; overflow-x:auto; overscroll-behavior-x:contain; padding-bottom:4px; }
 .compare-col { min-width:0; display:grid; gap:10px; align-content:start; }
 .compare-tag { color:var(--fs-muted); font-size:.6rem; font-weight:750; letter-spacing:.06em; text-transform:uppercase; }
 .compare-name { font-size:.78rem; overflow-wrap:anywhere; }
@@ -207,7 +207,7 @@
   .recommendation-card { padding:21px 17px; }
   .result-metrics { grid-template-columns:1fr 1fr; }
   .metric-card.income { grid-column:1/-1; }
-  .result-info,.environment-results-grid,.compare-grid { grid-template-columns:1fr; }
+  .result-info,.environment-results-grid { grid-template-columns:1fr; }
   .result-chart-card { padding:17px 14px; }
   .method-header { padding:18px 17px 15px; }
   .method-header h2 { font-size:1.25rem; }

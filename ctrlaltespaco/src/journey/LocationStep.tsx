@@ -37,9 +37,7 @@ export function LocationStep({ journey, world, area, explored, onExplore, onBuil
         <p className="note">Selected: <strong>{picked.municipality.name}, {picked.municipality.uf}</strong>
           <em className="badge">experimental</em> — data assembled automatically, not reviewed yet.</p>
       ) : null}
-      {area === null ? null : (
-        <p className="note">Your field: {HECTARES.format(area)} ha. Results are per hectare and use municipal data; the outline does not change them yet.</p>
-      )}
+      {area !== null && <p className="note">Your field: {HECTARES.format(area)} ha. Results are per hectare and use municipal data; the outline does not change them yet.</p>}
       <div className="actions">
         <span />
         <button type="button" className="primary" disabled={!journey.place} onClick={() => journey.go("crop")}>Continue</button>
