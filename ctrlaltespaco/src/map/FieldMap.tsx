@@ -39,8 +39,6 @@ async function addDrawing(map: L.Map, onArea: (hectares: number | null) => void)
   (window as unknown as { L: typeof L }).L = L;
   await import("leaflet-draw");
   const drawn = new L.FeatureGroup().addTo(map);
-  const shapes = { polygon: { showArea: true }, polyline: false, rectangle: false, circle: false, marker: false, circlemarker: false } as const;
-  map.addControl(new L.Control.Draw({ position: "topleft", draw: shapes, edit: { featureGroup: drawn } }));
   const report = () => {
     const [field] = drawn.getLayers() as L.Polygon[];
     onArea(field ? hectares(field) : null);
