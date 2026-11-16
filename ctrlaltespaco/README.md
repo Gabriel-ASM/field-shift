@@ -12,6 +12,10 @@ npm run build      # type-check and build into dist/
 
 To serve the build from the API itself: `FIELD_SHIFT_WEB_DIR=ctrlaltespaco/dist uv run uvicorn --factory field_shift.api:create_app`.
 
+The map needs the API up, and the API needs MongoDB loaded with the profiles (`python -m field_shift.ingest --mongo ...`);
+`docker run -p 8000:8000 field-shift` starts all three. State and municipality boundaries are files under `data/geo`,
+served by `/geo/*`; the front never calls IBGE.
+
 Runtime settings (basemap tiles, CMS address, run size) are not baked into the build. The front reads them from the API's
 `GET /config`, which the deployment sets with `FIELD_SHIFT_*` environment variables.
 

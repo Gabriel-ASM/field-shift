@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import argparse
+import gzip
 import json
 import csv
 from hashlib import sha256
@@ -17,11 +19,26 @@ ROOT = Path(__file__).resolve().parents[2]
 PROFILES = ROOT / "data" / "profiles"
 RAW_PAM = ROOT / "data" / "raw" / "ibge" / "pam-municipal-5457-1988-2025.json"
 RAW_ZARC = ROOT / "data" / "raw" / "mapa-siszarc"
-PROFILE_CITIES = {
+RAW_PAM_TARGETS = ROOT / "data" / "raw" / "ibge" / "pam"                      # fetch_pam_targets.py
+RAW_ZARC_STATES = RAW_ZARC / "by-uf"                                          # fetch_zarc_national.py
+CATALOG = ROOT / "data" / "catalog" / "perfis-exemplo.json"
+# The three example municipalities read the raw files downloaded for them; every other reads the fetchers' files.
+EXAMPLE_CITIES = {
     "ariquemes-ro": ("1100023", "ariquemes", "RO"),
     "franca-sp": ("3516200", "franca", "SP"),
     "varginha-mg": ("3170701", "varginha", "MG"),
 }
+
+
+def catalog_cities() -> dict[str, tuple[str, str, str]]:
+    """Profile id -> (IBGE code, municipality name, state) of every profile built by build_profiles.py."""
+    cities = {}
+    for entry in json.loads(CATALOG.read_text(encoding="utf-8"))["profiles"]:
+        cities[entry["profile"]] = EXAMPLE_CITIES.get(entry["profile"]) or (str(entry["ibge_code"]), entry["municipality"], entry["uf"])
+    return cities
+
+
+PROFILE_CITIES = catalog_cities()
 VARIABLE_FIELDS = {
     "112": "yield_kg_ha",
     "214": "production_tonnes",
@@ -93,7 +110,18 @@ def load_pam() -> tuple[dict[str, dict[str, dict[str, object]]], dict[str, objec
     by_municipality: dict[str, dict[tuple[str, int], dict[str, object]]] = {
         code: {} for code, _, _ in PROFILE_CITIES.values()
     }
-    for row in payload["records"]:
+    sources = {code: payload["source"] for code, _, _ in EXAMPLE_CITIES.values()}
+    rows = list(payload["records"])
+    for profile_id, (code, _, _) in PROFILE_CITIES.items():
+        if profile_id in EXAMPLE_CITIES:
+            continue
+        path = RAW_PAM_TARGETS / f"{code}.json.gz"
+        if not path.is_file():
+            raise FileNotFoundError(f"{path.relative_to(ROOT)} is missing; run fetch_pam_targets.py for {profile_id}")
+        municipal = json.loads(gzip.decompress(path.read_bytes()))
+        sources[code] = municipal["source"]
+        rows += municipal["records"]
+    for row in rows:
         code = str(row.get("D1C", ""))
         if code not in by_municipality:
             continue
@@ -153,7 +181,7 @@ def load_pam() -> tuple[dict[str, dict[str, dict[str, object]]], dict[str, objec
                 "evidence": "observed municipal PAM statistics; not parcel yield or a causal crop-response function",
             }
         result[profile_id] = {
-            "source": payload["source"],
+            "source": sources[municipality_code],
             "municipality_ibge_code": municipality_code,
             "records": records,
             "crop_summaries": summaries,
@@ -171,10 +199,17 @@ def read_zarc() -> dict[str, list[dict[str, object]]]:
     result: dict[str, list[dict[str, object]]] = {key: [] for key in PROFILE_CITIES}
     extracts = sorted(RAW_ZARC.glob("zarc-*-municipal-extract.csv"))
     if extracts:
-        profile_by_code = {code: profile_id for profile_id, (code, _, _) in PROFILE_CITIES.items()}
-        for path in extracts:
-            resource_kind = "perennial/olericulture/no-season" if "perennial" in path.name else "annual"
-            with path.open("r", encoding="utf-8-sig", newline="") as stream:
+        example_by_code = {code: profile_id for profile_id, (code, _, _) in EXAMPLE_CITIES.items() if profile_id in PROFILE_CITIES}
+        target_by_code = {code: profile_id for profile_id, (code, _, _) in PROFILE_CITIES.items() if profile_id not in EXAMPLE_CITIES}
+        target_states = {uf for profile_id, (_, _, uf) in PROFILE_CITIES.items() if profile_id not in EXAMPLE_CITIES}
+        target_files = sorted(path for path in RAW_ZARC_STATES.glob("*/*.csv.gz") if path.name.split(".")[0] in target_states)
+        if target_states and not target_files:
+            raise FileNotFoundError("data/raw/mapa-siszarc/by-uf is missing; run fetch_zarc_national.py")
+        for path in [*extracts, *target_files]:
+            profile_by_code = example_by_code if path in extracts else target_by_code
+            resource_kind = "perennial/olericulture/no-season" if "perennial" in path.relative_to(RAW_ZARC).as_posix() else "annual"
+            with (gzip.open(path, "rt", encoding="utf-8-sig", newline="") if path.suffix == ".gz"
+                  else path.open("r", encoding="utf-8-sig", newline="")) as stream:
                 reader = csv.DictReader(stream, delimiter=";")
                 for raw in reader:
                     row = {str(key).lstrip("\ufeff"): value for key, value in raw.items() if key is not None}
@@ -267,16 +302,30 @@ def read_zarc() -> dict[str, list[dict[str, object]]]:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--profiles", nargs="+", metavar="ID", help="only these profiles of the catalog (default: all)")
+    args = parser.parse_args()
+    coverage_path = ROOT / "data" / "reference" / "crop-data-coverage.json"
+    earlier = {}
+    if args.profiles:
+        unknown = set(args.profiles) - set(PROFILE_CITIES)
+        if unknown:
+            raise SystemExit(f"Not in the catalog: {', '.join(sorted(unknown))}")
+        for profile_id in list(PROFILE_CITIES):
+            if profile_id not in args.profiles:
+                del PROFILE_CITIES[profile_id]
+        earlier = json.loads(coverage_path.read_text(encoding="utf-8")).get("profiles", {})
     pam, pam_source = load_pam()
     zarc = read_zarc()
-    summaries = {"source": pam_source, "profiles": {}}
+    summaries = {"source": pam_source, "profiles": dict(earlier)}
     for profile_id, (ibge_code, city_name, uf) in PROFILE_CITIES.items():
         profile_dir = PROFILES / profile_id
+        display_name = city_name.title() if profile_id in EXAMPLE_CITIES else city_name
         pam_file = profile_dir / "pam-history.json"
         zarc_file = profile_dir / "zarc-planting-windows.json"
         pam_file.write_text(json.dumps(pam[profile_id], ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         zarc_payload = {
-            "municipality": {"name": city_name.title(), "uf": uf, "ibge_code": ibge_code},
+            "municipality": {"name": display_name, "uf": uf, "ibge_code": ibge_code},
             "source": {
                 "publisher": "MAPA",
                 "system": "SISZARC — Publicações do Zarc",
@@ -331,17 +380,18 @@ def main() -> None:
                     "crop_official_labels": sorted({row["crop"] for row in source_rows}),
                     "cultivar_group": "all strata (blank SISZARC filter)",
                     "soil_class": "all strata (blank SISZARC filter)",
-                    "municipality_normalization_filter": city_name.title(),
+                    "municipality_normalization_filter": display_name,
                 },
                 "sidecar": sidecar.relative_to(ROOT).as_posix() if sidecar.exists() else None,
                 "sidecar_sha256": sha256(sidecar.read_bytes()).hexdigest() if sidecar.exists() else None,
                 "normalized_municipality_rows": len(source_rows),
             })
+        raw_pam = RAW_PAM if profile_id in EXAMPLE_CITIES else RAW_PAM_TARGETS / f"{ibge_code}.json.gz"
         manifest.setdefault("raw_sources", {})["pam_municipal_json"] = {
-            "path": "data/raw/ibge/pam-municipal-5457-1988-2025.json",
-            "sha256": sha256(RAW_PAM.read_bytes()).hexdigest(),
-            "query": pam_source["url"],
-            "retrieved_at_http": pam_source.get("retrieved_at_http"),
+            "path": raw_pam.relative_to(ROOT).as_posix(),
+            "sha256": sha256(raw_pam.read_bytes()).hexdigest(),
+            "query": pam[profile_id]["source"]["url"],
+            "retrieved_at_http": pam[profile_id]["source"].get("retrieved_at_http"),
         }
         manifest["raw_sources"]["zarc_siszarc_reports"] = raw_reports
         manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

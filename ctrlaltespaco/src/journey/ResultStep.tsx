@@ -117,7 +117,10 @@ export function ResultStep({ journey }: { journey: Journey }) {
   if (!best || !selected) return <Exploratory ranked={ranked} run={run} journey={journey} />;
   const single = selected.route.crops.length < 2;
   const alternatives = options(ranked, run.ranking, OPTIONS).filter((item) => item !== best);
-  const compared = alternatives.find((item) => routeKey(item.route) === comparing) ?? alternatives[0];
+  const picked = alternatives.find((item) => routeKey(item.route) === comparing);
+  const compared = picked ?? alternatives[0];
+  // The return chart follows the option the farmer last picked, before it is confirmed for the whole view.
+  const charted = picked ?? selected;
   const facts = { model: run.model, ranking: run.ranking, periods: run.clock.periods, trajectories: scenario.trajectories,
     rankedRoutes: scenario.ranking_reference?.routes ?? 0, weight: journey.weight, returnWeight: journey.returnWeight };
   return (
@@ -138,7 +141,8 @@ export function ResultStep({ journey }: { journey: Journey }) {
         confirmed={compared !== undefined && selected === compared} pick={setComparing}
         onConfirm={() => compared && choose(routeKey(compared.route))} onAdjust={() => journey.go("priority")} />
       <Frames detail={detail} error={error} years={run.clock.horizon_years} recommended={selected === best} />
-      <ReturnChart value={selected.route.value!} fullSupport={run.ranking.support.full_score} />
+      <ReturnChart value={charted.route.value!} fullSupport={run.ranking.support.full_score}
+        sequence={charted === best ? undefined : charted.route.crops.map(cropLabel).join(" → ")} />
       <div className="result-info">
         <Facts journey={journey} run={run} scenario={scenario} best={selected} />
       </div>

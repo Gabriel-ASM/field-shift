@@ -1,4 +1,5 @@
 import json
+import time
 
 from field_shift.contracts import V2_DIR, contract_names
 
@@ -37,7 +38,12 @@ def test_views(client):
 
 
 def test_profiles_and_chain(client):
-    assert [p["id"] for p in client.get("/profiles").json()] == ["ariquemes-ro", "franca-sp", "varginha-mg"]
+    profiles = client.get("/profiles").json()
+    # Profiles assembled by the fetchers are flagged; the three reviewed ones are the defaults of the front.
+    assert [p["id"] for p in profiles if not p["experimental"]] == ["ariquemes-ro", "franca-sp", "varginha-mg"]
+    assert client.get("/profiles/franca-sp").json()["experimental"] is False
+    for extra in (p["id"] for p in profiles if p["experimental"]):
+        assert client.get(f"/geo/profiles/{extra}").json()["features"][0]["geometry"]["coordinates"]
     profile = client.get("/profiles/franca-sp").json()
     assert profile["initial_node"]["soil"]["available_water_capacity"] > 0 and "_id" not in profile
     assert client.get("/profiles/nowhere").status_code == 404
@@ -198,3 +204,82 @@ def test_any_municipal_boundary_comes_from_the_stored_file():
     rio_verde = client.get("/geo/municipalities/5218805").json()
     assert rio_verde["features"][0]["properties"]["codarea"] == "5218805"
     assert client.get("/geo/municipalities?q=vargin").json()[0]["name"] == "Varginha"
+
+
+def test_a_municipality_can_be_assembled_on_demand(client, monkeypatch):
+    """The route starts a build and reports it; the pipeline itself is replaced, since it needs the network."""
+    from field_shift.api import builds as module
+    ran = []
+    monkeypatch.setattr(module.Builds, "_execute", staticmethod(lambda command, progress: (ran.append(command[1].rsplit("/", 1)[-1]), progress(1.0))))
+    monkeypatch.setattr(module, "ingest", lambda profile, database: ran.append(f"ingest {profile}"))
+    monkeypatch.setattr(module, "harvested_years", lambda code: 30)
+    assert client.post("/profiles/builds/9999999").status_code == 404
+    build = client.post("/profiles/builds/4113700").json()
+    assert build["profile"] == "londrina-pr" and build["municipality"] == {"code": "4113700", "name": "Londrina", "uf": "PR"}
+    for _ in range(200):
+        view = client.get(f"/profiles/builds/{build['id']}").json()
+        if view["status"] in ("done", "failed"):
+            break
+        time.sleep(0.01)
+    assert view["status"] == "done" and view["fraction"] == 1.0 and view["error"] is None
+    assert ran[0] == "fetch_pam_targets.py" and ran[-1] == "ingest londrina-pr" and "fetch_soil.py" in ran
+    assert client.get("/profiles/builds/nope").status_code == 404
+
+
+def test_a_failed_stage_ends_the_build_with_its_reason(client, monkeypatch):
+    from field_shift.api import builds as module
+
+    def fail(command, progress):
+        raise RuntimeError("no complete SoilGrids prediction")
+    monkeypatch.setattr(module.Builds, "_execute", staticmethod(fail))
+    build = client.post("/profiles/builds/4113700").json()
+    for _ in range(200):
+        view = client.get(f"/profiles/builds/{build['id']}").json()
+        if view["status"] in ("done", "failed"):
+            break
+        time.sleep(0.01)
+    assert view["status"] == "failed" and "SoilGrids" in view["error"]
+
+
+def test_three_municipalities_are_assembled_at_a_time_and_derived_one_by_one(client, monkeypatch):
+    import threading
+    from field_shift.api import builds as module
+    lock, fetching, deriving, peak = threading.Lock(), set(), set(), {"fetch": 0, "derive": 0}
+
+    def execute(command, progress):
+        script = command[1].rsplit("/", 1)[-1]
+        group, key = (fetching, "fetch") if script == "fetch_soil.py" else (deriving, "derive") if script.startswith("build_") else (None, None)
+        if group is None:
+            return
+        with lock:
+            group.add(threading.get_ident())
+            peak[key] = max(peak[key], len(group))
+        time.sleep(0.05)
+        with lock:
+            group.discard(threading.get_ident())
+    monkeypatch.setattr(module.Builds, "_execute", staticmethod(execute))
+    monkeypatch.setattr(module, "ingest", lambda profile, database: None)
+    monkeypatch.setattr(module, "harvested_years", lambda code: 30)
+    started = [client.post(f"/profiles/builds/{code}").json() for code in ("4113700", "3170107", "3509502", "5107925", "4106902")]
+    for _ in range(600):
+        views = [client.get(f"/profiles/builds/{build['id']}").json() for build in started]
+        if all(view["status"] == "done" for view in views):
+            break
+        time.sleep(0.01)
+    assert all(view["status"] == "done" for view in views)
+    assert 2 <= peak["fetch"] <= module.CONCURRENT and peak["derive"] == 1
+
+
+def test_a_municipality_without_crop_history_is_refused_early_and_leaves_no_catalog_entry(client, monkeypatch):
+    from field_shift.api import builds as module
+    ran = []
+    monkeypatch.setattr(module.Builds, "_execute", staticmethod(lambda command, progress: ran.append(command[1].rsplit("/", 1)[-1])))
+    monkeypatch.setattr(module, "harvested_years", lambda code: 0)
+    build = client.post("/profiles/builds/2611606").json()
+    for _ in range(300):
+        view = client.get(f"/profiles/builds/{build['id']}").json()
+        if view["status"] in ("done", "failed"):
+            break
+        time.sleep(0.01)
+    assert view["status"] == "failed" and "no harvest of the modelled crops" in view["error"]
+    assert ran == ["fetch_pam_targets.py"] and not module.in_catalog("recife-pe")

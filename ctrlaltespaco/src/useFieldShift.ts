@@ -12,10 +12,13 @@ export interface World {
   states: Boundary;
 }
 
+/** Seed of the first simulation of a place and crop, so that one is reproducible. */
+const DEFAULT_SEED = 2026;
+
 const message = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
 /** Everything loaded once: configuration, the profiles and the state boundaries. */
-export function useWorld(): { world: World | null; error: string | null } {
+export function useWorld(): { world: World | null; error: string | null; addProfile: (profile: Profile) => void } {
   const [world, setWorld] = useState<World | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
@@ -25,7 +28,11 @@ export function useWorld(): { world: World | null; error: string | null } {
     };
     load().then(setWorld, (failure) => setError(message(failure)));
   }, []);
-  return { world, error };
+  /** A profile assembled on demand joins the ones loaded at the start. */
+  const addProfile = useCallback((profile: Profile) => {
+    setWorld((current) => current && { ...current, profiles: [...current.profiles.filter((item) => item.id !== profile.id), profile] });
+  }, []);
+  return { world, error, addProfile };
 }
 
 /** Resolves when the API runs this bundle's build; a run from an older bundle may misread the result. */
@@ -83,11 +90,10 @@ export function useJourney(world: World | null): Journey {
   const [caneCut, setCaneCut] = useState(2);
   const [weight, setWeight] = useState(0.2);
   const [returnWeight, setReturnWeight] = useState(0.5);
-  const [seed, setSeed] = useState(2026);
+  const [seed, setSeed] = useState(DEFAULT_SEED);
   const [run, setRun] = useState<RunResult | null>(null);
   const [job, setJob] = useState<string | null>(null);
   const [progress, setProgress] = useState<Progress | null>(null);
-  const [simulated, setSimulated] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [seen, setSeen] = useState<string | null>(null);
   const server = seen ?? world?.config.version ?? DEV;
@@ -122,23 +128,23 @@ export function useJourney(world: World | null): Journey {
     setRun(null);
   }, []);
 
-  /** Runs the engine, unless this place, crop and seed were already simulated: priorities only re-rank. */
+  /** Runs the engine, every time. The first run of a place and crop uses the default seed; asking again (after
+   *  adjusting the priorities) simulates other scenarios, with a new seed. */
   const simulate = useCallback(() => {
     if (!world || !place || !crop) return;
-    const key = `${place.profile.id}|${crop}|${caneCut}|${seed}`;
-    if (run && simulated === key) return go("result");
+    const next = run ? Math.floor(Math.random() * 2 ** 31) : DEFAULT_SEED;
+    setSeed(next);
     go("simulation");
     setError(null);
     setProgress(null);
-    const options = { profile: place.profile.id, seed, scenarios: [regionScenario(crop, caneCut)], ...world.config.run };
+    const options = { profile: place.profile.id, seed: next, scenarios: [regionScenario(crop, caneCut)], ...world.config.run };
     current().then(() => runJob(options, setProgress)).then(({ job: id, result }) => {
       playhead.reset(result.clock.periods);
       setRun(result);
       setJob(id);
-      setSimulated(key);
       go("result");
     }, fail);
-  }, [world, place, crop, caneCut, seed, run, simulated, fail]);
+  }, [world, place, crop, caneCut, run, fail]);
 
   const restart = useCallback(() => {
     setPlace(null);

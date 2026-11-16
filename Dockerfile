@@ -34,23 +34,25 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv python install 3.12 && uv sync --frozen --no-dev --no-install-project
 
+# The API writes here when a municipality is assembled on demand (POST /profiles/builds): raw downloads, profiles
+# and their catalogs. Copied already owned by `app`, so no layer is duplicated by a later chown.
+RUN useradd --system --no-create-home app
+COPY --chown=app data/catalog/ data/catalog/
+COPY --chown=app data/profiles/ data/profiles/
+COPY --chown=app data/raw/ data/raw/
+COPY --chown=app data/reference/ data/reference/
+COPY --chown=app data/v2/ data/v2/
+
 COPY field_shift/ field_shift/
-COPY data/catalog/ data/catalog/
 COPY data/contracts/ data/contracts/
 COPY data/geo/ data/geo/
 COPY data/pipeline/ data/pipeline/
 COPY data/policies/ data/policies/
-COPY data/profiles/ data/profiles/
-COPY data/reference/ data/reference/
-COPY data/v2/ data/v2/
 COPY docs/*.html docs/
 COPY --from=front /front/dist ctrlaltespaco/dist
 COPY docker/entrypoint.sh /usr/local/bin/field-shift-entrypoint
 
-RUN useradd --system --no-create-home app \
-    && mkdir -p data/v2 \
-    && chown -R app data/v2 \
-    && chmod +x /usr/local/bin/field-shift-entrypoint
+RUN chmod +x /usr/local/bin/field-shift-entrypoint
 
 # Last, so a new commit does not rebuild the layers above.
 ARG FIELD_SHIFT_VERSION=dev

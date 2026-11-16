@@ -12,6 +12,21 @@ export interface ProfileSummary {
   id: string;
   label: string;
   municipality: { name: string; uf: string; ibge_code: string };
+  /** Data assembled automatically and not reviewed: offered only through the search, with a label. */
+  experimental?: boolean;
+}
+
+/** A municipality being assembled on demand (POST /profiles/builds/{code}), polled until it is done. */
+export interface BuildView {
+  id: string;
+  status: "queued" | "running" | "done" | "failed";
+  /** What is being fetched or derived now, e.g. "Soil · ISRIC SoilGrids". */
+  stage: string;
+  /** Share done, 0 to 1. */
+  fraction: number;
+  error: string | null;
+  /** Id of the profile it becomes. */
+  profile: string;
 }
 
 export interface Profile extends ProfileSummary {

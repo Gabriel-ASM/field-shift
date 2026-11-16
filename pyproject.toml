@@ -10,6 +10,7 @@ dependencies = [
     "jsonschema>=4.22",
     "referencing>=0.35",
     "numpy>=2",
+    "xlrd>=2.0",        # CONAB cost sheets, read by data/pipeline when a municipality is assembled on demand
 ]
 
 [project.optional-dependencies]

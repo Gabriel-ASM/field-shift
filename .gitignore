@@ -5,6 +5,25 @@ __pycache__/
 .venv/
 .pytest_cache/
 !.env.example
-.run
-_field_shift_nitrogen_work
-relatorio/captura
+
+# Downloads beyond the three example municipalities (data/pipeline/fetch_*); re-create with the fetchers.
+data/raw/ibge/pam/
+data/raw/nasa_power/cells/
+data/raw/soilgrids/municipalities/
+data/raw/mapa-siszarc/by-uf/
+*.part
+
+# Profiles and v2 documents generated beyond the three example municipalities (data/pipeline with --sample/--all).
+data/profiles/*/
+!data/profiles/ariquemes-ro/
+!data/profiles/franca-sp/
+!data/profiles/varginha-mg/
+data/v2/chains/*
+!data/v2/chains/ariquemes-ro.json
+!data/v2/chains/franca-sp.json
+!data/v2/chains/varginha-mg.json
+data/v2/profiles/*
+!data/v2/profiles/ariquemes-ro.json
+!data/v2/profiles/franca-sp.json
+!data/v2/profiles/varginha-mg.json
+docker-build.log

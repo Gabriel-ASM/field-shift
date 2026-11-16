@@ -1,0 +1,250 @@
+{
+  "purpose": "Amostra de validação dos fetchers e do pipeline antes da rodada do Brasil inteiro.",
+  "rule": "Município de maior área colhida total (PAM, variável 216, 2025) em cada UF, mais os três municípios de exemplo.",
+  "source": {
+    "url": "https://apisidra.ibge.gov.br/values/t/5457/n6/all/v/216/p/last%201/c782/0?formato=json",
+    "retrieved_at_http": "Sun, 15 Nov 2026 23:37:36 GMT"
+  },
+  "municipalities": [
+    {
+      "code": "1100023",
+      "id": "ariquemes-ro",
+      "name": "Ariquemes",
+      "uf": "RO",
+      "harvested_area_ha": null,
+      "reason": "example municipality"
+    },
+    {
+      "code": "1101468",
+      "id": "pimenteiras-do-oeste-ro",
+      "name": "Pimenteiras do Oeste",
+      "uf": "RO",
+      "harvested_area_ha": 115997.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "1200385",
+      "id": "placido-de-castro-ac",
+      "name": "Plácido de Castro",
+      "uf": "AC",
+      "harvested_area_ha": 10740.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "1301704",
+      "id": "humaita-am",
+      "name": "Humaitá",
+      "uf": "AM",
+      "harvested_area_ha": 19643.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "1400100",
+      "id": "boa-vista-rr",
+      "name": "Boa Vista",
+      "uf": "RR",
+      "harvested_area_ha": 56087.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "1505502",
+      "id": "paragominas-pa",
+      "name": "Paragominas",
+      "uf": "PA",
+      "harvested_area_ha": 422959.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "1600303",
+      "id": "macapa-ap",
+      "name": "Macapá",
+      "uf": "AP",
+      "harvested_area_ha": 8680.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "1718204",
+      "id": "porto-nacional-to",
+      "name": "Porto Nacional",
+      "uf": "TO",
+      "harvested_area_ha": 127196.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "2101400",
+      "id": "balsas-ma",
+      "name": "Balsas",
+      "uf": "MA",
+      "harvested_area_ha": 367692.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "2201150",
+      "id": "baixa-grande-do-ribeiro-pi",
+      "name": "Baixa Grande do Ribeiro",
+      "uf": "PI",
+      "harvested_area_ha": 380711.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "2302305",
+      "id": "bela-cruz-ce",
+      "name": "Bela Cruz",
+      "uf": "CE",
+      "harvested_area_ha": 42168.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "2413359",
+      "id": "serra-do-mel-rn",
+      "name": "Serra do Mel",
+      "uf": "RN",
+      "harvested_area_ha": 40165.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "2511202",
+      "id": "pedras-de-fogo-pb",
+      "name": "Pedras de Fogo",
+      "uf": "PB",
+      "harvested_area_ha": 24352.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "2611101",
+      "id": "petrolina-pe",
+      "name": "Petrolina",
+      "uf": "PE",
+      "harvested_area_ha": 31983.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "2702306",
+      "id": "coruripe-al",
+      "name": "Coruripe",
+      "uf": "AL",
+      "harvested_area_ha": 39830.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "2801405",
+      "id": "carira-se",
+      "name": "Carira",
+      "uf": "SE",
+      "harvested_area_ha": 32222.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "2928901",
+      "id": "sao-desiderio-ba",
+      "name": "São Desidério",
+      "uf": "BA",
+      "harvested_area_ha": 765838.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "3170404",
+      "id": "unai-mg",
+      "name": "Unaí",
+      "uf": "MG",
+      "harvested_area_ha": 320302.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "3170701",
+      "id": "varginha-mg",
+      "name": "Varginha",
+      "uf": "MG",
+      "harvested_area_ha": null,
+      "reason": "example municipality"
+    },
+    {
+      "code": "3203205",
+      "id": "linhares-es",
+      "name": "Linhares",
+      "uf": "ES",
+      "harvested_area_ha": 53806.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "3301009",
+      "id": "campos-dos-goytacazes-rj",
+      "name": "Campos dos Goytacazes",
+      "uf": "RJ",
+      "harvested_area_ha": 39470.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "3516200",
+      "id": "franca-sp",
+      "name": "Franca",
+      "uf": "SP",
+      "harvested_area_ha": null,
+      "reason": "example municipality"
+    },
+    {
+      "code": "3522406",
+      "id": "itapeva-sp",
+      "name": "Itapeva",
+      "uf": "SP",
+      "harvested_area_ha": 156496.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "4104808",
+      "id": "cascavel-pr",
+      "name": "Cascavel",
+      "uf": "PR",
+      "harvested_area_ha": 241137.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "4203600",
+      "id": "campos-novos-sc",
+      "name": "Campos Novos",
+      "uf": "SC",
+      "harvested_area_ha": 89793.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "4306601",
+      "id": "dom-pedrito-rs",
+      "name": "Dom Pedrito",
+      "uf": "RS",
+      "harvested_area_ha": 210247.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "5005400",
+      "id": "maracaju-ms",
+      "name": "Maracaju",
+      "uf": "MS",
+      "harvested_area_ha": 650537.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "5107925",
+      "id": "sorriso-mt",
+      "name": "Sorriso",
+      "uf": "MT",
+      "harvested_area_ha": 1090035.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "5218805",
+      "id": "rio-verde-go",
+      "name": "Rio Verde",
+      "uf": "GO",
+      "harvested_area_ha": 854595.0,
+      "reason": "largest harvested area of the state"
+    },
+    {
+      "code": "5300108",
+      "id": "brasilia-df",
+      "name": "Brasília",
+      "uf": "DF",
+      "harvested_area_ha": 195772.0,
+      "reason": "largest harvested area of the state"
+    }
+  ]
+}

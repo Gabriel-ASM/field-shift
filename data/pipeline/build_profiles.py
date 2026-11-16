@@ -8,16 +8,22 @@ observations, crop yields, or crop recommendations.
 
 from __future__ import annotations
 
+import argparse
 import csv
+import gzip
 import hashlib
 import json
 import math
+import sys
 from collections import Counter, defaultdict
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from statistics import mean
 
 from contract_registry import current_contract_version, validate_contract
+import fetch_power
+import fetch_soil
+import targets
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -51,7 +57,28 @@ POWER_FIELDS = (
 )
 
 
+def location_for(target: dict) -> dict:
+    """An example municipality keeps its configured point and raw files; any other reads the fetchers' downloads."""
+    example = next((item for item in LOCATIONS if item["ibge_code"] == target["code"]), None)
+    return example or {
+        "id": target["id"], "municipality": target["name"], "uf": target["uf"], "ibge_code": target["code"],
+        "lon": target["lon"], "lat": target["lat"],
+    }
+
+
+def raw_paths(location: dict) -> tuple[Path, Path, Path]:
+    """Raw weather, soil and nitrogen/density files of a location (the last two are one file outside the examples)."""
+    if "source_stem" in location:
+        stem = location["source_stem"]
+        return (RAW_POWER / f"nasa-power-daily-{stem}-1981-20261106.json", RAW_SOIL / f"soilgrids-v2-{stem}-mean.json",
+                RAW_SOIL / f"soilgrids-v2-{stem}-nitrogen-bdod-wcs.json")
+    soil = fetch_soil.path_for(location["ibge_code"])
+    return fetch_power.path_for(location["lon"], location["lat"]), soil, soil
+
+
 def read_json(path: Path):
+    if path.suffix == ".gz":
+        return json.loads(gzip.decompress(path.read_bytes()))
     with path.open(encoding="utf-8") as stream:
         return json.load(stream)
 
@@ -152,7 +179,7 @@ def eto_fao56(row: dict, latitude: float, elevation_m: float) -> tuple[float | N
 
 
 def power_rows(location: dict) -> list[dict]:
-    raw = read_json(RAW_POWER / f"nasa-power-daily-{location['source_stem']}-1981-20261106.json")
+    raw = read_json(raw_paths(location)[0])
     params = raw["properties"]["parameter"]
     point = raw["geometry"]["coordinates"]
     rows = []
@@ -185,10 +212,21 @@ def power_rows(location: dict) -> list[dict]:
 
 
 def soil_profile(location: dict) -> dict:
-    raw = read_json(RAW_SOIL / f"soilgrids-v2-{location['source_stem']}-mean.json")
-    raw_nitrogen_bdod = read_json(RAW_SOIL / f"soilgrids-v2-{location['source_stem']}-nitrogen-bdod-wcs.json")
+    _, soil_path, nitrogen_path = raw_paths(location)
+    raw = read_json(soil_path)
     layers = {layer["name"]: layer for layer in raw["properties"]["layers"]}
-    nitrogen_properties = raw_nitrogen_bdod["properties"]
+    if nitrogen_path == soil_path:
+        # One properties-API answer holds every property; each value is the 250 m cell of the queried point.
+        nitrogen_properties = {
+            name: {"unit_measure": layers[name]["unit_measure"],
+                   "values": {depth["label"]: {"mean": depth["values"]["mean"], "valid_pixels": 1}
+                              for depth in layers[name]["depths"] if depth["values"]["mean"] is not None}}
+            for name in ("nitrogen", "bdod")
+        }
+        point = raw["field_shift"]["point"]
+        location = {**location, "lon": point["lon"], "lat": point["lat"]}
+    else:
+        nitrogen_properties = read_json(nitrogen_path)["properties"]
     output_layers = []
     total_awc = 0.0
     weighted = defaultdict(float)
@@ -264,7 +302,8 @@ def soil_profile(location: dict) -> dict:
     total_nitrogen_top_0_30_g_kg = nitrogen_stock_topsoil / (bulk_density_top_0_30_kg_dm3 * 30 * 100)
     return {
         "location_id": location["id"], "scope": "grid_cell", "reference_date": None,
-        "source": "ISRIC SoilGrids v2.0 mean prediction (properties API + WCS); AWC derived by Saxton & Rawls (2006)",
+        "source": ("ISRIC SoilGrids v2.0 mean prediction (properties API); AWC derived by Saxton & Rawls (2006)" if nitrogen_path == soil_path
+                   else "ISRIC SoilGrids v2.0 mean prediction (properties API + WCS); AWC derived by Saxton & Rawls (2006)"),
         "sample_point": {"longitude": location["lon"], "latitude": location["lat"], "basis": "centroide de área da malha municipal IBGE consultada; não é posição de talhão"},
         "depth_cm": 100, "available_water_capacity_mm": total_awc,
         "available_water_fraction": None, "texture_class": None, **avg,
@@ -432,6 +471,13 @@ def climate_summary(rows: list[dict], location_id: str) -> dict:
     }
 
 
+def boundary_path(location: dict) -> Path:
+    """The file the centroid was computed from: the single-municipality mesh of an example, the state mesh otherwise."""
+    if "source_stem" in location:
+        return RAW_IBGE / f"ibge-malha-municipal-{location['ibge_code']}.geojson"
+    return targets.BOUNDARIES
+
+
 def profile_manifest(location: dict, raw_climate: Path, raw_soil: Path, raw_soil_nitrogen_bdod: Path, climate_path: Path, soil_path: Path, transitions_path: Path, history_path: Path, states_path: Path, assumptions_path: Path, summary_path: Path, derivation_path: Path) -> dict:
     datasets = {
         "climate-daily.csv": {"origem": "NASA POWER Daily API v2.10.3", "responsavel": "NASA Langley Research Center", "frequencia": "diária, horário padrão local solar (LST)", "unidade": "mm/d; °C; MJ/m²/d; %; m/s", "periodo": f"1981-01-01 a {LAST_DAY.isoformat()}", "resolucao": "ponto amostrado no centroide municipal; grade nativa POWER, variável dependente", "qualidade": "T2M/chuva/humidade/vento; radiação ausente em 1981-1983 e em quatro dias recentes usa Hargreaves-Samani para ET0; chuva POWER sem correção contra IMERG", "sha256": sha256(climate_path), "contract_id": "climate_daily"},
@@ -451,7 +497,7 @@ def profile_manifest(location: dict, raw_climate: Path, raw_soil: Path, raw_soil
         "nasa_power_json": {"path": str(raw_climate.relative_to(ROOT)).replace("\\", "/"), "sha256": sha256(raw_climate), "query": f"https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M_MAX,T2M_MIN,RH2M,WS2M,ALLSKY_SFC_SW_DWN,PRECTOTCORR&community=AG&longitude={location['lon']}&latitude={location['lat']}&start=19810101&end=20261106&format=JSON", "api_start": "19810101", "api_end": "20261106", "time_standard": "LST", "retrieved_at": "2026-11-13"},
         "soilgrids_json": {"path": str(raw_soil.relative_to(ROOT)).replace("\\", "/"), "sha256": sha256(raw_soil), "query": f"https://rest.isric.org/soilgrids/v2.0/properties/query?lon={location['lon']}&lat={location['lat']}&property=clay&property=sand&property=silt&property=phh2o&property=soc&depth=0-5cm&depth=5-15cm&depth=15-30cm&depth=30-60cm&depth=60-100cm&value=mean", "value": "mean", "depths": [f"{top}-{bottom}cm" for top, bottom in DEPTHS], "retrieved_at": "2026-11-13"},
         "soilgrids_nitrogen_bdod_wcs_json": {"path": str(raw_soil_nitrogen_bdod.relative_to(ROOT)).replace("\\", "/"), "sha256": sha256(raw_soil_nitrogen_bdod), "query": "https://maps.isric.org/mapserv?map=/map/{nitrogen|bdod}.map&SERVICE=WCS&VERSION=2.0.1&REQUEST=GetCoverage&COVERAGEID={property}_{0-5cm|5-15cm|15-30cm}_mean&FORMAT=image/tiff&SUBSET=X/Y(centroid +/- 125m)&SUBSETTINGCRS=EPSG:152160", "properties": ["nitrogen", "bdod"], "depths": ["0-5cm", "5-15cm", "15-30cm"], "bbox_side_m": 250, "valid_pixels_per_layer": 1, "nitrogen_raw_unit": "cg/kg; d_factor=100 to g/kg", "bulk_density_raw_unit": "cg/cm3; d_factor=100 to kg/dm3", "retrieved_at": "2026-11-15"},
-        "ibge_malha_geojson": {"path": f"data/raw/ibge/ibge-malha-municipal-{location['ibge_code']}.geojson", "sha256": sha256(RAW_IBGE / f"ibge-malha-municipal-{location['ibge_code']}.geojson"), "query": f"https://servicodados.ibge.gov.br/api/v3/malhas/municipios/{location['ibge_code']}?formato=application/vnd.geo%2Bjson&qualidade=intermediaria", "retrieved_at": "2026-11-13"},
+        "ibge_malha_geojson": {"path": str(boundary_path(location).relative_to(ROOT)).replace("\\", "/"), "sha256": sha256(boundary_path(location)), "query": f"https://servicodados.ibge.gov.br/api/v3/malhas/municipios/{location['ibge_code']}?formato=application/vnd.geo%2Bjson&qualidade=intermediaria", "retrieved_at": "2026-11-13"},
     }
     return {
         "profile": location["id"], "version": "1.0.0", "natureza": "mista",
@@ -464,13 +510,15 @@ def profile_manifest(location: dict, raw_climate: Path, raw_soil: Path, raw_soil
 
 
 def build_location(location: dict) -> dict:
-    raw_climate = RAW_POWER / f"nasa-power-daily-{location['source_stem']}-1981-20261106.json"
-    raw_soil = RAW_SOIL / f"soilgrids-v2-{location['source_stem']}-mean.json"
-    raw_soil_nitrogen_bdod = RAW_SOIL / f"soilgrids-v2-{location['source_stem']}-nitrogen-bdod-wcs.json"
-    longitude, latitude = ibge_area_centroid(location["ibge_code"])
-    if abs(longitude - location["lon"]) > 1e-5 or abs(latitude - location["lat"]) > 1e-5:
-        raise ValueError(f"Configured NASA/SoilGrids point does not match IBGE centroid for {location['id']}: {(longitude, latitude)}")
-    location = {**location, "lon": longitude, "lat": latitude}
+    raw_climate, raw_soil, raw_soil_nitrogen_bdod = raw_paths(location)
+    for path in (raw_climate, raw_soil):
+        if not path.is_file():
+            raise FileNotFoundError(f"{path.relative_to(ROOT)} is missing; run the fetcher for {location['id']}")
+    if "source_stem" in location:
+        longitude, latitude = ibge_area_centroid(location["ibge_code"])
+        if abs(longitude - location["lon"]) > 1e-5 or abs(latitude - location["lat"]) > 1e-5:
+            raise ValueError(f"Configured NASA/SoilGrids point does not match IBGE centroid for {location['id']}: {(longitude, latitude)}")
+        location = {**location, "lon": longitude, "lat": latitude}
     profile = PROFILES / location["id"]
     profile.mkdir(parents=True, exist_ok=True)
     climate = power_rows(location)
@@ -556,19 +604,41 @@ def build_location(location: dict) -> dict:
     return {"location": location, "summary": summary, "awc_mm": soil["available_water_capacity_mm"], "soil": soil}
 
 
-def main() -> None:
-    catalog = []
-    for location in LOCATIONS:
-        catalog.append(build_location(location))
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    targets.add_arguments(parser)
+    parser.add_argument("--append", action="store_true",
+                        help="keep the profiles already in the catalog untouched and add the ones asked for")
+    args = parser.parse_args()
+    catalog_path = DATA / "catalog" / "perfis-exemplo.json"
+    kept = read_json(catalog_path)["profiles"] if args.append and catalog_path.is_file() else []
+    kept_ids = {entry["profile"] for entry in kept}
+    catalog, failures = [], []
+    for target in targets.resolve(args):
+        location = location_for(target)
+        if location["id"] in kept_ids:
+            continue
+        try:
+            catalog.append(build_location(location))
+        except (FileNotFoundError, ValueError, KeyError, ZeroDivisionError) as failure:
+            # One municipality without usable weather or soil does not stop the others.
+            failures.append({"profile": location["id"], "ibge_code": location["ibge_code"], "stage": "build_profiles", "reason": f"{type(failure).__name__}: {failure}"})
+            print(f"SKIP {location['id']}: {failure}", flush=True)
+            continue
+        print(f"ok   {location['id']}", flush=True)
+    catalog.sort(key=lambda item: [entry["id"] for entry in LOCATIONS].index(item["location"]["id"]) if "source_stem" in item["location"] else len(LOCATIONS))
     write_json(DATA / "catalog" / "perfis-exemplo.json", {
         "purpose": "Perfis carregados para a demonstração real; pontos municipais ilustrativos, sem seleção de talhão.",
         "selection_seed": 2026,
         "selection_rule": "A visualização sorteia uma localidade disponível por UF; existe uma localidade disponível em cada UF nesta entrega.",
-        "profiles": [{"profile": item["location"]["id"], "municipality": item["location"]["municipality"], "uf": item["location"]["uf"], "ibge_code": item["location"]["ibge_code"], "longitude": item["location"]["lon"], "latitude": item["location"]["lat"], "training_period": [item["summary"]["training_first_date"], item["summary"]["training_last_date"]], "daily_rows": item["summary"]["available_daily_rows"], "mean_annual_precipitation_mm": item["summary"]["mean_annual_precipitation_mm"], "mean_annual_eto_mm": item["summary"]["mean_annual_eto_mm"], "awc_0_100_cm_mm": item["awc_mm"]} for item in catalog],
+        "profiles": kept + [{"profile": item["location"]["id"], "municipality": item["location"]["municipality"], "uf": item["location"]["uf"], "ibge_code": item["location"]["ibge_code"], "longitude": item["location"]["lon"], "latitude": item["location"]["lat"], "training_period": [item["summary"]["training_first_date"], item["summary"]["training_last_date"]], "daily_rows": item["summary"]["available_daily_rows"], "mean_annual_precipitation_mm": item["summary"]["mean_annual_precipitation_mm"], "mean_annual_eto_mm": item["summary"]["mean_annual_eto_mm"], "awc_0_100_cm_mm": item["awc_mm"],
+                                      # Assembled by the fetchers and not reviewed: the front offers it only through the search, labelled.
+                                      **({} if "source_stem" in item["location"] else {"experimental": True})} for item in catalog],
         "limitations": ["Ponto de referência é centroide municipal e não representa talhão.", "Chuva usa POWER PRECTOTCORR, sem IMERG local; comparação do Oeste do PR não é extrapolada para outros estados.", "O balanço de referência não contém ação; matrizes de cultura são acrescentadas por pipeline separado e são derivadas de processo, não observadas em campo.", "PAM municipal não calibra resposta causal; custos e preços locais continuam necessários para VPL."],
     })
-    print(json.dumps({"profiles": [{"id": x["location"]["id"], "daily_rows": x["summary"]["available_daily_rows"], "awc_mm": round(x["awc_mm"], 1), "mean_annual_precipitation_mm": round(x["summary"]["mean_annual_precipitation_mm"], 1), "mean_annual_eto_mm": round(x["summary"]["mean_annual_eto_mm"], 1)} for x in catalog]}, ensure_ascii=False, indent=2))
+    print(json.dumps({"profiles": [{"id": x["location"]["id"], "daily_rows": x["summary"]["available_daily_rows"], "awc_mm": round(x["awc_mm"], 1), "mean_annual_precipitation_mm": round(x["summary"]["mean_annual_precipitation_mm"], 1), "mean_annual_eto_mm": round(x["summary"]["mean_annual_eto_mm"], 1)} for x in catalog], "skipped": failures}, ensure_ascii=False, indent=2))
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

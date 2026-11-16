@@ -98,6 +98,36 @@ O motor adiciona Dirichlet `α=0,5` por destino viável a cada linha de contagem
 
 Na página, cada trajetória sorteia linhas Dirichlet com parâmetros `massa_top5 + α` e avança até cinco anos. Em cada ano reamostra 24 quinzenas da chuva NASA POWER, atualiza água e carbono do solo e só então repondera e amostra a cultura do próximo plantio. A área anual do top 5 e as participações ficam expostas na linha do tempo; a massa top-5, o suporte fracionário e os pares rank 1 aparecem no grafo/matriz. Produtos PAM fora do catálogo não entram nesse ranking anual. A matriz hídrica completa continua disponível para inspeção.
 
+## Escalar para outros municípios
+
+As malhas de todos os municípios ficam locais em `geo/` (`python -m field_shift.ingest.geo`): a lista do IBGE em `geo/municipalities.json` e os contornos em `geo/municipality-boundaries.json.gz`. O ponto de clima e solo de um município é o centroide de área do contorno.
+
+Os fetchers em `pipeline/` aceitam a mesma seleção: `--codes`, `--uf`, `--sample` (lista em `catalog/municipios-amostra.json`, gerada por `select_sample.py`: maior área colhida de cada UF mais os três exemplos), `--all`; sem opção, os três exemplos. Cada um guarda o que baixou, pula o que já existe (`--refresh` refaz) e termina com um resumo de requisições, bytes, tempo e falhas. Os downloads ficam fora do git.
+
+| Fonte | Script | Interface e limite | Medido |
+|---|---|---|---|
+| IBGE PAM, tabela 5457 | `fetch_pam_targets.py` | SIDRA aceita 100.000 valores por consulta; 1.672 por município, lotes de 50 | 30 municípios: 1 requisição, 11 MB, 3,5 s |
+| MAPA ZARC | `fetch_zarc_national.py` | Dois CSV nacionais lidos em streaming, uma vez, e guardados por UF | 798 MB baixados em 108 s; 35 MB em disco para o Brasil inteiro |
+| NASA POWER diário | `fetch_power.py` | Um ponto devolve a célula da grade; série guardada por par de células MERRA-2 (0,5° × 0,625°) e CERES (1° × 1°) | 30 células, 50 MB, 20 s com 4 requisições simultâneas |
+| SoilGrids 2.0 | `fetch_soil.py` | API REST por ponto, cerca de 5 requisições por minuto | 12 a 26 s por município; para o Brasil inteiro, usar os rasters do ISRIC (WCS) |
+
+`build_profiles.py` aceita a mesma seleção e grava o catálogo `catalog/perfis-exemplo.json` (`--append` mantém intactos os perfis já catalogados e acrescenta os pedidos); os perfis fora dos três exemplos saem marcados `experimental`. `prepare_crop_data.py`, `build_crop_markov.py` e `build_crop_transition_markov.py` aceitam `--profiles <id>` para tratar só alguns. Município sem clima ou solo utilizável é pulado e listado em `skipped`.
+
+A API monta qualquer município sob demanda com esses mesmos scripts: `POST /profiles/builds/{código IBGE}` e `GET /profiles/builds/{id}` para o progresso (`field_shift/api/builds.py`). O front usa isso na busca experimental.
+
+```bash
+python -m field_shift.ingest.geo
+python data/pipeline/select_sample.py
+python data/pipeline/fetch_zarc_national.py
+for f in fetch_pam_targets fetch_power fetch_soil; do python data/pipeline/$f.py --sample; done
+python data/pipeline/build_profiles.py --sample --append
+python data/pipeline/prepare_crop_data.py
+python data/pipeline/build_crop_markov.py
+python data/pipeline/build_crop_transition_markov.py
+python data/pipeline/build_economic_benchmarks.py
+python -m field_shift.ingest
+```
+
 ## Reconstruir e abrir
 
 ```powershell

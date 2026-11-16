@@ -21,11 +21,40 @@ YAHOO_PATH = ROOT / "data" / "reference" / "yahoo-harvest-futures.json"
 OUTPUT = ROOT / "data" / "reference" / "economic-benchmarks.json"
 COVERAGE_OUTPUT = ROOT / "data" / "reference" / "economic-input-coverage.json"
 
-PROFILE_INFO = {
+CATALOG = ROOT / "data" / "catalog" / "perfis-exemplo.json"
+EXAMPLE_INFO = {
     "ariquemes-ro": {"name": "Ariquemes", "uf": "RO", "coffee_pam": "cafe_canephora"},
     "franca-sp": {"name": "Franca", "uf": "SP", "coffee_pam": "cafe_arabica"},
     "varginha-mg": {"name": "Varginha", "uf": "MG", "coffee_pam": "cafe_arabica"},
 }
+# States where the coffee grown is mostly canephora (conilon/robusta); used when the municipality has no coffee in PAM.
+CANEPHORA_STATES = {"RO", "ES", "AC", "AM", "PA", "MT"}
+
+
+def coffee_product(profile_id: str, uf: str) -> str:
+    """The coffee species with more harvested area in the municipal PAM history, or the usual one of the state."""
+    history = json.loads((PAM_DIR / profile_id / "pam-history.json").read_text(encoding="utf-8"))
+    area = {"cafe_arabica": 0.0, "cafe_canephora": 0.0}
+    for row in history.get("records", []):
+        if row.get("crop") in area and row.get("harvested_area_ha"):
+            area[row["crop"]] += float(row["harvested_area_ha"])
+    if area["cafe_arabica"] != area["cafe_canephora"]:
+        return max(area, key=area.get)
+    return "cafe_canephora" if uf in CANEPHORA_STATES else "cafe_arabica"
+
+
+def catalog_info() -> dict[str, dict[str, str]]:
+    """Name, state and coffee species of every profile in the catalog written by build_profiles.py."""
+    info = {}
+    for entry in json.loads(CATALOG.read_text(encoding="utf-8"))["profiles"]:
+        profile_id = entry["profile"]
+        info[profile_id] = EXAMPLE_INFO.get(profile_id) or {
+            "name": entry["municipality"], "uf": entry["uf"], "coffee_pam": coffee_product(profile_id, entry["uf"]),
+        }
+    return info
+
+
+PROFILE_INFO = catalog_info()
 PAM_CROPS = {
     "soybean": "soja_em_grao",
     "maize_grain": "milho_em_grao",
@@ -458,6 +487,11 @@ def cost_file_keys(crop_id: str, profile_info: dict[str, str]) -> tuple[str, ...
     return COST_FILES_BY_CROP.get(source_crop, ())
 
 
+def panel_deflator(panel: dict[str, object], indices: dict[str, float], annual_indices: dict[str, float]) -> float | None:
+    date_match = re.fullmatch(r"(\d{4})-(\d{2})", str(panel["cost_date"]))
+    return deflator(indices, annual_indices, int(date_match.group(1)), int(date_match.group(2))) if date_match else None
+
+
 def choose_cost_panel(
     profile_id: str, crop_id: str, profiles: dict[str, object], panels: list[dict[str, object]],
     lookup: dict[tuple[str, str], dict[str, object]], source_urls: dict[str, str | None],
@@ -471,6 +505,8 @@ def choose_cost_panel(
     files = set(cost_file_keys(crop_id, info))
     if raw_panel is None:
         candidates = [row for row in panels if row["source_file"].split("/")[-1] in files and row.get("total_cost_brl_ha") is not None]
+        # A panel dated outside the IPCA series cannot be brought to the reference month; a wider one that can is better.
+        candidates = [row for row in candidates if panel_deflator(row, indices, annual_indices) is not None]
         same_uf = [row for row in candidates if row["uf"] == info["uf"]]
         same_macroregion = [row for row in candidates if macroregion(str(row["uf"])) == macroregion(info["uf"])]
         pool = same_uf or same_macroregion or candidates
@@ -478,8 +514,7 @@ def choose_cost_panel(
             return None
         raw_panel = sorted(pool, key=lambda row: (int(row["worksheet_year"]), int(str(row["cost_date"])[5:7])), reverse=True)[0]
         match_level = "mesma UF · outro município" if same_uf else "mesma macrorregião" if same_macroregion else "painel nacional"
-    date_match = re.fullmatch(r"(\d{4})-(\d{2})", str(raw_panel["cost_date"]))
-    factor = deflator(indices, annual_indices, int(date_match.group(1)), int(date_match.group(2))) if date_match else None
+    factor = panel_deflator(raw_panel, indices, annual_indices)
     nominal_cost = raw_panel.get("total_cost_brl_ha")
     if nominal_cost is None or factor is None:
         return None

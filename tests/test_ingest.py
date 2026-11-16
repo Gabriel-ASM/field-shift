@@ -12,8 +12,8 @@ from field_shift.front.__main__ import topsoil_carbon_g_kg
 PROFILES = profile_ids()
 
 
-def test_three_profiles_are_known():
-    assert PROFILES == ["ariquemes-ro", "franca-sp", "varginha-mg"]
+def test_the_example_profiles_are_known():
+    assert PROFILES[:3] == ["ariquemes-ro", "franca-sp", "varginha-mg"]     # any other comes after, flagged experimental
 
 
 @pytest.mark.parametrize("profile", PROFILES)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from hashlib import sha256
 import json
+import sys
 from pathlib import Path
 
 from contract_registry import current_contract_version, validate_contract
@@ -230,7 +231,10 @@ def main() -> None:
     soil_hypotheses = read_json(ROOT / "data" / "reference" / "soil-crop-response-hypotheses.json")
     alpha_per_destination = float(soil_hypotheses["probability_modifiers"]["rotation_prior_alpha_per_destination"])
     lifecycle_rules = soil_hypotheses.get("crop_lifecycle_rules", {})
+    only = sys.argv[sys.argv.index("--profiles") + 1:] if "--profiles" in sys.argv else None
     for profile_dir in sorted(PROFILE_ROOT.iterdir()):
+        if only and profile_dir.name not in only:
+            continue
         if profile_dir.is_dir() and (profile_dir / "pam-history.json").exists():
             payload = build_profile(profile_dir, water_parameters, alpha_per_destination, lifecycle_rules)
             print(

@@ -34,7 +34,15 @@ def states() -> dict[str, Any]:
 def municipality(profile_id: str) -> dict[str, Any]:
     if not profile_id.replace("-", "").isalnum():
         raise HTTPException(404, "Unknown profile")
-    return _read(f"municipalities/{profile_id}")
+    if (GEO / f"municipalities/{profile_id}.geojson").is_file():
+        return _read(f"municipalities/{profile_id}")
+    # A profile beyond the examples has no file of its own: its boundary is in the file of every municipality.
+    catalog = json.loads((GEO.parent / "catalog" / "perfis-exemplo.json").read_text(encoding="utf-8"))
+    code = next((str(entry["ibge_code"]) for entry in catalog["profiles"] if entry["profile"] == profile_id), None)
+    body = _boundaries().get(code) if code else None
+    if body is None:
+        raise HTTPException(404, f"No boundary stored for {profile_id!r}; run python -m field_shift.ingest.geo")
+    return json.loads(body)
 
 
 def folded(text: str) -> str:

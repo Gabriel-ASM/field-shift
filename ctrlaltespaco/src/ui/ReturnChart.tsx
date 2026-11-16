@@ -85,13 +85,14 @@ function riskSentence(value: ValueSummary): string {
     `(CVaR₅, the mean of the ${count(tail)} lowest valid outcomes). The shaded area is that lower 5% tail.`;
 }
 
-export function ReturnChart({ value, fullSupport }: { value: ValueSummary; fullSupport: number }) {
+/** `sequence` names the route when it is not the recommendation, e.g. "Soybean → Maize". */
+export function ReturnChart({ value, fullSupport, sequence }: { value: ValueSummary; fullSupport: number; sequence?: string }) {
   if (!value.distribution) return null;
   const curve = density(value.distribution);
   return (
     <article className="result-chart-card">
       <div className="result-chart-heading">
-        <h3>Return distribution for the recommended sequence</h3>
+        <h3>{sequence ? `Return distribution for ${sequence}` : "Return distribution for the recommended sequence"}</h3>
         <span className="chart-badge">{count(value.count)} valid NPVs</span>
         <p>Five-year net present value per hectare, based on all valid calculations for this sequence. The curve smooths the simulated outcomes.</p>
       </div>

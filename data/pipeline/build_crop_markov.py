@@ -11,6 +11,7 @@ from __future__ import annotations
 import csv
 from hashlib import sha256
 import json
+import sys
 from collections import Counter, defaultdict
 from datetime import date
 from pathlib import Path
@@ -244,9 +245,14 @@ def derive_scenario(profile_dir: Path, rows: list[dict], environments: dict[date
 
 
 def main() -> None:
+    only = sys.argv[sys.argv.index("--profiles") + 1:] if "--profiles" in sys.argv else None
+    coverage_path = ROOT / "data" / "reference" / "crop-markov-coverage.json"
     parameters = supported_parameters()
-    report = {"profiles": {}}
+    # With --profiles only those are derived; the coverage of the others is kept as it was.
+    report = {"profiles": dict(read_json(coverage_path).get("profiles", {})) if only else {}}
     for profile_dir in sorted(path for path in PROFILE_ROOT.iterdir() if path.is_dir() and (path / "manifest.json").exists()):
+        if only and profile_dir.name not in only:
+            continue
         zarc = read_json(profile_dir / "zarc-planting-windows.json")
         soil = read_json(profile_dir / "soil-profile.json")
         history = read_json(profile_dir / "environment.json")

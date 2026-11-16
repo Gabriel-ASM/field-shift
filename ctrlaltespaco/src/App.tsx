@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { CropStep } from "./journey/CropStep.tsx";
 import { LocationStep } from "./journey/LocationStep.tsx";
 import type { Explored } from "./journey/PlaceSearch.tsx";
+import type { Profile } from "./types.ts";
 import { Outdated } from "./journey/Outdated.tsx";
 import { PriorityStep } from "./journey/PriorityStep.tsx";
 import { ResultStep } from "./journey/ResultStep.tsx";
@@ -20,12 +21,13 @@ interface ScreenProps {
   area: number | null;
   explored: Explored | null;
   onExplore: (explored: Explored | null) => void;
+  onBuilt: (profile: Profile) => void;
 }
 
-function Screen({ journey, world, area, explored, onExplore }: ScreenProps) {
+function Screen({ journey, world, area, explored, onExplore, onBuilt }: ScreenProps) {
   if (journey.outdated) return <Outdated />;
   switch (journey.step) {
-    case "location": return <LocationStep journey={journey} world={world} area={area} explored={explored} onExplore={onExplore} />;
+    case "location": return <LocationStep journey={journey} world={world} area={area} explored={explored} onExplore={onExplore} onBuilt={onBuilt} />;
     case "crop": return <CropStep journey={journey} />;
     case "priority": return <PriorityStep journey={journey} world={world} />;
     case "simulation": return <SimulationStep journey={journey} world={world} />;
@@ -45,7 +47,7 @@ function usePanelWidth(wide: boolean) {
 }
 
 export function App() {
-  const { world, error } = useWorld();
+  const { world, error, addProfile } = useWorld();
   const journey = useJourney(world);
   const [area, setArea] = useState<number | null>(null);
   const [started, setStarted] = useState(false);
@@ -66,14 +68,14 @@ export function App() {
   };
   return (
     <div className="app">
-      <FieldMap config={world.config} states={world.states} profiles={world.profiles} selected={journey.place?.profile ?? null}
+      <FieldMap config={world.config} states={world.states} profiles={world.profiles.filter((profile) => !profile.experimental)} selected={journey.place?.profile ?? null}
         municipality={journey.place?.municipality ?? null} explored={explored?.boundary ?? null} onSelect={choosePlace} onArea={setArea} />
       <aside ref={panel} className={wide ? "panel wide" : "panel"}>
         <header>
           <strong>Ctrl + Alt + Espaço</strong>
           <Steps current={journey.step} />
         </header>
-        <Screen journey={journey} world={world} area={area} explored={explored} onExplore={setExplored} />
+        <Screen journey={journey} world={world} area={area} explored={explored} onExplore={setExplored} onBuilt={addProfile} />
         {journey.step !== "simulation" && !journey.outdated && journey.error && <p className="error">{journey.error}</p>}
       </aside>
     </div>

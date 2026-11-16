@@ -1,5 +1,5 @@
 import { BUNDLE_VERSION, DEV, RELOAD_MESSAGE, VERSION_HEADER } from "./version.ts";
-import type { Boundary, ChainMatrix, JobView, Municipality, PlantingWindows, Profile, ProfileSummary, RouteDetail, RunChoices, RunResult, RuntimeConfig, ScenarioRequest } from "./types.ts";
+import type { Boundary, BuildView, ChainMatrix, JobView, Municipality, PlantingWindows, Profile, ProfileSummary, RouteDetail, RunChoices, RunResult, RuntimeConfig, ScenarioRequest } from "./types.ts";
 
 const HORIZON_DAYS = 1825;
 
@@ -36,6 +36,9 @@ export const getConfig = () => request<RuntimeConfig>("/config");
 export const getServerVersion = async () => (await request<RuntimeConfig>("/config", { cache: "no-store" })).version ?? DEV;
 export const listProfiles = () => request<ProfileSummary[]>("/profiles");
 export const getProfile = (id: string) => request<Profile>(`/profiles/${encodeURIComponent(id)}`);
+/** Experimental: fetch and assemble the data of any municipality; poll getBuild until it is done. */
+export const startBuild = (code: string) => request<BuildView>(`/profiles/builds/${encodeURIComponent(code)}`, { method: "POST" });
+export const getBuild = (id: string) => request<BuildView>(`/profiles/builds/${encodeURIComponent(id)}`);
 export const searchMunicipalities = (query: string) => request<Municipality[]>(`/geo/municipalities?q=${encodeURIComponent(query)}`);
 export const getMunicipalityBoundary = (code: string) => request<Boundary>(`/geo/municipalities/${encodeURIComponent(code)}`);
 export const getPlantingWindows = (id: string) => request<PlantingWindows>(`/profiles/${encodeURIComponent(id)}/planting-windows`);

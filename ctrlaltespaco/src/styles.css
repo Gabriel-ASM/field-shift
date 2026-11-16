@@ -201,4 +201,5 @@ button.alternative-route[aria-pressed="true"] { border-color: var(--fs-green); b
 .place-matches button:hover, .place-matches button:focus-visible { background: var(--soft, #eef3ee); }
 .place-matches small { color: var(--muted, #5b6b5b); margin-left: 4px; }
 .explored { margin-top: 10px; }
+.explored .choice { text-transform: none; }
 .explored p { margin: 0 0 8px; font-size: 0.88rem; }
